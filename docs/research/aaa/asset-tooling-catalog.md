@@ -218,12 +218,43 @@ engine-neutral export**, **(c) shippable commercial license on a paid tier.**
 
 ## 4. API-Availability Gaps / Blockers
 
-**Hard blockers for lights-out (no headless API found this pass):**
-- **Promethean AI** — desktop app + DCC/UE plugins, Python-in-editor only; **Unreal-adapter, DEFERRED**.
-- **Cascadeur** — desktop animation app; no public CLI/headless API. Human-finishing only.
-- **OpenArt Sprite Generator** — web GUI; no API surfaced.
-- **Rosebud AI** — full-game web tool; no engine-neutral asset-export API; overlaps factory role.
-- **Kaedim** — human-in-the-loop by design (contradicts lights-out); API [UNVERIFIED].
+> **RELAXED-CONSTRAINT UPDATE (2026-06-07).** The product owner has relaxed the "headless
+> required / no-API = blocker" stance: a tool now QUALIFIES if it can produce an asset and
+> EXPORT a license-clean, ingestible artifact via ANY control surface (REST API, MCP, headless
+> CLI, SaaS web UI via browser automation, or local desktop GUI via GUI automation). The
+> unifying contract is **asset-library ingestion + provenance, not the control method.** Under
+> this rule the "hard blockers" below are RE-CLASSIFIED. Full analysis, control-surface
+> taxonomy (`backend_class`), verbatim ToS quotes, and the expanded asset-adapter protocol are
+> in the companion doc **`asset-automation-backends.md`**. Summary of the flips (all primary-
+> source-verified there):
+>
+> - **Kaedim → viable-via-API.** Official Web API verified (`POST`, `X-API-Key`+JWT, returns
+>   obj/fbx/glb/gltf/mtl). Human-QC makes it async-with-latency, not instant — but API-driven
+>   (no UI scraping, no ToS hazard). Tier-2/3 high-quality-mesh backend.
+> - **Cascadeur → viable-via-desktop-gui.** Real Python `csc` API (FBX/DAE/USD export) but **no
+>   headless/CLI flag** → drive its in-app Python console via GUI automation + Xvfb, or keep as
+>   human-finishing. Now an allowed animation-finishing backend.
+> - **Promethean AI → viable-via-desktop-gui, but as a SCENE-LAYOUT step, not an asset source.**
+>   Verified: it set-dresses/arranges your EXISTING assets ("drag a folder of your 3D assets…
+>   build worlds"; UE-primary); it produces scene arrangements, not standalone assets. Belongs
+>   inside the engine adapter (Unreal-primary, deferred), downstream of the asset library.
+> - **OpenArt → STILL not viable.** Not for lack of a surface but because its ToS **forbids the
+>   only surface's automation**: ToS §4.4 (verbatim) *"No automated access, bots, or scripts" /
+>   "Only real human interactions are allowed"*; no public API. Browser automation = ToS
+>   violation. Also attribution-encumbered + uncopyrightable.
+> - **Rosebud → STILL not viable.** No per-asset export API AND ToS §(xi) (verbatim) prohibits
+>   *"spiders, crawlers, robots, scrapers, automated tools… to access the Services."*
+> - **GUI-bound DCCs split by driver path:** Blender (`-b --python` bpy), ZBrush (`-batch
+>   -script`, OBJ batch), and Substance Designer (`sbscooker`/`sbsrender`/Pysbs) are
+>   **headless-cli** (reproducible); Substance Painter (`--enable-remote-scripting`, needs live
+>   app) and Marvelous Designer (in-app Python) are **desktop-gui**.
+
+**Hard blockers for lights-out (no headless API found this pass) — see relaxed re-classification above:**
+- **Promethean AI** — desktop app + DCC/UE plugins, Python-in-editor only; **Unreal-adapter, DEFERRED**. RE-CLASSIFIED: viable-via-desktop-gui as a scene-layout step (not an asset producer).
+- **Cascadeur** — desktop animation app; no public CLI/headless API. RE-CLASSIFIED: viable-via-desktop-gui (Python `csc` console + GUI automation) — now an allowed animation-finishing backend.
+- **OpenArt Sprite Generator** — web GUI; no API surfaced. STILL NOT VIABLE: ToS forbids automation of its only surface.
+- **Rosebud AI** — full-game web tool; no engine-neutral asset-export API; overlaps factory role. STILL NOT VIABLE: no per-asset export + ToS forbids automation.
+- **Kaedim** — human-in-the-loop by design (contradicts lights-out). RE-CLASSIFIED: viable-via-API (async; official Web API verified → obj/fbx/glb/gltf/mtl).
 
 **Soft blockers (API claimed/likely but not primary-verified this pass — confirm before wrap):**
 - **World Labs (Marble)** export-format list + commercial license.

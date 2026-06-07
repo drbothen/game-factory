@@ -215,24 +215,37 @@ RULE 1 — Is this step part of the canonical, reproducible build?
         MCP/LLM may AUTHOR and maintain the scripts, but does NOT execute them in CI.
   NO  → (step is inherently generative/exploratory) continue to RULE 2.
 
-RULE 2 — Is the MCP integration headless-viable, i.e. class A (wraps CLI / cloud API /
-         headless interpreter) not class B (embedded in a GUI event loop)?
-  class B (Blender MCP, Substance Painter MCP, Cinema4D MCP, chongdashu Unreal MCP, Maya
-           commandPort) → DO NOT use in lights-out CI. Target the same app via its
-           documented headless mode instead (blender --background --python, hython, mayapy).
-  class A (Godot MCP, dcc-mcp-houdini, Bevy BRP/bevy_brp_mcp, IvanMurzak Unity w/ Docker,
-           Meshy/Tripo-API/ElevenLabs/Rodin cloud) → ELIGIBLE for CI, but for DETERMINISTIC
-           steps still prefer the raw CLI/API; reserve MCP for "let an agent decide" steps.
+RULE 2 — Pick the backend class by reliability tier (RELAXED 2026-06-07).
+  Originally: "class B never runs in CI." Now reliability-TIERED — GUI-bound surfaces are
+  ALLOWED when driven via automation + virtual-display, with reproducibility caveats, ONLY when
+  no robust API/CLI exists. Prefer in order (see backend_class enum, §6.4):
+    Reproducible CI tier  → cloud-api / headless-cli / mcp-headless (class A). Prefer these
+                            for any DETERMINISTIC step; reserve MCP for "let an agent decide".
+    Authoring-only        → mcp-gui (class B: Blender MCP, Substance Painter MCP, Cinema4D MCP,
+                            chongdashu Unreal MCP, Maya commandPort). Use for AUTHORING; for the
+                            same job in CI, target the app's documented headless mode instead
+                            (blender --background --python, hython, mayapy, sbsrender/Pysbs).
+    Last-resort, tiered   → saas-ui / desktop-gui. ALLOWED when no robust API/CLI exists AND
+                            (for saas-ui) tos_permits_automation: true. Run under virtual-display
+                            (Xvfb); tag reliability: low; outputs are provenance-reproducible
+                            ONLY (pin by hash, never assert bitwise regeneration). REQUIRES a
+                            run-recording (screen/DOM/console trace) as the weaker conformance
+                            evidence. saas-ui is BLOCKED for any tool whose ToS forbids automation
+                            (OpenArt, Rosebud — verified).
 
 RULE 3 — Role assignment:
   MCP            = interactive agent-AUTHORING control plane (pipeline design, tool discovery,
                    ad-hoc ops, the agent WRITING the headless scripts).
-  Headless CLI   = non-agentic EXECUTION plane in CI/worktrees (runs the authored scripts,
-                   keyed by repo state + pinned tool versions).
+  Reproducible   = cloud-api / headless-cli / mcp-headless: non-agentic EXECUTION plane in
+   CI tier        CI/worktrees (runs authored scripts, keyed by repo state + pinned versions).
+  GUI/SaaS tier  = saas-ui / desktop-gui: last-resort EXECUTION when no robust API/CLI exists,
+                   under Xvfb, reliability-tiered, ToS-gated, outputs pinned by hash.
 ```
 
-**One-line version:** *MCP authors the pipeline; the headless CLI executes it. A GUI-bound MCP
-(class B) never appears on the CI execution path.*
+**One-line version:** *Prefer the most reproducible backend (cloud-api / headless-cli /
+mcp-headless); a GUI-bound MCP (class B) stays authoring-only; saas-ui / desktop-gui are ALLOWED
+as a last resort — under a virtual display, reliability-tiered, pinned-by-hash, and (for saas-ui)
+only when the tool's ToS permits automation.* (Full taxonomy: `asset-automation-backends.md`.)
 
 This mirrors the factory's existing split between agent-driven generation and deterministic,
 contract-gated validation (AAA-RECONCILIATION §2 "Shift Work / Non-Interactive Agents").
@@ -275,14 +288,34 @@ exactly as in the engine adapter.
 
 ### 6.4 Backend-class declaration (the new field this protocol adds)
 
-Every asset-adapter manifest declares **`backend_class`** so the orchestrator knows whether it may
-run in CI:
+> **EXPANDED under the relaxed constraint (2026-06-07).** The original 4-value enum below
+> assumed "headless required / no-API = blocker." The product owner relaxed that: GUI-bound and
+> no-REST-API tools QUALIFY if they can export a license-clean, ingestible artifact via ANY
+> control surface, the unifying contract being **asset-library ingestion + provenance, not the
+> control method.** The enum is therefore expanded to **6 values** to cover SaaS-UI and
+> desktop-GUI automation. Full taxonomy, ToS register, and protocol expansion:
+> **`asset-automation-backends.md`**. The expanded enum, in strict preference order (most → least
+> reproducible; the orchestrator prefers the lowest-rank class a tool supports):
 
-- `cli` — headless CLI/SDK (blender-bg, hython, sbsbaker, gltf-transform) → CI-eligible.
-- `cloud-api` — stateless HTTP (Meshy/Tripo/ElevenLabs/Rodin) → CI-eligible, **stochastic**.
-- `mcp-headless` — class-A MCP (Godot CLI-wrapper, dcc-mcp-houdini, Bevy BRP) → CI-eligible.
-- `mcp-gui` — class-B MCP (Blender MCP, Substance Painter MCP, Cinema4D MCP) → **authoring only,
-  never on the CI execution path**.
+```
+backend_class ∈ {
+  cloud-api      # stateless HTTP (Meshy/Tripo/ElevenLabs/Rodin/Kaedim) → CI-eligible, provenance-reproducible
+  headless-cli   # blender -b, hython, sbscooker/sbsrender/Pysbs, ZBrush -batch -script, gltf-transform → CI-eligible, bitwise-reproducible
+  mcp-headless   # class-A MCP (Godot CLI-wrapper, dcc-mcp-houdini, Bevy BRP, IvanMurzak Unity Docker) → CI-eligible
+  mcp-gui        # class-B MCP (Blender MCP, Substance Painter MCP, Cinema4D MCP) → AUTHORING-ONLY, never on CI execution path
+  saas-ui        # browser automation of an API-less SaaS web UI → LAST RESORT; requires tos_permits_automation: true
+  desktop-gui    # GUI automation of a local desktop app under Xvfb (Cascadeur, Marvelous Designer, Promethean) → LAST RESORT, reliability-tiered
+}
+```
+
+Two gating fields accompany the GUI/SaaS classes: **`reliability: high|med|low`** and, for
+`saas-ui`, **`tos_permits_automation: true|false`** (OpenArt and Rosebud are verified `false` —
+their ToS forbid bots/scrapers/automated access — so they are DISABLED). The original 4-value
+names map forward as: `cli` → `headless-cli`; `cloud-api`, `mcp-headless`, `mcp-gui` unchanged.
+
+**Class is a property of the driver PATH, not the tool.** Blender is `headless-cli` (bpy `-b`)
+*and* `mcp-gui` (Blender MCP addon) at once; the adapter declares the highest-preference path it
+uses. Always prefer a tool's headless path when it has one.
 
 ### 6.5 Manifest sketch **[PROVISIONAL]** (mirrors engine-adapter manifest format)
 
