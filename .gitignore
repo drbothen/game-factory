@@ -1,3 +1,6 @@
 target/
 .DS_Store
 node_modules/
+
+# VSDD factory artifacts live on the factory-artifacts orphan branch (worktree)
+.factory/
