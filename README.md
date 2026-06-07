@@ -5,9 +5,17 @@ An **engine-agnostic** multi-agent factory for game development — a sibling of
 the verification/quality model with one suited to games (deterministic-sim
 contracts + playtest-validated design intent).
 
-> **Status:** Design phase. Nothing is built yet. This repo currently holds the
-> architecture, the engine-adapter protocol design, the extraction boundary from
-> vsdd-factory, and the supporting research.
+> **Status:** Spec-input phase. game-factory is a **product built BY
+> [vsdd-factory](../vsdd-factory)** following the full VSDD protocol. This repo is the
+> **VSDD input package** — the canonical entry artifact is the product brief at
+> [`.factory/specs/product-brief.md`](.factory/specs/product-brief.md); `docs/research/`
+> is the planning research that backs it; `docs/design/` + `docs/decisions/` are
+> Phase-1 seed inputs. vsdd-factory's pipeline produces the formal specs (domain spec,
+> PRD, behavioral contracts, architecture, verification properties), stories, and code.
+>
+> **Build mode:** greenfield (new layers) + Phase-0 brownfield extraction of vsdd-factory's
+> own engine-neutral spine. **Authoring depth:** human provides brief + research; the
+> pipeline crystallizes everything downstream.
 
 ## Core principle
 
