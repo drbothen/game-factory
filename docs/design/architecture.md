@@ -20,6 +20,15 @@ Three options were considered for adding game-dev capability to the VSDD ecosyst
 
 This repo implements **Option C**.
 
+> **Premise validated by research (2026-06-07).** No one builds an engine-agnostic
+> build-AND-test factory across Unity/Godot/Unreal/Bevy. Build CI is mature but
+> single-engine; the deepest cross-engine test SDKs reach only *two* engines
+> (Unity+Unreal); engine-agnostic testing exists only black-box (pixels/OCR).
+> The market quadrant we target is empty. Reuse the engine-native build runners
+> (GameCI, godot-ci, UAT, Cargo) + Rapier determinism; build the protocol,
+> conformance suite, and the semantic/replay layer. See
+> `docs/research/prior-art-and-precedents.md`.
+
 ## The split that makes Option C coherent
 
 - **Engine-neutral & game-neutral (reusable spine, ~70%):** orchestration,
@@ -72,7 +81,7 @@ quarantined and conformance-gated. See
 | Demo recorder (VHS/Playwright) | **adapter `capture` backend** + ffmpeg fallback | games need gameplay capture |
 | — | **asset lane** (new) | art/audio/anim are first-class story dependencies, not code |
 
-### Convergence dimensions (game-factory) **[PROVISIONAL]**
+### Convergence dimensions (game-factory)
 
 spec · sim-tests · implementation · **playtest/feel** · **frame-budget** (not
 throughput) · **asset-completeness** · visual · docs.
@@ -81,6 +90,13 @@ Each dimension is wired to **declare-and-degrade** against adapter capability
 fidelity: if an adapter reports `replay: none`, the regression dimension falls
 back from automated replay-diff to human playtest evidence. The core never
 *assumes* a capability — it negotiates.
+
+**Determinism is opt-in on every engine** (research-confirmed) — not a Bevy
+exclusive as first assumed. Cross-platform *bitwise* determinism is available only
+via Rapier (Bevy); Unity PhysX is same-machine only; Godot has no physics
+guarantee. The replay-regression dimension therefore degrades by a declared
+**`determinism_tier`** (exact snapshot-hash diff → tolerance-window metric diff).
+See `docs/decisions/0003` and `docs/research/RECONCILIATION.md`.
 
 ## The two-adapter rule
 

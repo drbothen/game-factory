@@ -28,8 +28,13 @@ them honest.
 ## Founding decision
 
 Adapter protocol is being designed against **Bevy + Unity** (maximum
-dissimilarity → hardest stress test). **Godot** is the planned cheap third
-adapter. See [`docs/decisions/0001-founding-engine-pair.md`](docs/decisions/0001-founding-engine-pair.md).
+dissimilarity → hardest stress test). **Godot** is the confirmed cheap third
+adapter (research-validated: between Bevy and Unity on 7/8 axes). Decisions:
+- [`0001`](docs/decisions/0001-founding-engine-pair.md) — founding pair Bevy + Unity
+- [`0002`](docs/decisions/0002-protocol-and-conformance-stance.md) — hybrid protocol + conformance (LSP + Terraform + CRI/CSI)
+- [`0003`](docs/decisions/0003-determinism-tier-capability.md) — determinism tier as a capability dimension
+
+**Research pass 1 is complete** — start with [`docs/research/RECONCILIATION.md`](docs/research/RECONCILIATION.md).
 
 ## Documents
 

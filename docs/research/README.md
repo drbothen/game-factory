@@ -4,14 +4,18 @@ This directory holds the cited research that validates (or refutes) the
 engine-specific capability claims in `docs/design/`. Until a claim here is
 confirmed, the corresponding design assertion is tagged **[PROVISIONAL]**.
 
-## Research pass 1 (in progress, launched 2026-06-07)
+## Research pass 1 (COMPLETE, 2026-06-07)
 
 | Report | Scope | Status |
 |---|---|---|
-| `bevy-capabilities.md` | Bevy: build/test/headless/determinism/replay/capture/lint/assets/introspect | ⏳ running |
-| `unity-capabilities.md` | Unity: same matrix; focus on `-nographics` vs capture conflict | ⏳ running |
-| `godot-capabilities.md` | Godot: same matrix; "between Bevy and Unity" hypothesis | ⏳ running |
-| `prior-art-and-precedents.md` | Prior art (engine-agnostic game CI/test/AI tooling); determinism-in-games; LSP/Terraform/CRI precedents | ⏳ running |
+| `bevy-capabilities.md` | Bevy: build/test/headless/determinism/replay/capture/lint/assets/introspect | ✅ done |
+| `unity-capabilities.md` | Unity: same matrix; focus on `-nographics` vs capture conflict | ✅ done |
+| `godot-capabilities.md` | Godot: same matrix; "between Bevy and Unity" hypothesis | ✅ done |
+| `prior-art-and-precedents.md` | Prior art; determinism-in-games; LSP/Terraform/CRI precedents | ✅ done |
+| `RECONCILIATION.md` | Synthesis: confirmed / refuted / newly-surfaced + design changes | ✅ done |
+
+**Read `RECONCILIATION.md` first** — it is the synthesis that drove the design-doc
+updates and Decisions 0002 (hybrid protocol + conformance) and 0003 (determinism tier).
 
 ## Key questions these must answer
 
@@ -24,3 +28,12 @@ confirmed, the corresponding design assertion is tagged **[PROVISIONAL]**.
 5. **Prior art:** is anyone already building an engine-agnostic game factory? What
    to reuse vs build?
 6. Do the **LSP / Terraform / CRI** protocol precedents actually map to our design?
+
+## Answers (pass 1)
+
+1. **Yes** — confirmed for Unity *and* Godot, sharpened with a fresh repro. Common case, not a Unity quirk.
+2. **Feasible but DIY/opt-in for all three**; cross-platform *bitwise* determinism only via Rapier (Bevy). → determinism-tier dimension.
+3. **Unity native** (new Input System); **Godot/Bevy DIY** on a native injection primitive.
+4. **Holds 7/8 axes** — breaks on capture (Godot sits with Unity), better-than-predicted on lint + introspect.
+5. **No** — the market quadrant is empty; the premise is validated. Reuse engine-native build runners + Rapier; build the protocol + conformance + semantic/replay layer.
+6. **Yes, strongly** — and they're complementary. Hybrid: LSP negotiation + Terraform versioning/acceptance + CRI/CSI conformance; avoid Testcontainers' no-conformance trap.
