@@ -1,0 +1,40 @@
+# game-factory
+
+An **engine-agnostic** multi-agent factory for game development — a sibling of
+[vsdd-factory](../vsdd-factory) that reuses its orchestration spine but replaces
+the verification/quality model with one suited to games (deterministic-sim
+contracts + playtest-validated design intent).
+
+> **Status:** Design phase. Nothing is built yet. This repo currently holds the
+> architecture, the engine-adapter protocol design, the extraction boundary from
+> vsdd-factory, and the supporting research.
+
+## Core principle
+
+> We do not "support N engines." We design **one engine-adapter protocol** and
+> write **N adapters** against it. The factory core never knows the word "Unity."
+
+This is the LSP / Terraform-provider / Kubernetes-CRI pattern: a stable protocol
+in the middle, pluggable backends on the edge, a conformance suite that keeps
+them honest.
+
+## Layers
+
+1. **Core orchestration engine** — extracted from vsdd-factory; engine- AND game-neutral.
+2. **Game-factory methodology layer** — game agents, contract schemas, convergence dims, playtest/replay protocols, asset lane.
+3. **Engine adapter protocol** — the anti-lock-in seam (capability manifest + command templates + result schema).
+4. **Adapters** — one per engine (Bevy, Unity, Godot, …), each passing a conformance suite.
+
+## Founding decision
+
+Adapter protocol is being designed against **Bevy + Unity** (maximum
+dissimilarity → hardest stress test). **Godot** is the planned cheap third
+adapter. See [`docs/decisions/0001-founding-engine-pair.md`](docs/decisions/0001-founding-engine-pair.md).
+
+## Documents
+
+- [`docs/design/architecture.md`](docs/design/architecture.md) — four-layer architecture
+- [`docs/design/engine-adapter-protocol.md`](docs/design/engine-adapter-protocol.md) — the protocol, capability matrix, sample manifests
+- [`docs/design/extraction-boundary.md`](docs/design/extraction-boundary.md) — what moves from vsdd-factory vs stays vs is built new
+- [`docs/research/`](docs/research/) — cited evidence base (engine capability research + prior art)
+- [`docs/decisions/`](docs/decisions/) — decision log
