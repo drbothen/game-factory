@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,25 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.3 changes (Pass-9 O-2 resolution — canonical convergence-report dimension field names):**
+> - **O-2 fixed:** Added §3.0 "Canonical Dimension Field Name Registry" — a central
+>   authoritative table mapping each of the 11 convergence dimensions (D-SIM through
+>   D-SEC) to its canonical `convergence-report.dimensions.<field>` JSON field name.
+>   This table is the single source of truth for field naming; downstream BCs and
+>   consumers must use these names. Deriving from existing pinned names (BC-7.01.001
+>   `sim_spec`, BC-7.02.001 `tests_replay`, BC-7.06.001 `cert_preflight`,
+>   BC-10.02.001 `provenance_legal_compliance`) and assigning canonical names for
+>   the 7 dimensions that had no prior pin.
+> - **O-2 drift flag (for PO):** SS-08 consumer BCs (BC-9.04.001, BC-9.06.001,
+>   BC-9.06.002) write `dimensions.distribution_readiness` for D-CERT, which
+>   contradicts the D-CERT canonical field `cert_preflight` defined in BC-7.06.001.
+>   These three BCs are in PO's SS-08 scope. The canonical name is `cert_preflight`;
+>   PO should update the three SS-08 consumer BCs to use `cert_preflight` in a
+>   follow-up pass. The dimension is NOT in PO's current in-flight scope (ss-10/ss-13),
+>   so this is a low-risk scheduling note.
+> - **Reference from ARCH-INDEX.md:** Document Map entry for `methodology-layer.md`
+>   now explicitly notes it contains the canonical dimension field name registry.
 
 > **v1.2 changes (Pass-2 adversarial defect resolution):**
 > - **I2-01 fixed:** §3.D-SEC `Subsystem` field corrected from `SS-04, SS-02` → `SS-06`
@@ -443,6 +462,48 @@ The convergence loop mechanics are **ADAPTED from vsdd** (not replaced):
   acknowledgment. Degraded-but-undocumented = blocked.
 - Release is blocked until either convergence is reached or the human principal
   accepts a named degradation for each non-converged dimension.
+
+---
+
+### §3.0 Canonical Dimension Field Name Registry
+
+**This table is the single source of truth for `convergence-report.dimensions.<field>` JSON
+field names.** Every BC, consumer module, and implementation artifact that reads or writes a
+convergence-report dimension MUST use the canonical field name from this table. Using a
+non-canonical name is a latent producer/consumer drift defect (class O-2).
+
+**Authority:** This table overrides any individual BC that names a field. Where an existing
+BC already pinned a field name, this table adopts that name (marked "pinned by BC"). Where no
+BC had pinned a name, this table assigns one (marked "assigned here"). Any consumer that
+disagrees with an assigned name should raise a spec change request — not silently use a
+different name.
+
+**Referenced from:** ARCH-INDEX.md §Document Map (`methodology-layer.md` entry). Any
+implementation or integration test that writes to `convergence-report.dimensions` must
+validate field names against this table.
+
+| Dim ID | Dimension Title | Canonical field name | Derivation | Owner BC |
+|--------|----------------|----------------------|------------|----------|
+| D-SIM | Sim/Spec | `sim_spec` | pinned by BC-7.01.001 | BC-7.01.001 |
+| D-REPLAY | Tests/Replay Regression | `tests_replay` | pinned by BC-7.02.001 | BC-7.02.001 |
+| D-IMPL | Implementation | `implementation` | assigned here (natural slug) | BC-7.03.001 |
+| D-ASSET | Asset Completeness | `asset_completeness` | assigned here (natural slug) | BC-7.04.001 |
+| D-PLAY | Playtest Satisfaction | `playtest_satisfaction` | assigned here (matches BC-7.05.001 title "Playtest-Satisfaction") | BC-7.05.001 |
+| D-CERT | Cert-Preflight + Distribution-Readiness | `cert_preflight` | pinned by BC-7.06.001 | BC-7.06.001 |
+| D-PERF | Performance Budget | `perf_budget` | assigned here (natural slug) | BC-7.07.001 |
+| D-PROV | Provenance / Legal and Compliance | `provenance_legal_compliance` | pinned by consumer BCs (BC-10.02.001, BC-10.06.001); consistent with BC-7.08.001 semantic | BC-7.08.001 |
+| D-DOCS | Documentation | `docs` | assigned here (natural slug) | BC-7.09.001 |
+| D-ETHICS | Monetization Ethics | `monetization_ethics` | assigned here (natural slug) | BC-7.10.001 |
+| D-SEC | Security Invariants | `security_invariants` | assigned here (natural slug) | BC-7.11.001 |
+
+**Count invariant:** 11 unique field names, one per dimension. No two dimensions share a
+field name. The check-spec-counts.sh check (m) asserts this invariant at CI time.
+
+**Known consumer drift (PO action required):** BC-9.04.001, BC-9.06.001, and BC-9.06.002
+(all in SS-08, `ss-09/` directory) write `convergence-report.dimensions.distribution_readiness`
+for D-CERT. The canonical name is `cert_preflight`. PO should update these three BCs in a
+follow-up pass when SS-08 is next in scope. Until corrected, these BCs diverge from the
+canonical registry.
 
 ---
 

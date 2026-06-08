@@ -69,7 +69,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Pass 1 DONE (5C/9I/4S all resolved; 170→179 BCs); Pass 2 DONE (3C/4I/3S all resolved; 179→178 count correction; CI count-gate added); Pass 3 DONE (1C/4I/3obs all resolved; +2 verification docs; CI gate v1.2; D-014); Pass 4 DONE (2C/4I/5obs all resolved; studio roster 57N+9A=66 reconciled; Kani 3→4; error-taxonomy single total; NFR Source restored; CI gate v1.3); Pass 5 DONE (3C/4I/1S all resolved; studio §3/§6 recompute; VP-TBD BC-local D-015; 11 VP↔BC back-refs; P0 subtotal 111; CI gate v1.4); Pass 6 DONE (0C/2I/1S+57-code completeness gap all resolved; priority 117/39/22; +5 E-ETH+57 codes; E-GEN retired; 196 total codes; CI gate v1.5/11 checks); Pass 7 CLEAN (0C/0I/1 LOW obs O7-01 deferred); Pass 8 FINDINGS (0C/1I/2obs all resolved; disclosure_class enum contradiction fixed; CI gate v1.6/12 checks); clean passes: **RESET 0/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–6 resolved (see phase-1-log.md rows 9–14); Pass 7 CLEAN (0C/0I/1 LOW obs O7-01 deferred); Pass 8 FINDINGS (0C/1I/2obs; disclosure_class enum contradiction; CI v1.6; counter RESET 0/3); Pass 9 FINDINGS (0C/2I/4obs; E-COMP-011/012; NFT→PEGI-18 fail-closed; dimension field canonicalization; CI v1.8; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,22 +78,18 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 9** (consecutive clean pass 1 of 3 — restart). Pass 8 FINDINGS: 0C/1I/2obs all resolved; disclosure_class enum contradiction (F8-01) fixed. Clean-pass counter RESET: 0/3.
-**Spec state:** PRD v1.6; BC-INDEX v1.4; error-taxonomy v1.6 (196 codes / 30 families / 187 active; E-GEN retired); subsystem-decomposition v1.4 (P0=117/P1=39/P2=22); ARCH-INDEX v1.6; VP-INDEX v1.3 (VP-TBD BC-local D-015; I4 rationale); methodology-layer v1.2; studio-of-agents v1.2 (§3 recomputed; Tier1=53/Tier2=13); verification-architecture.md v1.0; verification-coverage-matrix.md v1.2 (11 VP back-refs; I4 note); nfr-catalog v1.2; prd-cap-011 v1.3; BC-10.05.001 v1.1; BC-13.04.001 v1.2; BC-7.11.002 v1.1; BC-7.11.007 v1.1. 178 BCs / 196 codes / 35 NFRs / 66 studio roles. CI count-gate v1.6 (12 checks a–l).
+**NEXT: `phase-1d-adversarial` — Pass 10** (consecutive clean pass 1 of 3). Pass 9 FINDINGS: 0C/2I/4obs all resolved; E-COMP-011/012 registered; NFT→PEGI-18 fail-closed; dimension field canonicalization. Counter stays 0/3.
+**Spec state:** PRD v1.6; BC-INDEX v1.4; error-taxonomy v1.7 (198 codes / 30 families / 189 active; E-GEN retired); subsystem-decomposition v1.4 (P0=117/P1=39/P2=22); ARCH-INDEX v1.6 (methodology-layer ref updated); VP-INDEX v1.3; methodology-layer v1.3 (+§3.0 canonical dimension field table); studio-of-agents v1.2; verification-architecture.md v1.0; verification-coverage-matrix.md v1.2; nfr-catalog v1.2; prd-cap-011 v1.3; BC-10.05.001 v1.2; BC-10.01.001 v1.1; BC-13.01.004 v1.1; BC-9.04.001/9.06.001/9.06.002 v1.1. 178 BCs / 198 codes / 35 NFRs / 66 studio roles. CI count-gate v1.8 (14 sub-assertions a–m).
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented. lint job now includes Spec count consistency (S2-02) gate.
 
 ### Phase-1d Adversarial Convergence
 
 | Pass | Date | Verdict | Findings | Resolved | Clean-pass counter |
 |------|------|---------|----------|----------|--------------------|
-| 1 | 2026-06-08 | FINDINGS | 5C / 9I / 4S | ALL 18 RESOLVED | 0/3 |
-| 2 | 2026-06-08 | FINDINGS | 3C / 4I / 3S | ALL 10 RESOLVED | 0/3 |
-| 3 | 2026-06-08 | FINDINGS | 1C / 4I / 3 obs | ALL RESOLVED | 0/3 |
-| 4 | 2026-06-08 | FINDINGS | 2C / 4I / 5 obs | ALL RESOLVED | 0/3 |
-| 5 | 2026-06-08 | FINDINGS | 3C / 4I / 1S | ALL RESOLVED | 0/3 |
-| 6 | 2026-06-08 | FINDINGS | 0C / 2I / 1S + 57-code completeness gap | ALL RESOLVED | 0/3 |
+| 1–6 | 2026-06-08 | FINDINGS | (see phase-1-log.md rows 9–14) | ALL RESOLVED | 0/3 each |
 | 7 | 2026-06-08 | CLEAN | 0C / 0I / 1 LOW obs (O7-01) | n/a — non-blocking deferred | **1/3** |
 | 8 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs | ALL RESOLVED | **RESET 0/3** |
+| 9 | 2026-06-08 | FINDINGS | 0C / 2I / 4 obs | ALL RESOLVED | **0/3** |
 
 ---
 
@@ -109,7 +105,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Pass 1 done (5C/9I/4S all resolved; 179 BCs); Pass 2 done (3C/4I/3S all resolved; 178 BCs; CI count-gate added); Pass 3 done (1C/4I/3obs all resolved; +2 verification docs; CI v1.2; D-014); Pass 4 done (2C/4I/5obs all resolved; studio 57N+9A=66; Kani 3→4; error-taxonomy single total; NFR Source; CI v1.3); Pass 5 done (3C/4I/1S all resolved; studio §3/§6 recompute; VP-TBD BC-local D-015; 11 VP↔BC back-refs; P0=111; CI v1.4); Pass 6 done (0C/2I/1S+57-code gap all resolved; priority 117/39/22; 196 error codes; E-GEN retired; CI v1.5/11 checks); Pass 7 CLEAN (0C/0I/1 LOW obs FU-007 deferred); Pass 8 FINDINGS (0C/1I/2obs; disclosure_class enum contradiction fixed; CI v1.6/12 checks; counter RESET 0/3); Pass 9+ pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–6 all findings resolved (see phase-1-log.md); Pass 7 CLEAN (1/3); Pass 8 FINDINGS (counter RESET 0/3; disclosure_class fix); Pass 9 FINDINGS (0C/2I/4obs; E-COMP-011/012; NFT seam fail-closed; dimension field canonicalization; CI v1.8; counter stays 0/3); Pass 10 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -189,13 +185,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–8 DONE.
-**Phase-1d Pass 8 FINDINGS:** 0 criticals; 1 important (F8-01: disclosure_class closed-enum contradiction — consumer BC-10.05.001 used non-canonical `dev-tool-only`, omitted `procedural-exempt` routing; RESOLVED); 2 LOW obs (O8-01: asset_type→eu_scope_category rename; O8-02: DI-012 anchor note for CWE-602; BOTH RESOLVED). CI gate v1.6 adds check (l): disclosure_class closed-enum consistency (canonical set from BC-4.03.002; scans all BCs; 0 violations). Clean-pass counter RESET: 1/3 → 0/3. Severity trajectory: 5C/3C/1C/2C/3C/0C/CLEAN/FINDINGS(reset).
-**Next action:** `phase-1d-adversarial` — **Pass 9** (consecutive clean pass 1 of 3 — restart). Need 3 clean passes to converge.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–9 DONE.
+**Phase-1d Pass 9 FINDINGS resolved:** (I-1) E-COMP-010 semantic overload → registered E-COMP-011 "disclosure_class out-of-vocabulary at manifest aggregation"; BC-10.05.001 v1.2. (I-2) NFT-flag seam: BC-10.01.001 now fail-closed (PEGI-18 if EITHER nft_blockchain OR nft_mechanics true); E-COMP-012 "NFT flag divergence" registered; BC-10.01.001 v1.1, BC-13.01.004 v1.1. (O-1) eu_scope_category 3d-mesh added. (O-2) Convergence-dimension field names canonicalized: §3.0 table added to methodology-layer v1.3; BC-9.04.001/9.06.001/9.06.002 renamed dimensions.distribution_readiness → dimensions.cert_preflight (v1.1). CI gate v1.8 adds check (m) m.i + m.ii. Clean-pass counter: stays 0/3.
+**Next action:** `phase-1d-adversarial` — **Pass 10** (candidate clean #1 of 3). Need 3 clean passes to converge.
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v1.6. 178 BCs; 35 NFRs; 196 error codes / 30 families (187 active; E-GEN retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred).
-**BC versions changed Pass 8:** BC-10.05.001 v1.1, BC-13.04.001 v1.2, BC-7.11.002 v1.1, BC-7.11.007 v1.1.
-**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.2 (11 convergence dims + predicates); 66-role studio (57N+9A; 53T1+13T2); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.1). 10 VPs (6 P0, 4 P1). Priority: 178 BCs / P0=117 / P1=39 / P2=22.
+**PRD status:** v1.6. 178 BCs; 35 NFRs; 198 error codes / 30 families (189 active; E-GEN retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred).
+**BC versions changed Pass 9:** BC-10.05.001 v1.2; BC-10.01.001 v1.1; BC-13.01.004 v1.1; BC-9.04.001/9.06.001/9.06.002 v1.1. error-taxonomy v1.7. methodology-layer v1.3. ARCH-INDEX v1.6 (ref updated).
+**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.3 (11 convergence dims + §3.0 canonical field table); 66-role studio (57N+9A; 53T1+13T2); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.1). 10 VPs (6 P0, 4 P1). Priority: 178 BCs / P0=117 / P1=39 / P2=22.
 **Verification docs:** verification-architecture.md v1.0, verification-coverage-matrix.md v1.2. All 11 formal VP↔BC back-refs present. Kani=4, proptest=7 (dual-count VP-001).
 **D-014:** DI-008 engine-neutrality scope = Layer-1/Layer-2 only; L3 adapter-behavior BCs may name engines illustratively. FLAG FOR HUMAN RATIFICATION at Phase-1 gate.
 **D-015:** VP-TBD-NNN are BC-local placeholders; canonical form `<BC-ID>/VP-TBD-NNN`; Phase-6 promotes to VP-NNN. FLAG FOR HUMAN AWARENESS at Phase-1 gate.

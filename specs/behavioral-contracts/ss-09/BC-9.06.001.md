@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -19,7 +19,11 @@ capability: CAP-009
 priority: P1
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    by: product-owner
+    reason: "Canonicalize convergence-report dimension field name: dimensions.distribution_readiness → dimensions.cert_preflight per methodology-layer.md §3.0 (D-CERT canonical field). Console cert sign-off is a human-gated step within D-CERT's pass predicate."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -80,7 +84,7 @@ the milestone gate. Suppression is a hook-detectable defect (DI-006).
    ```
 2. This record is added to `distribution-release-pipeline.human_gated_tasks[]`.
 3. The record is surfaced to the milestone gate mechanism.
-4. The `convergence-report.dimensions.distribution_readiness` remains `AMBER` (not
+4. The `convergence-report.dimensions.cert_preflight` remains `AMBER` (not
    `GREEN`) until the task is marked `status: complete` by the cert-owner.
 5. The factory NEVER marks this task `status: complete` autonomously. Only the cert-owner
    (human) can do so.
@@ -91,7 +95,7 @@ the milestone gate. Suppression is a hook-detectable defect (DI-006).
   console target.
 - The record has `status: outstanding` until a human marks it `status: complete`.
 - The milestone gate reflects the outstanding task.
-- `convergence-report.dimensions.distribution_readiness != GREEN` while the task is outstanding.
+- `convergence-report.dimensions.cert_preflight != GREEN` while the task is outstanding.
 
 ## Invariants
 

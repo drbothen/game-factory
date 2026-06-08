@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -19,7 +19,11 @@ capability: CAP-009
 priority: P1
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    by: product-owner
+    reason: "Canonicalize convergence-report dimension field name: dimensions.distribution_readiness → dimensions.cert_preflight per methodology-layer.md §3.0 (D-CERT canonical field). distribution_readiness is semantically subsumed by D-CERT which is titled 'Cert-Preflight + Distribution-Readiness'."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,8 +41,8 @@ complete release execution plan and outcome for a game build: which distribution
 were invoked, which CLI commands ran, which build-upload-records were produced, the cert
 pre-flight status, outstanding human-gated tasks, and the release version stamp. It is
 the authoritative provenance record for "how did this build reach its distribution targets."
-The artifact must be structurally valid and complete before the distribution-readiness
-convergence dimension can advance past AMBER.
+The artifact must be structurally valid and complete before the D-CERT (cert-preflight +
+distribution-readiness) convergence dimension can advance past AMBER.
 
 ## Preconditions
 
@@ -46,7 +50,7 @@ convergence dimension can advance past AMBER.
 2. A `cert-preflight-report` for the build version exists (BC-9.01.001).
 3. All build-upload-records for the current build version are finalized (success or failed).
 4. The `convergence-report` for the game exists with a writable
-   `dimensions.distribution_readiness` field.
+   `dimensions.cert_preflight` field.
 
 ## Behavior
 
@@ -68,7 +72,7 @@ convergence dimension can advance past AMBER.
 2. Emit the artifact to `.factory/artifacts/distribution/<game_id>/<build_version>/
    distribution-release-pipeline.json`.
 3. Validate the artifact against `distribution-release-pipeline-v1.schema.json`.
-4. Update `convergence-report.dimensions.distribution_readiness`:
+4. Update `convergence-report.dimensions.cert_preflight`:
    - `COMPLETE` → `GREEN`
    - `PARTIAL` → `AMBER`
    - `FAILED` → `BLOCKED`
@@ -80,7 +84,7 @@ convergence dimension can advance past AMBER.
 - Every adapter that was invoked has a corresponding entry in `adapters_invoked[]`.
 - Every outstanding human-gated task is listed in `human_gated_tasks[]` — none are silently
   omitted (DI-006).
-- `convergence-report.dimensions.distribution_readiness` reflects the computed status.
+- `convergence-report.dimensions.cert_preflight` reflects the computed status.
 
 ## Invariants
 
@@ -97,7 +101,7 @@ convergence dimension can advance past AMBER.
 
 | EC-ID | Scenario | Expected Result |
 |-------|----------|----------------|
-| EC-001 | No adapters invoked yet for this build version | `overall_distribution_status: PENDING`; `adapters_invoked: []`; `distribution_readiness: AMBER` |
+| EC-001 | No adapters invoked yet for this build version | `overall_distribution_status: PENDING`; `adapters_invoked: []`; `cert_preflight: AMBER` |
 | EC-002 | All adapters succeeded but human-gated tasks not yet completed | `overall_distribution_status: PARTIAL`; tasks listed in `human_gated_tasks[]` |
 | EC-003 | cert-preflight-report missing for build version | Schema validation fails; artifact not emitted; error `E-DIST-040`  |
 | EC-004 | Two builds of the same version (rebuild) | New pipeline artifact overwrites previous if status was not `COMPLETE`; version-conflict error if previous was `COMPLETE` |

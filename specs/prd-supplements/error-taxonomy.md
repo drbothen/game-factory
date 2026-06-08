@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "1.6"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -51,7 +51,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | E-PLAY | CAP-008 | Structured playtest protocol errors | error-taxonomy.md §E-PLAY (added PRD rev 1.1) |
 | E-CERT | CAP-009 | Cert pre-flight errors | prd-cap-009-010.md §4 |
 | E-DIST | CAP-009 | Distribution adapter and upload tool errors | prd-cap-009-010.md §4 |
-| E-COMP | CAP-010 | Compliance pipeline errors | prd-cap-009-010.md §4 |
+| E-COMP | CAP-010 | Compliance pipeline errors (E-COMP-010: missing sidecar field; E-COMP-011: out-of-vocab disclosure_class at manifest aggregation; E-COMP-012: nft_blockchain/nft_mechanics inconsistency seam guard) | prd-cap-009-010.md §4 |
 | E-ETH | CAP-011 | Monetization ethics contract errors | error-taxonomy.md §E-ETH (added PRD rev 1.1) |
 | E-KB | CAP-012 | Canon Knowledge-Base structural errors | error-taxonomy.md §E-KB (added PRD rev 1.1) |
 | E-GENRE | CAP-013 | Genre-gated lane activation errors (E-GENRE covers core lane-activation BCs; E-GLG, E-MOD, E-MKT cover sub-lane BCs) | error-taxonomy.md §E-GENRE (added PRD rev 1.1) |
@@ -200,7 +200,9 @@ Message format uses `<placeholder>` syntax for dynamic values.
 | Error Code | Subsystem | Trigger Condition | Exit Code |
 |-----------|-----------|-------------------|-----------|
 | E-COMP-001 | IARC | Questionnaire version not recognized | 1 |
-| E-COMP-010 | AI-disclosure | Shipped asset missing required provenance sidecar field (DI-003 violation) | 1 |
+| E-COMP-010 | AI-disclosure | Shipped asset MISSING required provenance sidecar field (DI-003 violation) — field absent or null | 1 |
+| E-COMP-011 | AI-disclosure | Inbound sidecar `disclosure_class` value is out-of-vocabulary at manifest aggregation — field is present but its value is not in `{pre-generated, live-generated, procedural-exempt}` (parallel to E-PRV-011 at generation time; added PRD rev 1.7) | 1 |
+| E-COMP-012 | IARC-compliance | `game-metadata-spec.nft_blockchain` is inconsistent with `genre-profile.nft_mechanics` — NFT declared active in one source but not the other; conservative PEGI-18 applied and manifest flagged for human review (DI-011 seam guard; added PRD rev 1.7) | 1 |
 
 ---
 
@@ -582,6 +584,17 @@ and marketing asset manifest completeness (BC-13.04.002).
 
 ## Coverage Notes
 
+### PRD Revision 1.7 Changes (Pass-9 adversarial fixes: I-1, I-2, O-1)
+
+| Change | Detail |
+|--------|--------|
+| E-COMP-011 added (I-1) | **IMPORTANT:** New code for out-of-vocabulary `disclosure_class` value arriving on an inbound sidecar at manifest aggregation time. Triggered when the `disclosure_class` field IS present but its value is not in `{pre-generated, live-generated, procedural-exempt}`. Distinct from E-COMP-010 (field absent/null). Matches the E-PRV-010/011 producer-side split pattern (E-PRV-010 = absent/null; E-PRV-011 = present but out-of-vocab) at the consumer/manifest layer. BC-10.05.001 INV-3 and VP-COMP-017 updated to reference E-COMP-011 for the out-of-vocab case; Behavior step 3 retains E-COMP-010 for the genuine missing-field case. |
+| E-COMP-012 added (I-2) | **IMPORTANT (regulatory):** New code for NFT activation flag inconsistency seam: `game-metadata-spec.nft_blockchain` ≠ `genre-profile.nft_mechanics`. Emitted by BC-10.01.001 when these two fields diverge. Conservative fail-closed: PEGI-18 override and `NFT_PEGI18_OVERRIDE` flag applied to the `ratings-submission-manifest` whenever either source declares NFT active, preventing under-rated storefront submissions (DI-011 / R-013). |
+| BC-10.05.001 O-1 fix | **LOW:** `eu_scope_category` inline JSON comment in the `eu_c2pa_marks.marked_assets` object now lists all four projection values `image\|audio\|text\|3d-mesh` (was `image\|audio\|text`), matching the authoritative projection defined in the Preconditions. |
+| Total 196 → 198 | E-COMP family: 2 → 4. Total registered (incl. retired E-GEN): 198. Active codes only: 189. |
+
+---
+
 ### PRD Revision 1.6 Changes (check-k completeness fix)
 
 | Change | Detail |
@@ -598,8 +611,9 @@ and marketing asset manifest completeness (BC-13.04.002).
 | E-MKT added (4 codes) | **CRITICAL:** New family for marketing lane asset conformance. Covers BC-13.04.001 (E-MKT-001/002), BC-13.04.002 (E-MKT-003/004). |
 | E-XR extended (+1 code) | **CRITICAL:** Added E-XR-007 (visionOS manifest with OpenXR fields, BC-14.02.003). |
 | Total 139 → 196 (CI-computed) | **Net:** +57 new codes (E-AAG×7 + E-SVC×6 + E-PRV×5 + E-QG×11 + E-SHIP×3 + E-ING×4 + E-GLG×5 + E-MOD×11 + E-MKT×4 + E-XR×1) = 139 + 57 = **196 total registered codes** (CI computes all distinct E-xxx-NNN tokens including retired E-GEN). E-GEN (9 codes) retired but its codes remain in the taxonomy as a retired table, so CI still counts them. Active families: 22 − 1 (E-GEN retired) + 8 new = **29 active families**. Active codes only (excl. E-GEN): **187**. |
+| Total 196 → 198 (PRD rev 1.7) | **+E-COMP-011** (out-of-vocabulary `disclosure_class` at manifest aggregation; I-1 fix) and **+E-COMP-012** (`nft_blockchain`/`nft_mechanics` inconsistency seam guard; I-2 fix). E-COMP family: 2 → 4. Total all registered (incl. retired E-GEN): **198**. Active codes only (excl. E-GEN): **189**. |
 
-**Total defined error codes: 196** across 30 families (29 active + 1 retired E-GEN). Per-family breakdown (active codes: 187; retired codes: 9 E-GEN):
+**Total defined error codes: 198** across 30 families (29 active + 1 retired E-GEN). Per-family breakdown (active codes: 189; retired codes: 9 E-GEN):
 
 | Family | Code Count | Notes |
 |--------|-----------|-------|
@@ -621,7 +635,7 @@ and marketing asset manifest completeness (BC-13.04.002).
 | E-PROD | 3 | |
 | E-CERT | 3 | |
 | E-DIST | 19 | |
-| E-COMP | 2 | |
+| E-COMP | 4 | v1.7: +E-COMP-011 (out-of-vocab disclosure_class at manifest aggregation), +E-COMP-012 (nft_blockchain/nft_mechanics inconsistency seam guard) |
 | E-SIM | 9 | v1.1 addition |
 | E-CONV | 6 | v1.1 addition |
 | E-PLAY | 5 | v1.1 addition |
@@ -633,8 +647,8 @@ and marketing asset manifest completeness (BC-13.04.002).
 | E-MKT | 4 | v1.6 addition: marketing lane (BC-13.04.*) |
 | E-XR | 7 | v1.1: 6 codes; v1.6: +E-XR-007 (visionOS/OpenXR namespace error) |
 | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** — orphaned placeholder; no BC ever referenced these codes |
-| **TOTAL (all registered incl. retired)** | **196** | Sum of all rows including retired E-GEN; this is the CI-computed total |
-| *(active only, excl. E-GEN retired)* | *187* | Active codes only |
+| **TOTAL (all registered incl. retired)** | **198** | Sum of all rows including retired E-GEN; this is the CI-computed total |
+| *(active only, excl. E-GEN retired)* | *189* | Active codes only |
 
 ---
 

@@ -107,7 +107,7 @@ traces_to: .factory/specs/product-brief.md
 | `subsystem-decomposition.md` | SS-01..SS-12 definitions, BC→Subsystem assignment table (all 178), Directory→Subsystem alias table | ~1,400 |
 | `dtu-assessment.md` | DTU analog: replay harness + conformance doubles; DTU_REQUIRED verdict | ~900 |
 | `adapter-protocols.md` | Layer 3 adapter protocol spec: JSON-RPC transport, capability schema, fidelity grades, conformance suite, compatibility matrix | ~1,100 |
-| `methodology-layer.md` | Layer 2 game methodology: sim-BC schema, design-intent contract, replay-regression contract, asset-provenance, 11-dim convergence criteria | ~1,100 |
+| `methodology-layer.md` | Layer 2 game methodology: sim-BC schema, design-intent contract, replay-regression contract, asset-provenance, 11-dim convergence criteria; **§3.0 = canonical `convergence-report.dimensions.<field>` name registry (single source of truth for all 11 dimension field names)** | ~1,200 |
 | `studio-of-agents.md` | 66-role Studio-of-Agents roster; producer-orchestrator scheduling; cross-discipline DAG; change-propagation rules | ~1,200 |
 | `adrs/ADR-0004-adapter-family-anti-lock-in.md` | Four-seam adapter family as primary anti-lock-in mechanism | ~400 |
 | `adrs/ADR-0005-config-content-extraction-seam.md` | Extraction seam: spine vs quality-model at content/config boundary | ~400 |
