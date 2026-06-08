@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.02.002
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.02.002: Risk Tier Is Assigned from Asset Class and Use-Case at Request Creation Time
@@ -123,7 +141,7 @@ the canonical tier assignment policy defined in this BC.
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — the risk tier is the primary routing and provenance signal in the asset generation pipeline. It determines which backends are eligible (Tier-1 tools for Tier-1 assets), governs post-gate handling (auto-ingest vs flag), and feeds `risk_tier` into the mandatory provenance sidecar (BC-4.03.001). It is the operational encoding of D-006 (pure-maximal with recorded risks). |
-| L2 Invariants | DI-003 (provenance sidecar must include risk_tier — this BC ensures it is computed and immutable before generation) |
+| L2 Invariants | DI-003 (provenance sidecar must include risk_tier — this BC ensures it is computed and immutable before generation), DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 1 (Risk Tier Assignment) |
 | L2 Risks | R-001, R-002 (IP/copyright — tier 3 triggers human-modifications attention), R-005 (hero quality gap — tier 3 classification documents the gap) |
 | L2 Entities | GenerationRequest |

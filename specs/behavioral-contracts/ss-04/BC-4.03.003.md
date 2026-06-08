@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.03.003
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P1
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.03.003: Every Provenance Sidecar Carries a `copyrightability_assessment`; Assets with Empty `human_modifications_log` Receive `unlikely`
@@ -108,7 +126,7 @@ studio that they should engage counsel for Tier-2/3 assets where ownership matte
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — this BC implements the "provenance records copyrightability honestly" part of ratified decision D-006. The copyrightability_assessment field makes the IP ownership risk legible without blocking pure-maximal generation. |
-| L2 Invariants | DI-003 (provenance completeness — `copyrightability_assessment` is a required sidecar field per entities.md) |
+| L2 Invariants | DI-003 (provenance completeness — `copyrightability_assessment` is a required sidecar field per entities.md); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 3 (Generation), §Stage 4 (Quality Gate — advisory insertion) |
 | L2 Risks | **R-001** ("Fully autonomous AI assets may be uncopyrightable") — this BC is the direct data capture mitigating R-001 by recording `copyrightability_assessment` and `human_modifications_log` |
 | L2 Entities | ProvenanceSidecar |

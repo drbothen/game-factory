@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -30,6 +30,17 @@ traces_to: .factory/specs/product-brief.md
 ---
 
 # Architecture Index — game-factory
+
+> **v1.4 — Pass-3 adversarial defect resolution.**
+> - **I1 (Pass-3):** R-017 (kernel anti-cheat) risk mitigation row corrected from SS-11 → SS-01.
+>   R-017/DI-010 is enforced by BC-1.15.002 (Engine-Adapter Protocol subsystem). SS-11 owns
+>   DI-011 (NFT/web3), not DI-010. Mitigation note updated to cite VP-TBD-060/061.
+> - **C1 (Pass-3):** VP counts in ARCH-INDEX line 93 were already correct (6 P0, 4 P1);
+>   VP-INDEX.md summary line corrected from "7 P0, 3 P1" → "6 P0, 4 P1" (VP-INDEX v1.2).
+> - **I2 (Pass-3):** Authored `verification-architecture.md` and `verification-coverage-matrix.md`
+>   under `architecture/`. Resolves dangling `traces_to` reference in VP-INDEX.md.
+> - **O3 (Pass-3):** `check-spec-counts.sh` extended with VP P0/P1 count assertion (check d),
+>   BC H1↔BC-INDEX title sync (check e), and BC frontmatter-schema uniformity (check f).
 
 > **v1.3 — Pass-2 adversarial defect resolution.**
 > - **C2-01:** Grand total BC count corrected 179 → 178. BC-INDEX.md was not a BC;
@@ -73,6 +84,8 @@ traces_to: .factory/specs/product-brief.md
 | `adrs/ADR-0005-config-content-extraction-seam.md` | Extraction seam: spine vs quality-model at content/config boundary | ~400 |
 | `adrs/ADR-0006-11-dimension-convergence-model.md` | 11-dim convergence model replacing vsdd 7-dim | ~350 |
 | `adrs/ADR-0007-human-gated-fidelity-tier.md` | human-gated as a first-class fidelity value | ~350 |
+| `verification-architecture.md` | Verification strategy: provable-properties catalog, P0/P1 assignment, tool mapping (Kani/proptest), pure-sim slice boundary, VP-TBD rationale | ~1,000 |
+| `verification-coverage-matrix.md` | VP→BC/invariant coverage matrix; per-VP tool/phase/module assignments; explicitly-unguarded invariant justifications | ~700 |
 
 ### Verification Properties (`.factory/specs/verification-properties/`)
 
@@ -160,4 +173,4 @@ traces_to: .factory/specs/product-brief.md
 | R-013 (PEGI 2026) | SS-08 | `compliance-checklist` with min-rating rules; `content-descriptor-contract` |
 | R-014 (EU AI Act) | SS-03, SS-08 | C2PA marks from provenance sidecar; 2026-08-02 hard deadline wired to distribution gate |
 | R-015 (COPPA) | SS-08, SS-09 | Per-SDK consent flags in `privacy-config-contract`; `ad-monetization-spec` COPPA gate |
-| R-017 (kernel AC) | SS-11 | DI-010 policy hook; anti-cheat = wrap-only; never autonomously authored |
+| R-017 (kernel AC) | SS-01 | DI-010 policy hook; anti-cheat = wrap-only; never autonomously authored (enforced via BC-1.15.002 VP-TBD-060/061) |

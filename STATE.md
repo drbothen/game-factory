@@ -69,7 +69,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Pass 1 DONE (5C/9I/4S all resolved; 170→179 BCs); Pass 2 DONE (3C/4I/3S all resolved; 179→178 count correction; CI count-gate added); clean passes: 0/3 | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Pass 1 DONE (5C/9I/4S all resolved; 170→179 BCs); Pass 2 DONE (3C/4I/3S all resolved; 179→178 count correction; CI count-gate added); Pass 3 DONE (1C/4I/3obs all resolved; +2 verification docs; CI gate v1.2; D-014); clean passes: 0/3 | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,7 +78,8 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 3** (fresh-context re-review; same scope). Need 3 consecutive clean passes. Pass 2 complete: 10 findings (3C/4I/3S) ALL RESOLVED. PRD now v1.3; error-taxonomy v1.3 (22 families / 134 codes); 178 BCs; 178/178 priority. CI count-gate (scripts/check-spec-counts.sh) added and GREEN.
+**NEXT: `phase-1d-adversarial` — Pass 4** (fresh-context re-review; first candidate clean pass). Need 3 consecutive clean passes. Pass 3 complete: 8 findings (1C/4I/3obs) ALL RESOLVED. +2 new verification docs; CI gate v1.2 (6 checks); D-014 recorded.
+**Spec state:** PRD v1.3; BC-INDEX v1.4; error-taxonomy v1.3 (22 families / 134 codes); subsystem-decomposition v1.2; ARCH-INDEX v1.4; VP-INDEX v1.2; methodology-layer v1.2; ADR-0006 v1.1; verification-architecture.md v1.0; verification-coverage-matrix.md v1.0. 178 BCs / 134 codes. CI count-gate v1.2 (6 checks).
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented. lint job now includes Spec count consistency (S2-02) gate.
 
 ### Phase-1d Adversarial Convergence
@@ -87,6 +88,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 |------|------|---------|----------|----------|--------------------|
 | 1 | 2026-06-08 | FINDINGS | 5C / 9I / 4S | ALL 18 RESOLVED | 0/3 |
 | 2 | 2026-06-08 | FINDINGS | 3C / 4I / 3S | ALL 10 RESOLVED | 0/3 |
+| 3 | 2026-06-08 | FINDINGS | 1C / 4I / 3 obs | ALL RESOLVED | 0/3 |
 
 ---
 
@@ -102,7 +104,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Pass 1 done (5C/9I/4S all resolved; 179 BCs); Pass 2 done (3C/4I/3S all resolved; 178 BCs; CI count-gate added); Pass 3+ pending (0/3 clean passes) | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Pass 1 done (5C/9I/4S all resolved; 179 BCs); Pass 2 done (3C/4I/3S all resolved; 178 BCs; CI count-gate added); Pass 3 done (1C/4I/3obs all resolved; +2 verification docs; CI v1.2; D-014); Pass 4+ pending (0/3 clean passes) | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -138,6 +140,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | D-011 | compliance.iarc = objective-questions-only (no LLM inference on IARC rating) | ACCEPTED (architect, 2026-06-08) |
 | D-012 | design-intent-contract requires playtest_delegation_note schema field (methodology-layer) | ACCEPTED (architect, 2026-06-08) |
 | D-013 | sequence-graph directed:true = creative gate distinct from DI-006 external-human-gate (ADR-0007) | ACCEPTED (architect, 2026-06-08) |
+| D-014 | DI-008 engine-neutrality scope = Layer-1/Layer-2 core+spec artifacts only; L3 adapter-behavior BCs may name specific engines illustratively (adapters are engine-specific by design); O1 adjudicated IN-BOUNDS | ACCEPTED (orchestrator, 2026-06-08) — FLAG FOR HUMAN RATIFICATION at Phase-1 gate |
 
 ---
 
@@ -178,11 +181,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Pass 1 DONE + Phase-1d Pass 2 DONE.
-**Phase-1d Pass 2 DONE:** 10 findings (3C/4I/3S) ALL RESOLVED. PRD v1.2→v1.3; error-taxonomy v1.2→v1.3 (22 families / 134 codes, corrected from 143); 179→178 BCs (corrected count); 178/178 priority coverage (100%). CI count-gate added: `scripts/check-spec-counts.sh` wired into lint job — currently GREEN. ADR-0006 v1.1 reconciled; methodology-layer v1.2. Record: `cycles/v0.1.0-greenfield/adversarial/phase-1d-pass-2.md`.
-**Next action:** `phase-1d-adversarial` — **Pass 3** (fresh-context re-review; same adversary scope). Clean-pass counter: 0/3. Need 3 consecutive clean passes to converge.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Pass 1 DONE + Phase-1d Pass 2 DONE + Phase-1d Pass 3 DONE.
+**Phase-1d Pass 3 DONE:** 8 findings (1C/4I/3obs) ALL RESOLVED. VP-INDEX v1.2 (P0/P1 count corrected); ARCH-INDEX v1.4 (R-017 SS-anchor + verification docs registered); 2 new verification docs authored (verification-architecture.md v1.0, verification-coverage-matrix.md v1.0); 15 ss-04 BCs normalized to canonical frontmatter schema; BC-INDEX v1.4 (2 title-drift fixes); D-014 recorded (L3 adapter BCs may name engines illustratively — in-bounds). CI gate extended to v1.2 (6 checks: a-f). ALL 6 CHECKS GREEN. Record: `cycles/v0.1.0-greenfield/adversarial/phase-1d-pass-3.md`.
+**Next action:** `phase-1d-adversarial` — **Pass 4** (fresh-context re-review; first candidate clean pass). Clean-pass counter: 0/3. Need 3 consecutive clean passes to converge.
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
 **PRD status:** v1.3. 178 BCs; 35 NFRs; 134 error codes / 22 families. FU-001/002/003 CLOSED. FU-005 ongoing.
-**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.2 (11 convergence dims + predicates); 66-role studio (14R/18A/34N); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.1). 10 VPs.
+**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.2 (11 convergence dims + predicates); 66-role studio (14R/18A/34N); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.1). 10 VPs (6 P0, 4 P1).
+**Verification docs:** verification-architecture.md v1.0, verification-coverage-matrix.md v1.0 (new in Pass-3). All VP traces_to references resolve.
+**D-014:** DI-008 engine-neutrality scope = Layer-1/Layer-2 only; L3 adapter-behavior BCs may name engines illustratively. FLAG FOR HUMAN RATIFICATION at Phase-1 gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
 **File manifest:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

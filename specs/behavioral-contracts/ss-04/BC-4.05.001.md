@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.05.001
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.05.001: Ship Gate FAILS When Any Build Asset Has `commercial_use: false` or Unresolved Free-Tier Restriction
@@ -119,7 +137,7 @@ the "ship-bound-on-free/CC-BY-tier FAIL hook" mandated by the system prompt.
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — the "auto-provenance" component of CAP-004 specifically includes `license_terms_snapshot` in the sidecar (RECONCILIATION §9 sidecar field list). This BC is the ship-time enforcement that the license terms recorded in provenance are actually compatible with distribution. Without this gate, provenance data would be informational only; this BC makes it load-bearing. |
-| L2 Invariants | DI-003 (provenance sidecar including license_terms_snapshot is required — this BC uses it as a gate at ship time) |
+| L2 Invariants | DI-003 (provenance sidecar including license_terms_snapshot is required — this BC uses it as a gate at ship time); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 6 (Ingest — this BC fires at a later stage: ship gate) |
 | L2 Risks | R-002 ("Training-data indemnification gap") — `commercial_use: false` is the primary R-002 signal in the sidecar; R-003 (music legal hazard — upstream blocked but this is the downstream belt) |
 | L2 Failure Modes | FM-004 (provenance fields are the data this BC operates on) |

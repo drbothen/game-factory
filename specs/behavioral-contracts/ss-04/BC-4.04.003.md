@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.04.003
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P1
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.04.003: A Generated 2D Image Passes the Quality Gate When Resolution Meets Target, Format Matches Declaration, and Provenance Is Complete
@@ -114,7 +132,7 @@ with quality_flagged = true. Provenance failure is a hard gate for all tiers.
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — 2D images (concept art, textures, UI) are explicitly within the asset generation scope ("all game assets... concept art"). The quality gate for 2D completes the per-modality coverage initiated by BC-4.04.001 (3D) and BC-4.04.002 (audio). |
-| L2 Invariants | DI-003 (check 4 — provenance) |
+| L2 Invariants | DI-003 (check 4 — provenance); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 4 (Quality Gate) |
 | L2 Risks | R-002 (indemnification gap for 2D — Firefly-preferred recorded in sidecar, not blocked), R-005 (quality gap — concept art for hero assets is Tier-3, flagged but ingested) |
 | L2 Failure Modes | FM-004 (provenance check 4) |

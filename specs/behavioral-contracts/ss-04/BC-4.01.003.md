@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.01.003
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.01.003: ToS-Excluded Backends (OpenArt, Rosebud) Are Never Selected
@@ -101,7 +119,7 @@ the product brief scope decisions.
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — this BC ensures that the "pure-maximal" generation policy cannot be used to route to legally or policy-excluded backends. Without this gate, the factory could inadvertently generate assets from tools that are out of scope by decision. |
-| L2 Invariants | None directly (DI-009 covers music specifically; this BC covers the general ToS mechanism) |
+| L2 Invariants | None directly (DI-009 covers music specifically; this BC covers the general ToS mechanism); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 2 (Backend Selection) |
 | L2 Risks | R-002 (indemnification gap), R-016 (confabulation meta-risk — static list prevents runtime policy drift) |
 | L2 Failure Modes | FM-004 (upstream) |

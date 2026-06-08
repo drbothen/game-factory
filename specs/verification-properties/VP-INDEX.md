@@ -1,7 +1,7 @@
 ---
 document_type: verification-property-index
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -51,7 +51,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | VP-009 | Damage I/O matrix row-sum correctness | proptest | P0 | SS-05 | BC-6.01.002 |
 | VP-010 | Tournament bracket progression correctness (every participant advances exactly once per round per format rules) | proptest | P1 | SS-11 | BC-13.02.005 |
 
-**Total: 10 VPs — 7 P0, 3 P1. 6 pure-sim (SS-05/SS-02), 4 genre-gated esports (SS-11).**
+**Total: 10 VPs — 6 P0, 4 P1. 6 pure-sim (SS-05/SS-02), 4 genre-gated esports (SS-11).**
 
 ---
 

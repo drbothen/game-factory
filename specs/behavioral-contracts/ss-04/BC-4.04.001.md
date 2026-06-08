@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.04.001
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.04.001: A Generated 3D Mesh Passes the Quality Gate Only When Manifold, Within Budget, UV-Valid, Full PBR, and Provenance Complete
@@ -134,7 +152,7 @@ because a missing `disclosure_class` violates DI-003 and blocks the `ai-disclosu
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — the quality gate is explicitly named in PROC-003 (Process: Asset Generation and Provenance Capture, Stage 4) as a core step in the asset generation pipeline. Per-modality quality criteria for 3D meshes are the primary mechanism by which the factory distinguishes Tier-1 auto-ingest from Tier-2/3 flagged-but-ingested assets. |
-| L2 Invariants | DI-003 (provenance completeness is check 5 — always a hard gate regardless of tier) |
+| L2 Invariants | DI-003 (provenance completeness is check 5 — always a hard gate regardless of tier); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 4 (Quality Gate) |
 | L2 Risks | R-005 ("Hero-character autonomous quality gap") — Tier-3 hero characters flow through this gate; the NFR candidate in R-005 maps to quality gate pass rate NFR-4-03 |
 | L2 Failure Modes | FM-004 (provenance check 5 prevents FM-004 at the quality gate level) |

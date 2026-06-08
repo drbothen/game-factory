@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.03.002
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.03.002: Every Provenance Sidecar Has a Valid `disclosure_class` (One of Three Exact Values)
@@ -139,7 +157,7 @@ error that prevents the asset from being ingested. This BC defines the computati
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — the product brief success criterion "0 missing `disclosure_class`" makes this field the single most explicit quantified deliverable of CAP-004. This BC is the direct specification of how that field is computed and validated. |
-| L2 Invariants | **DI-003** (provenance sidecar completeness — `disclosure_class` is explicitly listed as a required field) |
+| L2 Invariants | **DI-003** (provenance sidecar completeness — `disclosure_class` is explicitly listed as a required field); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 3 (Generation) |
 | L2 Risks | R-006 (Steam AI disclosure — `disclosure_class` drives the disclosure manifest), **R-014** (EU AI Act Art. 50 — C2PA marks are generated from `disclosure_class`) |
 | L2 Failure Modes | FM-004 (missing sidecar — `disclosure_class` absence is one of the primary missing-field cases), FM-008 (ai-disclosure-manifest not generated — caused by missing `disclosure_class`) |

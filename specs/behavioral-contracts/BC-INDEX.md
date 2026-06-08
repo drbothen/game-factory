@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -33,7 +33,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
 > architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
-**Grand total: 178 behavioral contracts** across 14 capabilities. (168 original + 2 added in PRD revision v1.1 to close FU-001: BC-1.15.002 for DI-010, BC-13.01.004 for DI-011; +8 added in PRD revision v1.2 to resolve Phase-1d adversarial pass-1: BC-11.03.006 for DP-007; BC-7.11.002..008 for D-SEC server-authority invariant suite CWE-602. Note: corrected from 179 in v1.3 — BC-INDEX.md itself was erroneously counted in the prior total.)
+**Grand total: 178 behavioral contracts** across 14 capabilities. (168 original + 2 added in PRD revision v1.1 to close FU-001: BC-1.15.002 for DI-010, BC-13.01.004 for DI-011; +8 added in PRD revision v1.2 to resolve Phase-1d adversarial pass-1: BC-11.03.006 for DP-007; BC-7.11.002..008 for D-SEC server-authority invariant suite CWE-602. Note: corrected from 179 in v1.3 — BC-INDEX.md itself was erroneously counted in the prior total. v1.4: normalized all 15 ss-04 BC frontmatter blocks to canonical schema (added version, status, producer, timestamp, phase, inputs, lifecycle block); reconciled two H1↔INDEX title drifts: BC-1.15.002 and BC-4.03.004.)
 
 ---
 
@@ -77,7 +77,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-001.md`
 | BC-1.14.001 | Adapter Pins Exactly One engineVersion in the Capability Manifest | P0 | ss-01/BC-1.14.001.md | active |
 | BC-1.14.002 | Core Compatibility Matrix Maps Core Version to Supported Protocol Major Versions | P0 | ss-01/BC-1.14.002.md | active |
 | BC-1.15.001 | Factory Core Source Artifacts Contain No Engine SDK Imports or Engine Name References | P0 | ss-01/BC-1.15.001.md | active |
-| BC-1.15.002 | Factory Core Output Contains No Kernel Anti-Cheat Authored Code (Never-Author Enforcement) | P0 | ss-01/BC-1.15.002.md | active |
+| BC-1.15.002 | Factory Core Output Contains No Kernel-Mode or Ring-0 Authored Code (Never-Author Enforcement) | P0 | ss-01/BC-1.15.002.md | active |
 
 ---
 
@@ -129,7 +129,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-004.md`
 | BC-4.03.001 | Every Generated Asset Has a Complete Provenance Sidecar Populated at Generation Time (DI-003) | P0 | ss-04/BC-4.03.001.md | active |
 | BC-4.03.002 | Every Provenance Sidecar Has a Valid `disclosure_class` (One of Three Exact Values) | P0 | ss-04/BC-4.03.002.md | active |
 | BC-4.03.003 | Every Provenance Sidecar Carries a `copyrightability_assessment`; Assets with Empty `human_modifications_log` Receive `unlikely` | P1 | ss-04/BC-4.03.003.md | active |
-| BC-4.03.004 | Any Asset with `likeness_consent_ref != null` Triggers Human-Gated SAG-AFTRA Signature Task | P0 | ss-04/BC-4.03.004.md | active |
+| BC-4.03.004 | Any Asset with `likeness_consent_ref != null` Triggers Human-Gated SAG-AFTRA Signature Task and Is Blocked from Ship Build Until Task Is Complete | P0 | ss-04/BC-4.03.004.md | active |
 | BC-4.04.001 | A Generated 3D Mesh Passes the Quality Gate Only When Manifold, Within Budget, UV-Valid, Full PBR, and Provenance Complete | P0 | ss-04/BC-4.04.001.md | active |
 | BC-4.04.002 | A Generated Audio Asset Passes the Quality Gate When Loudness Is Within Target, True-Peak Does Not Exceed -1 dBTP, and Provenance Is Complete | P0 | ss-04/BC-4.04.002.md | active |
 | BC-4.04.003 | A Generated 2D Image Passes the Quality Gate When Resolution Meets Target, Format Matches Declaration, and Provenance Is Complete | P1 | ss-04/BC-4.04.003.md | active |

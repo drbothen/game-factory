@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.06.001
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.06.001: Asset Store Ingest Requires Quality Gate Pass, Complete Sidecar, and Consent-Cleared Status
@@ -127,7 +145,7 @@ The ingest hook runs three pre-flight checks in order:
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — the asset store ingest step is the culminating step of the CAP-004 asset generation pipeline (PROC-003 §Stage 6). This BC specifies the gate that determines whether the full pipeline's outputs are coherent and compliant. It directly enforces the success criterion "Generated assets with complete provenance sidecar: 100%; 0 missing disclosure_class." |
-| L2 Invariants | **DI-003** ("Every Generated Asset Has a Complete Provenance Sidecar") — this BC is the ingest-time enforcement of DI-003, complementing BC-4.03.001 (generation-time enforcement) |
+| L2 Invariants | **DI-003** ("Every Generated Asset Has a Complete Provenance Sidecar") — this BC is the ingest-time enforcement of DI-003, complementing BC-4.03.001 (generation-time enforcement); DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 6 (Ingest), PROC-006 (Human-Gated Task Surfacing — consent check) |
 | L2 Risks | R-001, R-002, R-004, R-014 — all risks mitigated by provenance sidecar; ingest gate ensures provenance is actually present before store admission |
 | L2 Failure Modes | **FM-004** ("Provenance Sidecar Missing at Ingest") — this BC is the detection and prevention mechanism for FM-004 at the ingest boundary |

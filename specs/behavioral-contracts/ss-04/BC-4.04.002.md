@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.04.002
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.04.002: A Generated Audio Asset Passes the Quality Gate When Loudness Is Within Target, True-Peak Does Not Exceed -1 dBTP, and Provenance Is Complete
@@ -125,7 +143,7 @@ normalization is not applied; the asset fails the loudness check and is queued f
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — audio assets are a named modality in the CAP-004 definition ("audio, music, voice"). The quality gate for audio is the per-modality acceptance check mandated by PROC-003 §Stage 4. Loudness/true-peak conformance is the primary machine-checkable quality assertion for audio. |
-| L2 Invariants | DI-003 (provenance check 4), DI-009 (music providers checked upstream; this gate is downstream verification) |
+| L2 Invariants | DI-003 (provenance check 4), DI-009 (music providers checked upstream; this gate is downstream verification), DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section |
 | L2 Processes | PROC-003 §Stage 4 (Quality Gate) |
 | L2 Risks | R-003 (music legal hazard — quality gate runs but license check is BC-4.05.001) |
 | L2 Failure Modes | FM-004 (provenance check within quality gate) |

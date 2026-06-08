@@ -2,13 +2,31 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.03.004
+version: "1.0"
+status: active
+producer: product-owner
+timestamp: 2026-06-07T00:00:00Z
+phase: 1a
+inputs:
+  - .factory/specs/domain-spec/capabilities.md
+  - .factory/specs/domain-spec/invariants.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/prd-supplements/prd-cap-004.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active
-traces_to: CAP-004
-input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+introduced: v0.1.0
+modified: []
+deprecated: null
+deprecated_by: null
+replacement: null
+retired: null
+removed: null
+removal_reason: null
 ---
 
 # BC-4.03.004: Any Asset with `likeness_consent_ref != null` Triggers Human-Gated SAG-AFTRA Signature Task and Is Blocked from Ship Build Until Task Is Complete
@@ -121,7 +139,7 @@ the asset from any ship build until the task is marked complete by an authorized
 |-------|-------|
 | L2 Capability | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 |
 | Capability Anchor Justification | CAP-004 ("Pure-Maximal Asset Generation with Auto-Provenance") per capabilities.md §CAP-004 — this BC governs a critical provenance attribute (`likeness_consent_ref`) that determines whether an asset can be used in a shipped product. The D-007 decision ("real-performer likeness routes to human-gated consent") is directly encoded here. |
-| L2 Invariants | **DI-006** ("Human-Gated Tasks Are Surfaced, Not Silently Dropped") — the consent task is a DI-006 human-gated act; this BC enforces that it cannot be silently skipped |
+| L2 Invariants | **DI-006** ("Human-Gated Tasks Are Surfaced, Not Silently Dropped") — the consent task is a DI-006 human-gated act; this BC enforces that it cannot be silently skipped; DI-012 (Every ContractArtifact Has a Declared Validation Method) — validation method is declared via the Verification Properties section (VP-4.03.004-a/b/c: formal property assertions) |
 | L2 Processes | PROC-003 §Stage 5 (Likeness Check), PROC-006 (Human-Gated Task Surfacing) |
 | L2 Risks | **R-004** ("SAG-AFTRA 2025 IMA voice consent requirement") — direct mitigation |
 | L2 Failure Modes | **FM-005** ("Likeness Consent Ref Present Without Human-Gated Completion") — this BC is the enforcement mechanism preventing FM-005 |
