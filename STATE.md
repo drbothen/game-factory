@@ -1,13 +1,13 @@
 ---
-pipeline: PRE-PIPELINE
-phase: pre-1
+pipeline: IN-PROGRESS
+phase: 0
 product: game-factory
 mode: greenfield
 brief_version: "2.0"
 timestamp: 2026-06-07T00:00:00Z
 brief_approval: PASSED
 preflight_verdict: READY-WITH-WARNINGS
-market_intel_verdict: CAUTION
+market_intel_verdict: PASSED
 ---
 
 # Factory State
@@ -16,8 +16,8 @@ market_intel_verdict: CAUTION
 
 | Phase | Name | Status | Notes |
 |-------|------|--------|-------|
-| pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel CAUTION — awaiting human disposition |
-| 0 | Brownfield Extraction | PENDING | extract vsdd-factory core from .reference/ — blocked on market-intel disposition |
+| pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED (D-006/07/08 human-ratified) |
+| 0 | Brownfield Extraction | IN PROGRESS | extract vsdd-factory core from .reference/ @ 82163b7; codebase-analyzer writing .factory/phase-0-ingestion/ |
 | 1 | Spec Crystallization | PENDING | — |
 | 2 | Story Decomposition | PENDING | — |
 | 3 | TDD Implementation | PENDING | — |
@@ -34,7 +34,9 @@ market_intel_verdict: CAUTION
 | 2 | product-brief.md committed on factory-artifacts | DONE |
 | 3 | validate-brief run; brief v2.0 human-approved | DONE |
 | 4 | Pre-pipeline preflight run — READY-WITH-WARNINGS (see planning/preflight-report.md) | DONE |
-| 5 | Market-intel assessment run — CAUTION (see planning/market-intel-assessment.md) | DONE — awaiting human disposition |
+| 5 | Market-intel assessment run — CAUTION (see planning/market-intel-assessment.md) | DONE |
+| 6 | Human ratified D-006, D-007, D-008 at market-intel gate; gate PASSED | DONE |
+| 7 | Phase 0 brownfield extraction started; codebase-analyzer dispatched to .factory/phase-0-ingestion/ | IN PROGRESS |
 
 ## Key Facts
 
@@ -72,9 +74,9 @@ market_intel_verdict: CAUTION
 | D-003 | Determinism tiers T1/T2/T3 (Decision 0003) | ACCEPTED |
 | D-004 | Asset generation: pure-maximal, no mandatory human creative finishing | ACCEPTED |
 | D-005 | human-gated = external third-party acts only (cert, publish, SAG-AFTRA, legal) | ACCEPTED |
-| D-006 | IP/copyrightability: provenance sidecar records absence of human modification honestly; per-project humanization step optional (studio's election) | PENDING human ratification |
-| D-007 | Autonomous music/voice: factory defaults to ship-safe-provider defaults (licensed-output music, non-performer synthetic voice); real-performer likeness = human-gated consent. Unlicensed autonomous music shipping not default. | PENDING human ratification |
-| D-008 | Regulatory compliance (EU AI Act Art.50, COPPA, PEGI 2026): provenance/ai-disclosure/compliance-checklist = P0 wave-1, not deferred | PENDING human ratification |
+| D-006 | IP/copyrightability: pure-maximal retained; provenance sidecar records copyrightability honestly; per-project humanization optional for IP-critical assets | RATIFIED (human, 2026-06-07) |
+| D-007 | Music/voice: pure-maximal retained; DEFAULT ship-safe generators (licensed-output music e.g. AIVA/Stable Audio; non-performer synthetic voice); real-performer likeness = human-gated consent | RATIFIED (human, 2026-06-07) |
+| D-008 | Regulatory: compliance/provenance/ai-disclosure = P0 wave-1 (not deferred); enforced in Phase-2 wave planning | RATIFIED (human, 2026-06-07) |
 
 ## Skip Log
 
@@ -82,9 +84,7 @@ _(none yet)_
 
 ## Blocking Issues
 
-| # | Issue | Resolution |
-|---|-------|------------|
-| B-001 | Market-intel gate CAUTION: three open conditions (D-006, D-007, D-008) require human disposition before Phase 1 spec lock. Phase 0 brownfield extraction may begin in parallel but Phase 1 L2 domain spec cannot be locked until these three decisions are made. | Awaiting human at this gate |
+_(none open)_
 
 ## Pre-Phase-3 Remediation Log
 
@@ -98,6 +98,6 @@ _(none yet)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-07
-**Phase:** pre-1 — PASSED gates: brief approval (human), preflight (READY-WITH-WARNINGS), market-intel (CAUTION).
-**Next action:** Human disposition at market-intel CAUTION gate — ratify or modify D-006 (IP/copyrightability), D-007 (autonomous music/voice policy), D-008 (compliance as P0 wave-1). Once D-006/D-007/D-008 resolved, proceed to Phase 0 brownfield extraction.
-**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Preflight: all hard checks PASS; 6 WARNs are pre-Phase-3 remediation items (LiteLLM proxy, API keys, .env/.envrc). Market-intel: empty quadrant confirmed; CAUTION on three legal/regulatory conditions that must be resolved before Phase 1 spec lock.
+**Phase:** 0 — IN PROGRESS. pre-1 fully PASSED (brief, preflight, market-intel). D-006/D-007/D-008 human-ratified.
+**Next action:** Await codebase-analyzer completion of Phase 0 brownfield extraction (output: .factory/phase-0-ingestion/). Then human approval gate on Phase-0 context before proceeding to Phase 1.
+**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Market-intel gate PASSED — D-006/07/08 ratified as recommended. D-008 enforces compliance/provenance/ai-disclosure as P0 wave-1 (Phase-2 wave planning). Pre-Phase-3 remediation items (LiteLLM proxy, API keys) remain outstanding but are not current blockers.
