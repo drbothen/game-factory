@@ -2,7 +2,7 @@
 document_type: pipeline-state
 project: game-factory
 status: in_progress
-current_step: prd-revision
+current_step: cicd-setup
 current_cycle: v0.1.0-greenfield
 pipeline: IN-PROGRESS
 phase: 1
@@ -55,7 +55,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | branch: factory-artifacts | `.factory/` worktree |
 | reference | vsdd-factory @ 82163b7 |
 | current phase | 1 — Spec Crystallization |
-| current step | prd-revision |
+| current step | cicd-setup |
 | current cycle | v0.1.0-greenfield |
 
 ---
@@ -67,8 +67,8 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-domain-spec | L2 domain spec (10 shards; 18 entities, 14 caps) | DONE |
 | create-prd | PRD + 168 BCs across 14 caps → SS-01..SS-12 | DONE |
 | create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
-| prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | NEXT |
-| cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | PENDING |
+| prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
+| cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | NEXT |
 | phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) | PENDING |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
@@ -78,9 +78,8 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `prd-revision`** — product-owner revises PRD per architect feasibility feedback.
-Resolve FU-001 (add BCs for DI-010/011), FU-002 (NFR numeric targets for 9 caps), FU-003 (add missing error families E-GEN/E-ETH/E-XR + ~7 others).
-Skill: `/vsdd-factory:phase-1-prd-revision`
+**NEXT: `cicd-setup`** — devops-engineer sets up `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3).
+**prd-revision COMPLETE** — PRD v1.1 produced; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families.
 
 ---
 
@@ -94,8 +93,8 @@ Skill: `/vsdd-factory:phase-1-prd-revision`
 | M4 | Phase-1 L2 domain spec (10 shards; 18 entities, 14 caps; 79a625c) | DONE |
 | M5 | Phase-1 L3 PRD + 168 BCs across 14 caps → 12 subsystems SS-01..SS-12 (e05fd9d) | DONE |
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
-| T7 | **prd-revision** — incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | **NEXT** |
-| T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | PENDING |
+| T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
+| T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **NEXT** |
 | T9 | Phase-1d adversarial spec convergence — >=3 clean passes; adversary validates D-010..D-013 (FU-005) | PENDING |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
@@ -110,7 +109,7 @@ Skill: `/vsdd-factory:phase-1-prd-revision`
 |-------|------|--------|-------|
 | pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED (D-006/07/08 human-ratified) |
 | 0 | Brownfield Extraction | PASSED | VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; quality model REPLACE; seam: 4 config/content swap interfaces; human-approved |
-| 1 | Spec Crystallization | IN PROGRESS | Steps 1–6 DONE (L2→PRD+168 BCs→architecture+VPs); see cycles/v0.1.0-greenfield/phase-1-log.md |
+| 1 | Spec Crystallization | IN PROGRESS | Steps 1–7 DONE (L2→PRD+168 BCs→architecture+VPs→prd-revision→PRD v1.1 170 BCs 35 NFRs 21 error families); see cycles/v0.1.0-greenfield/phase-1-log.md |
 | 2–7 | Story Decomp → Convergence | PENDING | — |
 
 ---
@@ -161,22 +160,22 @@ _(none open)_
 
 | ID | Item | Owner | When |
 |----|------|-------|------|
-| FU-001 | DI-010 (kernel-anti-cheat-never-authored) and DI-011 (NFT/Web3-off-by-default) have no dedicated BC — add lint/default BCs | architect | prd-revision |
-| FU-002 | NFR numerical-target gaps for CAP-001–003, 006–007, 009–011, 013–014 — specific thresholds TBD | product-owner | prd-revision |
-| FU-003 | Missing error families: E-GEN (CAP-004), E-ETH (CAP-011), E-XR (CAP-014), and ~7 others not modeled | product-owner / Phase-1d adversary | prd-revision / Phase-1d |
+| FU-001 | DI-010/011 dedicated BCs | — | **CLOSED** — BC-1.15.002 (DI-010, SS-01) + BC-13.01.004 (DI-011, SS-11) added in PRD v1.1 |
+| FU-002 | NFR numeric targets for CAP-001–003, 006–007, 009–011, 013–014 | — | **CLOSED** — NFR-020..NFR-035 added in nfr-catalog.md v1.1 |
+| FU-003 | Missing error families: E-GEN, E-ETH, E-XR + ~7 others | — | **CLOSED** — 10 new families added (E-CONF, E-REPLAY, E-GEN, E-SIM, E-CONV, E-PLAY, E-ETH, E-KB, E-GENRE, E-XR); total now 21 families / 137 codes |
 | FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers | — | CLOSED (c29f412) |
-| FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013 | Phase-1d adversary | Phase-1d pass-1 |
+| FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013. Also validate: BC-1.15.002 (SS-01; kernel-anti-cheat never-author lint; exhaustiveness of kernel-AC pattern list) and BC-13.01.004 (SS-11; NFT/Web3 off-by-default; full PEGI-18 consequence path incl. console cert implications). | Phase-1d adversary | Phase-1d pass-1 |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–6 DONE. Architecture + VPs committed (c29f412). Latest factory-artifacts commit: 068d4a2.
-**Next action:** `prd-revision` (`/vsdd-factory:phase-1-prd-revision`) — product-owner revises PRD per architect feasibility feedback; close FU-001/002/003.
-**Phase 1 remaining:** prd-revision → CI/CD setup (devops-engineer; D-009; MANDATORY) → Phase-1d adversarial convergence (>=3 passes; FU-005) → consistency audit → drift check → Phase-1 human gate.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–7 DONE (prd-revision complete). Architecture + VPs committed (c29f412).
+**Next action:** `cicd-setup` (devops-engineer; D-009; MANDATORY before Phase 3).
+**Phase 1 remaining:** CI/CD setup (devops-engineer; D-009; MANDATORY) → Phase-1d adversarial convergence (>=3 passes; FU-005) → consistency audit → drift check → Phase-1 human gate.
+**PRD status:** v1.1. 170 BCs (168+2); 35 NFRs (19+16); 137 error codes / 21 families (59/11 + 78/10 added). FU-001/002/003 CLOSED. DI-010 → BC-1.15.002 (SS-01). DI-011 → BC-13.01.004 (SS-11).
 **Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer (11 convergence dims + predicates); 66-role studio (14R/18A/34N); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007. 10 VPs (SS-02/05/11 pure-sim slice).
-**BCs/VPs:** 168 BCs resolved to SS-01..SS-12 (FU-004 closed). 10 VPs (VP-001..VP-010).
 **FU-005 items for Phase-1d adversary:** D-010 (11-dim convergence final), D-011 (compliance.iarc objective-only), D-012 (playtest_delegation_note field), D-013 (directed sequence-graph = creative gate).
 **Phase-0:** ~70% conceptual / ~85% file-level REUSE; quality model REPLACE; 4-seam adapter interfaces. D-009 outstanding.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

@@ -20,6 +20,7 @@ STATE.md now references this file for historical step detail.
 | 4 | L2 domain spec (business-analyst) — 10 shards; 18 entities, 14 caps [7P0/5P1/2P2], 12 invariants, 6 processes, 42 glossary terms, 8 assumptions, 17 risks, 10 failure-modes, 7 differentiators | DONE | 79a625c |
 | 5 | L3 PRD + behavioral contracts (product-owner) — 168 BCs (CAP-001:34, 002:6, 003:9, 004:15, 005:16, 006:11, 007:12, 008:5, 009:11, 010:6, 011:13, 012:9, 013:14, 014:7); prd.md + BC-INDEX + nfr-catalog (19 NFRs) + error-taxonomy (11 families) | DONE | e05fd9d |
 | 6 | create-architecture (architect) — 12 subsystems (CAP-001+002→SS-01, CAP-009+010→SS-08); ADR-0004..0007; adapter-protocols (4 seams, 8 contract schemas); methodology-layer (11 convergence predicates, 11 dims incl. D-ETHICS+D-SEC); studio-of-agents (14 REUSE/18 ADAPT/34 NEW); 10 VPs (pure-sim slice, SS-02/05/11); DTU=REQUIRED (10 clones); 168 BC SS-TBD resolved (FU-004 closed) | DONE | c29f412 |
+| 7 | prd-revision (product-owner) — PRD v1.0→v1.1; added BC-1.15.002 (SS-01; DI-010 kernel-anti-cheat never-author lint) + BC-13.01.004 (SS-11; DI-011 NFT/Web3 off-by-default); 168→170 BCs; NFR-020..035 numeric targets added (+16 NFRs, total 35); 10 new error families added (E-CONF, E-REPLAY, E-GEN, E-SIM, E-CONV, E-PLAY, E-ETH, E-KB, E-GENRE, E-XR) + E-EAP-011 extension; total 21 families / 137 error codes. FU-001/002/003 CLOSED. | DONE | — |
 
 ## File Manifest (Committed Artifacts as of c29f412 / 068d4a2)
 
