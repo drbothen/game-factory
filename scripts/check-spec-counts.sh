@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.21
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.22
 #
 # PURPOSE
 # -------
@@ -16,12 +16,12 @@
 # scoped spec file contains stale "four adapter seam" / "four-seam adapter"
 # in operative content (O14-01 recurrence prevention). POSIX/BSD compatible.
 # extended in v1.15 to add check (p) — cross-reference ID/description
-# consistency: for each Related-BCs citation of a SS-07 dimension-owner BC
+# consistency: for each Related-BCs citation of a SS-06 dimension-owner BC
 # (BC-7.01.001..BC-7.11.001), assert the inline description does NOT contain a
 # distinctive compound dimension keyword that maps to a DIFFERENT dimension owner
 # than the one cited. Catches the CI false-green class exposed in Pass-15 (e.g.,
 # BC-7.05.001 cited with "Cert Pre-Flight" description; BC-7.07.001 cited with
-# "playtest-satisfaction" description). Scope limited to SS-07 dimension-owner
+# "playtest-satisfaction" description). Scope limited to SS-06 dimension-owner
 # citations to avoid false positives on legitimate paraphrases. (P15-01
 # recurrence prevention). POSIX/BSD compatible.
 # extended in v1.16 to add check (a.ii) — BC-INDEX per-capability section-header
@@ -85,6 +85,21 @@
 # table (B) but neither compares table (A) against table (B). POSIX/BSD-awk
 # compatible. Positive-coverage log always printed. Green after the I23-01 fix
 # in methodology-layer.md v1.8.
+# extended in v1.22 to add check (t) — BC-7.* owner-attribution guard (Pass-24
+# I24-01 recurrence prevention): scans methodology-layer.md and other
+# architecture docs for operative lines that mis-attribute OWNERSHIP of the
+# BC-7.* dimension-evaluator family to a subsystem other than SS-06. The check
+# matches the two narrow compound patterns that exclusively signal a false owner
+# claim: "dimension-owner (SS-0" and "owner BCs (SS-0" where the subsystem code
+# is not SS-06. Changelog/blockquote lines (starting ">") are excluded to avoid
+# false-positives on historical notes documenting the I24-01 fix itself.
+# IMPORTANT: per-dimension "Subsystem: SS-07" producing-subsystem headers do NOT
+# contain "dimension-owner" or "owner BCs (SS-" phrasing, so they are naturally
+# excluded — no additional filter needed. Convention documented: BC-7.*
+# dimension-evaluator family is owned by SS-06 (Convergence Tracking Engine);
+# per-dimension "Subsystem:" headers in §3 denote the PRODUCING subsystem, which
+# is a legitimately different semantic. POSIX/BSD-grep compatible.
+# Positive-coverage log always printed. Green after the I24-01 fix.
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -226,6 +241,16 @@
 #       markup) are excluded. Orphan families (non-retired, zero BC citations)
 #       cause a FAIL. Positive-coverage log always printed.
 #       WILL FAIL until PO reconciles E-KB / E-PLAY / E-REPLAY.
+#   (t) [NEW v1.22, I24-01] BC-7.* owner-attribution guard: scans
+#       methodology-layer.md and architecture/*.md for operative lines that
+#       mis-attribute OWNERSHIP of the BC-7.* dimension-evaluator family to any
+#       subsystem other than SS-06. The two compound trigger patterns are:
+#         "dimension-owner (SS-0X"  where X != 6
+#         "owner BCs (SS-0X"        where X != 6
+#       Changelog/blockquote lines (starting ">") excluded. Per-dimension
+#       "Subsystem: SS-07" producing-subsystem headers do NOT contain either
+#       compound pattern, so they are naturally excluded — no extra filter needed.
+#       Positive-coverage log always printed. POSIX/BSD compatible.
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (a.ii) [NEW v1.16] BC-INDEX per-capability section-header count: for each H2
 #       "## CAP-NNN — <name> — N BCs" header, assert N equals the number of actual
@@ -330,7 +355,7 @@
 #   (p) [NEW v1.15, P15-01] Cross-reference ID/description consistency:
 #       For each Related-BCs citation line of the form "- BC-X.Y.Z — <desc>"
 #       (or "- BC-X.Y.Z — <desc>") in any BC body, scoped to citations of the
-#       11 SS-07 dimension-owner BCs (BC-7.01.001..BC-7.11.001): extract the
+#       11 SS-06 dimension-owner BCs (BC-7.01.001..BC-7.11.001): extract the
 #       inline description text and check for DISTINCTIVE compound dimension
 #       keywords (e.g., "playtest-satisfaction", "cert-preflight",
 #       "cert pre-flight", "perf-budget", "monetization-ethics",
@@ -339,7 +364,7 @@
 #       BC. If the keyword maps to a DIFFERENT dimension-owner BC than the one
 #       cited, FAIL with the citing BC + cited ID + inline description vs actual
 #       title. Changelog "reason:" lines excluded. Scope is intentionally
-#       limited to SS-07 dimension-owner cross-references (BC-7.01.001..
+#       limited to SS-06 dimension-owner cross-references (BC-7.01.001..
 #       BC-7.11.001) to avoid false positives on legitimate paraphrases.
 #       Positive-coverage log: "Check (p): N cross-references validated."
 #       WILL FAIL until PO fixes the 2 known mis-anchors (BC-9.01.001 citing
@@ -453,7 +478,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.21) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.22) ==="
 echo ""
 
 # ============================================================================
@@ -2694,14 +2719,14 @@ echo ""
 # (p) CROSS-REFERENCE ID/DESCRIPTION CONSISTENCY  [NEW v1.15, P15-01]
 # ============================================================================
 # For each Related-BCs citation line in any BC body that cites one of the 11
-# SS-07 dimension-owner BCs (BC-7.01.001..BC-7.11.001), assert that the inline
+# SS-06 dimension-owner BCs (BC-7.01.001..BC-7.11.001), assert that the inline
 # description does NOT contain a DISTINCTIVE compound dimension keyword that
 # unambiguously identifies a DIFFERENT dimension owner than the one cited.
 #
 # SCOPE: citations of BC-7.01.001..BC-7.11.001 only (dimension-owner BCs).
 # This scope is intentionally narrow to avoid false positives on legitimate
-# paraphrases in citations to other BCs. Cross-references that cite non-SS-07
-# BCs, or SS-07 BCs with generic relationship prose ("composes with",
+# paraphrases in citations to other BCs. Cross-references that cite non-SS-06
+# BCs, or SS-06 BCs with generic relationship prose ("composes with",
 # "depended on by", "convergence loop reads this dimension") that carry no
 # distinctive dimension keyword, are silently skipped.
 #
@@ -2749,7 +2774,7 @@ echo ""
 #
 # POSIX/BSD grep compatible (no -P; uses -E and -i only).
 echo ""
-echo "--- (p) cross-reference ID/description consistency (SS-07 dimension-owner citations) ---"
+echo "--- (p) cross-reference ID/description consistency (SS-06 dimension-owner citations) ---"
 echo "    Scope: citations of BC-7.01.001..BC-7.11.001 with distinctive dimension keywords"
 
 xref_violations=0
@@ -2782,7 +2807,7 @@ declare -a KW_OWNER_MAP=(
 while IFS= read -r -d $'\0' bc_file; do
   bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
 
-  # Extract lines that cite a SS-07 dimension-owner BC (BC-7.NN.001), excluding
+  # Extract lines that cite a SS-06 dimension-owner BC (BC-7.NN.001), excluding
   # changelog reason: lines and range-reference "through BC-" lines.
   # The em-dash separator (—, U+2014) is a multi-byte UTF-8 sequence; grep -E
   # with a literal UTF-8 string works on both BSD and GNU grep in a UTF-8 locale.
@@ -2846,7 +2871,7 @@ while IFS= read -r -d $'\0' bc_file; do
 done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
 
 # Positive-coverage log line (always printed — detects zero-scan / inert run).
-echo "    Check (p): $xref_validated cross-references to SS-07 dimension-owner BCs validated against cited BC titles."
+echo "    Check (p): $xref_validated cross-references to SS-06 dimension-owner BCs validated against cited BC titles."
 echo "    Cross-reference ID/description violations found: $xref_violations"
 
 if [[ $xref_violations -gt 0 ]]; then
@@ -3677,6 +3702,92 @@ fi
 echo ""
 
 # ============================================================================
+# (t) BC-7.* OWNER-ATTRIBUTION GUARD  [NEW v1.22, I24-01]
+# ============================================================================
+# The BC-7.* dimension-evaluator family (BC-7.01.001..BC-7.11.001) is owned by
+# SS-06 (Convergence Tracking Engine). Per-dimension "Subsystem:" headers in §3
+# of methodology-layer.md denote the PRODUCING/EVALUATED subsystem (a legitimately
+# different semantic); those headers must NOT be corrected by this check.
+#
+# Convention: the two compound patterns that exclusively signal a false ownership
+# claim are:
+#   "dimension-owner (SS-0"  followed by a digit that is not '6'
+#   "owner BCs (SS-0"        followed by a digit that is not '6'
+#
+# The per-dimension "Subsystem: SS-07" producing-subsystem headers do not contain
+# either of these compound patterns, so they are naturally excluded with no extra
+# filtering needed.
+#
+# EXCLUSIONS:
+#   - Lines starting with ">" (changelog/blockquote lines) — avoids false-positives
+#     on historical notes documenting the I24-01 fix.
+#   - Lines starting with "#" (script comments, if we ever scan this file).
+#
+# FILES SCANNED: methodology-layer.md + all architecture/*.md files that might
+# embed an owner-attribution claim.
+#
+# POSIX/BSD grep compatible (no -P; uses -E only).
+# Positive-coverage log always printed.
+echo ""
+echo "--- (t) BC-7.* owner-attribution guard (SS-06 ownership, I24-01 recurrence prevention) ---"
+echo "    Convention: BC-7.* dimension-evaluator family is owned by SS-06; per-dimension"
+echo "    'Subsystem:' headers in §3 denote the PRODUCING subsystem (a different semantic)."
+
+t_violations=0
+t_violation_msgs=()
+t_scanned_lines=0
+
+# Patterns that are ONLY present in an erroneous owner-attribution (not in producing-subsystem headers):
+#   "dimension-owner (SS-0X" where X != 6
+#   "owner BCs (SS-0X"       where X != 6
+# We match "SS-0[^6]" after "dimension-owner (" or "owner BCs (" to catch any non-SS-06 claim.
+
+_t_scan_file() {
+  local fpath="$1"
+  [[ ! -f "$fpath" ]] && return
+  while IFS= read -r tline; do
+    t_scanned_lines=$(( t_scanned_lines + 1 ))
+    # Skip blockquote/changelog lines (start with ">")
+    case "$tline" in
+      ">"*) continue ;;
+    esac
+    # Check for "dimension-owner (SS-0" followed by non-6 digit
+    if printf '%s' "$tline" | grep -qE 'dimension-owner \(SS-0[^6 ]'; then
+      t_violations=$(( t_violations + 1 ))
+      t_violation_msgs+=("$fpath: erroneous BC-7.* owner attribution — line: $tline")
+    fi
+    # Check for "owner BCs (SS-0" followed by non-6 digit
+    if printf '%s' "$tline" | grep -qE 'owner BCs \(SS-0[^6 ]'; then
+      t_violations=$(( t_violations + 1 ))
+      t_violation_msgs+=("$fpath: erroneous BC-7.* owner attribution — line: $tline")
+    fi
+  done < "$fpath"
+}
+
+_t_scan_file "$METHODOLOGY_LAYER"
+# Also scan other architecture docs that might carry an owner claim
+_ARCH_DIR="$(dirname "$METHODOLOGY_LAYER")"
+for _t_f in "$_ARCH_DIR"/*.md; do
+  [[ "$_t_f" == "$METHODOLOGY_LAYER" ]] && continue
+  [[ -f "$_t_f" ]] && _t_scan_file "$_t_f"
+done
+
+# Positive-coverage log (always printed)
+echo "    Check (t): $t_scanned_lines lines scanned across architecture docs for mis-attributed BC-7.* ownership."
+echo "    Owner-attribution violations found: $t_violations"
+
+if [[ $t_violations -gt 0 ]]; then
+  echo ""
+  echo "    BC-7.* OWNER-ATTRIBUTION VIOLATIONS (must say SS-06, not another subsystem):"
+  for tmsg in "${t_violation_msgs[@]}"; do
+    echo "      $tmsg"
+  done
+  errors+=("MISMATCH [BC-7.* owner-attribution guard (t)]: $t_violations operative line(s) attribute the BC-7.* dimension-evaluator family to a subsystem other than SS-06 — fix to 'SS-06' per ARCH-INDEX Subsystem Registry, subsystem-decomposition, and BC-7.* frontmatter")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -3705,10 +3816,11 @@ if [[ $fail -eq 0 ]]; then
   echo "  Dimension status-value enum (n.i):  all BC convergence-dimension status values are canonical ($dim_status_assignments_checked assignments validated across $dim_status_bcs_with_context BCs)"
   echo "  Per-dim subset enforcement (n.ii): all dimension-value assignments within allowed subsets"
   echo "  Bare token scan (n.iii):           no bare non-canonical hyphenated tokens in dim-context"
-  echo "  Cross-ref ID/desc consistency (p): $xref_validated SS-07 dim-owner citations validated, 0 ID/description mismatches"
+  echo "  Cross-ref ID/desc consistency (p): $xref_validated SS-06 dim-owner citations validated, 0 ID/description mismatches"
   echo "  Prose restatement guard (q):       $q_validated prose restatements validated, 0 mismatches"
   echo "  Error-family reverse coverage (r): $active_family_count non-retired families, all cited by >=1 BC"
   echo "  §3.1 cross-table consistency (s):  $s_dims_in_map dims × 4 values, 0 mismatches ($s_comparisons pairs verified)"
+  echo "  BC-7.* owner-attribution (t):      $t_scanned_lines lines scanned, 0 mis-attribution violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
