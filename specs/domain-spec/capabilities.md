@@ -2,7 +2,7 @@
 document_type: domain-spec-section
 level: L2
 section: capabilities
-version: "1.1"
+version: "1.2"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
@@ -155,8 +155,8 @@ timeline + naming-registry + canon-facts) with machine-checkable structural inte
 (no dangling entity refs, timeline consistency). All generative agents RAG over the
 Canon-KB.
 
-CAP-012 covers the Canon-KB because it is described as "the fifth load-bearing seam" in
-the product brief (Brief §Overflow Context) and RECONCILIATION §5.6a.
+CAP-012 covers the Canon-KB because it is described as "the sixth load-bearing seam" in
+the product brief (Brief §Overflow Context, product-brief.md:111) and RECONCILIATION §5.6a.
 
 ## CAP-013 — Genre-Gated Optional Lane Activation (P2)
 

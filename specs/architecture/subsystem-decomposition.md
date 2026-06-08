@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -17,6 +17,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Subsystem Decomposition
+
+> **v1.7 changes (Pass-31 I31-01 fix — Canon-KB seam ordinal fifth→sixth in SS-10 description):**
+> - **I31-01 fixed:** SS-10 (Canon Knowledge-Base) description corrected "fifth load-bearing
+>   seam" → "sixth load-bearing seam". The product-brief §Overflow Context (line 111) and
+>   ADR-0004 both state Canon-KB is the sixth load-bearing seam (five adapter seams precede
+>   it: engine/asset/distribution/XR/online-services). Root cause: Pass-14 O14-02 fix did
+>   not propagate to this passage.
 
 > **v1.6 changes (CAP-015 BCs delivered by PO — SS-13 count finalized):**
 > - SS-13 BC count updated from TBD → 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1).
@@ -280,7 +287,7 @@ Owns the Canon-KB structure (entity-registry, relationship-graph, timeline, nami
 canon-facts), machine-checkable structural integrity (no dangling refs, timeline consistency,
 phonotactic naming rules), retcon propagation (where-used impact analysis), and the
 RAG-grounding contract ensuring all generative agents query the Canon-KB rather than
-hallucinating lore. The Canon-KB is identified as the fifth load-bearing seam
+hallucinating lore. The Canon-KB is identified as the sixth load-bearing seam
 (product-brief §Overflow Context).
 
 **Principal agents:** `worldbuilder`, `loremaster`, `narrative-director`, `quest-designer`.

@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: layered-architecture
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -50,7 +50,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 │  studio-of-agents roster (66 roles, game-domain specialists)     │
 │  asset lane (asset generation + provenance pipeline)             │
 │  playtest protocol (holdout replacement — human gate)            │
-│  canon knowledge-base (fifth load-bearing seam)                  │
+│  canon knowledge-base (sixth load-bearing seam)                  │
 │  game-domain hook guards (REPLACE BC/VP guards)                  │
 │  game workflow phases (ADAPT lobster phase files)                │
 │                                                                  │
@@ -166,3 +166,13 @@ Architecture pass 2 will provide:
   replay-regression, asset-provenance), 11-dim convergence criteria definitions,
   studio-of-agents routing, game workflow phase definitions.
 - **Verification Coverage Matrix** — VP-to-module mapping for the pure-sim slice.
+
+---
+
+> **v1.1 changes (Pass-31 I31-01 fix — Canon-KB seam ordinal fifth→sixth):**
+> - **I31-01 fixed:** Layer 2 diagram label corrected "fifth load-bearing seam" →
+>   "sixth load-bearing seam" for the Canon Knowledge-Base entry. The five adapter
+>   seams (engine/asset/distribution/XR/online-services) precede it; Canon-KB is the
+>   sixth load-bearing seam per ADR-0004, product-brief.md §Overflow Context, and
+>   L2-INDEX.md. Root cause: Pass-14 O14-02 fifth→sixth fix did not propagate to this
+>   diagram label.

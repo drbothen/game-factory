@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.10"
+version: "1.11"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,18 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.11 changes (Pass-31 I31-01 fix — Canon-KB seam ordinal fifth→sixth in §2.7 Purpose):**
+> - **I31-01 fixed:** §2.7 canon-kb schema "Purpose" sentence corrected "fifth load-bearing seam"
+>   → "sixth load-bearing seam". The product-brief §Overflow Context (line 111) and ADR-0004
+>   both state "sixth"; the erroneous "fifth" was a residual from the Pass-14 O14-02 incomplete
+>   propagation. The brief-citation ("product-brief §Overflow Context") is now accurate because
+>   the brief actually says "sixth load-bearing seam" at that location.
+> - **CI guard (o) extended (v1.25):** check (o) extended to gate the Canon-KB load-bearing-seam
+>   ordinal. Any operative line referencing Canon-KB's load-bearing-seam ordinal must say "sixth".
+>   FAIL on "fifth load-bearing seam" (or any ordinal other than "sixth" applied to
+>   "load-bearing seam") in architecture spec files. Also asserts any `'<ordinal> load-bearing
+>   seam'` quotation attributed to the product brief matches the brief's actual text ("sixth").
 
 > **v1.10 changes (Pass-27 I27-01 fix — BC-8.08.004 mislabel in "Resolved in Pass-12" note; broadened CI guard (t)):**
 > - **I27-01 fixed (dimension-owner mislabel, third instance of the class):** The "Resolved in
@@ -503,7 +515,7 @@ wave_ordering_constraint: "from_discipline MUST complete before to_discipline in
 
 ### 2.7 canon-kb schema
 
-**Purpose.** The Canon Knowledge-Base is the fifth load-bearing seam (product-brief
+**Purpose.** The Canon Knowledge-Base is the sixth load-bearing seam (product-brief
 §Overflow Context). It is the RAG grounding anchor for all generative agents. Its
 structural integrity is machine-checkable; its narrative quality is human-judged.
 

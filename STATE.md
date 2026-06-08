@@ -46,7 +46,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 30 CLEAN (0C/0I/0S); **CLEAN-PASS COUNTER: 2/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 31 FINDINGS (0C/1I) RESOLVED; **CLEAN-PASS COUNTER: 0/3** (4th near-convergence reset) | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -55,9 +55,9 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 31** (consecutive clean 3 of 3 — convergence pass). Pass 30 CLEAN (0C/0I/0S): independent concurrence with Pass 29; ZERO new defects; all four gated recurring classes confirmed exhausted; spec STABLE. Counter: **2/3**. FU-007, FU-008, FU-010 remain open (non-blocking). Keep spec unchanged through Pass 31. If Pass 31 CLEAN → Phase-1d CONVERGED → proceed to fresh-context consistency audit + input-hash drift check + Phase-1 human gate.
+**NEXT: `phase-1d-adversarial` — Pass 32** (candidate clean #1, counter restart). Pass 31 FINDINGS (0C/1I): Canon-KB seam-ordinal drift "fifth"→"sixth" in 5 files; check (o.ii) added; counter RESET 0/3. FU-007, FU-008, FU-010 remain open (non-blocking).
 
-**Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.10; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; BC-5.06.001 v1.2; BC-12.12.008 v1.2; BC-7.04.001 v1.1; BC-7.05.001 v1.2; prd-cap-005 v1.1; CI gate v1.24 (checks a–u, ~29 sub-assertions; human-gated/creative-gate class comprehensively gated). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; BC-5.06.001 v1.2; BC-12.12.008 v1.2; BC-7.04.001 v1.1; BC-7.05.001 v1.2; prd-cap-005 v1.1; CI gate v1.25 (checks a–u + o.ii, ~30 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -79,6 +79,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | 28 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED + proactive 4-file class closure | Novelty MEDIUM. I28-01: `human-gated` vocabulary (+ DI-006/-32008) misapplied to internal cinematic-director creative gate (D-013/DI-007) in 4 BC files — contradicting methodology §2.8, ADR-0007, and Pass-1 I5 fix (E-CIN-003). Adversary flagged 2; orchestrator sweep found full class = 4. RESOLVED: BC-5.06.001 v1.2, BC-12.12.008 v1.2, BC-7.04.001 v1.1, BC-7.05.001 v1.2 — replaced human-gated/DI-006/-32008 with creative-gate/DI-007/E-CIN-003; legitimate SAG-AFTRA/cert/publish human-gated uses preserved. O28-01 (LOW): prd-cap-005.md E-CIN-003 row enriched per I5 canonical format — prd-cap-005 v1.1. check (u) added — human-gated/creative-gate term-misuse guard; 26,461 lines scanned, 5 creative-gate lines validated, 0 violations; CI gate v1.24. | **stays: 0/3** |
 | 29 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty ZERO. Verified clean (fresh territory): all 11 producing-subsystem headers correct (un-gated-but-correct); T1/T2/T3 ↔ canonical values; camelCase wire vs snake_case internal documented; DP-NNN→BC mappings; DEGRADED/DEGRADED-PENDING/BLOCKED + D-ETHICS binary + D-SEC offline-only; conditional-dimension vs "all 11 evaluated" (GREEN-by-inapplicability, no contradiction); D-013 creative-gate vs human-gated (now gated, no leak); studio roster 66; DI-001..012→BC enforcement; VP→BC back-refs; four now-gated recurring classes genuinely exhausted (checks a.ii/a.iii/a.iv/r/t/u all 0 violations). Spec STABLE. | **CLEAN-PASS COUNTER: 1/3** |
 | 30 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty ZERO. Independent concurrence with Pass 29. Verified clean (least-covered angles): VP-INDEX↔ARCH subsystem-vs-directory anchoring (SS-11/ss-13); ADR-0004/0005/0007 three orthogonal seam concepts (no conflation); DI-001..012 grounding + enforcement; 11-dim model (§3.0/§3.1 cross-table, owner-vs-producing-subsystem, D-ETHICS binary); error-code meaning-vs-usage (E-EAP-013, E-OSVC-009, E-CIN-003); "zero active codes" historical-changelog note (not stale); offline-project/D-SEC composition; determinism-tier partial-order (-32004); ADR-0007 human-gate semantics. All four gated classes exhausted (checks a.ii/a.iii/a.iv/r/t/u all 0 violations). Spec STABLE. | **CLEAN-PASS COUNTER: 2/3** |
+| 31 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | Novelty MODERATE-HIGH. I31-01: Canon-KB "load-bearing seam" ORDINAL drift — 5 operative files said "fifth load-bearing seam" but authoritative sources (ADR-0004, product-brief.md:111, prd.md:63, L2-INDEX) say SIXTH (5 adapter seams + Canon-KB = 6th); 2 files also falsely cited the brief as "fifth". Pass-14 O14-02 fifth→sixth fix didn't fully propagate. RESOLVED: corrected to "sixth" in layered-architecture.md:53 (v1.1), methodology-layer.md:506 (v1.11), subsystem-decomposition.md:283 (v1.7), capabilities.md:158 (v1.2), prd-cap-008-012.md:58/61 (v1.1); false brief-citations corrected with accurate file:line anchors. Check (o.ii) added — asserts any operative Canon-KB load-bearing-seam ordinal says "sixth"; 28 files scanned, 0 violations. CI gate v1.25. | **CLEAN-PASS COUNTER RESET: 2/3 → 0/3** (4th near-convergence reset). Next = Pass 32 (candidate clean #1, restart). |
 
 ---
 
@@ -94,7 +95,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–30 all resolved/clean; Pass 30 CLEAN (0C/0I/0S; zero new defects; independent concurrence with Pass 29; all 4 gated classes exhausted); counter **2/3**; Pass 31 pending (convergence pass) | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–31 all resolved/clean; Pass 31 FINDINGS (0C/1I) RESOLVED (Canon-KB ordinal fifth→sixth, 5 files, check o.ii); counter **0/3** (4th near-convergence reset); Pass 32 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -168,12 +169,12 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–30 DONE.
-**Phase-1d Pass 30:** CLEAN — 0C/0I/0S. Zero new defects. Independent concurrence with Pass 29. All four now-gated recurring defect classes confirmed genuinely exhausted (checks a.ii/a.iii/a.iv/r/t/u, CI gate v1.24). Spec STABLE — no changes this pass. **Clean-pass counter: 2/3** (second consecutive clean; streak at Pass 29+30).
-**Next action:** `phase-1d-adversarial` — **Pass 31** (consecutive clean 3 of 3; convergence-determining pass). If CLEAN → Phase-1d CONVERGED → proceed to fresh-context consistency audit + input-hash drift check + Phase-1 human gate. FU-007/FU-008/FU-010 remain open (non-blocking). Do NOT modify spec before Pass 31.
-**Phase 1 remaining:** Phase-1d adversarial convergence (2/3 clean passes, need 3) → consistency audit → drift check → Phase-1 human gate.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–31 DONE.
+**Phase-1d Pass 31:** FINDINGS (0C/1I) RESOLVED. I31-01: Canon-KB "load-bearing seam" ordinal drift — 5 files said "fifth" but authoritative sources say "sixth" (5 adapter seams + Canon-KB = 6th). Pass-14 O14-02 fix didn't fully propagate. Corrected in layered-architecture.md (v1.1), methodology-layer.md (v1.11), subsystem-decomposition.md (v1.7), capabilities.md (v1.2), prd-cap-008-012.md (v1.1). Check (o.ii) added; CI gate v1.25. **Clean-pass counter RESET: 2/3 → 0/3** (4th near-convergence reset).
+**Next action:** `phase-1d-adversarial` — **Pass 32** (candidate clean #1, counter restart). FU-007/FU-008/FU-010 remain open (non-blocking).
+**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit → drift check → Phase-1 human gate.
 **PRD status:** v2.2. 190 BCs; 41 NFRs; 255 error codes / 31 families total (246 active; E-GEN 9 retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006/007/008/010 open (non-blocking). FU-009 CLOSED.
-**Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.10; 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: P0=126 / P1=42 / P2=22.
-**Version bumps this pass:** none (spec STABLE).
+**Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.11; 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: P0=126 / P1=42 / P2=22.
+**Version bumps Pass 31:** layered-architecture v1.1, methodology-layer v1.11, subsystem-decomposition v1.7, capabilities v1.2, prd-cap-008-012 v1.1, CI gate v1.25.
 **D-014/015/016:** see Decisions Log. D-014/D-015 flagged for human gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
