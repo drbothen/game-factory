@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,23 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.7 changes (Pass-19 F1 fix — prose-restatement drift in Pass-12 changelog note):**
+> - **F1 fixed (doc coherence):** The "Resolved in Pass-12" changelog note (line ~661) restated
+>   D-PLAY's allowed-value set as "GREEN/DEGRADED-PENDING/BLOCKED", omitting DEGRADED. This
+>   contradicted the canonical §3.1 Per-Dimension Allowed Value Subsets table (which correctly
+>   lists D-PLAY = {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}), BC-8.08.004 postcondition #4
+>   (sets D-PLAY=DEGRADED on CONDITIONAL/human-override), and BC-7.05.001 EC-002 (DEGRADED =
+>   human override with documented rationale). The parenthetical now reads "(D-PLAY allows
+>   GREEN/DEGRADED/DEGRADED-PENDING/BLOCKED)" matching the canonical §3.1 table. No change to
+>   the model — this is a pure doc-coherence fix.
+> - **Process-gap guard added (P19-01):** `scripts/check-spec-counts.sh` bumped to v1.19. Check
+>   (q) added: flags any line outside the §3.1 canonical table that contains a per-dimension
+>   allowed-value prose restatement of the pattern "D-<DIM> allows <TOKEN>/<TOKEN>/..." or
+>   "(D-<DIM> allows ...)". These inline restatements are discouraged (see Convention below);
+>   the check surfaces them so stale copies can be corrected. Green on the fixed corpus.
+>   Convention: do not restate per-dimension allowed-value subsets in prose outside §3.1; if a
+>   summary is needed, reference §3.1 by name rather than copying the token list inline.
 
 > **v1.6 changes (Pass-12 F-12-02 fix — §3.1 PO Change List converted to past-tense; OBS-1):**
 > - **OBS-1 fixed (doc currency):** The "PO Change List — Producer BCs Using Non-Canonical
@@ -658,8 +675,8 @@ cause of F-12-01 (CI false-green that survived 11 adversarial passes). Unlike th
 Pass-10 BCs which used uppercase `AMBER`, BC-8.08.004 used **lowercase** status tokens
 (`green`, `red`, `amber`, `pending`) which were structurally invisible to check (n)'s
 uppercase-only extraction (F-12-02). The Product Owner updated BC-8.08.004 to use
-uppercase canonical values: `GREEN`, `RED`→`BLOCKED` (D-PLAY allows GREEN/DEGRADED-PENDING/
-BLOCKED), and `PENDING`→`DEGRADED-PENDING` (scheduled but not yet run). CI check (n) was
+uppercase canonical values: `GREEN`, `RED`→`BLOCKED`, and `PENDING`→`DEGRADED-PENDING`
+(D-PLAY allows GREEN/DEGRADED/DEGRADED-PENDING/BLOCKED per §3.1; scheduled but not yet run). CI check (n) was
 simultaneously extended (v1.12) to be case-insensitive at the detection layer to prevent
 recurrence.
 

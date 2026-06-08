@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -39,6 +39,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Adapter Protocol Family
+
+> **v1.3 changes (Pass-19 O1 — determinism tier wire-vs-record naming convention note):**
+> - §2.3 Determinism Tier: added explicit convention note documenting that the JSON-RPC
+>   manifest wire field `determinismTier` (camelCase) and the internal/BC accepted-record
+>   field `determinism_tier` (snake_case) use a deliberate wire-vs-record naming split.
+>   Value enumerations are identical in both contexts. This preempts future reviewer
+>   false-positive flags on the case difference (confirmed non-blocking by Pass-19 adversary).
 
 > **v1.2 changes (Pass-13 adversarial defect C13-01 — five-seam reconciliation):**
 > - Added §6 Online-Services Adapter Seam (SS-13, CAP-015): capability surface,
@@ -360,6 +367,14 @@ method the core selects:
 must declare all three prerequisites: `fixed-timestep`, `seeded-rng`,
 `input-injection`. An adapter missing any of the three must declare `replay: none`,
 which degrades the D-REPLAY convergence dimension to human playtest evidence.
+
+**Naming convention — wire vs record.** The JSON-RPC manifest wire field is
+`determinismTier` (camelCase, per the wire-protocol convention for this manifest).
+The internal accepted-record field and BC-3.03.003/004/005 + methodology
+§replay-regression-contract use `determinism_tier` (snake_case). This is a
+deliberate wire-vs-record naming split: the value enumerations
+(`bitwise-cross-platform`, `same-machine`, `tolerance-only`) are identical in both
+contexts. Do not treat the case difference as drift.
 
 ---
 
