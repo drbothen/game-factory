@@ -17,7 +17,7 @@ market_intel_verdict: PASSED
 | Phase | Name | Status | Notes |
 |-------|------|--------|-------|
 | pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED (D-006/07/08 human-ratified) |
-| 0 | Brownfield Extraction | IN PROGRESS | extract vsdd-factory core from .reference/ @ 82163b7; codebase-analyzer writing .factory/phase-0-ingestion/ |
+| 0 | Brownfield Extraction | COMPLETE — awaiting gate | extraction-ingestion VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam: 4 config/content swap interfaces; devops item: extracted core needs own release/cross-compile pipeline |
 | 1 | Spec Crystallization | PENDING | — |
 | 2 | Story Decomposition | PENDING | — |
 | 3 | TDD Implementation | PENDING | — |
@@ -36,7 +36,9 @@ market_intel_verdict: PASSED
 | 4 | Pre-pipeline preflight run — READY-WITH-WARNINGS (see planning/preflight-report.md) | DONE |
 | 5 | Market-intel assessment run — CAUTION (see planning/market-intel-assessment.md) | DONE |
 | 6 | Human ratified D-006, D-007, D-008 at market-intel gate; gate PASSED | DONE |
-| 7 | Phase 0 brownfield extraction started; codebase-analyzer dispatched to .factory/phase-0-ingestion/ | IN PROGRESS |
+| 7 | Phase 0 brownfield extraction started; codebase-analyzer dispatched to .factory/phase-0-ingestion/ | DONE |
+| 8 | Phase 0 outputs validated VERIFIED-WITH-CORRECTIONS (validate-extraction); committed f77e91e | DONE |
+| 9 | Awaiting HUMAN Phase-0 context approval gate | PENDING |
 
 ## Key Facts
 
@@ -64,6 +66,9 @@ market_intel_verdict: PASSED
 | `.factory/planning/decisions/0003-determinism-tier-capability.md` | — | committed |
 | `.factory/planning/preflight-report.md` | 1.0 | committed |
 | `.factory/planning/market-intel-assessment.md` | 1.0 | committed |
+| `.factory/phase-0-ingestion/project-context.md` | — | committed f77e91e |
+| `.factory/phase-0-ingestion/extraction-boundary-validated.md` | — | committed f77e91e |
+| `.factory/phase-0-ingestion/component-inventory.md` | — | committed f77e91e |
 
 ## Decisions Log
 
@@ -98,6 +103,7 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-07
-**Phase:** 0 — IN PROGRESS. pre-1 fully PASSED (brief, preflight, market-intel). D-006/D-007/D-008 human-ratified.
-**Next action:** Await codebase-analyzer completion of Phase 0 brownfield extraction (output: .factory/phase-0-ingestion/). Then human approval gate on Phase-0 context before proceeding to Phase 1.
-**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Market-intel gate PASSED — D-006/07/08 ratified as recommended. D-008 enforces compliance/provenance/ai-disclosure as P0 wave-1 (Phase-2 wave planning). Pre-Phase-3 remediation items (LiteLLM proxy, API keys) remain outstanding but are not current blockers.
+**Phase:** 0 — COMPLETE, awaiting HUMAN approval gate. pre-1 fully PASSED (brief, preflight, market-intel). D-006/D-007/D-008 human-ratified.
+**Next action:** Human reviews Phase-0 context (project-context.md, extraction-boundary-validated.md, component-inventory.md). On approval, proceed to Phase 1 spec crystallization.
+**Key Phase-0 findings:** ~70% conceptual / ~85% file-level neutral spine REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; config/content seam = 4 declarative swap interfaces (hooks-registry guard rows, phase-4/6/7 lobster workflows, ~6 agent-routing rows, BC/VP/holdout/DTU/formal templates). Devops work item: extracted core needs its own release/cross-compile pipeline (dispatcher currently from marketplace tarball).
+**Context:** .factory/ worktree on factory-artifacts is healthy (commit f77e91e). Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) remain outstanding but are not current blockers.
