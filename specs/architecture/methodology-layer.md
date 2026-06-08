@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,20 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.2 changes (Pass-2 adversarial defect resolution):**
+> - **I2-01 fixed:** §3.D-SEC `Subsystem` field corrected from `SS-04, SS-02` → `SS-06`
+>   (Convergence Tracking Engine). BC-7.11.001 (D-SEC owner) and BC-7.11.002..008
+>   (server-authority invariants) all declare `subsystem: SS-06`; subsystem-decomposition
+>   assigns all BC-7.* to SS-06. The previous SS-04/SS-02 was an incorrect stale value.
+> - **I2-04 fixed:** §2.3 replay-regression-contract example delexicalized: "T1 adapters
+>   (Bevy+Rapier)" replaced with "a fully-deterministic T1 adapter" per DI-008 (no engine
+>   names in Layer-2 artifacts). The engine-neutrality guarantee of this section is now
+>   consistent with §0's declaration.
+> - **S2-03:** §3.D-SEC degradation predicate is the authoritative rule (unchanged).
+>   ADR-0006 table updated to match this document's semantics. Rule: degradation only
+>   via explicit `online_features: false` (offline products); no degradation path for
+>   online games with failing CWE-602 invariants.
 
 > **v1.1 changes (Phase-1d arch alignment):**
 > - **S3 fixed:** `inputs:` frontmatter: `prd-cap-012.md` (non-existent file) replaced
@@ -202,8 +216,8 @@ traces_to: "<SBC-NNN or DIC-NNN this regression guards>"
 
 **Cross-cutting use.** The replay-regression-contract is structurally identical to
 the esports `replay-format` artifact and the anti-cheat proof-of-state artifact —
-the same harness serves all three use cases. T1 adapters (Bevy+Rapier) get all three
-for free.
+the same harness serves all three use cases. A fully-deterministic T1 adapter
+(`determinismTier: bitwise-cross-platform`) gets all three for free.
 
 ---
 
@@ -641,7 +655,7 @@ pattern detected; adversarial review not completed.
 
 ### D-SEC: Security Invariants
 
-**ID:** D-SEC | **Automated:** Yes (required for online games) | **Subsystem:** SS-04, SS-02
+**ID:** D-SEC | **Automated:** Yes (required for online games) | **Subsystem:** SS-06
 
 **Pass predicate:** `server-authority-invariant-suite` (CWE-602 spine) all assertions
 green: no-trust-client, input range/rate/sequence validation, replay-attack prevention,

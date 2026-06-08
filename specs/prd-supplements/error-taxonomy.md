@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -392,7 +392,33 @@ ingest-time structural violations that are hard stops.
 | E-EAP-011 reassigned; E-EAP-012/013 added | **CRITICAL (C4, arch cross-edit):** E-EAP-011 (KernelAntiCheatAttempted) was assigned JSON-RPC code -32007, which collided with -32007 (`MalformedManifest`) defined in adapter-protocols.md §1.5. Resolved by reassigning E-EAP-011 to **-32009** (next available in protocol-reserved range). Added E-EAP-012 (`MalformedManifest`, -32007) and E-EAP-013 (`HumanGatedTaskPending`, -32008) as registered E-EAP entries — these codes exist in adapter-protocols.md §1.5 but were absent from this registry. E-EAP-013 is load-bearing: it carries the DI-006 / ADR-0007 `human-gated` signal. |
 | E-CIN-003 wording corrected | **IMPORTANT (I5, arch cross-edit):** Changed "human-gated checklist item" vocabulary to "cinematic-director creative sign-off" to unambiguously distinguish the D-013 creative gate from the ADR-0007 `human-gated` fidelity tier. |
 
-**Total defined error codes: 143** across 22 families (was 141 / 22 families in PRD v1.2; +2 from C4 JSON-RPC reconciliation: E-EAP-012 MalformedManifest, E-EAP-013 HumanGatedTaskPending; E-EAP-011 reassigned from -32007 to -32009 to resolve collision).
+**Total defined error codes: 134** across 22 families. Per-family breakdown (recomputable from actual table rows; prior "143" was inflated by prose change-note rows matching the `E-XXX-NNN` pattern):
+
+| Family | Code Count | Notes |
+|--------|-----------|-------|
+| E-EAP | 13 | v1.1: +E-EAP-011; v1.2: +E-EAP-012 (MalformedManifest), +E-EAP-013 (HumanGatedTaskPending) |
+| E-DES | 5 | |
+| E-ART | 3 | |
+| E-AUD | 4 | |
+| E-NAR | 4 | |
+| E-ENG | 2 | |
+| E-CIN | 4 | |
+| E-PROD | 3 | |
+| E-CERT | 3 | |
+| E-DIST | 19 | |
+| E-COMP | 2 | |
+| E-CONF | 5 | v1.1 addition |
+| E-REPLAY | 7 | v1.1 addition |
+| E-GEN | 9 | v1.1 addition |
+| E-PRV | 3 | v1.2 addition: E-PRV-010/011/012 |
+| E-SIM | 9 | v1.1 addition |
+| E-CONV | 6 | v1.1 addition |
+| E-PLAY | 5 | v1.1 addition |
+| E-ETH | 9 | v1.1 addition; v1.2: +E-ETH-009 |
+| E-KB | 7 | v1.1 addition |
+| E-GENRE | 6 | v1.1 addition |
+| E-XR | 6 | v1.1 addition |
+| **TOTAL** | **134** | Sum of above rows; verifiable by `grep -cP '^\| E-XXX-\d{3} \|'` per family |
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -33,7 +33,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
 > architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
-**Grand total: 179 behavioral contracts** across 14 capabilities. (168 original + 2 added in PRD revision v1.1 to close FU-001: BC-1.15.002 for DI-010, BC-13.01.004 for DI-011; +9 added in PRD revision v1.2 to resolve Phase-1d adversarial pass-1: BC-11.03.006 for DP-007; BC-7.11.002..008 for D-SEC server-authority invariant suite CWE-602)
+**Grand total: 178 behavioral contracts** across 14 capabilities. (168 original + 2 added in PRD revision v1.1 to close FU-001: BC-1.15.002 for DI-010, BC-13.01.004 for DI-011; +8 added in PRD revision v1.2 to resolve Phase-1d adversarial pass-1: BC-11.03.006 for DP-007; BC-7.11.002..008 for D-SEC server-authority invariant suite CWE-602. Note: corrected from 179 in v1.3 — BC-INDEX.md itself was erroneously counted in the prior total.)
 
 ---
 
@@ -260,24 +260,28 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-009-010.md`
 
 ---
 
-## CAP-011 — Monetization Ethics Enforcement (P1) — 13 BCs
+## CAP-011 — Monetization Ethics Enforcement (P0/P1) — 14 BCs
+
+> Priority split per D-008 (compliance/provenance = P0 wave-1): regulatory-enforcement
+> BCs (ethics contract gate, forbidden patterns, COPPA/PEGI compliance) are P0;
+> economy-quality BCs are P1. See prd-cap-011.md §11.8 for rationale.
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-011.md`
 
 | BC ID | Title | Priority | File | Lifecycle |
 |-------|-------|----------|------|-----------|
-| BC-11.01.001 | Ethics Contract Structural Validity | P1 | ss-11/BC-11.01.001.md | active |
-| BC-11.01.002 | Default Ethics Envelope Application | P1 | ss-11/BC-11.01.002.md | active |
-| BC-11.01.003 | Adversarial Review Evidence Gate (Fail-Closed for Convergence) | P1 | ss-11/BC-11.01.003.md | active |
-| BC-11.02.001 | No Unconstrained LTV Optimization Objective (Fail-Closed for All Agents) | P1 | ss-11/BC-11.02.001.md | active |
+| BC-11.01.001 | Ethics Contract Structural Validity | P0 | ss-11/BC-11.01.001.md | active |
+| BC-11.01.002 | Default Ethics Envelope Application | P0 | ss-11/BC-11.01.002.md | active |
+| BC-11.01.003 | Adversarial Review Evidence Gate (Fail-Closed for Convergence) | P0 | ss-11/BC-11.01.003.md | active |
+| BC-11.02.001 | No Unconstrained LTV Optimization Objective (Fail-Closed for All Agents) | P0 | ss-11/BC-11.02.001.md | active |
 | BC-11.02.002 | Constrained-Optimization Invariant — Economy Spine Propagation | P1 | ss-11/BC-11.02.002.md | active |
 | BC-11.02.003 | No-Progression-Deadlock-Without-Spend Invariant | P1 | ss-11/BC-11.02.003.md | active |
-| BC-11.03.001 | Forbidden Dark Pattern — Loot Box Without Odds Disclosure (DP-005) | P1 | ss-11/BC-11.03.001.md | active |
-| BC-11.03.002 | Forbidden Dark Pattern — Pay-to-Win in Ranked Mode (DP-004) | P1 | ss-11/BC-11.03.002.md | active |
+| BC-11.03.001 | Forbidden Dark Pattern — Loot Box Without Odds Disclosure (DP-005) | P0 | ss-11/BC-11.03.001.md | active |
+| BC-11.03.002 | Forbidden Dark Pattern — Pay-to-Win in Ranked Mode (DP-004) | P0 | ss-11/BC-11.03.002.md | active |
 | BC-11.03.003 | Forbidden Dark Pattern — Loss-Triggered Purchase Prompt (DP-003) | P1 | ss-11/BC-11.03.003.md | active |
-| BC-11.03.004 | Forbidden Dark Pattern — Minor Loot Box / Gacha Access (DP-008) | P1 | ss-11/BC-11.03.004.md | active |
+| BC-11.03.004 | Forbidden Dark Pattern — Minor Loot Box / Gacha Access (DP-008) | P0 | ss-11/BC-11.03.004.md | active |
 | BC-11.03.005 | Forbidden Dark Pattern — Miscategorized Best-Value Bundle (DP-006) | P1 | ss-11/BC-11.03.005.md | active |
-| BC-11.03.006 | Forbidden Dark Pattern — Predatory Vulnerability Targeting / Whale Hunting (DP-007) | P1 | ss-11/BC-11.03.006.md | active |
+| BC-11.03.006 | Forbidden Dark Pattern — Predatory Vulnerability Targeting / Whale Hunting (DP-007) | P0 | ss-11/BC-11.03.006.md | active |
 | BC-11.04.001 | Gacha EV and Pity Correctness (Ethics-Bounded) | P1 | ss-11/BC-11.04.001.md | active |
 | BC-11.04.002 | Spend-Concentration Guardrail (Gini Coefficient Bound) | P1 | ss-11/BC-11.04.002.md | active |
 
@@ -355,8 +359,8 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 | CAP-008 — Playtest Protocol | P1 | SS-07 | 5 |
 | CAP-009 — Cert + Distribution | P1 | SS-08 | 11 |
 | CAP-010 — Compliance + AI Disclosure | P1 | SS-08 (merged into Cert+Distribution) | 6 |
-| CAP-011 — Monetization Ethics | P1 | SS-09 | 14 (+1 v1.2: BC-11.03.006 DP-007) |
+| CAP-011 — Monetization Ethics | P0/P1 | SS-09 | 14 (+1 v1.2: BC-11.03.006 DP-007) |
 | CAP-012 — Canon KB | P1 | SS-10 | 9 |
 | CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 15 |
 | CAP-014 — XR Seam | P2 | SS-12 | 7 |
-| **TOTAL** | | | **179** |
+| **TOTAL** | | | **178** |

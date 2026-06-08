@@ -2,7 +2,7 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0006"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -22,6 +22,16 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 **Status:** Draft
 **Date:** 2026-06-08
 **Driver:** AAA-RECONCILIATION §7; architecture.md §Convergence dimensions; CAP-007
+
+> **v1.1 (S2-03 resolution):** D-SEC degradation fallback column corrected.
+> The original "Degraded: manual security review" was inconsistent with the
+> authoritative predicate in methodology-layer.md §3.D-SEC, which allows degradation
+> only when `online_features: false` is explicitly declared (offline/single-player
+> product). For online builds, D-SEC has no degradation path — a failing CWE-602
+> invariant is always blocked. The "manual security review" path was removed because
+> it would allow an online game with a failing server-authority invariant to ship in
+> degraded state, which contradicts the security-by-construction mandate of SS-06.
+> The authoritative rule is in methodology-layer.md; this table row now matches it.
 
 ## Context
 
@@ -49,7 +59,7 @@ game-factory uses an **11-dimension convergence model** replacing the vsdd 7-dim
 | 8 | D-PROV | Provenance / Legal + Compliance | Yes (sidecar completeness + IARC auto-fill) + Human gate (ratings sign-off) | Degraded: human legal review flag |
 | 9 | D-DOCS | Docs | Yes (structural completeness) | — |
 | 10 | D-ETHICS | Monetization Ethics | Yes (ethics contract schema) + Adversarial review | Non-substitutable adversarial review gate |
-| 11 | D-SEC | Security Invariants | Yes (server-authority-invariant suite + CWE-602 checks) | Degraded: manual security review |
+| 11 | D-SEC | Security Invariants | Yes (server-authority-invariant suite + CWE-602 checks) | Degraded: `online_features: false` declared (offline/single-player only). Online builds: no degradation path — any CWE-602 invariant failure is blocked. |
 
 **Convergence loop mechanics (ADAPTED from vsdd, extracted verbatim):**
 - Novelty decay assessment per dimension

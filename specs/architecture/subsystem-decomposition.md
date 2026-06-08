@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -19,10 +19,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 # Subsystem Decomposition
 
 > **v1.1 changes (Phase-1d arch alignment):**
-> - **I1:** BC→Subsystem table updated from 168 → 179 total. Added rows for BC-1.15.002
+> - **I1:** BC→Subsystem table updated from 168 → 178 total. Added rows for BC-1.15.002
 >   (SS-01, v1.1), BC-13.01.004 (SS-11, v1.1), BC-11.03.006 (SS-09, v1.2), and
 >   BC-7.11.002..008 (SS-06, v1.2). Per-SS BC counts updated: SS-01=41, SS-06=19,
 >   SS-09=14, SS-11=15.
+> - **C2-01 (v1.2):** Grand total corrected 179 → 178. The previous "179" erroneously
+>   counted BC-INDEX.md as a behavioral contract; per-subsystem counts already sum to
+>   178 and were always correct. Only the TOTAL rows are changed.
 > - **I1:** SS-09 language corrected from "five declared patterns" to "six declared
 >   patterns" (DP-003 through DP-008 inclusive is six patterns).
 > - **I6:** Added authoritative Directory→Subsystem Alias Table at end of document.
@@ -296,7 +299,7 @@ when implementation begins; the adapter implementation is deferred.
 > This table is the authoritative resolution of all SS-TBD placeholders.
 > A mechanical pass will apply `subsystem: SS-NN` to each BC file's frontmatter.
 > BC directory names (ss-01/…ss-14/) are navigability aliases for CAP numbers only.
-> Grand total: **179** (168 original + 2 v1.1 + 9 v1.2).
+> Grand total: **178** (168 original + 2 v1.1 + 9 v1.2; total corrected from 179 in C2-01 — BC-INDEX.md was not a BC).
 
 | BC ID Range | Count | Assigned Subsystem | Rationale |
 |-------------|-------|--------------------|-----------|
@@ -318,7 +321,7 @@ when implementation begins; the adapter implementation is deferred.
 | BC-13.01.001 – BC-13.04.002 | 14 | **SS-11** | CAP-013 = genre-gated lanes (original 14) |
 | BC-13.01.004 | 1 | **SS-11** | CAP-013; v1.1 add: NFT/web3 off-by-default DI-011 (dir: ss-13/) |
 | BC-14.01.001 – BC-14.02.003 | 7 | **SS-12** | CAP-014 = XR platform seam |
-| **TOTAL** | **179** | | |
+| **TOTAL** | **178** | | |
 
 ---
 
@@ -386,4 +389,4 @@ for distribution. A single subsystem boundary is cleaner than two with overlappi
 | P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06 | 112 (SS-01=41, SS-02=9, SS-03=15, SS-04=16, SS-05=11, SS-06=19, +1 v1.1 SS-01) |
 | P1 (ship v1) | SS-07, SS-08, SS-09, SS-10 | 45 (SS-07=5, SS-08=17, SS-09=14, SS-10=9) |
 | P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 22 (SS-11=15, SS-12=7) |
-| **Total** | | **179** |
+| **Total** | | **178** |

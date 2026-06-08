@@ -1,7 +1,7 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -246,6 +246,13 @@ human-gated task). The enforcement point:
 
 All BCs are in `.factory/specs/behavioral-contracts/ss-11/`.
 
+> **Priority policy (v1.2, per D-008):** CAP-011 has a mixed P0/P1 profile. BCs that gate
+> regulatory-mandatory consumer protection obligations (FTC, COPPA 2025, PEGI-16, EU consumer
+> law) or enforce DI-005 (unconstrained LTV as factory defect) are **P0** and must ship in
+> wave 1. BCs that enforce economy-quality properties (pity correctness, spend-concentration)
+> are **P1**. This split is authoritative across all three locations: this table, BC-INDEX.md,
+> and BC frontmatter `priority:` fields.
+
 | BC ID | Title | Priority | Summary |
 |-------|-------|----------|---------|
 | BC-11.01.001 | Ethics Contract Structural Validity | P0 | Contract exists, all required fields populated, validation method declared |
@@ -254,12 +261,12 @@ All BCs are in `.factory/specs/behavioral-contracts/ss-11/`.
 | BC-11.02.001 | No Unconstrained LTV Optimization Objective | P0 | No agent config or generated config declares unconstrained LTV/ARPU/engagement objective |
 | BC-11.02.002 | Constrained-Optimization Invariant — Economy Spine | P1 | Ethics contract constraints propagate into live-economy-balance-contract assertions |
 | BC-11.02.003 | No-Progression-Deadlock-Without-Spend Invariant | P1 | Economy sim verifies all player archetypes can progress without purchase, or contract explicitly declares deadlock-by-design with human sign-off |
-| BC-11.03.001 | Forbidden Dark Pattern — Loot Box Without Odds Disclosure (DP-005) | P0 | gacha-spec presence requires published_odds field |
+| BC-11.03.001 | Forbidden Dark Pattern — Loot Box Without Odds Disclosure (DP-005) | P0 | gacha-spec presence requires published_odds field (Apple Dec 2017, Google Play May 2019, ESRB Apr 2020, PEGI-16 Jun 2026) |
 | BC-11.03.002 | Forbidden Dark Pattern — Pay-to-Win in Ranked (DP-004) | P0 | Economy graph shows zero mechanical advantage in ranked mode for any spend level |
 | BC-11.03.003 | Forbidden Dark Pattern — Loss-Triggered Purchase Prompt (DP-003) | P1 | No purchase prompt event within declared loss-event proximity window |
-| BC-11.03.004 | Forbidden Dark Pattern — Minor Loot Box Access (DP-008) | P0 | minor_protection.no_loot_box_for_minors = true whenever gacha/loot-box mechanic is declared |
+| BC-11.03.004 | Forbidden Dark Pattern — Minor Loot Box Access (DP-008) | P0 | minor_protection.no_loot_box_for_minors = true whenever gacha/loot-box mechanic is declared (COPPA 2025, PEGI-16 Jun 2026) |
 | BC-11.03.005 | Forbidden Dark Pattern — Miscategorized Best-Value Bundle (DP-006) | P1 | Every SKU labeled best_value_tag=true has the highest per-unit EV in its category |
-| BC-11.03.006 | Forbidden Dark Pattern — Predatory Vulnerability Targeting / Whale Hunting (DP-007) | P1 | segmentation-ltv-spec must not contain offer-escalation rules conditioned on vulnerability proxies |
+| BC-11.03.006 | Forbidden Dark Pattern — Predatory Vulnerability Targeting / Whale Hunting (DP-007) | P0 | segmentation-ltv-spec must not contain offer-escalation rules conditioned on vulnerability proxies (EU DSA dark patterns) |
 | BC-11.04.001 | Gacha EV and Pity Correctness (Ethics-Bounded) | P1 | Gacha pull EV and worst-case cost-to-target remain within ethics-contract declared bounds |
 | BC-11.04.002 | Spend-Concentration Guardrail | P1 | Gini coefficient of spend distribution measured in sim does not exceed ethics-contract declared threshold |
 

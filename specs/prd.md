@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -141,7 +141,7 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 
 **Tier 3 total: 22 BCs** (21 original + 1 added in v1.1: BC-13.01.004 for DI-011)
 
-**Grand total: 179 BCs**
+**Grand total: 178 BCs**
 
 ---
 
@@ -223,13 +223,13 @@ NFR summary — capabilities now with defined numeric targets (v1.1 additions ma
 
 ## Section 5 — Consolidated Error Taxonomy
 
-Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (141 error codes, 22 families — v1.2).
+Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (134 error codes, 22 families — v1.3).
 
-Family summary (v1.1 additions marked with `*`):
+Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`):
 
 | Family | Owning Capability | Code Count |
 |--------|------------------|-----------|
-| E-EAP | CAP-001 (Engine Adapter Protocol) | 11 (+1: E-EAP-011 kernel anti-cheat, v1.1) |
+| E-EAP | CAP-001 (Engine Adapter Protocol) | 13 (v1.1: +E-EAP-011; v1.2: +E-EAP-012 MalformedManifest, +E-EAP-013 HumanGatedTaskPending) |
 | E-CONF * | CAP-002 (Conformance suite) | 5 |
 | E-REPLAY * | CAP-003 (Replay harness) | 7 |
 | E-GEN * | CAP-004 (Asset generation) | 9 |
@@ -246,13 +246,14 @@ Family summary (v1.1 additions marked with `*`):
 | E-CERT | CAP-009 (Cert pre-flight) | 3 |
 | E-DIST | CAP-009 (Distribution tools) | 19 |
 | E-COMP | CAP-010 (Compliance) | 2 |
-| E-ETH * | CAP-011 (Monetization Ethics) | 9 (+1: E-ETH-009 DP-007, v1.2) |
+| E-ETH * | CAP-011 (Monetization Ethics) | 9 (v1.2: +E-ETH-009 DP-007) |
 | E-KB * | CAP-012 (Canon KB) | 7 |
 | E-GENRE * | CAP-013 (Genre lanes) | 6 |
 | E-XR * | CAP-014 (XR seam) | 6 |
 | E-PRV ** | CAP-004 (Provenance disclosure_class) | 3 (E-PRV-010/011/012, v1.2) |
+| **TOTAL** | 22 families | **134** |
 
-**Error family gap status:** All 14 capability families now have error families defined. FU-003 closed. v1.2 adds E-PRV (3 codes, CAP-004 provenance) and E-ETH-009. See `error-taxonomy.md §Coverage Notes`.
+**Error family gap status:** All 14 capability families now have error families defined. FU-003 closed. v1.2 adds E-PRV (3 codes, CAP-004 provenance), E-ETH-009, E-EAP-012/013. See `error-taxonomy.md §Coverage Notes`.
 
 ---
 
@@ -335,10 +336,11 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | 1.0 | 2026-06-08 | product-owner | Initial PRD: 168 BCs, 19 NFRs, 59 error codes / 11 families |
 | 1.1 | 2026-06-08 | product-owner | PRD revision (FU-001/002/003): +2 BCs (BC-1.15.002, BC-13.01.004); +16 NFRs (NFR-020..035); +10 error families, +79 error codes; all DI orphan invariants closed; incorporates DI-010 (kernel AC never authored, §DI-010) and DI-011 (NFT/web3 off by default, §DI-011) as primary architectural decisions, plus ADR-0006 (11-dim convergence model) and ADR-0007 (human-gated fidelity tier) |
 | 1.2 | 2026-06-08 | product-owner | Phase-1d adversarial pass-1 resolution: +9 BCs (BC-11.03.006 DP-007; BC-7.11.002–008 server-authority CWE-602 invariants); E-PRV family (3 codes); E-ETH-009; E-GEN-004 vocabulary corrected; E-ETH-005 mislabel fixed; E-SIM-009 identifier corrected; BC-1.15.002 kernel patterns extended (macOS/IOKit, eBPF, binary blobs, build.rs); BC-13.01.004 console cert-preflight routing added; BC-4.03.002 procedural-exempt audit controls specified; DP deny-list coverage documented; priority fields backfilled on ss-01..ss-08 BCs |
+| 1.3 | 2026-06-08 | product-owner | Phase-1d adversarial pass-2 integrity fixes (C2-01/02/03, S2-01, I2-02/03): corrected grand total 179→178 (BC-INDEX was erroneously self-counted); corrected error-code total 143/141→134 (prose change-notes were incorrectly counted as codes); per-family code-count table added to prd.md §5 and error-taxonomy.md (S2-01); priority backfill completed on remaining 44 BCs in ss-11..ss-14; CAP-011 DP-enforcement BCs escalated to P0 per D-008 compliance policy; all three locations (prd-cap-011.md, BC-INDEX, BC frontmatter) now consistent |
 
 ### 8.1 Subsystem Assignment (Resolved)
 
-**All 170 behavioral contracts have been assigned to architecture subsystems (SS-01 through
+**All 178 behavioral contracts have been assigned to architecture subsystems (SS-01 through
 SS-12).** The `subsystem: SS-TBD` placeholder has been replaced in all BC frontmatter.
 The assignment was propagated from `.factory/specs/architecture/subsystem-decomposition.md`
 (see ARCH-INDEX.md Subsystem Registry). BC file paths (directory `ss-NN/`, filename) are
@@ -348,12 +350,16 @@ Subsystem distribution: SS-01 (41 BCs: CAP-001+002 + BC-1.15.002), SS-02 (9), SS
 SS-04 (16), SS-05 (11), SS-06 (19: CAP-007 12 original + 7 server-authority invariant BCs v1.2), SS-07 (5), SS-08 (17: CAP-009+010), SS-09 (14: CAP-011 13 original + BC-11.03.006 v1.2),
 SS-10 (9), SS-11 (15: CAP-013 + BC-13.01.004), SS-12 (7).
 
-### 8.2 BC Frontmatter Priority Gap — CLOSED (v1.2)
+### 8.2 BC Frontmatter Priority Gap — CLOSED (v1.3)
 
-Priority fields have been backfilled for all 94 BCs in `ss-01/` through `ss-03/` and
-`ss-05/` through `ss-08/` that previously lacked them. Priority values assigned from
-`capabilities.md`: P0 for CAP-001–007 (ss-01..ss-07 dirs), P1 for CAP-008 (ss-08 dir).
-All 179 BCs now have explicit `priority:` fields in frontmatter.
+Priority fields have been backfilled on all 178 BCs across all directories.
+
+- *v1.2:* Backfilled 94 BCs in `ss-01/` through `ss-03/` and `ss-05/` through `ss-08/`. Values: P0 for CAP-001–007, P1 for CAP-008.
+- *v1.3:* Backfilled remaining 44 BCs in `ss-11/` through `ss-14/`. Values: P0/P1 for CAP-011 (see priority-split rationale below), P1 for CAP-012, P2 for CAP-013/014. Also corrected false "CLOSED" assertion — `ss-09/` and `ss-10/` were already complete per v1.2.
+
+**CAP-011 priority split (D-008 compliance = P0):** BCs that enforce regulatory-mandatory consumer-protection obligations (ethics contract gate, forbidden dark patterns with legal basis, minor protection with COPPA/PEGI-16, no-unconstrained-LTV) are P0. BCs that enforce economy-quality properties (economy-spine propagation, pity correctness, Gini guardrail, loss-triggered-offers) are P1. See BC-INDEX §CAP-011 for the per-BC assignments.
+
+All 178 BCs now have explicit `priority:` fields in frontmatter.
 
 ### 8.3 Domain Invariant Coverage — CLOSED (v1.1)
 
@@ -376,7 +382,7 @@ E-PRV family added (3 codes: E-PRV-010/011/012) to register BC-4.03.002's failur
 E-ETH-009 added for DP-007 enforcement. E-GEN-004 vocabulary corrected to canonical three
 values `[pre-generated, live-generated, procedural-exempt]`. E-ETH-005 "(DP-007 equivalent)"
 mislabel removed. E-SIM-009 identifier corrected from `(D-012)` to `(DI-012)`.
-Total: 141 error codes across 22 families. See `error-taxonomy.md §Coverage Notes`.
+Total: 134 error codes across 22 families. See `error-taxonomy.md §Coverage Notes`.
 
 *v1.1:* All 14 capability families had defined error families. 10 new families added.
 E-EAP extended with E-EAP-011. 137 codes across 21 families. **FU-003 closed.**
