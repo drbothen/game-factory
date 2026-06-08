@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.16
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.17
 #
 # PURPOSE
 # -------
@@ -36,6 +36,18 @@
 # rows). Positive-coverage log: "Check (a.ii): N capability section headers
 # validated." POSIX/BSD-awk/grep compatible (no grep -P). (P16-01 recurrence
 # prevention).
+# extended in v1.17 to add check (a.iii) — alternate-phrasing BC grand-count
+# consistency: scans prd.md, subsystem-decomposition.md, and ARCH-INDEX.md for
+# operative statements of the BC grand total using alternate prose phrasings:
+# "all N behavioral contracts", "N behavioral contracts have been assigned",
+# "all N BCs" (non-historical context), "N behavioral contracts assigned". For
+# each match, asserts the stated N equals the computed BC file count. Seven
+# false-positive exclusion rules skip changelog table rows (lines starting |),
+# blockquote lines (starting >), YAML reason: lines, lines containing
+# "pre-v[0-9]", transition delta lines ("[0-9]+→" or "→[0-9]"), and historical
+# backfill notes containing "backfilled". Positive-coverage log: "Check (a.iii):
+# N alternate-phrasing BC-count statements validated." (P17-01 recurrence
+# prevention). POSIX/BSD compatible.
 # extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
 # (F8-01 recurrence prevention);
 # extended in v1.7 to add check (m) — convergence-report dimension field name
@@ -141,6 +153,30 @@
 #       counts that survive grand-total checks (e.g., CAP-007 "12 BCs" above 19
 #       rows; CAP-015 "11 BCs" above 12 rows). Positive-coverage log always
 #       printed. POSIX/BSD-awk/grep compatible (no grep -P).
+#   (a.iii) [NEW v1.17] Alternate-phrasing BC grand-count consistency: scans
+#       prd.md, subsystem-decomposition.md, and ARCH-INDEX.md for operative
+#       BC-count statements using phrasings not caught by check (a):
+#         - "all N behavioral contracts" (case-insensitive)
+#         - "N behavioral contracts have been assigned"
+#         - "all N BCs" (case-insensitive; with historical-context exclusions)
+#         - "N behavioral contracts assigned"
+#       For each match, asserts N == computed BC file count. FAIL lists each
+#       stale phrasing with file, line number, stated count, and expected count.
+#       Catches P17-01 defect class: "All 189 behavioral contracts" surviving
+#       the "Grand total:" check because it uses different wording.
+#       False-positive exclusions (7 rules):
+#         (1) Lines starting with "|" (changelog version table rows).
+#         (2) Lines starting with ">" (blockquote changelog lines).
+#         (3) Lines containing "reason:" (YAML lifecycle prose).
+#         (4) Lines containing "pre-v[0-9]" (explicit historical version refs).
+#         (5) Lines containing "[0-9]→" or "→[0-9]" (transition delta notation).
+#         (6) Lines containing "backfilled" (historical priority backfill notes).
+#         (7) Patterns require words "behavioral contracts" or "BCs", NOT bare
+#             numbers or "error codes" — so "189 active error codes" never matches.
+#       Positive-coverage log: "Check (a.iii): N alternate-phrasing BC-count
+#       statements validated." POSIX/BSD-awk/grep compatible (no grep -P).
+#       WILL FAIL until PO fixes prd.md line with "All 189 behavioral contracts";
+#       becomes green automatically after PO work. (P17-01 recurrence prevention).
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
 #   (d) [NEW v1.2] VP P0/P1 counts: parse VP-INDEX table, assert P0+P1 match
@@ -305,7 +341,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.16) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.17) ==="
 echo ""
 
 # ============================================================================
@@ -504,6 +540,168 @@ else
     errors+=("MISMATCH [per-capability section-header count (a.ii)]: $cap_header_violations count mismatch(es) between BC-INDEX.md capability headers/Summary table and actual section row counts (see list above)")
     fail=1
   fi
+fi
+echo ""
+
+# ============================================================================
+# (a.iii) ALTERNATE-PHRASING BC GRAND-COUNT CONSISTENCY  [NEW v1.17]
+# ============================================================================
+# Scans prd.md, subsystem-decomposition.md, and ARCH-INDEX.md for operative
+# BC-count statements using phrasings NOT caught by check (a)'s "Grand total:"
+# pattern. For each match, asserts the stated count equals $computed_bc.
+#
+# Target phrasings (case-insensitive):
+#   1. "all [0-9]+ behavioral contracts"
+#   2. "[0-9]+ behavioral contracts have been assigned"
+#   3. "all [0-9]+ BCs"
+#   4. "[0-9]+ behavioral contracts assigned"
+#
+# False-positive exclusions (applied per line before extracting a count):
+#   (1) Line starts with "|" — changelog version table rows.
+#   (2) Line starts with ">" — blockquote changelog/annotation lines.
+#   (3) Line contains "reason:" — YAML frontmatter lifecycle prose.
+#   (4) Line contains "pre-v" followed by a digit — explicit historical version
+#       refs ("All 178 pre-v1.9 BCs").
+#   (5) Line contains a digit followed by the arrow char OR arrow followed by a
+#       digit — transition delta notation ("178->190 BCs", em-dash arrow form).
+#   (6) Line contains "backfilled" — historical priority/field backfill notes
+#       ("Priority fields have been backfilled on all 178 BCs").
+#
+# NOTE: "189 active error codes" does NOT match because the patterns require
+# the words "behavioral contracts" or "BCs", not "error codes".
+#
+# POSIX/BSD-grep/awk compatible (no grep -P). awk used for number extraction.
+# EXPECTED: FAIL until PO fixes "All 189 behavioral contracts" in prd.md sect 8.1;
+# becomes green automatically after PO work.
+#
+# POSITIVE-COVERAGE: "Check (a.iii): N alternate-phrasing BC-count statements
+# validated." always printed — detects zero-scan / inert run.
+echo "--- (a.iii) Alternate-phrasing BC grand-count consistency ---"
+
+aiii_violations=0
+aiii_checked=0
+aiii_violation_msgs=()
+
+# Files to scan (same scope as check (a) minus BC-INDEX which uses a different
+# phrasing and is already covered by check (a)'s "Grand total:" pattern).
+AIII_FILES=("$PRD" "$SUBDECOMP" "$ARCH_INDEX")
+AIII_FILE_LABELS=("prd.md" "subsystem-decomposition.md" "ARCH-INDEX.md")
+
+for file_idx in "${!AIII_FILES[@]}"; do
+  scan_file="${AIII_FILES[$file_idx]}"
+  scan_label="${AIII_FILE_LABELS[$file_idx]}"
+
+  if [[ ! -f "$scan_file" ]]; then
+    echo "    SKIP [$scan_label]: file not found"
+    continue
+  fi
+
+  # Use awk to scan every line in the file.
+  # For each line:
+  #   1. Apply exclusion rules — if any fires, skip the line.
+  #   2. Test case-insensitive match for each of the 4 target phrasings.
+  #   3. If matched, extract the integer N from the match.
+  #   4. Output: "LINENO|N|matched_phrasing|line_snippet"
+  #
+  # The UTF-8 right-arrow (U+2192) used in transition notes like "178->190"
+  # is represented in the source as the raw bytes e2 86 92. BSD awk processes
+  # the file as bytes, so we match its raw occurrence with a literal character
+  # in the pattern.  We also match the ASCII approximation "->" for robustness.
+  match_records=$(awk '
+    {
+      line = $0
+      lc   = tolower(line)
+
+      # --- Exclusion rules ---
+      # (1) starts with "|"
+      if (substr(lc,1,1) == "|") next
+      # (2) starts with ">"
+      if (substr(lc,1,1) == ">") next
+      # (3) contains "reason:"
+      if (index(lc,"reason:") > 0) next
+      # (4) contains "pre-v" followed by a digit
+      if (match(lc,/pre-v[0-9]/)) next
+      # (5) contains transition delta arrow patterns
+      #     Match ASCII "->" approximation (common in changelog entries)
+      if (index(lc,"->") > 0) next
+      #     Match UTF-8 right-arrow as raw bytes (e2 86 92) via literal char
+      if (index(line,"\342\206\222") > 0) next
+      # (6) contains "backfilled"
+      if (index(lc,"backfilled") > 0) next
+
+      # --- Pattern matching ---
+      matched = 0
+      n = 0
+      phrasing = ""
+
+      # Phrasing 1: "all N behavioral contracts"
+      if (!matched && match(lc, /all [0-9]+ behavioral contracts/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        split(tok, a, " ")
+        n = a[2] + 0
+        if (n > 0) { matched = 1; phrasing = "all N behavioral contracts" }
+      }
+
+      # Phrasing 2: "N behavioral contracts have been assigned"
+      if (!matched && match(lc, /[0-9]+ behavioral contracts have been assigned/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        split(tok, a, " ")
+        n = a[1] + 0
+        if (n > 0) { matched = 1; phrasing = "N behavioral contracts have been assigned" }
+      }
+
+      # Phrasing 3: "all N BCs"  (tolower converts BCs -> bcs)
+      if (!matched && match(lc, /all [0-9]+ bcs/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        split(tok, a, " ")
+        n = a[2] + 0
+        if (n > 0) { matched = 1; phrasing = "all N BCs" }
+      }
+
+      # Phrasing 4: "N behavioral contracts assigned"
+      if (!matched && match(lc, /[0-9]+ behavioral contracts assigned/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        split(tok, a, " ")
+        n = a[1] + 0
+        if (n > 0) { matched = 1; phrasing = "N behavioral contracts assigned" }
+      }
+
+      if (matched) {
+        disp = substr(line, 1, 80)
+        print NR "|" n "|" phrasing "|" disp
+      }
+    }
+  ' "$scan_file" 2>/dev/null || true)
+
+  # Process each match record from this file
+  while IFS='|' read -r lineno stated_n phrasing line_disp; do
+    [[ -z "$lineno" ]] && continue
+    aiii_checked=$(( aiii_checked + 1 ))
+
+    if [[ "$stated_n" != "$computed_bc" ]]; then
+      aiii_violations=$(( aiii_violations + 1 ))
+      aiii_violation_msgs+=("${scan_label}:${lineno}: phrasing '${phrasing}' states ${stated_n} BCs but computed count is ${computed_bc} — text: ${line_disp}")
+    else
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [a.iii ${scan_label}:${lineno}]: phrasing='${phrasing}' stated=${stated_n} matches computed=${computed_bc}"
+      fi
+    fi
+  done <<< "$match_records"
+
+done
+
+# Positive-coverage log (always printed — detects zero-scan / inert run)
+echo "    Check (a.iii): $aiii_checked alternate-phrasing BC-count statements validated."
+echo "    Alternate-phrasing BC-count violations: $aiii_violations"
+
+if [[ $aiii_violations -gt 0 ]]; then
+  echo ""
+  echo "    ALTERNATE-PHRASING BC-COUNT MISMATCHES (operative prose states wrong BC grand total):"
+  for msg in "${aiii_violation_msgs[@]}"; do
+    echo "      $msg"
+  done
+  errors+=("MISMATCH [alternate-phrasing BC count (a.iii)]: $aiii_violations operative prose statement(s) assert a stale BC grand total (see list above) — PO must update the stated count to ${computed_bc}")
+  fail=1
 fi
 echo ""
 
@@ -2565,6 +2763,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  BC H1/INDEX title sync:            ${bc_title_checked} checked, 0 mismatches"
   echo "  BC frontmatter schema:             $computed_bc checked, 0 violations"
   echo "  Cap section-header counts (a.ii):  ${cap_header_check_count:-0} headers validated, 0 mismatches"
+  echo "  Alt-phrasing BC counts (a.iii):   ${aiii_checked:-0} statements validated, 0 violations"
   echo "  Studio §3/§6 counts:               verified"
   echo "  Subdecomp priority subtotals:      P0=${computed_frontmatter_p0:-?} P1=${computed_frontmatter_p1:-?} P2=${computed_frontmatter_p2:-?} sum=${computed_frontmatter_grand:-?} (computed from frontmatter)"
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
