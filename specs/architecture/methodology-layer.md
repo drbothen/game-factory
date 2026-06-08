@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,22 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.8 changes (Pass-23 I23-01 fix — §3.1 table (A) DEGRADED row missing D-PLAY):**
+> - **I23-01 fixed (intra-§3.1 cross-table contradiction):** Table (A) "Canonical Status-Value Enum"
+>   DEGRADED row "Applicable Dimensions" cell omitted D-PLAY. Table (B) "Per-Dimension Allowed
+>   Value Subsets" correctly lists D-PLAY = {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}. The
+>   D-PLAY prose predicate (§3.D-PLAY DEGRADED predicate), BC-7.05.001 EC-002, and ADR-0006 §D-PLAY
+>   column all confirm D-PLAY=DEGRADED is canonical (human override with documented rationale). Added
+>   D-PLAY to table (A) DEGRADED row "Applicable Dimensions" cell. Full cross-check of all 4 status
+>   values × 11 dimensions confirms this is the only discrepancy between tables (A) and (B).
+>   No change to the actual per-dimension status model.
+> - **CI guard added (s):** `scripts/check-spec-counts.sh` bumped to v1.21. Check (s) added:
+>   §3.1 cross-table consistency — parses both §3.1 tables and asserts, for each of the 4 status
+>   values, that {dimensions listing the value in Per-Dimension Subset table (B)} == {dimensions
+>   in the value's "Applicable Dimensions" cell of Canonical Status-Value Enum table (A)}. FAIL
+>   lists any mismatch. Closes the intra-§3.1 contradiction class (which checks (q) and (n.ii)
+>   do not cover). POSIX/BSD-awk compatible. Green after this fix.
 
 > **v1.7 changes (Pass-19 F1 fix — prose-restatement drift in Pass-12 changelog note):**
 > - **F1 fixed (doc coherence):** The "Resolved in Pass-12" changelog note (line ~661) restated
@@ -605,7 +621,7 @@ subordinate consumers and must adopt this vocabulary.
 | Value | Meaning | Applicable Dimensions |
 |-------|---------|----------------------|
 | `GREEN` | All pass predicates satisfied; no outstanding gates. | All 11 dimensions (subject to per-dimension rules below) |
-| `DEGRADED` | Pass preconditions partially met with an explicit, documented fallback; human acknowledgment recorded. Generic intermediate state when a degradation path exists. | D-SIM, D-REPLAY, D-ASSET, D-CERT, D-PERF, D-PROV, D-SEC (offline only) |
+| `DEGRADED` | Pass preconditions partially met with an explicit, documented fallback; human acknowledgment recorded. Generic intermediate state when a degradation path exists. | D-SIM, D-REPLAY, D-ASSET, D-PLAY, D-CERT, D-PERF, D-PROV, D-SEC (offline only) |
 | `DEGRADED-PENDING` | All automatable work is complete; one or more human or on-device acts are outstanding (e.g. console cert sign-off, attorney review, store publish, playtest session not yet run, GPU/XR hardware not yet available). Distinct from DEGRADED in that the factory has done its full automated share — only an external human act or on-device measurement remains. | D-CERT, D-PROV, D-PLAY, D-PERF |
 | `BLOCKED` | A hard failure predicate is met; the dimension cannot proceed. A BLOCKED dimension halts release. | All 11 dimensions |
 
