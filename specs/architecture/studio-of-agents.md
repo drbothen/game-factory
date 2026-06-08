@@ -2,7 +2,7 @@
 document_type: architecture
 level: L3
 section: studio-of-agents
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -23,6 +23,17 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Studio-of-Agents
 
+> **v1.1 — Pass-4 adversarial defect resolution.**
+> - **C1:** Resolved three-way internal count contradiction. Canonical roster is
+>   57 NEW + 9 ADAPT = 66 game-discipline roles (all enumerated in §2 table). The
+>   14 vsdd-factory infra REUSE agents are NOT part of the 66-role studio count;
+>   they operate outside the roster. §1, §2, §3, and ARCH-INDEX now agree.
+> - **I1:** `security-engineer` (role 55) owning subsystem corrected SS-05 → SS-06.
+>   Its principal artifact `server-authority-invariant-suite` (BC-7.11.002..008) is
+>   owned by SS-06 (Convergence Tracking Engine). §3 SS-05/SS-06 NEW counts adjusted.
+> - **I2:** Roles 55/56/57 activation tier gap closed. `security-engineer` → Tier 1;
+>   `anti-cheat-integrator` + `moderation-ops` → Tier 2. All 66 roles now partitioned.
+
 > **Scope.** This document defines the 66-role Studio-of-Agents: the complete
 > roster of game-discipline specialist agent roles, their extraction disposition
 > (REUSE / NEW / ADAPT from vsdd-factory), their owning subsystem (SS-NN), and
@@ -36,19 +47,30 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 ## 1. Role Extraction Disposition Summary
 
+> **v1.1 canonical roster (C1 fix):** The 66-role studio roster consists exclusively
+> of game-discipline specialist roles listed in §2. vsdd-factory infrastructure roles
+> (orchestrator, adversary, state-manager, etc.) are sourced as REUSE from the vsdd
+> engine and operate OUTSIDE this roster count — they are not game-discipline specialists
+> and are not assigned to a game SS-NN. See §5 for the boundary.
+
 | Disposition | Count | Description |
 |-------------|-------|-------------|
-| **REUSE** | 14 | Lifted verbatim from vsdd-factory agent inventory; game knowledge not required. |
-| **ADAPT** | 18 | vsdd-factory neutral agents reshaped to handle game contracts; mechanism unchanged, domain scope changed. |
-| **NEW** | 34 | Net-new game-discipline specialists with no vsdd analog; pure game-domain roles. |
-| **Total** | 66 | |
+| **NEW** | 57 | Net-new game-discipline specialists with no vsdd analog; pure game-domain roles. |
+| **ADAPT** | 9 | vsdd-factory neutral agents reshaped to handle game contracts; mechanism unchanged, domain scope changed. (Roles 35–43 in §2.) |
+| **Total (in-studio)** | 66 | All enumerated in the §2 roster table. |
 
-Referencing RECONCILIATION §5 and component-inventory.md: the REUSE agents
-correspond to vsdd-factory's neutral specialist set (orchestrator, adversary, state-manager,
-etc.); the ADAPT set covers vsdd agents whose mechanism is retained but whose scope
-shifts to game contracts (product-owner → game contract production, implementer →
-sim-slice TDD, formal-verifier → pure-sim hardening). The NEW set is the complete
-game-discipline surface added in v1.0/v1.5/v2.0 research integration.
+> **vsdd-factory infra layer (not counted in 66):** 14 agents REUSE'd verbatim from
+> vsdd-factory (orchestrator, adversary, state-manager, architect, implementer, test-writer,
+> product-owner, formal-verifier, pr-manager, consistency-validator, research-agent,
+> devops-engineer, demo-recorder, story-writer). These belong to Layer 1/Layer 2
+> boundary and are activated by the pipeline engine — they are not game SS-NN owners.
+
+Referencing RECONCILIATION §5 and component-inventory.md: the ADAPT set covers vsdd
+agents whose mechanism is retained but whose scope shifts to game contracts —
+`producer` → game-production-plan orchestration, `cert-owner` → platform cert, QA
+roles → game-specific replay/balance/loc/compliance testing, `playtest-evaluator` →
+3-lens convergence protocol. The NEW set is the complete game-discipline surface added
+in v1.0/v1.5/v2.0 research integration.
 
 ---
 
@@ -115,7 +137,7 @@ game-discipline surface added in v1.0/v1.5/v2.0 research integration.
 | 52 | `cinematic-director` | Cinematics | SS-04 | NEW | C | `cinematic-spec`, `sequence-graph`; `directed:true` = human-gated |
 | 53 | `camera-cinematography` | Cinematics | SS-04 | NEW | S | `camera-rules-profile` |
 | 54 | `lipsync-animator` | Cinematics | SS-03 | NEW | S | `lip-sync-pipeline-contract` (ARKit-52 blendshapes) |
-| 55 | `security-engineer` | Security | SS-05 | NEW | S | `security-requirements-contract`, `server-authority-invariant-suite` |
+| 55 | `security-engineer` | Security | SS-06 | NEW | S | `security-requirements-contract`, `server-authority-invariant-suite` |
 | 56 | `anti-cheat-integrator` | Security | SS-11 | NEW | S | `anti-cheat-integration-adapter` (EAC/EOS wrap-only) |
 | 57 | `moderation-ops` | Security / Trust | SS-11 | NEW | C | `moderation-pipeline-contract`; judgment = human-gated |
 | 58 | `backend-services-engineer` | Online services | SS-11 | NEW | S | `online-services-spec`, `remote-config-contract` |
@@ -132,24 +154,34 @@ game-discipline surface added in v1.0/v1.5/v2.0 research integration.
 
 ## 3. Disposition Breakdown by Subsystem
 
-| SS | Name | REUSE | ADAPT | NEW | Total principal roles |
-|----|------|-------|-------|-----|----------------------|
-| SS-03 | Asset Generation Pipeline | 0 | 0 | 14 | 14 |
-| SS-04 | Multi-Discipline Production | 0 | 6 | 16 | 22 (cross-listed) |
-| SS-05 | Simulation Quality Verification | 0 | 4 | 1 | 5 |
-| SS-06 | Convergence Tracking | 0 | 1 | 1 | 2 |
-| SS-07 | Playtest Protocol | 0 | 3 | 0 | 3 |
-| SS-08 | Cert and Distribution | 0 | 2 | 8 | 10 |
-| SS-09 | Monetization Ethics | 0 | 0 | 2 | 2 |
-| SS-10 | Canon Knowledge-Base | 0 | 0 | 4 | 4 |
-| SS-11 | Genre-Gated Lanes | 0 | 0 | 8 | 8 |
-| SS-12 | XR Platform Seam | 0 | 0 | 1 | 1 |
+> **Counting rule.** Each role is counted under every SS-NN listed in its row (cross-listed
+> roles appear more than once). Column totals therefore exceed 66; the "Total principal roles"
+> column counts all appearances including cross-listed ones. The §2 table is the authoritative
+> source — each row has exactly one disposition tag. Per-SS totals here reflect the set of
+> roles that have responsibility in that subsystem (ADAPT: 9 unique roles; NEW: 57 unique roles).
 
-> Note: Roles marked REUSE (orchestrator, adversary, architect, state-manager, etc.) are
-> infrastructure roles sourced from vsdd-factory Layer 1; they do not appear in this table
-> because they are not game-discipline specialists and are not owned by a game SS-NN.
-> The 14 REUSE agents from component-inventory.md all belong to Layer 1 (core orchestration).
-> The 18 ADAPT agents belong to Layer 1 or Layer 2 boundary roles.
+| SS | Name | ADAPT | NEW | Total appearances |
+|----|------|-------|-----|-------------------|
+| SS-03 | Asset Generation Pipeline | 0 | 16 | 16 (cross-listed) |
+| SS-04 | Multi-Discipline Production | 3 | 20 | 23 (cross-listed) |
+| SS-05 | Simulation Quality Verification | 3 | 0 | 3 |
+| SS-06 | Convergence Tracking | 1 | 2 | 3 |
+| SS-07 | Playtest Protocol | 3 | 0 | 3 |
+| SS-08 | Cert and Distribution | 2 | 10 | 12 (cross-listed) |
+| SS-09 | Monetization Ethics | 0 | 2 | 2 |
+| SS-10 | Canon Knowledge-Base | 0 | 4 | 4 |
+| SS-11 | Genre-Gated Lanes | 0 | 11 | 11 (cross-listed) |
+| SS-12 | XR Platform Seam | 0 | 1 | 1 |
+
+> Note: vsdd-factory infrastructure roles (orchestrator, adversary, architect,
+> state-manager, implementer, test-writer, product-owner, formal-verifier, pr-manager,
+> consistency-validator, research-agent, devops-engineer, demo-recorder, story-writer)
+> are sourced as REUSE from the vsdd engine. They are NOT game-discipline specialists,
+> are NOT assigned to a game SS-NN, and are NOT counted in the 66-role studio roster.
+> See §5 for the Layer 1/Layer 2 boundary with vsdd-factory infrastructure agents.
+> The ADAPT column above covers the 9 in-studio ADAPT roles (roles 35–43 in §2).
+> (I1 fix v1.1: `security-engineer` role 55 moved from SS-05 → SS-06; SS-05 NEW 1→0,
+> SS-06 NEW 1→2.)
 
 ---
 
@@ -277,11 +309,19 @@ These agents are REUSE from vsdd-factory and are not counted in the 66-role stud
 
 ## 6. Activation Model (Scope Tiers)
 
+> **v1.1 (I2 fix):** Roles 55–57 were previously unassigned to a tier. They are now
+> explicitly placed: `security-engineer` is Tier 1 (always-on; server-authority
+> invariants are required for all online titles), `anti-cheat-integrator` and
+> `moderation-ops` are Tier 2 (genre-gated; online/multiplayer only). All 66 roles
+> are now covered with no gaps or overlaps.
+
 | Tier | Activated agents | Rationale |
 |------|-----------------|-----------|
-| **Tier 1 — v1 Core** | Roles 1–43, 50–54, 58–61 (~50 roles) | Det-sim pilot universal spine |
-| **Tier 2 — Genre-Gated** | Roles 44–49, 62–66 (monetization, marketing, esports, modding, XR seam) | Optional; activated per genre-profile |
+| **Tier 1 — v1 Core** | Roles 1–43, 50–55, 58–61 (51 roles) | Det-sim pilot universal spine; includes `security-engineer` (always-on for server-authority invariant suite, required for all online titles) |
+| **Tier 2 — Genre-Gated** | Roles 44–49, 56–57, 62–66 (15 roles) | Optional; activated per genre-profile. `anti-cheat-integrator` (role 56): online/competitive only; `moderation-ops` (role 57): online/UGC/multiplayer only; monetization/marketing/esports/modding/XR as before |
 | **Tier 3 — Deferred** | `xr-adapter-owner` (role 62) implementation | Seam reserved; build deferred |
 
+> Tier 1 + Tier 2 = 51 + 15 = 66. All roles accounted for.
+>
 > The det-sim pilot (Bevy, premium/cosmetic-DLC, no UGC, no esports) deploys
-> approximately 40 active specialists plus all catalysts.
+> approximately 40 active specialists plus all catalysts from Tier 1.

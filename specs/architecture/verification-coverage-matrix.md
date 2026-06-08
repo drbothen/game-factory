@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-coverage-matrix
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -40,13 +40,14 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | VP-009 | P0 | proptest | SS-05 | Economy simulation core | BC-6.01.002 | DI-012 | HIGH |
 | VP-010 | P1 | proptest | SS-11 | Tournament bracket engine | BC-13.02.005 | DI-012 | HIGH |
 
-**Totals: 10 VPs — Kani: 3 (VP-001 partial, VP-002, VP-004, VP-008), proptest: 7 (VP-001 partial, VP-003, VP-005, VP-006, VP-007, VP-009, VP-010), algebraic: 1 (VP-005 partial).**
+**Totals: 10 VPs — Kani: 4 (VP-001 partial, VP-002, VP-004, VP-008), proptest: 7 (VP-001 partial, VP-003, VP-005, VP-006, VP-007, VP-009, VP-010), algebraic: 1 (VP-005 partial).**
 
 Note: VP-001 uses Kani + proptest (counted under both); VP-005 uses proptest + algebraic proof.
+(C2 fix v1.1: Kani count corrected 3 → 4 — VP-001, VP-002, VP-004, VP-008 are all Kani targets.)
 
 | Tool | VP Count |
 |------|---------|
-| Kani | 3 (VP-001, VP-002, VP-004, VP-008) |
+| Kani | 4 (VP-001, VP-002, VP-004, VP-008) |
 | proptest | 7 (VP-001, VP-003, VP-005, VP-006, VP-007, VP-009, VP-010) |
 | Algebraic | 1 (VP-005) |
 | Grand total VP rows | 10 |

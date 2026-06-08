@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: nfr-catalog
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -50,22 +50,22 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | NFR-018 | Retrieval determinism | CAP-012 | Same `{entity_context_ids, kb_version}` query returns the same subgraph | 100% deterministic | Property-based test | NFR-012-003 |
 | NFR-019 | Grounding coverage | CAP-012 | Every generative agent in the required-grounding list must produce artifacts with `grounded_against` tags | 100% of narrative artifacts from required-grounding agents | Schema validation at artifact acceptance | NFR-012-004 |
 
-| NFR-020 | Adapter protocol round-trip latency | CAP-001 | JSON-RPC request dispatch to response received (local stdio transport) | p50 < 5 ms; p99 < 50 ms per call (exclusive of engine operation time) | CI micro-benchmark: 1,000 no-op `ping` calls over stdio; measure round-trip at transport layer |
-| NFR-021 | Engine-neutrality lint gate execution time | CAP-001 | CI lint check scanning factory core source for engine-name references | < 10 s for a ≤ 100,000-line codebase | Timed CI lint step on reference core source tree |
-| NFR-022 | Conformance suite execution time | CAP-002 | Full conformance suite run for one engine adapter against all declared capabilities | p95 < 10 min per adapter on a standard CI runner (4 vCPU / 8 GB) | Timed CI conformance run for Bevy adapter; gate at 10 min |
-| NFR-023 | Conformance drift detection latency | CAP-002 | Scheduled anti-drift re-run on engine minor release | < 15 min end-to-end (trigger → pass/fail verdict) | Timed CI scheduled run |
-| NFR-024 | Replay recording overhead | CAP-003 | Input-stream recording overhead vs. unrecorded run at T1 determinism | < 5% wall-clock overhead | CI benchmark: 10,000-frame deterministic sim; compare recorded vs. unrecorded run |
-| NFR-025 | Replay execution wall-clock time | CAP-003 | Replay of a 10,000-frame session at T1 (exact snapshot-hash mode) | p95 < 2× original recorded wall-clock time | CI replay benchmark; regression flag if ratio exceeds 2× |
-| NFR-026 | Simulation-BC verification throughput | CAP-006 | Machine-verifiable simulation contract battery (economy, damage, FSM, AI — all 11 checks) | p95 < 60 s for a reference game's full sim-BC suite | Timed CI sim-BC gate |
-| NFR-027 | Convergence dimension evaluation latency | CAP-007 | Full 11-dimension convergence evaluation pass (one loop tick) | p95 < 30 s for a fully-populated project state | Timed CI convergence-tick benchmark |
-| NFR-028 | Cert pre-flight checklist generation time | CAP-009 | Machine-checkable cert pre-flight run for one target platform (Steam, PlayStation, Xbox, iOS, Android) | p95 < 5 min per platform on CI | Timed CI cert-preflight step per platform |
-| NFR-029 | Compliance manifest generation time | CAP-010 | AI disclosure manifest + IARC questionnaire auto-fill from provenance sidecar data | p95 < 60 s for a 1,000-asset project | Timed CI compliance-pipeline step |
-| NFR-030 | Ethics contract validation latency | CAP-011 | Monetization-ethics-contract structural validation + dark-pattern scan | p95 < 10 s per contract | Timed CI ethics-gate step |
-| NFR-031 | Ethics adversarial review surface time | CAP-011 | Time from ethics-gate trigger to adversarial review task being surfaced to operator | < 30 s (task creation + notification) | CI integration test: trigger ethics gate; measure time to task visibility |
-| NFR-032 | Genre profile schema validation time | CAP-013 | Genre profile validation including NFT/web3 default enforcement (BC-13.01.004) | p99 < 1 s per profile document | Property-based test: 10,000 random valid/invalid genre profiles; measure validation time |
-| NFR-033 | Inactive lane zero-artifact guarantee verification | CAP-013 | CI check that no artifacts from inactive lanes appear in build output | p99 < 30 s for full artifact manifest scan | Timed CI artifact-scan step |
-| NFR-034 | XR adapter manifest schema validation time | CAP-014 | XR adapter manifest schema validation at adapter registration | p99 < 500 ms per manifest | CI integration test: validate 100 XR manifests; measure median + p99 |
-| NFR-035 | XR seam isolation check | CAP-014 | Verify zero core changes required when XR adapter is added or removed (BC-14.01.004) | 0 core files modified in git diff between XR-adapter-present and XR-adapter-absent builds | Static analysis: git diff check; CI gate |
+| NFR-020 | Adapter protocol round-trip latency | CAP-001 | JSON-RPC request dispatch to response received (local stdio transport) | p50 < 5 ms; p99 < 50 ms per call (exclusive of engine operation time) | CI micro-benchmark: 1,000 no-op `ping` calls over stdio; measure round-trip at transport layer | prd-cap-001.md §FU-002 |
+| NFR-021 | Engine-neutrality lint gate execution time | CAP-001 | CI lint check scanning factory core source for engine-name references | < 10 s for a ≤ 100,000-line codebase | Timed CI lint step on reference core source tree | prd-cap-001.md §FU-002 |
+| NFR-022 | Conformance suite execution time | CAP-002 | Full conformance suite run for one engine adapter against all declared capabilities | p95 < 10 min per adapter on a standard CI runner (4 vCPU / 8 GB) | Timed CI conformance run for Bevy adapter; gate at 10 min | prd-cap-002-003.md §FU-002 (CAP-002) |
+| NFR-023 | Conformance drift detection latency | CAP-002 | Scheduled anti-drift re-run on engine minor release | < 15 min end-to-end (trigger → pass/fail verdict) | Timed CI scheduled run | prd-cap-002-003.md §FU-002 (CAP-002) |
+| NFR-024 | Replay recording overhead | CAP-003 | Input-stream recording overhead vs. unrecorded run at T1 determinism | < 5% wall-clock overhead | CI benchmark: 10,000-frame deterministic sim; compare recorded vs. unrecorded run | prd-cap-002-003.md §FU-002 (CAP-003) |
+| NFR-025 | Replay execution wall-clock time | CAP-003 | Replay of a 10,000-frame session at T1 (exact snapshot-hash mode) | p95 < 2× original recorded wall-clock time | CI replay benchmark; regression flag if ratio exceeds 2× | prd-cap-002-003.md §FU-002 (CAP-003) |
+| NFR-026 | Simulation-BC verification throughput | CAP-006 | Machine-verifiable simulation contract battery (economy, damage, FSM, AI — all 11 checks) | p95 < 60 s for a reference game's full sim-BC suite | Timed CI sim-BC gate | prd-cap-006-007.md §FU-002 (CAP-006) |
+| NFR-027 | Convergence dimension evaluation latency | CAP-007 | Full 11-dimension convergence evaluation pass (one loop tick) | p95 < 30 s for a fully-populated project state | Timed CI convergence-tick benchmark | prd-cap-006-007.md §FU-002 (CAP-007) |
+| NFR-028 | Cert pre-flight checklist generation time | CAP-009 | Machine-checkable cert pre-flight run for one target platform (Steam, PlayStation, Xbox, iOS, Android) | p95 < 5 min per platform on CI | Timed CI cert-preflight step per platform | prd-cap-009-010.md §FU-002 (CAP-009) |
+| NFR-029 | Compliance manifest generation time | CAP-010 | AI disclosure manifest + IARC questionnaire auto-fill from provenance sidecar data | p95 < 60 s for a 1,000-asset project | Timed CI compliance-pipeline step | prd-cap-009-010.md §FU-002 (CAP-010) |
+| NFR-030 | Ethics contract validation latency | CAP-011 | Monetization-ethics-contract structural validation + dark-pattern scan | p95 < 10 s per contract | Timed CI ethics-gate step | prd-cap-011.md §FU-002 |
+| NFR-031 | Ethics adversarial review surface time | CAP-011 | Time from ethics-gate trigger to adversarial review task being surfaced to operator | < 30 s (task creation + notification) | CI integration test: trigger ethics gate; measure time to task visibility | prd-cap-011.md §FU-002 |
+| NFR-032 | Genre profile schema validation time | CAP-013 | Genre profile validation including NFT/web3 default enforcement (BC-13.01.004) | p99 < 1 s per profile document | Property-based test: 10,000 random valid/invalid genre profiles; measure validation time | prd-cap-013-014.md §FU-002 (CAP-013) |
+| NFR-033 | Inactive lane zero-artifact guarantee verification | CAP-013 | CI check that no artifacts from inactive lanes appear in build output | p99 < 30 s for full artifact manifest scan | Timed CI artifact-scan step | prd-cap-013-014.md §FU-002 (CAP-013) |
+| NFR-034 | XR adapter manifest schema validation time | CAP-014 | XR adapter manifest schema validation at adapter registration | p99 < 500 ms per manifest | CI integration test: validate 100 XR manifests; measure median + p99 | prd-cap-013-014.md §FU-002 (CAP-014) |
+| NFR-035 | XR seam isolation check | CAP-014 | Verify zero core changes required when XR adapter is added or removed (BC-14.01.004) | 0 core files modified in git diff between XR-adapter-present and XR-adapter-absent builds | Static analysis: git diff check; CI gate | prd-cap-013-014.md §FU-002 (CAP-014) |
 
 ---
 
@@ -84,3 +84,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 - **NFR-011** (engine-neutrality) is a correctness NFR, not a performance NFR. It is listed here because it has a numerical target (0 occurrences) and a machine-checkable validation method.
 
 **Total NFRs in this catalog: 35** (NFR-001..NFR-019 from Phase 1a; NFR-020..NFR-035 added in PRD revision v1.1 to close FU-002)
+
+---
+
+## Changelog
+
+### v1.2 (2026-06-08)
+
+| Change | Detail |
+|--------|--------|
+| Source column backfilled for NFR-020..035 (I4) | **IMPORTANT:** NFR-020..NFR-035 rows were missing the `Source` column, making the reverse-traceability claim in § NFR Table (lines 24-25) false for 16 of 35 rows. Added `Source` values derived from the originating per-capability supplement file and FU-002 numeric-target pass: NFR-020/021 → `prd-cap-001.md §FU-002`; NFR-022/023 → `prd-cap-002-003.md §FU-002 (CAP-002)`; NFR-024/025 → `prd-cap-002-003.md §FU-002 (CAP-003)`; NFR-026 → `prd-cap-006-007.md §FU-002 (CAP-006)`; NFR-027 → `prd-cap-006-007.md §FU-002 (CAP-007)`; NFR-028 → `prd-cap-009-010.md §FU-002 (CAP-009)`; NFR-029 → `prd-cap-009-010.md §FU-002 (CAP-010)`; NFR-030/031 → `prd-cap-011.md §FU-002`; NFR-032/033 → `prd-cap-013-014.md §FU-002 (CAP-013)`; NFR-034/035 → `prd-cap-013-014.md §FU-002 (CAP-014)`. All 35 rows now have a complete 7-column structure. |

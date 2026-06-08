@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -30,6 +30,21 @@ traces_to: .factory/specs/product-brief.md
 ---
 
 # Architecture Index — game-factory
+
+> **v1.5 — Pass-4 adversarial defect resolution.**
+> - **C1:** Studio roster line corrected. Canonical: 57 NEW + 9 ADAPT = 66 game-discipline
+>   roles. vsdd-factory infra agents (14 REUSE) are NOT counted in the 66; they operate
+>   outside the roster. Previous "14 REUSE, 18 ADAPT, 34 NEW" was internally inconsistent
+>   with the §2 table.
+> - **C2:** Kani VP count corrected 3 → 4 in verification-coverage-matrix.md (VP-001,
+>   VP-002, VP-004, VP-008 all use Kani).
+> - **I1:** `security-engineer` (role 55) owning subsystem corrected SS-05 → SS-06 in
+>   studio-of-agents.md. Principal artifact `server-authority-invariant-suite` is owned
+>   by SS-06 per subsystem-decomposition and BC frontmatter.
+> - **I2:** Activation tier gap closed — roles 55/56/57 now assigned: `security-engineer`
+>   Tier 1, `anti-cheat-integrator`/`moderation-ops` Tier 2. All 66 roles partitioned.
+> - **O1/O2:** check-spec-counts.sh extended with VP catalog consistency check (g);
+>   stale "expected to FAIL" comments on checks (e)/(f) removed.
 
 > **v1.4 — Pass-3 adversarial defect resolution.**
 > - **I1 (Pass-3):** R-017 (kernel anti-cheat) risk mitigation row corrected from SS-11 → SS-01.
@@ -105,7 +120,7 @@ traces_to: .factory/specs/product-brief.md
 
 **VP counts:** 10 total — 6 P0 (VP-001, VP-002, VP-003, VP-004, VP-008, VP-009), 4 P1 (VP-005, VP-006, VP-007, VP-010).
 
-**Studio roster:** 66 roles — 14 REUSE (vsdd infra), 18 ADAPT, 34 NEW. See `studio-of-agents.md`.
+**Studio roster:** 66 roles — 57 NEW + 9 ADAPT (all game-discipline; enumerated in §2 of `studio-of-agents.md`). vsdd-factory infra agents (14 REUSE: orchestrator, adversary, state-manager, etc.) operate outside this roster count. See `studio-of-agents.md` §1 and §5.
 
 ---
 

@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -422,6 +422,15 @@ ingest-time structural violations that are hard stops.
 
 ---
 
+### PRD Revision 1.4 Changes
+
+| Change | Detail |
+|--------|--------|
+| Stale v1.1 total removed (I3) | **IMPORTANT:** Removed contradictory `Total defined error codes (v1.1): 137 across 21 families` statement. The authoritative total is 134 across 22 families per the per-family table in § PRD Revision 1.2 Changes. The stale figure was a historical snapshot that was never updated after v1.2 additions; it could cause CI tools reading past the first total match to encounter conflicting data. |
+| E-ETH v1.1 changelog clarified (I3) | **IMPORTANT:** Annotated E-ETH v1.1 resolution row to read "8 codes at v1.1 launch; 9 codes current — E-ETH-009 added in v1.2", preventing the historical figure from being misread as the current code count. |
+
+---
+
 ### PRD Revision 1.1 Changes
 
 All 14 capability families now have defined error families. The following previously-flagged
@@ -435,11 +444,11 @@ gaps are now resolved:
 | CAP-006 (Simulation QA) | No error table | **E-SIM added** (9 codes) |
 | CAP-007 (Convergence) | No error table | **E-CONV added** (6 codes) |
 | CAP-008 (Playtest) | No error table | **E-PLAY added** (5 codes) |
-| CAP-011 (Monetization Ethics) | No error table | **E-ETH added** (8 codes) |
+| CAP-011 (Monetization Ethics) | No error table | **E-ETH added** (8 codes at v1.1 launch; 9 codes current — E-ETH-009 added in v1.2) |
 | CAP-012 (Canon KB) | No error table | **E-KB added** (7 codes) |
 | CAP-013 (Genre Lanes) | No error table | **E-GENRE added** (6 codes) |
 | CAP-014 (XR Seam) | No error table | **E-XR added** (6 codes) |
 
 **E-EAP extended:** E-EAP-011 (KernelAntiCheatAttempted) added to enforce BC-1.15.002 / DI-010.
 
-**Total defined error codes (v1.1): 137** across 21 families (was 59 / 11 families in PRD v1.0).
+_Historical snapshot (v1.1 at launch): 126 codes across 21 families (was 59 / 11 families in PRD v1.0). Current total is 134 across 22 families — see the authoritative per-family table above._
