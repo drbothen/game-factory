@@ -7,3 +7,6 @@ node_modules/
 
 # Brownfield reference repos (external; ingested in Phase 0, not tracked)
 .reference/
+
+# Local MCP config — contains API keys, never commit
+.mcp.json

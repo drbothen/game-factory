@@ -8,8 +8,8 @@ contracts + playtest-validated design intent).
 > **Status:** Spec-input phase. game-factory is a **product built BY
 > [vsdd-factory](../vsdd-factory)** following the full VSDD protocol. This repo is the
 > **VSDD input package** — the canonical entry artifact is the product brief at
-> [`.factory/specs/product-brief.md`](.factory/specs/product-brief.md); `docs/research/`
-> is the planning research that backs it; `docs/design/` + `docs/decisions/` are
+> [`.factory/specs/product-brief.md`](.factory/specs/product-brief.md); `.factory/planning/research/`
+> is the planning research that backs it; `.factory/planning/design/` + `.factory/planning/decisions/` are
 > Phase-1 seed inputs. vsdd-factory's pipeline produces the formal specs (domain spec,
 > PRD, behavioral contracts, architecture, verification properties), stories, and code.
 >
@@ -38,16 +38,16 @@ them honest.
 Adapter protocol is being designed against **Bevy + Unity** (maximum
 dissimilarity → hardest stress test). **Godot** is the confirmed cheap third
 adapter (research-validated: between Bevy and Unity on 7/8 axes). Decisions:
-- [`0001`](docs/decisions/0001-founding-engine-pair.md) — founding pair Bevy + Unity
-- [`0002`](docs/decisions/0002-protocol-and-conformance-stance.md) — hybrid protocol + conformance (LSP + Terraform + CRI/CSI)
-- [`0003`](docs/decisions/0003-determinism-tier-capability.md) — determinism tier as a capability dimension
+- [`0001`](.factory/planning/decisions/0001-founding-engine-pair.md) — founding pair Bevy + Unity
+- [`0002`](.factory/planning/decisions/0002-protocol-and-conformance-stance.md) — hybrid protocol + conformance (LSP + Terraform + CRI/CSI)
+- [`0003`](.factory/planning/decisions/0003-determinism-tier-capability.md) — determinism tier as a capability dimension
 
-**Research pass 1 is complete** — start with [`docs/research/RECONCILIATION.md`](docs/research/RECONCILIATION.md).
+**Research pass 1 is complete** — start with [`.factory/planning/research/RECONCILIATION.md`](.factory/planning/research/RECONCILIATION.md).
 
 ## Documents
 
-- [`docs/design/architecture.md`](docs/design/architecture.md) — four-layer architecture
-- [`docs/design/engine-adapter-protocol.md`](docs/design/engine-adapter-protocol.md) — the protocol, capability matrix, sample manifests
-- [`docs/design/extraction-boundary.md`](docs/design/extraction-boundary.md) — what moves from vsdd-factory vs stays vs is built new
-- [`docs/research/`](docs/research/) — cited evidence base (engine capability research + prior art)
-- [`docs/decisions/`](docs/decisions/) — decision log
+- [`.factory/planning/design/architecture.md`](.factory/planning/design/architecture.md) — four-layer architecture
+- [`.factory/planning/design/engine-adapter-protocol.md`](.factory/planning/design/engine-adapter-protocol.md) — the protocol, capability matrix, sample manifests
+- [`.factory/planning/design/extraction-boundary.md`](.factory/planning/design/extraction-boundary.md) — what moves from vsdd-factory vs stays vs is built new
+- [`.factory/planning/research/`](.factory/planning/research/) — cited evidence base (engine capability research + prior art)
+- [`.factory/planning/decisions/`](.factory/planning/decisions/) — decision log

@@ -17,9 +17,9 @@ available here.
 
 Read these first, in order:
   1. .factory/specs/product-brief.md   (the VSDD entry artifact)
-  2. docs/research/RECONCILIATION.md    (research synthesis driving the design)
-  3. docs/decisions/0001..0003          (founding pair / conformance / determinism tier)
-  4. docs/design/architecture.md, protocol-schema.md, extraction-boundary.md
+  2. .factory/planning/research/RECONCILIATION.md    (research synthesis driving the design)
+  3. .factory/planning/decisions/0001..0003          (founding pair / conformance / determinism tier)
+  4. .factory/planning/design/architecture.md, protocol-schema.md, extraction-boundary.md
 
 Locked decisions:
   - Authoring depth = brief + research only. The pipeline crystallizes everything
@@ -67,11 +67,11 @@ adapter.
 - **Input package complete and committed (4 commits):**
   - `.factory/specs/product-brief.md` — VSDD entry artifact (conforms to vsdd-factory's
     product-brief template).
-  - `docs/research/` — 5 docs: per-engine capability reports (Bevy/Unity/Godot),
+  - `.factory/planning/research/` — 5 docs: per-engine capability reports (Bevy/Unity/Godot),
     prior-art + protocol precedents, and `RECONCILIATION.md` (read first).
-  - `docs/design/` — architecture, engine-adapter-protocol, protocol-schema v1.0 draft,
+  - `.factory/planning/design/` — architecture, engine-adapter-protocol, protocol-schema v1.0 draft,
     extraction-boundary.
-  - `docs/decisions/` — ADRs 0001 (founding pair), 0002 (protocol+conformance), 0003
+  - `.factory/planning/decisions/` — ADRs 0001 (founding pair), 0002 (protocol+conformance), 0003
     (determinism tier).
 - **Pipeline not yet started.** No `.factory/` orphan-branch worktree set up yet; no
   preflight; no Phase 0. The brief has NOT yet been validated or approved.
@@ -90,20 +90,20 @@ adapter.
 - **Reuse engine-native build runners** (GameCI, godot-ci, UAT, Cargo) + Rapier — wrap,
   don't reinvent. Build the protocol + conformance suite + semantic/replay layer.
 - **Verify engine APIs against version-tagged primary docs** — AI summarizers confabulate
-  fast-moving engine APIs (see `docs/research/bevy-capabilities.md`).
+  fast-moving engine APIs (see `.factory/planning/research/bevy-capabilities.md`).
 
 ### The VSDD pipeline path (greenfield + Phase-0 extraction)
 
 1. `validate-brief` → fix gaps/bloat → **human brief-approval gate**.
 2. Pre-pipeline preflight (toolchain/LLM/MCP) + set up game-factory's `.factory/`
    worktree properly (devops-engineer / state-manager).
-3. Market-intel gate — largely pre-satisfied by `docs/research/prior-art-and-precedents.md`
+3. Market-intel gate — largely pre-satisfied by `.factory/planning/research/prior-art-and-precedents.md`
    (empty-quadrant GO); the agent formalizes it.
 4. **Phase 0 — extraction ingestion:** brownfield-ingest vsdd-factory's own engine-neutral
    core (../vsdd-factory) to drive the extraction boundary.
 5. **Phase 1 — spec crystallization:** architect / product-owner / business-analyst produce
-   domain spec, PRD, behavioral contracts, architecture, VPs — using `docs/design` +
-   `docs/decisions` as authoritative inputs.
+   domain spec, PRD, behavioral contracts, architecture, VPs — using `.factory/planning/design` +
+   `.factory/planning/decisions` as authoritative inputs.
 6. **Phase 1d → 2 → 3 → …** adversarial spec review → story decomposition → TDD build →
    convergence.
 
