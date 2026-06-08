@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.2
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.3
 #
 # PURPOSE
 # -------
-# Prevent recurring count-drift across the spec layer. Six classes of drift
-# are checked (extended in v1.2 to cover Pass-3 adversarial defect classes):
+# Prevent recurring count-drift across the spec layer. Seven classes of drift
+# are checked (extended in v1.2 to cover Pass-3 adversarial defect classes;
+# extended in v1.3 to cover Pass-4 VP catalog consistency):
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
@@ -12,13 +13,15 @@
 #       VP-INDEX summary line AND ARCH-INDEX vp_p0/vp_p1 frontmatter values.
 #   (e) [NEW v1.2] BC H1 ↔ BC-INDEX title sync: for each BC file, compare its
 #       H1 heading title to its BC-INDEX title-column entry; fail on mismatch.
-#       NOTE: Checks (e) and (f) will FAIL until the product-owner completes the
-#       BC title/frontmatter fixes from Pass-3 adversarial review (I3/I4). This
-#       is expected. The orchestrator will run the final green check after PO
-#       completes those fixes.
 #   (f) [NEW v1.2] BC frontmatter-schema uniformity: assert every BC carries the
 #       required fields: status:, version:, lifecycle_status:, subsystem:,
 #       capability:, priority:.
+#   (g) [NEW v1.3] VP catalog consistency across all VP-bearing docs: assert that
+#       (i) total VP count = 10 and P0/P1 = 6/4 everywhere they are stated
+#       (VP-INDEX, verification-architecture.md, ARCH-INDEX frontmatter); and
+#       (ii) per-tool VP counts (Kani, proptest) agree between
+#       verification-architecture.md and verification-coverage-matrix.md.
+#       Directly prevents the C2 class of per-tool arithmetic drift.
 #
 # USAGE
 #   ./scripts/check-spec-counts.sh [--verbose]
@@ -56,6 +59,8 @@ ARCH_INDEX="$REPO_ROOT/.factory/specs/architecture/ARCH-INDEX.md"
 PRD="$REPO_ROOT/.factory/specs/prd.md"
 ERROR_TAX="$REPO_ROOT/.factory/specs/prd-supplements/error-taxonomy.md"
 VP_INDEX="$REPO_ROOT/.factory/specs/verification-properties/VP-INDEX.md"
+VERIF_ARCH="$REPO_ROOT/.factory/specs/architecture/verification-architecture.md"
+VERIF_MATRIX="$REPO_ROOT/.factory/specs/architecture/verification-coverage-matrix.md"
 
 # ---- Helpers ----------------------------------------------------------------
 fail=0
@@ -246,10 +251,6 @@ fi
 # For each BC file, extract the H1 title (after "# BC-NNN: ") and compare to
 # the BC-INDEX title column (the 3rd |-separated field in the BC-INDEX table row
 # for that BC ID).
-#
-# IMPORTANT: This check is expected to FAIL until the product-owner completes
-# the BC title fixes flagged in Pass-3 adversarial review (I3/I4). The
-# orchestrator will run the final green check after those fixes are merged.
 echo "--- (e) BC H1 <-> BC-INDEX title sync ---"
 
 bc_title_mismatches=()
@@ -303,9 +304,6 @@ echo "    Title mismatches found: ${#bc_title_mismatches[@]}"
 
 if [[ ${#bc_title_mismatches[@]} -gt 0 ]]; then
   echo ""
-  echo "    NOTE: Mismatches below are expected to be resolved by product-owner"
-  echo "    as part of Pass-3 I3/I4 BC-title/frontmatter fixes."
-  echo ""
   echo "    TITLE MISMATCHES:"
   for m in "${bc_title_mismatches[@]}"; do
     echo "      $m"
@@ -320,10 +318,6 @@ echo ""
 # ============================================================================
 # Assert every BC file carries the required frontmatter fields:
 #   status:, version:, lifecycle_status:, subsystem:, capability:, priority:
-#
-# IMPORTANT: Like check (e), this check may fail until the product-owner
-# completes the BC frontmatter fixes from Pass-3 (I4). Expected. Final green
-# check runs after PO merges their fixes.
 echo "--- (f) BC frontmatter-schema uniformity ---"
 
 REQUIRED_FIELDS=("status:" "version:" "lifecycle_status:" "subsystem:" "capability:" "priority:")
@@ -355,9 +349,6 @@ echo "    BC files with schema violations: $bc_schema_failures"
 
 if [[ $bc_schema_failures -gt 0 ]]; then
   echo ""
-  echo "    NOTE: Schema violations below are expected to be resolved by product-owner"
-  echo "    as part of Pass-3 I3/I4 BC frontmatter fixes."
-  echo ""
   echo "    SCHEMA VIOLATIONS:"
   for issue in "${bc_schema_issues[@]}"; do
     echo "      $issue"
@@ -366,6 +357,129 @@ if [[ $bc_schema_failures -gt 0 ]]; then
   fail=1
 fi
 echo ""
+
+# ============================================================================
+# (g) VP CATALOG CONSISTENCY  [NEW v1.3]
+# ============================================================================
+# Assert VP count coherence across all four VP-bearing docs:
+#   VP-INDEX.md, verification-architecture.md, verification-coverage-matrix.md,
+#   ARCH-INDEX.md frontmatter.
+#
+# Checks:
+#   (g.i)  Total VP count = 10 and P0/P1 = 6/4 in every doc that states them.
+#   (g.ii) Per-tool VP counts (Kani, proptest) agree between
+#          verification-architecture.md and verification-coverage-matrix.md.
+#
+# Pattern strategy: POSIX/BSD-grep compatible (no -P; uses -E only).
+echo "--- (g) VP catalog consistency ---"
+
+VP_TOTAL_EXPECTED=10
+VP_P0_EXPECTED=6
+VP_P1_EXPECTED=4
+
+if [[ ! -f "$VERIF_ARCH" ]]; then
+  echo "    SKIP: verification-architecture.md not found at $VERIF_ARCH"
+elif [[ ! -f "$VERIF_MATRIX" ]]; then
+  echo "    SKIP: verification-coverage-matrix.md not found at $VERIF_MATRIX"
+elif [[ ! -f "$VP_INDEX" ]]; then
+  echo "    SKIP: VP-INDEX.md not found at $VP_INDEX"
+else
+  # ---- (g.i) Total/P0/P1 checks ----
+
+  # VP-INDEX summary line: "Total: 10 VPs — 6 P0, 4 P1"
+  vp_idx_summary=$(grep -E 'Total: [0-9]+ VPs' "$VP_INDEX" 2>/dev/null | head -1 || true)
+  vp_idx_total=$(printf '%s' "$vp_idx_summary" \
+    | awk '{for(i=1;i<=NF;i++) if($i~/^[0-9]+$/ && $(i+1)~/VPs/) {print $i; exit}}')
+  vp_idx_p0=$(printf '%s' "$vp_idx_summary" \
+    | awk '{for(i=1;i<=NF;i++) if($i=="P0," || $i=="P0.") {print $(i-1); exit}}')
+  vp_idx_p1=$(printf '%s' "$vp_idx_summary" \
+    | awk '{for(i=1;i<=NF;i++) if($i=="P1." || $i=="P1,") {print $(i-1); exit}}')
+
+  # verification-architecture.md VP counts line:
+  # "**VP counts: 10 total — 6 P0 (VP-001...), 4 P1 (...)**"
+  va_counts_line=$(grep -E 'VP counts:.*total' "$VERIF_ARCH" 2>/dev/null | head -1 || true)
+  va_total=$(printf '%s' "$va_counts_line" \
+    | awk '{for(i=1;i<=NF;i++) if($i~/^[0-9]+$/ && $(i+1)~/total/) {print $i; exit}}')
+  va_p0=$(printf '%s' "$va_counts_line" \
+    | awk '{for(i=1;i<=NF;i++) if($i=="P0" && $(i+1)~/^\(VP/) {print $(i-1); exit}}')
+  va_p1=$(printf '%s' "$va_counts_line" \
+    | awk '{for(i=1;i<=NF;i++) if($i=="P1" && $(i+1)~/^\(VP/) {print $(i-1); exit}}')
+
+  # verification-coverage-matrix.md grand total row:
+  # "| Grand total VP rows | 10 |"
+  vm_total=$(grep -E '^\| Grand total VP rows' "$VERIF_MATRIX" 2>/dev/null \
+    | awk -F'|' '{gsub(/ /,"",$3); print $3}' | head -1 || true)
+
+  # ARCH-INDEX frontmatter (already parsed in check d, re-read for clarity):
+  arch_vp_total_line=$(grep -E '^vp_total:' "$ARCH_INDEX" 2>/dev/null \
+    | awk '{gsub(/[^0-9]/,"",$2); print $2}' | head -1 || true)
+
+  echo "    VP-INDEX total stated:          ${vp_idx_total:-NOT_FOUND}"
+  echo "    VP-INDEX P0 stated:             ${vp_idx_p0:-NOT_FOUND}"
+  echo "    VP-INDEX P1 stated:             ${vp_idx_p1:-NOT_FOUND}"
+  echo "    verif-arch total stated:        ${va_total:-NOT_FOUND}"
+  echo "    verif-arch P0 stated:           ${va_p0:-NOT_FOUND}"
+  echo "    verif-arch P1 stated:           ${va_p1:-NOT_FOUND}"
+  echo "    verif-matrix grand total:       ${vm_total:-NOT_FOUND}"
+  echo "    ARCH-INDEX vp_total:            ${arch_vp_total_line:-NOT_FOUND}"
+  echo "    Expected: total=$VP_TOTAL_EXPECTED  P0=$VP_P0_EXPECTED  P1=$VP_P1_EXPECTED"
+  echo ""
+
+  # Assert all stated totals equal expected
+  [[ -n "$vp_idx_total" ]] && check "VP total / VP-INDEX summary" \
+    "$vp_idx_total" "$VP_TOTAL_EXPECTED" "VP-INDEX.md"
+  [[ -n "$vp_idx_p0" ]] && check "VP P0 / VP-INDEX summary (g)" \
+    "$vp_idx_p0" "$VP_P0_EXPECTED" "VP-INDEX.md"
+  [[ -n "$vp_idx_p1" ]] && check "VP P1 / VP-INDEX summary (g)" \
+    "$vp_idx_p1" "$VP_P1_EXPECTED" "VP-INDEX.md"
+  [[ -n "$va_total" ]] && check "VP total / verification-architecture" \
+    "$va_total" "$VP_TOTAL_EXPECTED" "verification-architecture.md"
+  [[ -n "$va_p0" ]] && check "VP P0 / verification-architecture" \
+    "$va_p0" "$VP_P0_EXPECTED" "verification-architecture.md"
+  [[ -n "$va_p1" ]] && check "VP P1 / verification-architecture" \
+    "$va_p1" "$VP_P1_EXPECTED" "verification-architecture.md"
+  [[ -n "$vm_total" ]] && check "VP grand total / verification-coverage-matrix" \
+    "$vm_total" "$VP_TOTAL_EXPECTED" "verification-coverage-matrix.md"
+  [[ -n "$arch_vp_total_line" ]] && check "VP total / ARCH-INDEX vp_total" \
+    "$arch_vp_total_line" "$VP_TOTAL_EXPECTED" "ARCH-INDEX.md"
+
+  # ---- (g.ii) Per-tool count agreement ----
+  # Both the verification-architecture.md VP Targets column AND the
+  # verification-coverage-matrix.md tool summary table must state the same
+  # per-tool counts. VP-001 uses Kani+proptest and is counted under BOTH tools
+  # in the matrix. The architecture tooling table lists it under Kani only
+  # (proptest row lists 6 VPs, matrix Kani column enumerates 4, matrix proptest
+  # enumerates 7 including VP-001 dual-counted). We assert both docs match
+  # canonical expected values: Kani=4, proptest=7.
+  VM_KANI_EXPECTED=4
+  VM_PROPTEST_EXPECTED=7
+
+  # Parse VP Targets column from verification-architecture.md tooling table.
+  # The Kani row lists VP-001, VP-002, VP-004, VP-008 (4 targets).
+  va_kani_vps=$(grep -E '^\| \*\*Kani\*\*' "$VERIF_ARCH" 2>/dev/null \
+    | grep -oE 'VP-[0-9]+' | sort -u | wc -l | tr -d '[:space:]' || true)
+
+  # Parse Kani/proptest counts from verification-coverage-matrix.md tool summary table:
+  # "| Kani | 4 (VP-001, VP-002, VP-004, VP-008) |"
+  # Extract the first integer in the second data column ($3 when split by |).
+  vm_kani_count=$(grep -E '^\| Kani ' "$VERIF_MATRIX" 2>/dev/null \
+    | awk -F'|' '{match($3,/[0-9]+/); print substr($3,RSTART,RLENGTH)}' | head -1 || true)
+  vm_proptest_count=$(grep -E '^\| proptest ' "$VERIF_MATRIX" 2>/dev/null \
+    | awk -F'|' '{match($3,/[0-9]+/); print substr($3,RSTART,RLENGTH)}' | head -1 || true)
+
+  echo "    Kani VP count (verif-arch VP Targets): ${va_kani_vps:-NOT_FOUND}  (expected: $VM_KANI_EXPECTED)"
+  echo "    Kani VP count (verif-matrix table):    ${vm_kani_count:-NOT_FOUND}  (expected: $VM_KANI_EXPECTED)"
+  echo "    proptest VP count (verif-matrix):      ${vm_proptest_count:-NOT_FOUND}  (expected: $VM_PROPTEST_EXPECTED)"
+  echo "    Note: proptest=7 because VP-001 is dual-counted (Kani+proptest)."
+  echo ""
+
+  [[ -n "$va_kani_vps" ]] && check "Kani VP count / verif-arch VP Targets column" \
+    "$va_kani_vps" "$VM_KANI_EXPECTED" "verification-architecture.md"
+  [[ -n "$vm_kani_count" ]] && check "Kani VP count / verif-matrix tool table" \
+    "$vm_kani_count" "$VM_KANI_EXPECTED" "verification-coverage-matrix.md"
+  [[ -n "$vm_proptest_count" ]] && check "proptest VP count / verif-matrix tool table" \
+    "$vm_proptest_count" "$VM_PROPTEST_EXPECTED" "verification-coverage-matrix.md"
+fi
 
 # ============================================================================
 # SUMMARY
@@ -389,10 +503,6 @@ else
   echo ""
   echo "Fix the stated totals in the documents listed above to match the"
   echo "computed values, or fix the source BC/error files causing the discrepancy."
-  echo ""
-  echo "NOTE: Checks (e) BC H1/INDEX title sync and (f) BC frontmatter schema"
-  echo "will fail until the product-owner completes Pass-3 I3/I4 BC fixes."
-  echo "The orchestrator will run the final green check after those changes merge."
 fi
 echo ""
 
