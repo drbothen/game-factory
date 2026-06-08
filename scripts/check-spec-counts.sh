@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.13
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.14
 #
 # PURPOSE
 # -------
@@ -9,6 +9,12 @@
 # extended in v1.4 to cover Pass-5 studio §3 appearance counts, subsystem
 # priority subtotals, and formal VP ↔ BC bidirectional anchor):
 # extended in v1.5 to fix false-green in check (i) (I6-01) and add check (k);
+# extended in v1.14 to extend check (k) with label-match sub-check (k.ii) —
+# for E-EAP and E-OSVC families: asserts BC parenthetical label is non-
+# contradictory with registered taxonomy category/name (C14-02 recurrence
+# prevention). Also adds check (o) — seam-count consistency: FAIL if any
+# scoped spec file contains stale "four adapter seam" / "four-seam adapter"
+# in operative content (O14-01 recurrence prevention). POSIX/BSD compatible.
 # extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
 # (F8-01 recurrence prevention);
 # extended in v1.7 to add check (m) — convergence-report dimension field name
@@ -136,11 +142,26 @@
 #       guarded BC must cite its VP-00x back. Currently EXPECTED TO FAIL until
 #       PO completes back-reference additions (I2 fix). Implemented so the check
 #       becomes green after PO work without script changes.
-#   (k) [NEW v1.5] Error-identifier resolution: every E-[A-Z]+-[0-9]+ token
-#       referenced in any BC file must resolve to a registered code in
-#       error-taxonomy.md. Reports unregistered codes. Will FAIL until PO
-#       registers E-ETH codes for dark-pattern BCs (I6-02 class). Implemented
-#       now so it becomes green automatically after PO work.
+#   (k) [NEW v1.5, EXTENDED v1.14] Error-identifier resolution + label-match:
+#       (k.i)  Every E-[A-Z]+-[0-9]+ token referenced in any BC file must
+#              resolve to a registered code in error-taxonomy.md. Reports
+#              unregistered codes. Will FAIL until PO registers all pending
+#              codes. Becomes green after PO work.
+#       (k.ii) [NEW v1.14] For E-EAP and E-OSVC families: asserts the
+#              parenthetical BC label (e.g. "(UnsupportedAuthProvider)") is
+#              non-contradictory with the registered taxonomy category/name.
+#              E-EAP: exact CamelCase match (normalized). E-OSVC: significant
+#              words from BC label must appear in the registered short
+#              description. Scoped to E-EAP/E-OSVC only to avoid false positives
+#              on families with looser label conventions. Will FAIL until PO
+#              completes C14-01 re-citation fix. Positive-coverage log line
+#              always printed.
+#   (o) [NEW v1.14, O14-01] Seam-count consistency: FAIL if any scoped spec
+#       file (ARCH-INDEX, ADR-0004, capabilities.md, invariants.md, prd.md,
+#       product-brief.md) contains "four adapter seam" / "four-seam adapter"
+#       (case-insensitive) in operative content (changelog/reason lines
+#       excluded). Prevents I14-01 recurrence. Will go green after PO updates
+#       domain-spec/prd/product-brief prose; architect files are clean now.
 #   (l) [NEW v1.6] disclosure_class closed-enum consistency (F8-01 recurrence
 #       prevention): derives the canonical allowed-value set programmatically from
 #       the producer BC ss-04/BC-4.03.002.md (source of truth; authoritative closed
@@ -236,7 +257,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.13) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.14) ==="
 echo ""
 
 # ============================================================================
@@ -895,21 +916,62 @@ fi
 echo ""
 
 # ============================================================================
-# (k) ERROR-IDENTIFIER RESOLUTION  [NEW v1.5]
+# (k) ERROR-IDENTIFIER RESOLUTION + LABEL MATCH  [NEW v1.5; EXTENDED v1.14]
 # ============================================================================
-# Assert every E-[A-Z]+-[0-9]+ token referenced in any BC file resolves to a
-# registered code in error-taxonomy.md. Unregistered codes are reported.
+# (k.i)  [v1.5] Assert every E-[A-Z]+-[0-9]+ token in any BC resolves to a
+#        registered code in error-taxonomy.md. Unregistered codes are reported.
+#        WILL FAIL until PO registers all pending codes. Becomes green after PO
+#        work without script changes.
 #
-# This guards the I6-02 class: BCs that reference error codes that have not yet
-# been registered in the taxonomy. The check WILL FAIL until PO registers E-ETH
-# codes for dark-pattern/ethics BCs in SS-09 (CAP-011). Implemented so it
-# becomes green automatically after PO work without script changes.
+# (k.ii) [NEW v1.14, C14-02] Label-match sub-check: for each occurrence of the
+#        form "E-<FAMILY>-<NNN> (<Label>)" in any BC, look up the registered
+#        Category/name for that code in error-taxonomy.md and assert the BC's
+#        <Label> is non-contradictory with the registered category.
 #
-# Strategy:
-#   1. Build the set of registered codes from error-taxonomy.md (same grep used
-#      in check b, but here we keep the full list rather than just counting).
-#   2. Collect all E-[A-Z]+-[0-9]+ tokens across BC files.
-#   3. Report any token that is not in the registered set.
+#        SCOPE: The check targets the two families where BCs consistently attach
+#        CamelCase labels:
+#          E-EAP  — column layout: | Code | JSONCode | CamelCaseName | ... |
+#                   The 3rd column is the authoritative CamelCase name. The BC
+#                   label is expected to match it exactly (after normalization).
+#          E-OSVC — column layout: | Code | ShortDescription | Severity | ... |
+#                   The 2nd column is the short description (prose). BCs derive
+#                   a CamelCase label from it. Contradiction is detected by
+#                   normalized word-overlap check (no significant words from the
+#                   BC label must be absent from the registered description).
+#
+#        Other families are not scoped because their taxonomy Category columns
+#        are prose sentences or symbolic SCREAMING_SNAKE_CASE sub-codes (E-ETH)
+#        whose label conventions differ from the CamelCase form used in E-EAP/
+#        E-OSVC. Scoping prevents false positives on 30+ other families.
+#
+#        NORMALIZATION strategy (POSIX/BSD-grep compatible; no -P):
+#        1. Strip leading/trailing whitespace, backticks, underscores.
+#        2. Lowercase both the BC label and the taxonomy category string.
+#        3. For E-EAP: require the lowercased BC label to match the lowercased
+#           CamelCase name from column 3 exactly (case-fold only; no word split).
+#           E.g., BC "CapabilityUnsupported" folds to "capabilityunsupported";
+#           taxonomy col3 "CapabilityUnsupported" folds to "capabilityunsupported"
+#           — match. If the folded strings differ, it is a mismatch.
+#        4. For E-OSVC: split the BC label's significant words by CamelCase
+#           boundary (insert spaces before uppercase letters, then lowercase).
+#           Check that every significant word from the BC label appears as a
+#           substring in the lowercased taxonomy description. A word is
+#           "significant" if it has 4+ characters (excludes "by", "in", "or").
+#           E.g., BC label "UnsupportedAuthProvider" → words ["unsupported",
+#           "auth", "provider"]; taxonomy "Score rejected by server" does NOT
+#           contain "unsupported" → FAIL.
+#           E.g., BC label "ScoreRejectedByServer" → words ["score", "rejected",
+#           "server"]; taxonomy "Score rejected by server" contains all three →
+#           PASS.
+#
+#        WILL FAIL until PO completes C14-01 re-citation fix (E-OSVC-003
+#        UnsupportedAuthProvider → E-OSVC-013 in BC-15.02.001 and related BCs).
+#        Implemented now so it becomes green automatically after PO work.
+#
+#        POSITIVE COVERAGE LOG: always prints the count of validated citations
+#        ("Check (k) label-match: N E-code label citations validated against
+#        taxonomy categories.") to detect a zero-scan (inert) run.
+#
 # POSIX/BSD grep compatible (no -P; uses -E and -o only).
 echo "--- (k) error-identifier resolution (BC refs vs error-taxonomy.md) ---"
 
@@ -926,7 +988,7 @@ else
   echo "    Registered codes in error-taxonomy.md: $(printf '%s\n' "$registered_codes" | grep -c . 2>/dev/null || echo 0)"
   echo "    Distinct E-codes referenced across BC files: $(printf '%s\n' "$bc_referenced_codes" | grep -c . 2>/dev/null || echo 0)"
 
-  # Find BC-referenced codes that are NOT in the registered set
+  # --- (k.i) Unregistered-code check ---
   unregistered_codes=()
   if [[ -n "$bc_referenced_codes" ]]; then
     while IFS= read -r code; do
@@ -952,6 +1014,239 @@ else
     errors+=("MISMATCH [error-identifier resolution (k)]: ${#unregistered_codes[@]} E-code(s) referenced in BCs are not registered in error-taxonomy.md — PO must register (see list above)")
     fail=1
   fi
+
+  # --- (k.ii) Label-match sub-check [NEW v1.14] ---
+  # Scoped to E-EAP and E-OSVC families only (see design rationale in header above).
+  echo ""
+  echo "--- (k.ii) label-match: BC parenthetical labels vs registered taxonomy categories ---"
+  echo "    Scope: E-EAP (exact CamelCase name match) + E-OSVC (word-overlap match)"
+
+  # Build E-EAP code → CamelCase name map.
+  # Taxonomy row format: | E-EAP-NNN | JSONCode | CamelCaseName | Description | Severity |
+  # awk field $4 (1-indexed, leading | makes $1 empty): CamelCaseName column.
+  declare -A EAP_NAMES
+  while IFS= read -r row; do
+    code=$(printf '%s' "$row" | awk -F'|' '{gsub(/[[:space:]]/,"",$2); print $2}')
+    name=$(printf '%s' "$row" | awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/,"",$4); print $4}')
+    if printf '%s' "$code" | grep -qE '^E-EAP-[0-9]+$' 2>/dev/null && [[ -n "$name" ]]; then
+      EAP_NAMES["$code"]="$name"
+    fi
+  done < <(grep -E '^\| E-EAP-[0-9]+' "$ERROR_TAX" 2>/dev/null || true)
+
+  # Build E-OSVC code → short description map.
+  # Taxonomy row format: | E-OSVC-NNN | Short description | Severity | ExitCode | ... |
+  # awk field $3 (1-indexed): short description column.
+  declare -A OSVC_DESC
+  while IFS= read -r row; do
+    code=$(printf '%s' "$row" | awk -F'|' '{gsub(/[[:space:]]/,"",$2); print $2}')
+    desc=$(printf '%s' "$row" | awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/,"",$3); print $3}')
+    if printf '%s' "$code" | grep -qE '^E-OSVC-[0-9]+$' 2>/dev/null && [[ -n "$desc" ]]; then
+      OSVC_DESC["$code"]="$desc"
+    fi
+  done < <(grep -E '^\| E-OSVC-[0-9]+' "$ERROR_TAX" 2>/dev/null || true)
+
+  klabel_violations=0
+  klabel_violation_msgs=()
+  klabel_validated=0
+
+  while IFS= read -r -d $'\0' bc_file; do
+    bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
+
+    # Extract all "E-FAMILY-NNN (Label)" patterns from this BC file.
+    # Use grep -oE to extract each full match, then parse code and label.
+    # Pattern: E-EAP-NNN or E-OSVC-NNN followed by optional whitespace, open-paren,
+    # a label string of word chars/backticks/slashes/hyphens, close-paren.
+    # POSIX/BSD-grep: use -E -o only; no -P. Match up to 60 chars inside parens.
+    # We use two passes: one for E-EAP, one for E-OSVC.
+
+    # Pass 1: E-EAP labels
+    # Exclude lines containing "mis-citation" (YAML frontmatter changelog entries
+    # that document a historical error-code fix — not operative BC body content).
+    eap_cited=$(grep -E 'E-EAP-[0-9]+[[:space:]]*\(' "$bc_file" 2>/dev/null \
+      | grep -v 'mis-citation' \
+      | grep -oE 'E-EAP-[0-9]+[[:space:]]*\([^)]{1,80}\)' \
+      || true)
+    while IFS= read -r citation; do
+      [[ -z "$citation" ]] && continue
+      cited_code=$(printf '%s' "$citation" | grep -oE 'E-EAP-[0-9]+')
+      # Extract the first CamelCase token only (content inside parens, up to the
+      # first space character). This avoids absorbing extra prose like
+      # "(HumanGatedTaskPending for human-gated path)" → "HumanGatedTaskPending".
+      paren_content=$(printf '%s' "$citation" \
+        | sed 's/E-EAP-[0-9]*[[:space:]]*//' \
+        | sed 's/^(//' | sed 's/)$//' \
+        | sed 's/`//g')
+      # Take only the first whitespace-delimited token (the CamelCase name)
+      cited_label=$(printf '%s' "$paren_content" | awk '{print $1}' | tr -d '[:space:]')
+      [[ -z "$cited_code" || -z "$cited_label" ]] && continue
+      registered_name="${EAP_NAMES[$cited_code]:-}"
+      [[ -z "$registered_name" ]] && continue  # code not found — already caught by k.i
+      klabel_validated=$(( klabel_validated + 1 ))
+      # Normalize: lowercase, strip non-alphanumeric
+      label_norm=$(printf '%s' "$cited_label" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9')
+      reg_norm=$(printf '%s' "$registered_name" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9')
+      if [[ "$label_norm" != "$reg_norm" ]]; then
+        klabel_violations=$(( klabel_violations + 1 ))
+        klabel_violation_msgs+=("${bc_rel}: ${cited_code} BC-label='${cited_label}' vs registered CamelCase='${registered_name}' (normalized: '${label_norm}' != '${reg_norm}')")
+      fi
+    done <<< "$eap_cited"
+
+    # Pass 2: E-OSVC labels
+    # Exclude lines containing "mis-citation" (same YAML frontmatter exclusion as pass 1).
+    osvc_cited=$(grep -E 'E-OSVC-[0-9]+[[:space:]]*\(' "$bc_file" 2>/dev/null \
+      | grep -v 'mis-citation' \
+      | grep -oE 'E-OSVC-[0-9]+[[:space:]]*\([^)]{1,60}\)' \
+      || true)
+    while IFS= read -r citation; do
+      [[ -z "$citation" ]] && continue
+      cited_code=$(printf '%s' "$citation" | grep -oE 'E-OSVC-[0-9]+')
+      cited_label=$(printf '%s' "$citation" \
+        | sed 's/E-OSVC-[0-9]*[[:space:]]*//' \
+        | sed 's/^(//' | sed 's/)$//' \
+        | sed 's/`//g' | tr -d '[:space:]')
+      [[ -z "$cited_code" || -z "$cited_label" ]] && continue
+      registered_desc="${OSVC_DESC[$cited_code]:-}"
+      [[ -z "$registered_desc" ]] && continue  # code not found — already caught by k.i
+      klabel_validated=$(( klabel_validated + 1 ))
+      # Word-overlap normalization for E-OSVC:
+      # 1. Split BC label by CamelCase boundary: insert space before each uppercase
+      #    letter that follows a lowercase letter, then lowercase the whole string.
+      #    awk does not support lookahead; use a character-level approach:
+      #    for each character, if it is uppercase and the previous was lowercase,
+      #    prepend a space. POSIX/BSD awk compatible.
+      label_words=$(printf '%s' "$cited_label" \
+        | awk '{
+            out=""
+            for(i=1;i<=length($0);i++){
+              c=substr($0,i,1)
+              if(c~/[A-Z]/ && i>1 && substr($0,i-1,1)~/[a-z]/){out=out" "}
+              out=out c
+            }
+            print tolower(out)
+          }' \
+        | grep -oE '[a-z]{4,}' \
+        | sort -u || true)
+      reg_lower=$(printf '%s' "$registered_desc" | tr '[:upper:]' '[:lower:]')
+      # Check each significant word from the label appears in the registered description
+      mismatch_words=()
+      while IFS= read -r word; do
+        [[ -z "$word" ]] && continue
+        if ! printf '%s' "$reg_lower" | grep -qF "$word" 2>/dev/null; then
+          mismatch_words+=("$word")
+        fi
+      done <<< "$label_words"
+      if [[ ${#mismatch_words[@]} -gt 0 ]]; then
+        klabel_violations=$(( klabel_violations + 1 ))
+        klabel_violation_msgs+=("${bc_rel}: ${cited_code} BC-label='${cited_label}' — significant word(s) [${mismatch_words[*]}] not found in registered description '${registered_desc}'")
+      fi
+    done <<< "$osvc_cited"
+
+  done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+  # Positive-coverage log line (always printed)
+  echo "    Check (k) label-match: $klabel_validated E-code label citations validated against taxonomy categories."
+  echo "    Label-match violations found: $klabel_violations"
+
+  if [[ $klabel_violations -gt 0 ]]; then
+    echo ""
+    echo "    LABEL MISMATCHES (BC parenthetical label contradicts registered taxonomy category):"
+    for msg in "${klabel_violation_msgs[@]}"; do
+      echo "      $msg"
+    done
+    errors+=("MISMATCH [error-label contradiction (k.ii)]: $klabel_violations BC(s) cite an E-code with a label that contradicts the registered category in error-taxonomy.md — EXPECTED: await PO C14-01 re-citation fix (see list above)")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
+# (o) SEAM-COUNT CONSISTENCY  [NEW v1.14, O14-01]
+# ============================================================================
+# Prevent recurrence of the I14-01 class: spec files retaining "four adapter
+# seam" or "four-seam adapter" phrasing after the online-services seam (SS-13)
+# was added in Pass-13, making the correct count "five adapter seams".
+#
+# Strategy: FAIL if any spec file in the scoped set contains the pattern
+# "four adapter seam" or "four-seam adapter" (case-insensitive) outside a
+# changelog/reason line.
+#
+# Scoped spec files (those that describe the adapter seam count):
+#   - ARCH-INDEX.md (ADR registry + Document Map)
+#   - ADR-0004-adapter-family-anti-lock-in.md (primary adapter-seam ADR)
+#   - capabilities.md (domain-spec)
+#   - invariants.md (domain-spec)
+#   - prd.md
+#   - product-brief.md
+#
+# Changelog exclusion: lines starting with ">" (blockquote / changelog prose)
+# or containing "reason:" (YAML lifecycle) are excluded — historical references
+# like "> reconciled from four-seam" are acceptable in changelog lines.
+#
+# This check WILL FAIL if any of the scoped files still contains stale "four"
+# phrasing in operative content. It becomes green once the PO completes prose
+# updates in prd.md/product-brief.md/capabilities.md/invariants.md (those files
+# are not touched here per constraint; their green status awaits PO work).
+#
+# POSIX/BSD grep compatible; no grep -P.
+echo "--- (o) seam-count consistency: no stale 'four adapter seam' / 'four-seam adapter' in operative content ---"
+
+DOMAIN_SPEC_DIR="$REPO_ROOT/.factory/specs/domain-spec"
+ADR_0004="$REPO_ROOT/.factory/specs/architecture/adrs/ADR-0004-adapter-family-anti-lock-in.md"
+
+# Files to check — only those that describe the adapter seam count
+seam_check_files=(
+  "$ARCH_INDEX"
+  "$ADR_0004"
+)
+# Add domain-spec and prd files if they exist
+[[ -f "$DOMAIN_SPEC_DIR/capabilities.md" ]] && seam_check_files+=("$DOMAIN_SPEC_DIR/capabilities.md")
+[[ -f "$DOMAIN_SPEC_DIR/invariants.md" ]] && seam_check_files+=("$DOMAIN_SPEC_DIR/invariants.md")
+[[ -f "$PRD" ]] && seam_check_files+=("$PRD")
+[[ -f "$REPO_ROOT/.factory/specs/product-brief.md" ]] && seam_check_files+=("$REPO_ROOT/.factory/specs/product-brief.md")
+
+seam_violations=0
+seam_violation_msgs=()
+
+for seam_file in "${seam_check_files[@]}"; do
+  [[ ! -f "$seam_file" ]] && continue
+  file_label=$(printf '%s' "$seam_file" | awk -F'/' '{print $(NF-1)"/"$NF}')
+
+  # Grep for the stale patterns, case-insensitive.
+  # Exclude changelog/reason lines:
+  #   (a) Lines starting with ">" (blockquote / changelog prose).
+  #   (b) Lines containing "reason:" (YAML lifecycle prose).
+  #   (c) Lines that contain the pattern in a change-description context:
+  #       the phrase appears alongside "to" + "five" (e.g., 'updated from
+  #       "four adapter seams" to "five adapter seams"' in version tables).
+  #       This excludes changelog table rows that describe the seam-count fix
+  #       without flagging false positives on genuine stale content.
+  # BSD grep -i: case-insensitive. -E: extended regex. POSIX compatible.
+  stale_lines=$(grep -inE 'four[[:space:]]+adapter[[:space:]]+seam|four-seam[[:space:]]+adapter' \
+    "$seam_file" 2>/dev/null \
+    | grep -v '^[0-9]*:>[[:space:]]' \
+    | grep -v 'reason:' \
+    | grep -viE '"four[[:space:]]+adapter[[:space:]]+seam"[[:space:]]to[[:space:]]"five|four[[:space:]]+adapter[[:space:]]+seam.*to[[:space:]].*five[[:space:]]+adapter' \
+    || true)
+
+  if [[ -n "$stale_lines" ]]; then
+    seam_violations=$(( seam_violations + 1 ))
+    # Collect the offending line numbers for the report
+    stale_summary=$(printf '%s' "$stale_lines" | head -3 | tr '\n' ';')
+    seam_violation_msgs+=("${file_label}: stale 'four adapter seam' / 'four-seam adapter' in operative content: ${stale_summary}")
+  fi
+done
+
+echo "    Files scanned for stale four-seam phrasing: ${#seam_check_files[@]}"
+echo "    Files with stale phrasing in operative content: $seam_violations"
+
+if [[ $seam_violations -gt 0 ]]; then
+  echo ""
+  echo "    STALE SEAM-COUNT PHRASING (must be updated to 'five adapter seams' per ADR-0004 v1.2):"
+  for msg in "${seam_violation_msgs[@]}"; do
+    echo "      $msg"
+  done
+  errors+=("MISMATCH [seam-count consistency (o)]: $seam_violations file(s) contain stale 'four adapter seam' / 'four-seam adapter' in operative content — EXPECTED: await PO updates in domain-spec/prd/product-brief prose; architect files (ARCH-INDEX, ADR-0004) must be clean immediately")
+  fail=1
 fi
 echo ""
 
@@ -1896,7 +2191,9 @@ if [[ $fail -eq 0 ]]; then
   echo "  Studio §3/§6 counts:               verified"
   echo "  Subdecomp priority subtotals:      P0=${computed_frontmatter_p0:-?} P1=${computed_frontmatter_p1:-?} P2=${computed_frontmatter_p2:-?} sum=${computed_frontmatter_grand:-?} (computed from frontmatter)"
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
-  echo "  Error-identifier resolution:       all BC E-codes registered in taxonomy"
+  echo "  Error-identifier resolution (k.i): all BC E-codes registered in taxonomy"
+  echo "  Error label-match (k.ii):          $klabel_validated E-code label citations validated, 0 contradictions"
+  echo "  Seam-count consistency (o):        no stale 'four adapter seam' phrasing in operative content"
   echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
   echo "  Dimension field uniqueness:        §3.0 table has $DIM_FIELD_COUNT_EXPECTED unique field names"
   echo "  Dimension field usage-site:        all BC convergence-report dimension references use canonical field names"
