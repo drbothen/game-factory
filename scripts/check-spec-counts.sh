@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.24
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.25
 #
 # PURPOSE
 # -------
@@ -165,6 +165,20 @@
 # WILL FAIL until PO completes fixes in BC-5.06.001, BC-12.12.008, BC-7.04.001,
 # BC-7.05.001. Becomes green automatically after PO work.
 # POSIX/BSD-grep/awk compatible (no grep -P).
+# extended in v1.25 to extend check (o) with sub-check (o.ii) — Canon-KB
+# load-bearing-seam ordinal guard (Pass-31 I31-01 recurrence prevention):
+# CANONICAL RULE (ADR-0004 / product-brief §Overflow Context): the Canon
+# Knowledge-Base is the SIXTH load-bearing seam. There are five adapter seams
+# (engine/asset/distribution/XR/online-services); Canon-KB follows as the sixth.
+# The check scans all architecture/*.md, domain-spec/*.md, prd.md,
+# prd-supplements/prd-cap-*.md, and product-brief.md for operative lines (excl ">"
+# blockquote / "reason:") that apply any ordinal OTHER than "sixth" to the phrase
+# "load-bearing seam". FAIL on "fifth load-bearing seam" or any other wrong ordinal.
+# "sixth load-bearing seam" passes silently. Sub-assertion (o.ii.b): lines that
+# attribute a non-sixth ordinal to the product-brief are flagged as false citations
+# (the brief at line 111 says "sixth"). Positive-coverage log always printed.
+# WILL FAIL until PO fixes capabilities.md and prd-cap-008-012.md; architect files
+# must be clean after this pass. POSIX/BSD compatible.
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -547,6 +561,9 @@ s_violations=0
 u_lines_scanned=0
 u_creative_gate_lines=0
 u_violations=0
+# (o.ii) Canon-KB ordinal counters: initialized here so SUMMARY is safe if check is skipped
+ordinal_files_scanned=0
+ordinal_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -567,7 +584,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.24) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.25) ==="
 echo ""
 
 # ============================================================================
@@ -1790,7 +1807,7 @@ fi
 echo ""
 
 # ============================================================================
-# (o) SEAM-COUNT CONSISTENCY  [NEW v1.14, O14-01]
+# (o) SEAM-COUNT CONSISTENCY  [NEW v1.14, O14-01; EXTENDED v1.25, I31-01]
 # ============================================================================
 # Prevent recurrence of the I14-01 class: spec files retaining "four adapter
 # seam" or "four-seam adapter" phrasing after the online-services seam (SS-13)
@@ -1816,6 +1833,30 @@ echo ""
 # phrasing in operative content. It becomes green once the PO completes prose
 # updates in prd.md/product-brief.md/capabilities.md/invariants.md (those files
 # are not touched here per constraint; their green status awaits PO work).
+#
+# [v1.25 EXTENSION — (o.ii) Canon-KB load-bearing-seam ordinal guard (I31-01)]
+# Assert that any operative line (excl ">" blockquote / "reason:" lines) in the
+# spec tree that references a "load-bearing seam" with an explicit ordinal uses
+# "sixth" — never "fifth" or any other ordinal. This closes the I31-01 class:
+# Pass-14 O14-02 set Canon-KB to "sixth" in authoritative docs but left "fifth"
+# in several architecture section files.
+#
+# Pattern: any word from the set (first|second|third|fourth|fifth|seventh|
+# eighth|ninth|tenth) immediately preceding "load-bearing seam" — case-insensitive.
+# "sixth load-bearing seam" does NOT match (correct — passes silently).
+#
+# Sub-assertion (o.ii.b): any line that both references the product-brief AND
+# contains an ordinal-applied "load-bearing seam" attribution must use "sixth"
+# (the brief line 111 reads "sixth load-bearing seam"). A line attributing a
+# non-sixth ordinal to the brief is a false citation.
+#
+# Scoped files: all architecture/*.md + ADR files, domain-spec/*.md, prd.md,
+# prd-supplements/prd-cap-*.md, product-brief.md.
+# Exclusions: lines starting with ">" and lines containing "reason:".
+# WILL FAIL until PO fixes capabilities.md and prd-cap-008-012.md; expected.
+#
+# Positive-coverage log: "Check (o.ii): N files scanned for Canon-KB ordinal;
+# K wrong-ordinal violations found." always printed.
 #
 # POSIX/BSD grep compatible; no grep -P.
 echo "--- (o) seam-count consistency: no stale 'four adapter seam' / 'four-seam adapter' in operative content ---"
@@ -1876,6 +1917,101 @@ if [[ $seam_violations -gt 0 ]]; then
     echo "      $msg"
   done
   errors+=("MISMATCH [seam-count consistency (o)]: $seam_violations file(s) contain stale 'four adapter seam' / 'four-seam adapter' in operative content — EXPECTED: await PO updates in domain-spec/prd/product-brief prose; architect files (ARCH-INDEX, ADR-0004) must be clean immediately")
+  fail=1
+fi
+echo ""
+
+# ----------------------------------------------------------------------------
+# (o.ii) Canon-KB load-bearing-seam ordinal guard  [NEW v1.25, I31-01]
+# ----------------------------------------------------------------------------
+# Assert any operative line containing "<ordinal> load-bearing seam" (where
+# ordinal is NOT "sixth") is a violation.  "sixth load-bearing seam" passes.
+# Exclusions: lines starting with ">" and lines containing "reason:".
+# Scope: architecture/*.md (including ADR subdir), domain-spec/*.md, prd.md,
+# prd-supplements/prd-cap-*.md, product-brief.md.
+#
+# WILL FAIL until PO fixes domain-spec/capabilities.md and
+# prd-supplements/prd-cap-008-012.md (those files are PO-owned; expected).
+# Architect files (layered-architecture, methodology-layer, subsystem-decomposition)
+# must already be clean after this pass.
+echo "--- (o.ii) Canon-KB load-bearing-seam ordinal guard: only 'sixth' allowed ---"
+
+# Build the set of files to scan for (o.ii)
+ordinal_check_files=()
+
+# All architecture/*.md files (flat and one level deep for ADRs)
+while IFS= read -r f; do
+  ordinal_check_files+=("$f")
+done < <(find "$REPO_ROOT/.factory/specs/architecture" -name "*.md" 2>/dev/null | sort || true)
+
+# domain-spec files
+[[ -f "$DOMAIN_SPEC_DIR/capabilities.md" ]] && ordinal_check_files+=("$DOMAIN_SPEC_DIR/capabilities.md")
+[[ -f "$DOMAIN_SPEC_DIR/invariants.md" ]] && ordinal_check_files+=("$DOMAIN_SPEC_DIR/invariants.md")
+
+# prd.md and product-brief.md
+[[ -f "$PRD" ]] && ordinal_check_files+=("$PRD")
+[[ -f "$REPO_ROOT/.factory/specs/product-brief.md" ]] && ordinal_check_files+=("$REPO_ROOT/.factory/specs/product-brief.md")
+
+# prd-supplements/prd-cap-*.md
+while IFS= read -r f; do
+  ordinal_check_files+=("$f")
+done < <(find "$PRD_SUPPLEMENTS_DIR" -name "prd-cap-*.md" 2>/dev/null | sort || true)
+
+ordinal_violations=0
+ordinal_violation_msgs=()
+ordinal_files_scanned=0
+
+# Wrong-ordinal pattern: any ordinal word EXCEPT "sixth" immediately before
+# "load-bearing seam" (case-insensitive).
+# Ordinals covered: first, second, third, fourth, fifth, seventh, eighth, ninth, tenth.
+# "sixth" is intentionally absent — those lines are correct and must pass silently.
+WRONG_ORDINAL_PAT='(first|second|third|fourth|fifth|seventh|eighth|ninth|tenth)[[:space:]]+load-bearing[[:space:]]+seam'
+
+for ord_file in "${ordinal_check_files[@]}"; do
+  [[ ! -f "$ord_file" ]] && continue
+  ordinal_files_scanned=$(( ordinal_files_scanned + 1 ))
+  file_label=$(printf '%s' "$ord_file" | sed "s|$REPO_ROOT/||")
+
+  # Grep for wrong-ordinal pattern, case-insensitive.
+  # Exclude: lines starting with ">" (blockquote/changelog) and "reason:" lines.
+  wrong_ord_lines=$(grep -inE "$WRONG_ORDINAL_PAT" "$ord_file" 2>/dev/null \
+    | grep -v '^[0-9]*:>[[:space:]]' \
+    | grep -v 'reason:' \
+    || true)
+
+  if [[ -n "$wrong_ord_lines" ]]; then
+    ordinal_violations=$(( ordinal_violations + 1 ))
+    ord_summary=$(printf '%s' "$wrong_ord_lines" | head -3 | tr '\n' ';')
+    ordinal_violation_msgs+=("${file_label}: wrong ordinal applied to 'load-bearing seam' (must be 'sixth'): ${ord_summary}")
+  fi
+
+  # Sub-assertion (o.ii.b): lines that both reference product-brief AND assign
+  # a non-sixth ordinal to "load-bearing seam" in an attribution context.
+  # Pattern: line contains "product-brief" AND wrong-ordinal "load-bearing seam".
+  # (Already caught by the main wrong-ordinal scan above — this is an additional
+  # targeted message for false-brief-citation context, not a separate violation counter.)
+  brief_false_cite=$(grep -inE "$WRONG_ORDINAL_PAT" "$ord_file" 2>/dev/null \
+    | grep -v '^[0-9]*:>[[:space:]]' \
+    | grep -v 'reason:' \
+    | grep -iE 'product.?brief' \
+    || true)
+
+  if [[ -n "$brief_false_cite" ]]; then
+    brief_cite_summary=$(printf '%s' "$brief_false_cite" | head -2 | tr '\n' ';')
+    ordinal_violation_msgs+=("  NOTE — false brief-citation (product-brief says 'sixth'): ${brief_cite_summary}")
+  fi
+done
+
+# Positive-coverage log (always printed — detects zero-scan / inert run).
+echo "    Check (o.ii): $ordinal_files_scanned files scanned for Canon-KB load-bearing-seam ordinal; $ordinal_violations file(s) with wrong-ordinal violations found."
+
+if [[ $ordinal_violations -gt 0 ]]; then
+  echo ""
+  echo "    WRONG CANON-KB ORDINAL (must be 'sixth load-bearing seam' per ADR-0004 / product-brief §Overflow Context):"
+  for msg in "${ordinal_violation_msgs[@]}"; do
+    echo "      $msg"
+  done
+  errors+=("MISMATCH [Canon-KB seam ordinal (o.ii)]: $ordinal_violations file(s) contain wrong ordinal on 'load-bearing seam' (must be sixth) — architect files must be clean; PO-owned files (capabilities.md, prd-cap-008-012.md) await PO fix")
   fail=1
 fi
 echo ""
@@ -4157,6 +4293,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Error-identifier resolution (k.i): all BC E-codes registered in taxonomy"
   echo "  Error label-match (k.ii):          $klabel_validated E-code label citations validated, 0 contradictions"
   echo "  Seam-count consistency (o):        no stale 'four adapter seam' phrasing in operative content"
+  echo "  Canon-KB ordinal guard (o.ii):    $ordinal_files_scanned files scanned, 0 wrong-ordinal violations (all say 'sixth')"
   echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
   echo "  Dimension field uniqueness:        §3.0 table has $DIM_FIELD_COUNT_EXPECTED unique field names"
   echo "  Dimension field usage-site:        all BC convergence-report dimension references use canonical field names"
