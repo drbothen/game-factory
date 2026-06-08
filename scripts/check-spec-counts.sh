@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.3
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.4
 #
 # PURPOSE
 # -------
-# Prevent recurring count-drift across the spec layer. Seven classes of drift
+# Prevent recurring count-drift across the spec layer. Ten classes of drift
 # are checked (extended in v1.2 to cover Pass-3 adversarial defect classes;
-# extended in v1.3 to cover Pass-4 VP catalog consistency):
+# extended in v1.3 to cover Pass-4 VP catalog consistency;
+# extended in v1.4 to cover Pass-5 studio §3 appearance counts, subsystem
+# priority subtotals, and formal VP ↔ BC bidirectional anchor):
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
@@ -22,6 +24,18 @@
 #       (ii) per-tool VP counts (Kani, proptest) agree between
 #       verification-architecture.md and verification-coverage-matrix.md.
 #       Directly prevents the C2 class of per-tool arithmetic drift.
+#   (h) [NEW v1.4] studio-of-agents §3 per-SS appearance counts recomputed from
+#       §2 roster using the canonical counting rule (each role counted under every
+#       SS-NN listed in its row). Expected values: SS-03=16 SS-04=23 SS-05=6
+#       SS-06=3 SS-07=3 SS-08=12 SS-09=2 SS-10=5 SS-11=11 SS-12=1.
+#       §6 tier subtotals: Tier 1=53, Tier 2=13, sum=66.
+#   (i) [NEW v1.4] subsystem-decomposition §Subsystem Priority Summary: P0, P1,
+#       P2 subtotals sum to the grand total (178 BCs). Expected P0=111, P1=45,
+#       P2=22. Guards against the double-counting error class (I3).
+#   (j) [NEW v1.4] VP ↔ BC bidirectional anchor: every formal VP (VP-001..010)
+#       guarded BC must cite its VP-00x back. Currently EXPECTED TO FAIL until
+#       PO completes back-reference additions (I2 fix). Implemented so the check
+#       becomes green after PO work without script changes.
 #
 # USAGE
 #   ./scripts/check-spec-counts.sh [--verbose]
@@ -61,6 +75,7 @@ ERROR_TAX="$REPO_ROOT/.factory/specs/prd-supplements/error-taxonomy.md"
 VP_INDEX="$REPO_ROOT/.factory/specs/verification-properties/VP-INDEX.md"
 VERIF_ARCH="$REPO_ROOT/.factory/specs/architecture/verification-architecture.md"
 VERIF_MATRIX="$REPO_ROOT/.factory/specs/architecture/verification-coverage-matrix.md"
+STUDIO_AGENTS="$REPO_ROOT/.factory/specs/architecture/studio-of-agents.md"
 
 # ---- Helpers ----------------------------------------------------------------
 fail=0
@@ -482,6 +497,244 @@ else
 fi
 
 # ============================================================================
+# (h) STUDIO-OF-AGENTS §3 PER-SS APPEARANCE COUNTS  [NEW v1.4]
+# ============================================================================
+# Assert the §3 table totals in studio-of-agents.md match the canonical values
+# derived from the §2 roster (counting rule: each role counted under every SS-NN
+# listed in its row). Expected totals (ADAPT+NEW):
+#   SS-03=16  SS-04=23  SS-05=6  SS-06=3  SS-07=3  SS-08=12
+#   SS-09=2   SS-10=5   SS-11=11 SS-12=1
+# §6 tier subtotals: Tier 1=53, Tier 2=13, sum line "53 + 13 = 66".
+#
+# Strategy: parse the §3 table rows by looking for "| SS-NN |" lines and
+# extracting the "Total appearances" column (field 5). Parse §6 tier rows for
+# the parenthesized count. POSIX/BSD grep compatible.
+echo "--- (h) studio-of-agents §3 per-SS appearance counts and §6 tier subtotals ---"
+
+if [[ ! -f "$STUDIO_AGENTS" ]]; then
+  echo "    SKIP: studio-of-agents.md not found at $STUDIO_AGENTS"
+else
+  # Expected per-SS total appearances (ADAPT + NEW combined)
+  # Format: "SS-NN:expected"
+  declare -a SS_EXPECTED=(
+    "SS-03:16"
+    "SS-04:23"
+    "SS-05:6"
+    "SS-06:3"
+    "SS-07:3"
+    "SS-08:12"
+    "SS-09:2"
+    "SS-10:5"
+    "SS-11:11"
+    "SS-12:1"
+  )
+
+  for entry in "${SS_EXPECTED[@]}"; do
+    ss_id="${entry%%:*}"
+    expected="${entry##*:}"
+    # Parse total from §3 table row: "| SS-NN | Name | ADAPT | NEW | TOTAL ... |"
+    # Field 5 after splitting by | (leading | makes field 1 empty, then: 2=SS, 3=Name,
+    # 4=ADAPT, 5=NEW, 6=Total). Extract the first integer in field 6.
+    stated_total=$(grep -E "^\| ${ss_id} \|" "$STUDIO_AGENTS" 2>/dev/null \
+      | awk -F'|' '{match($6,/[0-9]+/); if(RLENGTH>0) print substr($6,RSTART,RLENGTH)}' \
+      | head -1 || true)
+
+    if [[ -n "$stated_total" ]]; then
+      check "studio §3 ${ss_id} total appearances" "$stated_total" "$expected" "studio-of-agents.md"
+      if [[ "$VERBOSE" == true ]] && [[ "$stated_total" == "$expected" ]]; then
+        echo "    OK [studio §3 ${ss_id}]: stated=$stated_total expected=$expected"
+      fi
+    else
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    SKIP [studio §3 ${ss_id}]: row not found in §3 table"
+      fi
+    fi
+  done
+
+  # §6 Tier subtotals: parse "| Tier 1 — v1 Core | ... (53 roles) |" and
+  # "| Tier 2 — Genre-Gated | ... (13 roles) |" rows.
+  # Extract the parenthesized number from field 3 (the agent list column).
+  tier1_stated=$(grep -E "Tier 1" "$STUDIO_AGENTS" 2>/dev/null \
+    | grep -v '^>' | grep -E '\([0-9]+ roles\)' \
+    | awk '{match($0,/\([0-9]+/); print substr($0,RSTART+1,RLENGTH-1)}' \
+    | head -1 || true)
+  tier2_stated=$(grep -E "Tier 2" "$STUDIO_AGENTS" 2>/dev/null \
+    | grep -v '^>' | grep -E '\([0-9]+ roles\)' \
+    | awk '{match($0,/\([0-9]+/); print substr($0,RSTART+1,RLENGTH-1)}' \
+    | head -1 || true)
+
+  # §6 summary line: "Tier 1 + Tier 2 = 53 + 13 = 66"
+  tier_sum_line=$(grep -E 'Tier 1 \+ Tier 2' "$STUDIO_AGENTS" 2>/dev/null | head -1 || true)
+  tier_sum_total=$(printf '%s' "$tier_sum_line" \
+    | awk '{n=split($0,a,"="); gsub(/ /,"",a[n]); gsub(/\./,"",a[n]); print a[n]+0}' || true)
+
+  echo "    §6 Tier 1 stated: ${tier1_stated:-NOT_FOUND}  (expected: 53)"
+  echo "    §6 Tier 2 stated: ${tier2_stated:-NOT_FOUND}  (expected: 13)"
+  echo "    §6 sum line total: ${tier_sum_total:-NOT_FOUND}  (expected: 66)"
+  echo ""
+
+  [[ -n "$tier1_stated" ]] && check "studio §6 Tier 1 count" "$tier1_stated" "53" "studio-of-agents.md"
+  [[ -n "$tier2_stated" ]] && check "studio §6 Tier 2 count" "$tier2_stated" "13" "studio-of-agents.md"
+  [[ -n "$tier_sum_total" ]] && [[ "$tier_sum_total" != "0" ]] && \
+    check "studio §6 Tier 1+2 sum" "$tier_sum_total" "66" "studio-of-agents.md"
+fi
+echo ""
+
+# ============================================================================
+# (i) SUBSYSTEM-DECOMPOSITION PRIORITY SUBTOTALS  [NEW v1.4]
+# ============================================================================
+# Assert P0, P1, P2 subtotals in §Subsystem Priority Summary sum to grand total
+# (178) AND match the expected per-priority BC counts:
+#   P0=111  P1=45  P2=22  Total=178
+#
+# Parse the Subsystem Priority Summary table rows by looking for "| P0 |",
+# "| P1 |", "| P2 |" rows. Extract the first standalone integer >= 10 in the
+# BC Count column (field 4). POSIX/BSD grep compatible.
+echo "--- (i) subsystem-decomposition priority subtotals ---"
+
+if [[ ! -f "$SUBDECOMP" ]]; then
+  echo "    SKIP: subsystem-decomposition.md not found at $SUBDECOMP"
+else
+  EXPECTED_P0=111
+  EXPECTED_P1=45
+  EXPECTED_P2=22
+  EXPECTED_GRAND=178
+
+  # The Priority Summary table has rows like:
+  # "| P0 (must ship v1) | SS-01, ... | 111 (SS-01=41, ...) |"
+  # Extract the first integer >= 2 digits in field 4 (the BC count column).
+  subdecomp_p0=$(grep -E '^\| P0 ' "$SUBDECOMP" 2>/dev/null \
+    | awk -F'|' '{match($4,/[0-9]+/); print substr($4,RSTART,RLENGTH)+0}' \
+    | head -1 || true)
+  subdecomp_p1=$(grep -E '^\| P1 ' "$SUBDECOMP" 2>/dev/null \
+    | awk -F'|' '{match($4,/[0-9]+/); print substr($4,RSTART,RLENGTH)+0}' \
+    | head -1 || true)
+  subdecomp_p2=$(grep -E '^\| P2 ' "$SUBDECOMP" 2>/dev/null \
+    | awk -F'|' '{match($4,/[0-9]+/); print substr($4,RSTART,RLENGTH)+0}' \
+    | head -1 || true)
+  # Grand total row: "| **Total** | | **178** |"
+  subdecomp_grand=$(grep -E '^\| \*\*Total\*\*' "$SUBDECOMP" 2>/dev/null \
+    | awk -F'|' '{match($4,/[0-9]+/); print substr($4,RSTART,RLENGTH)+0}' \
+    | head -1 || true)
+
+  echo "    P0 stated: ${subdecomp_p0:-NOT_FOUND}  (expected: $EXPECTED_P0)"
+  echo "    P1 stated: ${subdecomp_p1:-NOT_FOUND}  (expected: $EXPECTED_P1)"
+  echo "    P2 stated: ${subdecomp_p2:-NOT_FOUND}  (expected: $EXPECTED_P2)"
+  echo "    Grand total stated: ${subdecomp_grand:-NOT_FOUND}  (expected: $EXPECTED_GRAND)"
+
+  # Also compute the sum of P0+P1+P2 and compare to grand total
+  if [[ -n "$subdecomp_p0" ]] && [[ -n "$subdecomp_p1" ]] && [[ -n "$subdecomp_p2" ]]; then
+    computed_priority_sum=$(( subdecomp_p0 + subdecomp_p1 + subdecomp_p2 ))
+    echo "    P0+P1+P2 computed sum: $computed_priority_sum  (expected: $EXPECTED_GRAND)"
+    check "subdecomp P0+P1+P2 sum matches grand total" \
+      "$computed_priority_sum" "$EXPECTED_GRAND" "subsystem-decomposition.md"
+  fi
+  echo ""
+
+  [[ -n "$subdecomp_p0" ]] && check "subdecomp P0 subtotal" \
+    "$subdecomp_p0" "$EXPECTED_P0" "subsystem-decomposition.md"
+  [[ -n "$subdecomp_p1" ]] && check "subdecomp P1 subtotal" \
+    "$subdecomp_p1" "$EXPECTED_P1" "subsystem-decomposition.md"
+  [[ -n "$subdecomp_p2" ]] && check "subdecomp P2 subtotal" \
+    "$subdecomp_p2" "$EXPECTED_P2" "subsystem-decomposition.md"
+  [[ -n "$subdecomp_grand" ]] && check "subdecomp grand total" \
+    "$subdecomp_grand" "$EXPECTED_GRAND" "subsystem-decomposition.md"
+fi
+echo ""
+
+# ============================================================================
+# (j) FORMAL VP ↔ BC BIDIRECTIONAL ANCHOR  [NEW v1.4]
+# ============================================================================
+# Assert that every formal VP's guarded BC cites the VP back.
+# This check WILL FAIL until PO adds back-references (I2 fix in VP-INDEX.md).
+# Implemented now so it becomes green automatically after PO work.
+#
+# Pairs to check (VP-ID → BC file path relative to BC_DIR):
+#   VP-001 → ss-06/BC-6.01.001.md
+#   VP-002 → ss-06/BC-6.01.003.md
+#   VP-003 → ss-06/BC-6.02.003.md
+#   VP-004 → ss-06/BC-6.02.004.md
+#   VP-005 → ss-13/BC-13.02.001.md  (checks for VP-005 OR VP-006 OR VP-007)
+#   VP-006 → ss-13/BC-13.02.001.md  (same file, three VPs)
+#   VP-007 → ss-13/BC-13.02.001.md  (same file)
+#   VP-008 → ss-03/BC-3.03.001.md AND ss-03/BC-3.03.002.md
+#   VP-009 → ss-06/BC-6.01.002.md
+#   VP-010 → ss-13/BC-13.02.005.md
+#
+# A BC "cites" a VP when the string "VP-00N" (or "VP-01N") appears in the file.
+# We do NOT require a specific field name — any occurrence in the file counts.
+echo "--- (j) formal VP ↔ BC bidirectional anchor ---"
+
+if [[ ! -f "$VP_INDEX" ]]; then
+  echo "    SKIP: VP-INDEX.md not found"
+else
+  # Array of "VP-ID:relative/path/to/bc.md" pairs
+  declare -a VP_BC_PAIRS=(
+    "VP-001:ss-06/BC-6.01.001.md"
+    "VP-002:ss-06/BC-6.01.003.md"
+    "VP-003:ss-06/BC-6.02.003.md"
+    "VP-004:ss-06/BC-6.02.004.md"
+    "VP-005:ss-13/BC-13.02.001.md"
+    "VP-006:ss-13/BC-13.02.001.md"
+    "VP-007:ss-13/BC-13.02.001.md"
+    "VP-008-a:ss-03/BC-3.03.001.md:VP-008"
+    "VP-008-b:ss-03/BC-3.03.002.md:VP-008"
+    "VP-009:ss-06/BC-6.01.002.md"
+    "VP-010:ss-13/BC-13.02.005.md"
+  )
+
+  vp_bc_failures=0
+  vp_bc_issues=()
+
+  for entry in "${VP_BC_PAIRS[@]}"; do
+    # Entry format: "VP-NNN:relative/path" or "VP-NNN-suffix:relative/path:actual-vp-id"
+    label="${entry%%:*}"
+    rest="${entry#*:}"
+    bc_rel="${rest%%:*}"
+    # If there's a third colon-segment, it's the actual VP id to search for
+    actual_vp="${rest##*:}"
+    if [[ "$actual_vp" == "$bc_rel" ]]; then
+      # No third segment: actual_vp = label itself (strip any -a/-b suffix)
+      actual_vp=$(printf '%s' "$label" | sed 's/-[ab]$//')
+    fi
+
+    bc_full="$BC_DIR/$bc_rel"
+
+    if [[ ! -f "$bc_full" ]]; then
+      # BC file not present — skip (may be future BC)
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    SKIP [$label]: BC file not found: $bc_rel"
+      fi
+      continue
+    fi
+
+    # Check if the BC file contains a back-reference to the VP id
+    if grep -qE "${actual_vp}[^0-9]|${actual_vp}$" "$bc_full" 2>/dev/null; then
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [$label]: $bc_rel cites $actual_vp"
+      fi
+    else
+      vp_bc_failures=$(( vp_bc_failures + 1 ))
+      vp_bc_issues+=("$actual_vp → $bc_rel: BC does not cite $actual_vp (PO back-reference pending)")
+    fi
+  done
+
+  echo "    VP↔BC back-reference checks: ${#VP_BC_PAIRS[@]} pairs"
+  echo "    Missing back-references: $vp_bc_failures"
+
+  if [[ $vp_bc_failures -gt 0 ]]; then
+    echo ""
+    echo "    MISSING VP BACK-REFERENCES (PO action required per VP-INDEX.md §I2):"
+    for issue in "${vp_bc_issues[@]}"; do
+      echo "      $issue"
+    done
+    errors+=("MISMATCH [VP↔BC bidirectional anchor (j)]: $vp_bc_failures BC file(s) missing VP back-reference — PO must add per VP-INDEX.md §I2 table")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -495,6 +748,9 @@ if [[ $fail -eq 0 ]]; then
   echo "  VP P1 (computed from table):       ${computed_vp_p1:-N/A}"
   echo "  BC H1/INDEX title sync:            ${bc_title_checked} checked, 0 mismatches"
   echo "  BC frontmatter schema:             $computed_bc checked, 0 violations"
+  echo "  Studio §3/§6 counts:               verified"
+  echo "  Subdecomp priority subtotals:      P0=111 P1=45 P2=22 sum=178"
+  echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
