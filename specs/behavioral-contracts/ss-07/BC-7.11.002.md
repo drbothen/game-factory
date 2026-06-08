@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.002
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -20,7 +20,10 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0-prd-rev-1d
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    reason: "O8-02: clarified DI-012 is the meta-invariant anchor for CWE-602/server-authority; no dedicated DI-NNN exists"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -105,7 +108,7 @@ This BC specifies the testable assertion that must be verified by the
 |-------|-------|
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC specifies one of the seven invariants that compose the `server-authority-invariant-suite` evaluated by convergence dimension D-SEC (BC-7.11.001). The CWE-602 server-authority model is the backbone of the D-SEC dimension. |
-| L2 Domain Invariants | DI-012 (Every ContractArtifact Has a Declared Validation Method) |
+| L2 Domain Invariants | DI-012 (Every ContractArtifact Has a Declared Validation Method). Note: the CWE-602 server-authority / no-trust-client rule has no dedicated DI-NNN; DI-012 is cited as the applicable meta-invariant (every contract artifact must have a declared validation method — this BC fulfills that obligation for the `server-authority-invariant-suite`). |
 | Architecture Module | convergence-tracker / security-gate (SS-06) |
 | Stories | S-TBD |
 

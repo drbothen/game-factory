@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.007
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -19,7 +19,10 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0-prd-rev-1d
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    reason: "O8-02: clarified DI-012 is the meta-invariant anchor for economy-atomicity/CWE-602; no dedicated DI-NNN exists"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -106,7 +109,7 @@ the SECURITY requirement; conservation is the GAME-DESIGN requirement. Both must
 |-------|-------|
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — specifies the economy atomicity and conservation invariants of the `server-authority-invariant-suite` for D-SEC evaluation. |
-| L2 Domain Invariants | DI-012 |
+| L2 Domain Invariants | DI-012 (Every ContractArtifact Has a Declared Validation Method). Note: the economy atomicity / CWE-602 server-authority rule has no dedicated DI-NNN; DI-012 is cited as the applicable meta-invariant. |
 | Architecture Module | convergence-tracker / security-gate (SS-06) |
 | Stories | S-TBD |
 
