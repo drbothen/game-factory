@@ -7,18 +7,18 @@ producer: "human+planning-research"
 timestamp: 2026-06-07T00:00:00
 phase: 1a
 inputs:
-  - docs/research/RECONCILIATION.md
-  - docs/research/bevy-capabilities.md
-  - docs/research/unity-capabilities.md
-  - docs/research/godot-capabilities.md
-  - docs/research/prior-art-and-precedents.md
-  - docs/design/architecture.md
-  - docs/design/engine-adapter-protocol.md
-  - docs/design/protocol-schema.md
-  - docs/design/extraction-boundary.md
-  - docs/decisions/0001-founding-engine-pair.md
-  - docs/decisions/0002-protocol-and-conformance-stance.md
-  - docs/decisions/0003-determinism-tier-capability.md
+  - planning/research/RECONCILIATION.md
+  - planning/research/bevy-capabilities.md
+  - planning/research/unity-capabilities.md
+  - planning/research/godot-capabilities.md
+  - planning/research/prior-art-and-precedents.md
+  - planning/design/architecture.md
+  - planning/design/engine-adapter-protocol.md
+  - planning/design/protocol-schema.md
+  - planning/design/extraction-boundary.md
+  - planning/decisions/0001-founding-engine-pair.md
+  - planning/decisions/0002-protocol-and-conformance-stance.md
+  - planning/decisions/0003-determinism-tier-capability.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: ""
 ---
@@ -92,9 +92,9 @@ swappable adapter that passes a conformance suite.
 - **Built BY vsdd-factory via greenfield + Phase-0 extraction** — vsdd-factory greenfields
   the new layers (methodology, protocol, adapters) and runs a Phase-0 brownfield ingestion
   of vsdd-factory's own engine-neutral core to identify and extract the reusable spine
-  (see `docs/design/extraction-boundary.md`).
+  (see `planning/design/extraction-boundary.md`).
 - **Adapter protocol = JSON-RPC 2.0 over stdio**, LSP-style lifecycle + dynamic capability
-  registration (`docs/design/protocol-schema.md`).
+  registration (`planning/design/protocol-schema.md`).
 - **Conformance is load-bearing** — hybrid stance: LSP-style negotiation + Terraform-style
   versioning/acceptance + CRI/CSI-style capability-gated conformance; the Testcontainers
   "no conformance" approach is explicitly rejected (Decision 0002).
@@ -106,7 +106,7 @@ swappable adapter that passes a conformance suite.
 - **Engine operational constraints** — Unity requires a per-CI-agent license; Bevy's pre-1.0
   API churn requires pinned engine versions + per-release adapter maintenance.
 - **Verify engine APIs against version-tagged primary docs** — AI summarizers confabulate
-  fast-moving engine APIs (documented in `docs/research/bevy-capabilities.md`).
+  fast-moving engine APIs (documented in `planning/research/bevy-capabilities.md`).
 
 ## Overflow Context (Optional — Reference Only)
 
@@ -115,7 +115,7 @@ build-AND-test factory spans Unity/Godot/Unreal/Bevy as of 2026: build CI is mat
 single-engine; the deepest cross-engine test SDKs (GameDriver, AltTester) reach only two
 engines; engine-agnostic testing exists only black-box (pixels/OCR). The target quadrant —
 unified build + *semantic/deterministic* test/replay across engines — is empty. Full prior-art
-survey: `docs/research/prior-art-and-precedents.md`.
+survey: `planning/research/prior-art-and-precedents.md`.
 
 **Founding-pair rationale (Decision 0001).** The protocol is designed against Bevy + Unity
 because they are maximally dissimilar (compiled-code-first vs editor/GUI-first;
@@ -125,7 +125,7 @@ assumptions leaking into the "neutral" protocol.
 
 **Architecture (four layers).** (1) core orchestration engine [extracted], (2) game
 methodology layer, (3) engine-adapter protocol, (4) adapters. Full detail in
-`docs/design/architecture.md`. Quality-model delta vs VSDD: BCs kept for the
+`planning/design/architecture.md`. Quality-model delta vs VSDD: BCs kept for the
 deterministic-sim slice; new Design Intent Contracts for feel; holdout-eval → playtest
 protocol; DTU → deterministic replay harness; formal hardening applies only to the pure-sim
 slice; new asset lane; reshaped convergence dimensions.
@@ -135,8 +135,8 @@ Rapier-class determinism — wrap, don't reinvent. Build the protocol, the confo
 and the semantic/replay layer (especially for Godot/Bevy where no deep SDK exists).
 
 **Research evidence base.** Per-engine capability reports + reconciliation:
-`docs/research/{bevy,unity,godot}-capabilities.md`, `prior-art-and-precedents.md`,
-`RECONCILIATION.md`. Decisions: `docs/decisions/000{1,2,3}.md`.
+`planning/research/{bevy,unity,godot}-capabilities.md`, `prior-art-and-precedents.md`,
+`RECONCILIATION.md`. Decisions: `planning/decisions/000{1,2,3}.md`.
 
 **Pilot bias.** First reference game should be a Bevy/Rapier deterministic-simulation genre
 (factory/automation, roguelike, sim, deterministic RTS) — tier-1 determinism gives the
