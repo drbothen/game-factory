@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,12 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Subsystem Decomposition
 
+> **v1.3 changes (Pass-5 adversarial defect I3):**
+> - **I3:** P0 subtotal corrected 112 → 111. The "+1 v1.1 SS-01" parenthetical in the
+>   Subsystem Priority Summary double-counted the BC-1.15.002 addition — that BC is
+>   already included in SS-01=41. Removed the parenthetical; P0 sum is
+>   41+9+15+16+11+19 = 111. P0(111)+P1(45)+P2(22) = 178. ✓
+>
 > **v1.1 changes (Phase-1d arch alignment):**
 > - **I1:** BC→Subsystem table updated from 168 → 178 total. Added rows for BC-1.15.002
 >   (SS-01, v1.1), BC-13.01.004 (SS-11, v1.1), BC-11.03.006 (SS-09, v1.2), and
@@ -386,7 +392,7 @@ for distribution. A single subsystem boundary is cleaner than two with overlappi
 
 | Priority | Subsystems | BC Count |
 |----------|-----------|----------|
-| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06 | 112 (SS-01=41, SS-02=9, SS-03=15, SS-04=16, SS-05=11, SS-06=19, +1 v1.1 SS-01) |
+| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06 | 111 (SS-01=41, SS-02=9, SS-03=15, SS-04=16, SS-05=11, SS-06=19) |
 | P1 (ship v1) | SS-07, SS-08, SS-09, SS-10 | 45 (SS-07=5, SS-08=17, SS-09=14, SS-10=9) |
 | P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 22 (SS-11=15, SS-12=7) |
 | **Total** | | **178** |

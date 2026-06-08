@@ -136,3 +136,4 @@ S-TBD — Balance Band Design Intent Contract
 
 - VP-TBD-013 — band-check monotonicity
 - VP-TBD-014 — balance simulation determinism
+- Formally verified by VP-003 (Balance band containment — metric within declared bounds) — see verification-properties/VP-003-balance-band-containment.md

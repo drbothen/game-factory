@@ -140,3 +140,4 @@ S-TBD — No-Softlock Design Intent Contract
 
 - VP-TBD-015 — every reachable non-terminal state has a forward exit
 - VP-TBD-016 — softlock detection terminates on finite graphs
+- Formally verified by VP-004 (No-softlock reachability — goal state reachable from any valid state) — see verification-properties/VP-004-no-softlock-reachability.md

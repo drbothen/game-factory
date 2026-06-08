@@ -2,11 +2,11 @@
 document_type: architecture
 level: L3
 section: studio-of-agents
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 traces_to:
   - ARCH-INDEX.md
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md#§5
@@ -23,6 +23,17 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Studio-of-Agents
 
+> **v1.2 — Pass-5 adversarial defect resolution (C1/I1 arithmetic).**
+> - **C1:** §3 per-SS appearance counts fully recomputed from §2 roster (not patched).
+>   SS-05 corrected: NEW 0→3 (systems-designer, economy-designer, combat-designer all
+>   cross-list SS-04,SS-05), ADAPT stays 3, Total 3→6. SS-10 corrected: NEW 4→5
+>   (narrative-designer, narrative-director, worldbuilder, loremaster, quest-designer),
+>   Total 4→5. All other SS rows verified and unchanged.
+> - **I1:** §6 Tier 1 count corrected 51→53 (roles 1–43,50–55,58–61 = 43+6+4 = 53);
+>   Tier 2 count corrected 15→13 (roles 44–49,56–57,62–66 = 6+2+5 = 13). Partition
+>   remains complete and disjoint (53+13=66). Summary line updated from "51+15=66"
+>   to "53+13=66". Wrong "51 roles" label in §I2 fix-note also corrected.
+>
 > **v1.1 — Pass-4 adversarial defect resolution.**
 > - **C1:** Resolved three-way internal count contradiction. Canonical roster is
 >   57 NEW + 9 ADAPT = 66 game-discipline roles (all enumerated in §2 table). The
@@ -164,12 +175,12 @@ in v1.0/v1.5/v2.0 research integration.
 |----|------|-------|-----|-------------------|
 | SS-03 | Asset Generation Pipeline | 0 | 16 | 16 (cross-listed) |
 | SS-04 | Multi-Discipline Production | 3 | 20 | 23 (cross-listed) |
-| SS-05 | Simulation Quality Verification | 3 | 0 | 3 |
-| SS-06 | Convergence Tracking | 1 | 2 | 3 |
+| SS-05 | Simulation Quality Verification | 3 | 3 | 6 (cross-listed) |
+| SS-06 | Convergence Tracking | 1 | 2 | 3 (cross-listed) |
 | SS-07 | Playtest Protocol | 3 | 0 | 3 |
 | SS-08 | Cert and Distribution | 2 | 10 | 12 (cross-listed) |
 | SS-09 | Monetization Ethics | 0 | 2 | 2 |
-| SS-10 | Canon Knowledge-Base | 0 | 4 | 4 |
+| SS-10 | Canon Knowledge-Base | 0 | 5 | 5 (cross-listed) |
 | SS-11 | Genre-Gated Lanes | 0 | 11 | 11 (cross-listed) |
 | SS-12 | XR Platform Seam | 0 | 1 | 1 |
 
@@ -180,8 +191,9 @@ in v1.0/v1.5/v2.0 research integration.
 > are NOT assigned to a game SS-NN, and are NOT counted in the 66-role studio roster.
 > See §5 for the Layer 1/Layer 2 boundary with vsdd-factory infrastructure agents.
 > The ADAPT column above covers the 9 in-studio ADAPT roles (roles 35–43 in §2).
-> (I1 fix v1.1: `security-engineer` role 55 moved from SS-05 → SS-06; SS-05 NEW 1→0,
-> SS-06 NEW 1→2.)
+> (I1 fix v1.1: `security-engineer` role 55 moved from SS-05 → SS-06; SS-05 NEW 1→0 then
+> corrected to 3 in v1.2 (C1) — systems-designer/economy-designer/combat-designer cross-list
+> SS-04,SS-05. SS-06 NEW 1→2 in v1.1; unchanged in v1.2.)
 
 ---
 
@@ -317,11 +329,11 @@ These agents are REUSE from vsdd-factory and are not counted in the 66-role stud
 
 | Tier | Activated agents | Rationale |
 |------|-----------------|-----------|
-| **Tier 1 — v1 Core** | Roles 1–43, 50–55, 58–61 (51 roles) | Det-sim pilot universal spine; includes `security-engineer` (always-on for server-authority invariant suite, required for all online titles) |
-| **Tier 2 — Genre-Gated** | Roles 44–49, 56–57, 62–66 (15 roles) | Optional; activated per genre-profile. `anti-cheat-integrator` (role 56): online/competitive only; `moderation-ops` (role 57): online/UGC/multiplayer only; monetization/marketing/esports/modding/XR as before |
+| **Tier 1 — v1 Core** | Roles 1–43, 50–55, 58–61 (53 roles) | Det-sim pilot universal spine; includes `security-engineer` (always-on for server-authority invariant suite, required for all online titles) |
+| **Tier 2 — Genre-Gated** | Roles 44–49, 56–57, 62–66 (13 roles) | Optional; activated per genre-profile. `anti-cheat-integrator` (role 56): online/competitive only; `moderation-ops` (role 57): online/UGC/multiplayer only; monetization/marketing/esports/modding/XR as before |
 | **Tier 3 — Deferred** | `xr-adapter-owner` (role 62) implementation | Seam reserved; build deferred |
 
-> Tier 1 + Tier 2 = 51 + 15 = 66. All roles accounted for.
+> Tier 1 + Tier 2 = 53 + 13 = 66. All roles accounted for.
 >
 > The det-sim pilot (Bevy, premium/cosmetic-DLC, no UGC, no esports) deploys
 > approximately 40 active specialists plus all catalysts from Tier 1.

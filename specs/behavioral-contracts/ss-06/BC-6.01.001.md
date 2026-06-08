@@ -132,3 +132,4 @@ S-TBD — Economy Conservation Sim Contract
 
 - VP-TBD-001 — Conservation holds for all valid transaction sequences
 - VP-TBD-002 — No silent acceptance of over-spend
+- Formally verified by VP-001 (Economy conservation — no creation/destruction) — see verification-properties/VP-001-economy-conservation.md

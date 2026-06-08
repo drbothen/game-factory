@@ -134,3 +134,4 @@ S-TBD — Damage I/O Sim Contract
 
 - VP-TBD-003 — hp_delta clamping invariant
 - VP-TBD-004 — damage function determinism
+- Formally verified by VP-009 (Damage I/O matrix row-sum correctness) — see verification-properties/VP-009-damage-io-matrix.md

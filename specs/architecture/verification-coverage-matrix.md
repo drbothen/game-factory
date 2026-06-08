@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-coverage-matrix
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,17 +33,23 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | VP-002 | P0 | Kani | SS-05 | FSM runtime | BC-6.01.003 | DI-012 | HIGH |
 | VP-003 | P0 | proptest | SS-05 | Economy simulation core | BC-6.02.003 | DI-012 | HIGH |
 | VP-004 | P0 | Kani (bounded) | SS-05 | Reachability / solvability engine | BC-6.02.004 | DI-012 | MEDIUM (state-space bound required) |
-| VP-005 | P1 | proptest + algebraic | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | HIGH (float precision constraints) |
-| VP-006 | P1 | proptest | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | HIGH |
-| VP-007 | P1 | proptest | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | MEDIUM (partial order over floats; NaN exclusion required) |
+| VP-005 | P1 | proptest + algebraic | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | HIGH (float precision constraints) — see I4 note |
+| VP-006 | P1 | proptest | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | HIGH — see I4 note |
+| VP-007 | P1 | proptest | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | MEDIUM (partial order over floats; NaN exclusion required) — see I4 note |
 | VP-008 | P0 | Kani (harness) | SS-02 | Replay harness golden-state comparison | BC-3.03.001, BC-3.03.002 | DI-004, DI-012 | HIGH (pure-sim Layer 2 only; engine physics excluded) |
 | VP-009 | P0 | proptest | SS-05 | Economy simulation core | BC-6.01.002 | DI-012 | HIGH |
-| VP-010 | P1 | proptest | SS-11 | Tournament bracket engine | BC-13.02.005 | DI-012 | HIGH |
+| VP-010 | P1 | proptest | SS-11 | Tournament bracket engine | BC-13.02.005 | DI-012 | HIGH — see I4 note |
 
 **Totals: 10 VPs — Kani: 4 (VP-001 partial, VP-002, VP-004, VP-008), proptest: 7 (VP-001 partial, VP-003, VP-005, VP-006, VP-007, VP-009, VP-010), algebraic: 1 (VP-005 partial).**
 
 Note: VP-001 uses Kani + proptest (counted under both); VP-005 uses proptest + algebraic proof.
 (C2 fix v1.1: Kani count corrected 3 → 4 — VP-001, VP-002, VP-004, VP-008 are all Kani targets.)
+
+> **I4 — P1-VP-guards-P2-BC priority note.** VP-005, VP-006, VP-007, VP-010 are P1 but guard
+> P2 BCs (BC-13.02.001, BC-13.02.005 in SS-11, the genre-gated esports lane). This is
+> intentional pre-activation hardening: the formal proofs are scheduled P1 to de-risk the
+> competitive-integrity surface before the esports lane is turned on. See VP-INDEX.md §I4 for
+> the full rationale and scheduling rule.
 
 | Tool | VP Count |
 |------|---------|
@@ -94,21 +100,21 @@ Note: VP-001 uses Kani + proptest (counted under both); VP-005 uses proptest + a
 |----|-----------|-----------------|-------|
 | BC-13.02.001 | VP-005, VP-006, VP-007 | — | Rating system math properties (Elo, Glicko-2, TrueSkill) |
 | BC-13.02.005 | VP-010 | — | Tournament bracket progression correctness |
-| BC-13.01.004 | — | VP-TBD-062/063/064 (schema) | NFT/web3 field schema; not formally proven |
+| BC-13.01.004 | — | BC-13.01.004/VP-TBD-062/063/064 (schema) | NFT/web3 field schema; not formally proven |
 | Other BC-13.* | — | TDD integration | Genre profile lifecycle, esports platform integration |
 
 ### SS-01 — Engine-Adapter Protocol
 
 | BC | Formal VP | Non-Formal Check | Notes |
 |----|-----------|-----------------|-------|
-| BC-1.15.002 | — | VP-TBD-060/061 (static lint) | Kernel anti-cheat policy: no kernel-mode patterns in generated output; enforces DI-010/R-017 |
+| BC-1.15.002 | — | BC-1.15.002/VP-TBD-060/061 (static lint) | Kernel anti-cheat policy: no kernel-mode patterns in generated output; enforces DI-010/R-017 |
 | Other BC-1.*, BC-2.* | — | TDD + conformance suite | Adapter protocol, capability schema, conformance verification |
 
 ### SS-06 — Convergence Tracking Engine
 
 | BC | Formal VP | Non-Formal Check | Notes |
 |----|-----------|-----------------|-------|
-| BC-7.11.002..008 | — | VP-TBD-200..209 (integration/proptest) | Server-authority, anti-cheat, entitlement gating, AOI, economy transaction integrity |
+| BC-7.11.002..008 | — | BC-7.11.NNN/VP-TBD-200..209 (integration/proptest) | Server-authority, anti-cheat, entitlement gating, AOI, economy transaction integrity; use qualified form BC-7.11.NNN/VP-TBD-NNN per VP-INDEX convention |
 | Other BC-7.* | — | TDD | Convergence tracking lifecycle, 11-dimension reporting |
 
 ---
@@ -138,9 +144,10 @@ test-sufficient. All are covered by the non-formal verification tier.
 
 ## Coverage Gaps and Phase-6 Promotion Candidates
 
-| Candidate | Current Status | Promotion Condition |
-|-----------|---------------|---------------------|
-| VP-TBD-207 (economy conservation across N transactions) | Integration / proptest | Promote to VP-011 if economy transaction state can be extracted as pure function excluding DB I/O |
-| VP-TBD-127/128 (dark pattern detection — blocked signal proxy) | Unit test | Promote to VP-012/013 if signal composition analysis can be proven over in-memory spec structure |
+| Candidate | Qualified ID | Current Status | Promotion Condition |
+|-----------|-------------|---------------|---------------------|
+| Economy conservation across N transactions | BC-7.11.007/VP-TBD-207 | Integration / proptest | Promote to VP-011 if economy transaction state can be extracted as pure function excluding DB I/O |
+| Dark pattern detection — blocked signal proxy | BC-11.03.006/VP-TBD-127 | Unit test | Promote to VP-012 if signal composition analysis can be proven over in-memory spec structure |
+| Dark pattern detection — computed proxy | BC-11.03.006/VP-TBD-128 | Unit test | Promote to VP-013 if signal composition analysis can be proven over in-memory spec structure |
 
-Both candidates are deferred to story-writer / formal-verifier at Phase 6 entry per VP-INDEX.md §VP-TBD Resolution Table.
+Both candidates are deferred to story-writer / formal-verifier at Phase 6 entry per VP-INDEX.md §VP-TBD Cross-Cutting Registry.

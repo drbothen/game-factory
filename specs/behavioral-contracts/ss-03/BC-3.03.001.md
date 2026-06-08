@@ -148,3 +148,4 @@ does not modify simulation behavior.
 
 - VP-TBD-019 — non-interference with simulation hash
 - VP-TBD-020 — input event completeness
+- Formally verified by VP-008 (Replay determinism equality — T1 bitwise snapshot hash) — see verification-properties/VP-008-replay-determinism-equality.md

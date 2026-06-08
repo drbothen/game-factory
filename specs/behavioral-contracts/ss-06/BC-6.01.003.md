@@ -137,3 +137,4 @@ S-TBD — FSM Legality Sim Contract
 
 - VP-TBD-005 — every reachable FSM state is declared valid
 - VP-TBD-006 — no undeclared transition ever succeeds
+- Formally verified by VP-002 (FSM state legality — no invalid state reachable) — see verification-properties/VP-002-fsm-state-legality.md

@@ -155,3 +155,4 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 - VP-TBD-022 — replay input fidelity
 - VP-TBD-023 — exact tick count
 - VP-TBD-024 — T1 bitwise identical snapshots (same commit)
+- Formally verified by VP-008 (Replay determinism equality — T1 bitwise snapshot hash) — see verification-properties/VP-008-replay-determinism-equality.md
