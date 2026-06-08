@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,9 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - pass: "Pass-10"
+    reason: "I-3 status-value enum reconciliation: postcondition #3 label changed from 'DEGRADED (human-gated pending)' to canonical 'DEGRADED-PENDING' per methodology-layer.md §3.1."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,7 +63,7 @@ for any game shipping after that date.
 2. **GREEN (full):** Schema GREEN + all human-gated items complete:
    SAG-AFTRA consent signatures obtained for applicable assets, legal-doc attorney
    review signed off, ratings submission manifest reviewed and submitted.
-3. **DEGRADED (human-gated pending):** Schema checks GREEN; human-gated items
+3. **DEGRADED-PENDING:** Schema checks GREEN; human-gated items
    (consent signatures, attorney review, ratings submission) pending. The factory
    has completed all automatable work; `human-gated` task lists are emitted.
 4. **BLOCKED:** Any provenance sidecar missing `disclosure_class` (DI-003).

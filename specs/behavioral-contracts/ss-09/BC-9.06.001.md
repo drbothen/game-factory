@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -24,6 +24,10 @@ modified:
     date: 2026-06-08
     by: product-owner
     reason: "Canonicalize convergence-report dimension field name: dimensions.distribution_readiness → dimensions.cert_preflight per methodology-layer.md §3.0 (D-CERT canonical field). Console cert sign-off is a human-gated step within D-CERT's pass predicate."
+  - version: "1.2"
+    date: 2026-06-08
+    by: product-owner
+    reason: "Pass-10 I-3: replace non-canonical AMBER with DEGRADED-PENDING for cert_preflight dimension status per methodology-layer.md §3.1 canonical enum {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -84,7 +88,7 @@ the milestone gate. Suppression is a hook-detectable defect (DI-006).
    ```
 2. This record is added to `distribution-release-pipeline.human_gated_tasks[]`.
 3. The record is surfaced to the milestone gate mechanism.
-4. The `convergence-report.dimensions.cert_preflight` remains `AMBER` (not
+4. The `convergence-report.dimensions.cert_preflight` remains `DEGRADED-PENDING` (not
    `GREEN`) until the task is marked `status: complete` by the cert-owner.
 5. The factory NEVER marks this task `status: complete` autonomously. Only the cert-owner
    (human) can do so.

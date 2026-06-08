@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -20,7 +20,11 @@ capability: CAP-009
 priority: P1
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    by: product-owner
+    reason: "Pass-10 I-3: replace non-canonical AMBER with DEGRADED-PENDING for cert_preflight dimension status per methodology-layer.md §3.1 canonical enum {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -75,8 +79,8 @@ are explicitly flagged `requires-human-review` in the report.
      reference to the failing check IDs.
 6. If all automatable checks PASS but REQUIRES_HUMAN_REVIEW items exist:
    - `overall_status` is `PARTIAL`.
-   - The `convergence-report.dimensions.cert_preflight` field is set to `AMBER` (awaiting
-     human review completion).
+   - The `convergence-report.dimensions.cert_preflight` field is set to `DEGRADED-PENDING`
+     (awaiting human review completion).
 7. If all automatable checks PASS and no REQUIRES_HUMAN_REVIEW items exist for this
    platform scope:
    - `overall_status` is `PASS`.
@@ -113,7 +117,7 @@ are explicitly flagged `requires-human-review` in the report.
 | EC-002 | `cert-preflight-config` for `target_platform` does not exist | Error `E-CERT-002`: "No cert-preflight-config for platform `<target>`" |
 | EC-003 | GDK Submission Validator binary not found (Xbox target) | Xbox-specific checks that require it are emitted as `SKIP` with reason "GDK Submission Validator not found at declared path" |
 | EC-004 | Game binary has `build_profile: debug` | Harness runs with a `debug-build` warning in the report header; release-only checks (e.g., strip-debug-symbols) emit `REQUIRES_HUMAN_REVIEW` with note |
-| EC-005 | `cert-preflight-config` lists 0 automatable checks (all REQUIRES_HUMAN_REVIEW) | Report is valid; `overall_status = PARTIAL`; `convergence-report.cert_preflight = AMBER` |
+| EC-005 | `cert-preflight-config` lists 0 automatable checks (all REQUIRES_HUMAN_REVIEW) | Report is valid; `overall_status = PARTIAL`; `convergence-report.cert_preflight = DEGRADED-PENDING` |
 | EC-006 | Same build run against multiple platforms in parallel | Each platform gets its own scoped report; no cross-platform state sharing |
 | EC-007 | Check execution throws a runtime exception | Check is emitted as `SKIP` with `reason: "evaluation_error"` and error detail; harness continues remaining checks |
 | EC-008 | Checklist version in config does not match any known version | Error `E-CERT-003`: checklist version unknown; harness aborts |
@@ -124,9 +128,9 @@ are explicitly flagged `requires-human-review` in the report.
 |----------------|-------------|--------------------------|-------------------------------|
 | `steam` | All automatable checks pass; no REQUIRES_HUMAN_REVIEW | `PASS` | `GREEN` |
 | `steam` | 1 automatable check FAIL (e.g., missing crash handler) | `FAIL` | `BLOCKED` |
-| `steam` | All automatable checks pass; 3 REQUIRES_HUMAN_REVIEW | `PARTIAL` | `AMBER` |
-| `xbox` | GDK Submission Validator: 0 failures; 2 REQUIRES_HUMAN_REVIEW | `PARTIAL` | `AMBER` |
-| `psn` | Config has 0 automatable checks (all NDA-gated) | `PARTIAL` | `AMBER` |
+| `steam` | All automatable checks pass; 3 REQUIRES_HUMAN_REVIEW | `PARTIAL` | `DEGRADED-PENDING` |
+| `xbox` | GDK Submission Validator: 0 failures; 2 REQUIRES_HUMAN_REVIEW | `PARTIAL` | `DEGRADED-PENDING` |
+| `psn` | Config has 0 automatable checks (all NDA-gated) | `PARTIAL` | `DEGRADED-PENDING` |
 | `steam` | Build artifact missing | Error `E-CERT-001` | `BLOCKED` |
 
 ## Verification Properties
@@ -152,7 +156,7 @@ are explicitly flagged `requires-human-review` in the report.
 
 - BC-9.01.002 — Xbox GDK Submission Validator Integration (specializes this BC for Xbox)
 - BC-9.02.001 — Distribution-Adapter Capability Negotiation (declares `human-gated` fidelity)
-- BC-9.06.001 — Human-Gated Console Cert Sign-Off Task Surfacing (depends on: this BC's AMBER state triggers it)
+- BC-9.06.001 — Human-Gated Console Cert Sign-Off Task Surfacing (depends on: this BC's DEGRADED-PENDING state triggers it)
 - BC-7.05.001 — Cert Pre-Flight Convergence Dimension Evaluation (consumes this BC's output)
 
 ## Architecture Anchors

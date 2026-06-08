@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,21 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.4 changes (Pass-10 I-2/I-3 resolution — status-value enum + stale-note fix):**
+> - **I-2 fixed:** The v1.3 "Known consumer drift (PO action required)" note (§3.0 table
+>   below) that flagged BC-9.04.001/9.06.001/9.06.002 writing `distribution_readiness`
+>   is now replaced with a resolved note. Pass-9 already renamed those three fields to
+>   `cert_preflight`; the stale instruction has been removed.
+> - **I-3 fixed (authority side):** Added §3.1 "Canonical Convergence-Dimension
+>   Status-Value Enum" — the closed set of values that a
+>   `convergence-report.dimensions.<field>` entry may hold, with per-value meanings and
+>   per-dimension allowed subsets. Owner BCs (BC-7.06.001, BC-7.08.001, BC-7.10.001
+>   and all other SS-07 dimension BCs) are the canonical authority; their vocabulary
+>   (GREEN / DEGRADED / DEGRADED-PENDING / BLOCKED) is codified here. Producer BCs
+>   in SS-09/10/11/13 that write `AMBER` for the intermediate state are non-canonical
+>   and MUST be updated by PO (change list in §3.1). Added CI check (n) to
+>   `scripts/check-spec-counts.sh` v1.9 to enforce this enum at usage-site.
 
 > **v1.3 changes (Pass-9 O-2 resolution — canonical convergence-report dimension field names):**
 > - **O-2 fixed:** Added §3.0 "Canonical Dimension Field Name Registry" — a central
@@ -499,11 +514,95 @@ validate field names against this table.
 **Count invariant:** 11 unique field names, one per dimension. No two dimensions share a
 field name. The check-spec-counts.sh check (m) asserts this invariant at CI time.
 
-**Known consumer drift (PO action required):** BC-9.04.001, BC-9.06.001, and BC-9.06.002
-(all in SS-08, `ss-09/` directory) write `convergence-report.dimensions.distribution_readiness`
-for D-CERT. The canonical name is `cert_preflight`. PO should update these three BCs in a
-follow-up pass when SS-08 is next in scope. Until corrected, these BCs diverge from the
-canonical registry.
+**Resolved in Pass-9:** BC-9.04.001, BC-9.06.001, and BC-9.06.002 now use
+`convergence-report.dimensions.cert_preflight` (updated from the former non-canonical
+`distribution_readiness`). No outstanding consumer drift for D-CERT field naming.
+
+---
+
+### §3.1 Canonical Convergence-Dimension Status-Value Enum
+
+**This section is the single source of truth for every value a
+`convergence-report.dimensions.<field>` entry may hold.** The canonical vocabulary
+is the closed set used by the SS-07 dimension-owner BCs (BC-7.01.001 through
+BC-7.12.001). Any producer BC in any other subsystem that writes a value outside
+this enum is non-canonical and must be corrected.
+
+**Authority:** This enum supersedes any divergent value in producer BCs. The owner
+BCs (SS-07) are canonical authority; consumer/producer BCs in SS-09/10/11/13 are
+subordinate consumers and must adopt this vocabulary.
+
+#### Canonical Status-Value Enum
+
+| Value | Meaning | Applicable Dimensions |
+|-------|---------|----------------------|
+| `GREEN` | All pass predicates satisfied; no outstanding gates. | All 11 dimensions (subject to per-dimension rules below) |
+| `DEGRADED` | Pass preconditions partially met with an explicit, documented fallback; human acknowledgment recorded. Generic intermediate state when a degradation path exists. | D-SIM, D-REPLAY, D-ASSET, D-CERT, D-PERF, D-PROV, D-SEC (offline only) |
+| `DEGRADED-PENDING` | All automatable work is complete; one or more `human-gated` tasks are outstanding (e.g. console cert sign-off, attorney review, store publish account). Distinct from DEGRADED in that the factory has done its full automated share — only an external human act remains. | D-CERT, D-PROV |
+| `BLOCKED` | A hard failure predicate is met; the dimension cannot proceed. A BLOCKED dimension halts release. | All 11 dimensions |
+
+**Rationale for DEGRADED vs AMBER:** The dimension predicates throughout §3 and
+ADR-0006 use the vocabulary "degraded predicate" / "blocked predicate". The owner
+BCs (BC-7.06.001, BC-7.08.001, etc.) have always written `DEGRADED` and
+`DEGRADED-PENDING`. `AMBER` is a producer-side drift that entered SS-09/10/11/13
+BCs without authorization. It is NOT canonical. Producers writing `AMBER` for the
+intermediate state MUST be updated to `DEGRADED` or `DEGRADED-PENDING` as
+appropriate (see PO change list below). Choosing a single closed set ({GREEN,
+DEGRADED, DEGRADED-PENDING, BLOCKED}) rather than collapsing DEGRADED and
+DEGRADED-PENDING into one value preserves the actionable distinction between "degraded
+with documented fallback" and "automatable work done, waiting on a specific named
+human act" — the latter is required to implement DI-006 (human-gated tasks surfaced
+not suppressed).
+
+#### Per-Dimension Allowed Value Subsets
+
+| Dim | Allowed Values | Rationale |
+|-----|---------------|-----------|
+| D-SIM | GREEN, DEGRADED, BLOCKED | Degradation path: tolerance-only tier or waived low-priority SBCs. |
+| D-REPLAY | GREEN, DEGRADED, BLOCKED | Degradation path: `replay: none` adapter with playtest evidence. |
+| D-IMPL | GREEN, BLOCKED | No degradation path defined; CI either passes or fails. |
+| D-ASSET | GREEN, DEGRADED, BLOCKED | Degradation path: placeholder assets with documented gaps. |
+| D-PLAY | GREEN, BLOCKED | Human gate; non-substitutable. No automated degradation. |
+| D-CERT | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED for NDA-gated platform or no platforms declared. DEGRADED-PENDING when automatable prefix complete but human-gated tasks outstanding. |
+| D-PERF | GREEN, DEGRADED, BLOCKED | Degradation path: manual profiler evidence in lieu of CI gate. |
+| D-PROV | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED-PENDING when schema checks pass but consent/legal tasks outstanding. |
+| D-DOCS | GREEN, BLOCKED | No degradation path defined. |
+| **D-ETHICS** | **GREEN, BLOCKED** | **Binary. No degradation path. DI-005: unconstrained LTV = factory defect. If monetization is active, the ethics contract must be present and clean-reviewed — no intermediate fallback. See ADR-0006.** |
+| D-SEC | GREEN, DEGRADED (offline only), BLOCKED | DEGRADED only when `online_features: false` explicitly declared. Online games: no degradation path. |
+
+**D-ETHICS binary decision (adjudication):** BC-7.10.001 states "NO DEGRADATION
+PATH" and DI-005 defines unconstrained LTV optimization as a factory defect. An
+intermediate `DEGRADED` state for ethics would create a path to ship a game with an
+unreviewed ethics contract in degraded mode — this contradicts the adversarial-review
+mandate. Therefore D-ETHICS permits only {GREEN, BLOCKED}. Any producer BC (such
+as BC-11.01.002, BC-11.03.006) that writes an intermediate value for
+`monetization_ethics` is writing a BUG: the intermediate state before adversarial
+review is complete should be `BLOCKED` (not DEGRADED/AMBER), because the review is
+not optional and cannot be deferred.
+
+#### PO Change List — Producer BCs Using Non-Canonical `AMBER`
+
+The following producer BCs must be updated by the Product Owner. The architect
+(SS-07 owner) establishes this canonical enum; PO owns SS-09/10/11/13 and the PRD
+supplement.
+
+| BC | Field | Old Value | New Value | Notes |
+|----|-------|-----------|-----------|-------|
+| BC-9.01.001 | `convergence-report.dimensions.cert_preflight` | `AMBER` | `DEGRADED-PENDING` | "Awaiting human review / human-gated tasks outstanding" maps to DEGRADED-PENDING per D-CERT allowed set. |
+| BC-9.04.001 | `convergence-report.dimensions.cert_preflight` | `AMBER` | `DEGRADED-PENDING` | PARTIAL/PENDING overall states → dimension is DEGRADED-PENDING (automatable work done, human tasks outstanding). |
+| BC-9.06.001 | `convergence-report.dimensions.cert_preflight` | `AMBER` | `DEGRADED-PENDING` | Dimension remains non-GREEN while human-gated console cert task outstanding; canonical value is DEGRADED-PENDING. |
+| BC-9.06.002 | `convergence-report.dimensions.cert_preflight` | `AMBER` | `DEGRADED-PENDING` | Same as BC-9.06.001; store-publish human task → DEGRADED-PENDING. |
+| BC-10.02.001 | `convergence-report.dimensions.provenance_legal_compliance` | `AMBER` | `DEGRADED-PENDING` | Schema-GREEN + human-gated items pending → DEGRADED-PENDING per D-PROV allowed set. |
+| BC-10.06.001 | `convergence-report.dimensions.provenance_legal_compliance` | `AMBER` | `DEGRADED-PENDING` | Human legal/consent tasks outstanding → DEGRADED-PENDING. |
+| BC-11.01.002 | `convergence-report.dimensions.monetization_ethics` | `AMBER` | `BLOCKED` | D-ETHICS is binary. "Contract present, adversarial review not yet complete" is BLOCKED, not a degradation. DI-005. |
+| BC-11.03.006 | `convergence-report.dimensions.monetization_ethics` | `AMBER` | `BLOCKED` | D-ETHICS is binary. Flagged-pending-review intermediate state is BLOCKED. |
+| BC-13.01.004 | `convergence-report.dimensions.cert_preflight` | `AMBER` | `DEGRADED-PENDING` | NFT/web3 console policy check pending human review → DEGRADED-PENDING. |
+| prd-cap-009-010.md §11.2 line ~339 | prose reference `provenance_legal_compliance` must be at least `AMBER` | `AMBER` | `DEGRADED-PENDING` | Update prose to: "must be at least `DEGRADED-PENDING`". |
+
+**Note to PO:** Do NOT edit SS-07 BCs (BC-7.xx.xxx). Those are architect-owned and are
+already canonical. Edit only the BCs in columns above, which are in your SS-09/10/11/13
+scope. After your updates, CI check (n) (added in v1.9 of check-spec-counts.sh) will
+turn green.
 
 ---
 

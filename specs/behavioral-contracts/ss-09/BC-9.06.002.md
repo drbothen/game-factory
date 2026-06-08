@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -25,6 +25,10 @@ modified:
     date: 2026-06-08
     by: product-owner
     reason: "Canonicalize convergence-report dimension field name: dimensions.distribution_readiness → dimensions.cert_preflight per methodology-layer.md §3.0 (D-CERT canonical field). Store publish is a human-gated terminal step within D-CERT's pass predicate."
+  - version: "1.2"
+    date: 2026-06-08
+    by: product-owner
+    reason: "Pass-10 I-3: replace non-canonical AMBER with DEGRADED-PENDING for cert_preflight dimension status per methodology-layer.md §3.1 canonical enum {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -83,7 +87,7 @@ and recorded in the `distribution-release-pipeline`.
    ```
 2. Record is added to `distribution-release-pipeline.human_gated_tasks[]`.
 3. Record is surfaced to the milestone gate mechanism.
-4. `convergence-report.dimensions.cert_preflight` remains `AMBER` until marked complete.
+4. `convergence-report.dimensions.cert_preflight` remains `DEGRADED-PENDING` until marked complete.
 5. Factory NEVER calls any store-page-publish or pricing API autonomously.
 
 ## Postconditions
