@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.18
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.19
 #
 # PURPOSE
 # -------
@@ -51,6 +51,17 @@
 # extended in v1.18 to add check (a.iv) — per-capability PRD BC totals + NFR
 # total consistency: closes the recurring class of stale count-summary lines in
 # prd-supplements that check (a) / (a.ii) / (a.iii) do not cover.
+# extended in v1.19 to add check (q) — per-dimension allowed-value prose
+# restatement guard (P19-01 recurrence prevention): scans methodology-layer.md
+# for inline prose restatements of a dimension's allowed-value set — patterns
+# like "D-<DIM> allows <TOKEN>/<TOKEN>/..." or "(D-<DIM> allows ...)". Any such
+# line OUTSIDE the §3.1 canonical table is flagged as a restatement that must
+# not diverge from §3.1. The check compares the token set on the flagged line
+# against the canonical allowed set for that dimension (parsed from §3.1), and
+# FAILs if any token is missing or extra. Convention: do not restate per-dimension
+# allowed-value subsets in prose outside §3.1; reference §3.1 by name instead.
+# POSIX/BSD-grep/awk compatible (no grep -P). Positive-coverage log always
+# printed. Calibrated to be green after the F1 fix in methodology-layer.md v1.7.
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -177,6 +188,15 @@
 #       False-positive avoidance: patterns are anchored to convergence-report dimension
 #       context (lines that contain `convergence[-_]report` or `dimensions.` near a
 #       status keyword); standalone AMBER in non-dimension prose does NOT trigger.
+#   (q) [NEW v1.19] Per-dimension allowed-value prose restatement guard: scans
+#       methodology-layer.md for lines matching "D-<DIM> allows <TOKEN>/<TOKEN>/..."
+#       or "(D-<DIM> allows ...)" OUTSIDE the §3.1 canonical table. For each match,
+#       parses the token set and asserts it equals the §3.1 canonical allowed set for
+#       that dimension. FAIL if any token is missing or extra (vs §3.1 authoritative
+#       subset). Advisory if the pattern matches but §3.1 does not list the dimension.
+#       Convention: avoid inline restatements; reference §3.1 instead.
+#       Positive-coverage log: "Check (q): N prose restatements validated." POSIX/BSD.
+#       (P19-01 recurrence prevention).
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (a.ii) [NEW v1.16] BC-INDEX per-capability section-header count: for each H2
 #       "## CAP-NNN — <name> — N BCs" header, assert N equals the number of actual
@@ -373,6 +393,10 @@ PRD_SUPPLEMENTS_DIR="$REPO_ROOT/.factory/specs/prd-supplements"
 # ---- Helpers ----------------------------------------------------------------
 fail=0
 errors=()
+# Initialize check-local counters that are referenced in the SUMMARY block;
+# ensures the summary is valid even if a check is skipped (e.g. METHODOLOGY_LAYER not found).
+q_validated=0
+q_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -393,7 +417,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.18) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.19) ==="
 echo ""
 
 # ============================================================================
@@ -3089,6 +3113,172 @@ fi
 echo ""
 
 # ============================================================================
+# (q) PER-DIMENSION ALLOWED-VALUE PROSE RESTATEMENT GUARD  [NEW v1.19, P19-01]
+# ============================================================================
+# Detects inline prose restatements of a dimension's allowed-value set that
+# appear OUTSIDE the §3.1 canonical "Per-Dimension Allowed Value Subsets" table
+# in methodology-layer.md.
+#
+# This is the 3rd recurrence of per-dimension subset drift between the §3.1
+# table and a prose restatement of it (Pass-12 changelog note omitting DEGRADED
+# from D-PLAY; earlier occurrences in Pass-11 BC body drift). The check flags
+# restatements so they can be corrected before CI goes stale.
+#
+# DETECTION PATTERN (POSIX/BSD grep -E compatible):
+#   Lines matching:
+#     "D-[A-Z]+ allows [A-Z]"                (e.g. "D-PLAY allows GREEN/...")
+#     "(D-[A-Z]+ allows"                      (parenthetical form)
+#   Both forms capture the dimension ID (D-PLAY, D-PERF, etc.) and the token list
+#   that follows "allows " up to the next whitespace-free boundary.
+#
+# §3.1 TABLE EXCLUSION:
+#   The §3.1 canonical table itself contains "Allowed Values" in its header row
+#   and rows of the form "| D-SIM | GREEN, DEGRADED, BLOCKED | ..." — these do
+#   NOT match the detection pattern (no "allows" verb), so they are never flagged.
+#
+# VALIDATION:
+#   For each flagged line, extract the claimed dimension ID (e.g. D-PLAY) and
+#   the token list (slash- or comma-separated all-caps tokens). Parse the
+#   §3.1 canonical allowed set for that dimension (from the DIM_ALLOWED_MAP
+#   built by check (n.ii), reused here). Assert:
+#     (i)  every token in the prose restatement is in the §3.1 canonical set
+#     (ii) every token in the §3.1 canonical set appears in the prose restatement
+#   FAIL if either assertion fails — the restatement is inconsistent with §3.1.
+#   ADVISORY if the dimension is not found in §3.1 (cannot validate).
+#
+# EXCLUSIONS:
+#   - Lines starting with ">" (blockquote / changelog entries) — historical
+#     prose restatements in changelogs are tolerated; only operative content fails.
+#   - Lines starting with "|" (table rows — part of §3.1 canonical table).
+#   - Lines containing "reason:" (YAML lifecycle prose).
+#
+# POSITIVE-COVERAGE: "Check (q): N prose restatements validated." always printed.
+# POSIX/BSD-grep/awk compatible (no grep -P). (P19-01 recurrence prevention).
+echo ""
+echo "--- (q) per-dimension allowed-value prose restatement guard ---"
+echo "    Scope: methodology-layer.md operative lines matching 'D-<DIM> allows <TOKENS>'"
+echo "    Convention: do not restate per-dimension subsets in prose; reference §3.1 instead."
+
+if [[ ! -f "$METHODOLOGY_LAYER" ]]; then
+  echo "    SKIP: methodology-layer.md not found at $METHODOLOGY_LAYER"
+else
+  q_violations=0
+  q_validated=0
+  q_violation_msgs=()
+
+  # Extract restatement lines from methodology-layer.md.
+  # We scan for lines containing the pattern "D-[A-Z]+ allows" (case-sensitive;
+  # dimension IDs are always uppercase). Exclude changelog/reason lines:
+  #   (a) Lines starting with ">" (blockquote — changelog entries).
+  #   (b) Lines starting with "|" (table rows — §3.1 canonical table).
+  #   (c) Lines containing "reason:" (YAML lifecycle prose).
+  restatement_lines=$(grep -nE 'D-[A-Z]+ allows [A-Z]' "$METHODOLOGY_LAYER" 2>/dev/null \
+    | grep -v '^[0-9]*:>' \
+    | grep -v '^[0-9]*:|' \
+    | grep -v 'reason:' \
+    || true)
+
+  if [[ -z "$restatement_lines" ]]; then
+    echo "    No prose restatements found outside §3.1 table."
+  else
+    while IFS= read -r rline; do
+      [[ -z "$rline" ]] && continue
+
+      # Extract line number and content
+      lineno=$(printf '%s' "$rline" | cut -d: -f1)
+      content=$(printf '%s' "$rline" | cut -d: -f2-)
+
+      # Extract dimension ID: first "D-[A-Z]+" token on the line
+      dim_id=$(printf '%s' "$content" | grep -oE 'D-[A-Z]+' | head -1 || true)
+      [[ -z "$dim_id" ]] && continue
+
+      # Extract token list: everything after "allows " up to end-of-word boundary
+      # The token list uses "/" or "," or "/" separators: "GREEN/DEGRADED/BLOCKED"
+      # Extract the text after "allows " using awk (POSIX compatible)
+      token_string=$(printf '%s' "$content" \
+        | awk '{if(match($0,/allows [A-Z][A-Z\/-]+/)) print substr($0,RSTART+7,RLENGTH-7)}' \
+        | head -1 || true)
+      [[ -z "$token_string" ]] && continue
+
+      # Tokenize: split on "/" and "," to get individual token names
+      # Use tr + grep to normalize and extract [A-Z][A-Z-]+ tokens
+      prose_tokens=$(printf '%s' "$token_string" \
+        | tr '/,' '\n' \
+        | grep -oE '[A-Z][A-Z-]+' \
+        | grep -E '^[A-Z][A-Z-]+$' \
+        | sort -u || true)
+      [[ -z "$prose_tokens" ]] && continue
+
+      # Look up §3.1 canonical allowed set for this dimension (from DIM_ALLOWED_MAP
+      # built in check n.ii; may be empty if check (n) was skipped or §3.1 not parsed)
+      canonical_allowed="${DIM_ALLOWED_MAP[$dim_id]:-}"
+
+      if [[ -z "$canonical_allowed" ]]; then
+        # Cannot validate — dimension not in §3.1 map (advisory, not hard fail)
+        echo "    ADVISORY: line $lineno: '${dim_id} allows ...' — dimension not in §3.1 map; cannot validate token set"
+        continue
+      fi
+
+      q_validated=$(( q_validated + 1 ))
+
+      # canonical_allowed is space-separated; convert to newline-separated for comparison
+      canonical_tokens=$(printf '%s\n' "$canonical_allowed" | tr ' ' '\n' \
+        | grep -E '^[A-Z][A-Z-]+$' | sort -u || true)
+
+      # Check (i): every prose token must be in the canonical set
+      missing_from_canonical=()
+      while IFS= read -r ptok; do
+        [[ -z "$ptok" ]] && continue
+        if ! printf '%s\n' "$canonical_tokens" | grep -qxF "$ptok" 2>/dev/null; then
+          missing_from_canonical+=("$ptok")
+        fi
+      done <<< "$prose_tokens"
+
+      # Check (ii): every canonical token must appear in the prose restatement
+      missing_from_prose=()
+      while IFS= read -r ctok; do
+        [[ -z "$ctok" ]] && continue
+        if ! printf '%s\n' "$prose_tokens" | grep -qxF "$ctok" 2>/dev/null; then
+          missing_from_prose+=("$ctok")
+        fi
+      done <<< "$canonical_tokens"
+
+      if [[ ${#missing_from_canonical[@]} -gt 0 || ${#missing_from_prose[@]} -gt 0 ]]; then
+        q_violations=$(( q_violations + 1 ))
+        prose_set=$(printf '%s\n' "$prose_tokens" | tr '\n' '/' | sed 's/\/$//')
+        canon_set=$(printf '%s\n' "$canonical_tokens" | tr '\n' '/' | sed 's/\/$//')
+        msg="line $lineno: ${dim_id} prose restatement {${prose_set}} != §3.1 canonical {${canon_set}}"
+        [[ ${#missing_from_canonical[@]} -gt 0 ]] && \
+          msg="${msg}; extra-in-prose: ${missing_from_canonical[*]}"
+        [[ ${#missing_from_prose[@]} -gt 0 ]] && \
+          msg="${msg}; missing-from-prose: ${missing_from_prose[*]}"
+        q_violation_msgs+=("methodology-layer.md:${msg}")
+      else
+        if [[ "$VERBOSE" == true ]]; then
+          echo "    OK [q line $lineno]: ${dim_id} prose restatement matches §3.1 canonical set"
+        fi
+      fi
+
+    done <<< "$restatement_lines"
+  fi
+
+  # Positive-coverage log (always printed)
+  echo "    Check (q): $q_validated prose restatements validated against §3.1 canonical subsets."
+  echo "    Prose restatement mismatches: $q_violations"
+
+  if [[ $q_violations -gt 0 ]]; then
+    echo ""
+    echo "    PROSE RESTATEMENT MISMATCHES (token set differs from §3.1 canonical table):"
+    for msg in "${q_violation_msgs[@]}"; do
+      echo "      $msg"
+    done
+    errors+=("MISMATCH [per-dim prose restatement (q)]: $q_violations prose restatement(s) of dimension allowed-value subsets differ from §3.1 canonical table in methodology-layer.md — correct the restatement or remove it and reference §3.1")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -3118,6 +3308,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Per-dim subset enforcement (n.ii): all dimension-value assignments within allowed subsets"
   echo "  Bare token scan (n.iii):           no bare non-canonical hyphenated tokens in dim-context"
   echo "  Cross-ref ID/desc consistency (p): $xref_validated SS-07 dim-owner citations validated, 0 ID/description mismatches"
+  echo "  Prose restatement guard (q):       $q_validated prose restatements validated, 0 mismatches"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
