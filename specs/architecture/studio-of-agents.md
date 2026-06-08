@@ -2,7 +2,7 @@
 document_type: architecture
 level: L3
 section: studio-of-agents
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -23,6 +23,15 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Studio-of-Agents
 
+> **v1.3 — Pass-13 adversarial defect C13-01 / I13-01 (online-services seam).**
+> - **I13-01:** Role 58 (`backend-services-engineer`) owning subsystem corrected
+>   SS-11 → SS-13 (Online-Services Adapter). Online-services is Tier-1 always-on;
+>   SS-11 (Genre-Gated Lanes) is the wrong semantic home for always-on capabilities.
+>   SS-13 is a new subsystem added in subsystem-decomposition.md v1.5.
+> - **§3 SS-11 appearance count corrected 11→10** (role 58 no longer cross-listed
+>   under SS-11). SS-13 row added (NEW=1, Total=1).
+> - **§6 Tier 1 list annotation updated**: role 58 now listed under SS-13.
+>
 > **v1.2 — Pass-5 adversarial defect resolution (C1/I1 arithmetic).**
 > - **C1:** §3 per-SS appearance counts fully recomputed from §2 roster (not patched).
 >   SS-05 corrected: NEW 0→3 (systems-designer, economy-designer, combat-designer all
@@ -151,7 +160,7 @@ in v1.0/v1.5/v2.0 research integration.
 | 55 | `security-engineer` | Security | SS-06 | NEW | S | `security-requirements-contract`, `server-authority-invariant-suite` |
 | 56 | `anti-cheat-integrator` | Security | SS-11 | NEW | S | `anti-cheat-integration-adapter` (EAC/EOS wrap-only) |
 | 57 | `moderation-ops` | Security / Trust | SS-11 | NEW | C | `moderation-pipeline-contract`; judgment = human-gated |
-| 58 | `backend-services-engineer` | Online services | SS-11 | NEW | S | `online-services-spec`, `remote-config-contract` |
+| 58 | `backend-services-engineer` | Online services | SS-13 | NEW | S | `online-services-spec`, `remote-config-contract` |
 | 59 | `platform-integrator` | Platform | SS-08 | NEW | S | `platform-integration-manifest` |
 | 60 | `release-engineer` | Distribution | SS-08 | NEW | S | `distribution-release-pipeline` (steamcmd/butler/fastlane) |
 | 61 | `liveops-sre` | LiveOps | SS-06, SS-08 | NEW | S | Crash-reporting symbol upload, feature-flag wiring, A/B runbooks |
@@ -181,8 +190,9 @@ in v1.0/v1.5/v2.0 research integration.
 | SS-08 | Cert and Distribution | 2 | 10 | 12 (cross-listed) |
 | SS-09 | Monetization Ethics | 0 | 2 | 2 |
 | SS-10 | Canon Knowledge-Base | 0 | 5 | 5 (cross-listed) |
-| SS-11 | Genre-Gated Lanes | 0 | 11 | 11 (cross-listed) |
+| SS-11 | Genre-Gated Lanes | 0 | 10 | 10 (cross-listed) |
 | SS-12 | XR Platform Seam | 0 | 1 | 1 |
+| SS-13 | Online-Services Adapter | 0 | 1 | 1 |
 
 > Note: vsdd-factory infrastructure roles (orchestrator, adversary, architect,
 > state-manager, implementer, test-writer, product-owner, formal-verifier, pr-manager,
@@ -194,6 +204,8 @@ in v1.0/v1.5/v2.0 research integration.
 > (I1 fix v1.1: `security-engineer` role 55 moved from SS-05 → SS-06; SS-05 NEW 1→0 then
 > corrected to 3 in v1.2 (C1) — systems-designer/economy-designer/combat-designer cross-list
 > SS-04,SS-05. SS-06 NEW 1→2 in v1.1; unchanged in v1.2.)
+> (I13-01 fix v1.3: `backend-services-engineer` role 58 moved from SS-11 → SS-13;
+> SS-11 NEW 11→10; SS-13 added NEW=1.)
 
 ---
 
@@ -329,7 +341,7 @@ These agents are REUSE from vsdd-factory and are not counted in the 66-role stud
 
 | Tier | Activated agents | Rationale |
 |------|-----------------|-----------|
-| **Tier 1 — v1 Core** | Roles 1–43, 50–55, 58–61 (53 roles) | Det-sim pilot universal spine; includes `security-engineer` (always-on for server-authority invariant suite, required for all online titles) |
+| **Tier 1 — v1 Core** | Roles 1–43, 50–55, 58–61 (53 roles) | Det-sim pilot universal spine; includes `security-engineer` (always-on for server-authority invariant suite, required for all online titles) and `backend-services-engineer` (SS-13 — always-on for projects with online_features: true; inactive for offline/single-player projects) |
 | **Tier 2 — Genre-Gated** | Roles 44–49, 56–57, 62–66 (13 roles) | Optional; activated per genre-profile. `anti-cheat-integrator` (role 56): online/competitive only; `moderation-ops` (role 57): online/UGC/multiplayer only; monetization/marketing/esports/modding/XR as before |
 | **Tier 3 — Deferred** | `xr-adapter-owner` (role 62) implementation | Seam reserved; build deferred |
 

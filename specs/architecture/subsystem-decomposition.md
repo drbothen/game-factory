@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.4"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,22 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Subsystem Decomposition
 
+> **v1.6 changes (CAP-015 BCs delivered by PO — SS-13 count finalized):**
+> - SS-13 BC count updated from TBD → 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1).
+>   Grand total updated 178 + TBD → **190**.
+>   Priority subtotals: P0 117→126 (+9), P1 39→42 (+3), P2 22 (unchanged). Sum: 190. ✓
+>   BC→Subsystem assignment table updated with explicit BC-15.* count and total.
+>
+> **v1.5 changes (Pass-13 adversarial defect C13-01 — online-services seam):**
+> - **C13-01:** Added SS-13 (Online-Services Adapter, CAP-015) as a new subsystem.
+>   Role 58 (`backend-services-engineer`) moved from SS-11 → SS-13 (I13-01 resolution:
+>   online-services is Tier-1 always-on, not genre-gated; SS-11 owns only genre-gated lanes).
+>   DTU-08 (Nakama BaaS Double) subsystem corrected SS-11 → SS-13.
+>   BC-count total unchanged at 178 pending PO authoring of CAP-015 BCs.
+>   SS-11 appearance count in §3 corrected 11→10; SS-13 added (1 appearance).
+>   Alias table extended with `ss-15/` → SS-13 row.
+>   ARCH-INDEX subsystem registry updated to 13 subsystems.
+>
 > **v1.4 changes (Pass-6 adversarial defect I6-01 / O6-01):**
 > - **I6-01:** Priority subtotals corrected to frontmatter ground truth. The stale
 >   P0=111/P1=45 values undercounted the 8 P0 dark-pattern/ethics BCs in SS-09
@@ -311,12 +327,59 @@ when implementation begins; the adapter implementation is deferred.
 
 ---
 
+### SS-13 — Online-Services Adapter
+
+**Layer:** 3 + 4 (seam contract at Layer 3; adapter implementations at Layer 4)
+**Owned capabilities:** CAP-015 (Online-Services Adapter)
+**BC count:** 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1; delivered by PO v1.6)
+**Priority:** P1 (Tier 1 — v1 ship prerequisite; default-on for online-enabled titles;
+  must be disableable for offline/single-player projects via `online_features: false`)
+
+Owns the online-services adapter seam: the BaaS capability surface
+(identity/saves/cloud-save, leaderboards, matchmaking, entitlements), the
+online-services manifest schema, conformance suite, and reference adapter
+implementations. This is the fifth adapter seam per ADR-0004 v1.1.
+
+**Subsystem placement rationale (I13-01 resolution).** Online-services is Tier-1
+always-on (product brief §Overflow Context §Tier 1 list) — it is NOT genre-gated.
+SS-11 (Genre-Gated Lanes) exclusively owns opt-in activation of genre-specific
+production lanes (competitive-multiplayer, modding/UGC, marketing, esports). Placing
+an always-on capability there would violate SS-11's declared scope ("inactive lanes
+impose zero constraints on the universal core") and would create a false implication
+that online-services is opt-in. A new subsystem (SS-13) is the correct architectural
+home. Expanding SS-01 (Engine-Adapter Protocol) was rejected: SS-01's scope is the
+engine adapter protocol surface specifically; mixing engine and BaaS capability
+surfaces would blur the seam boundaries that ADR-0004 establishes.
+
+**Anti-lock-in thesis.** Nakama is the self-hostable reference target (Docker-in-CI
+feasible; no BaaS lock-in). EOS and PlayFab follow the same adapter conformance path.
+The online-services manifest schema declares per-capability fidelity grades using the
+same model as all other seams (ADR-0004 v1.1).
+
+**D-SEC convergence dimension.** Leaderboard integrity and entitlement integrity
+fall under the existing D-SEC convergence dimension (server-authority invariants,
+BC-7.11.*). The PO should reference BC-7.11.* rather than creating a duplicate
+convergence dimension. The online-services conformance suite verifies that the BaaS
+adapter enforces server-authority for leaderboard and entitlement operations; any
+violations are reported through the D-SEC dimension (SS-06).
+
+**Off-by-default for offline/single-player projects.** When `online_features: false`
+in the project genre-profile, SS-13 is inactive and produces zero artifacts (mirror
+of the inactive-lane invariant). The factory must not require BaaS configuration
+for single-player or offline projects. The conformance suite must include a
+`capabilities.identity: none` / `capabilities.leaderboards: none` path.
+
+**Principal agents:** `backend-services-engineer` (role 58).
+
+---
+
 ## BC to Subsystem Assignment Table
 
 > This table is the authoritative resolution of all SS-TBD placeholders.
 > A mechanical pass will apply `subsystem: SS-NN` to each BC file's frontmatter.
-> BC directory names (ss-01/…ss-14/) are navigability aliases for CAP numbers only.
-> Grand total: **178** (168 original + 2 v1.1 + 9 v1.2; total corrected from 179 in C2-01 — BC-INDEX.md was not a BC).
+> BC directory names (ss-01/…ss-15/) are navigability aliases for CAP numbers only.
+> Grand total: **190** (178 pre-CAP-015 + 12 CAP-015 BCs delivered by PO v1.6).
+> CAP-015 BCs: BC-15.01.001..BC-15.11.001 (9 P0 + 3 P1) assigned to SS-13.
 
 | BC ID Range | Count | Assigned Subsystem | Rationale |
 |-------------|-------|--------------------|-----------|
@@ -338,7 +401,8 @@ when implementation begins; the adapter implementation is deferred.
 | BC-13.01.001 – BC-13.04.002 | 14 | **SS-11** | CAP-013 = genre-gated lanes (original 14) |
 | BC-13.01.004 | 1 | **SS-11** | CAP-013; v1.1 add: NFT/web3 off-by-default DI-011 (dir: ss-13/) |
 | BC-14.01.001 – BC-14.02.003 | 7 | **SS-12** | CAP-014 = XR platform seam |
-| **TOTAL** | **178** | | |
+| BC-15.01.001 – BC-15.11.001 | 12 | **SS-13** | CAP-015 = Online-Services Adapter (9 P0 + 3 P1; delivered by PO v1.6) |
+| **TOTAL** | **190** | | 178 pre-CAP-015 + 12 CAP-015 BCs |
 
 ---
 
@@ -354,6 +418,11 @@ pipeline (CAP-010) are co-owned by the same principal agents (`cert-owner`,
 `compliance-officer`) and share the human-gated task surfacing pattern (DI-006).
 Compliance artifacts (IARC, ratings submission manifest, AI disclosure) are prerequisites
 for distribution. A single subsystem boundary is cleaner than two with overlapping owners.
+
+**CAP-015 maps 1:1 to SS-13 (Online-Services Adapter).** Online-services is Tier-1
+always-on and is NOT genre-gated, making SS-11 an incorrect home. A dedicated SS-13
+preserves the seam boundary established by ADR-0004 v1.1 (each adapter seam has its
+own subsystem: engine→SS-01, asset→SS-03, distribution→SS-08, XR→SS-12, online-services→SS-13).
 
 **All other capabilities map 1:1 to a subsystem.**
 
@@ -388,6 +457,7 @@ for distribution. A single subsystem boundary is cleaner than two with overlappi
 | `ss-12/` | CAP-012 | **SS-10** (Canon Knowledge-Base) | |
 | `ss-13/` | CAP-013 | **SS-11** (Genre-Gated Lanes) | BC-13.01.004 is in ss-13/ and subsystem=SS-11 ✓ |
 | `ss-14/` | CAP-014 | **SS-12** (XR Platform Seam) | |
+| `ss-15/` | CAP-015 | **SS-13** (Online-Services Adapter) | New v1.5; online-services is always-on Tier-1, not genre-gated |
 
 **Key hazard rows** (where directory ≠ subsystem suffix):
 
@@ -403,7 +473,7 @@ for distribution. A single subsystem boundary is cleaner than two with overlappi
 
 | Priority | Subsystems | BC Count |
 |----------|-----------|----------|
-| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06, SS-09 (partial) | 117 (SS-01=41, SS-02=9, SS-03=13, SS-04=16, SS-05=11, SS-06=19, SS-09=8) |
-| P1 (ship v1) | SS-03 (partial), SS-07, SS-08, SS-09 (partial), SS-10 | 39 (SS-03=2, SS-07=5, SS-08=17, SS-09=6, SS-10=9) |
+| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06, SS-09 (partial), **SS-13 (partial)** | 126 (SS-01=41, SS-02=9, SS-03=13, SS-04=16, SS-05=11, SS-06=19, SS-09=8, **SS-13=9**) |
+| P1 (ship v1) | SS-03 (partial), SS-07, SS-08, SS-09 (partial), SS-10, **SS-13 (partial)** | 42 (SS-03=2, SS-07=5, SS-08=17, SS-09=6, SS-10=9, **SS-13=3**) |
 | P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 22 (SS-11=15, SS-12=7) |
-| **Total** | | **178** |
+| **Total** | | **190** |

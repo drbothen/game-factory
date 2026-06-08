@@ -17,7 +17,7 @@ phase0_gate: PASSED
 dtu_required: true
 dtu_assessment: 2026-06-08
 dtu_clones_built: pending
-dtu_services: [game-engine-bevy, game-engine-unity, asset-gen-visual, asset-gen-audio, asset-gen-voice, asset-gen-3d, compliance-iarc, compliance-ai-disclosure, distribution-steam, distribution-itch]
+dtu_services: [game-engine-bevy, game-engine-unity, asset-gen-visual, asset-gen-audio, asset-gen-voice, asset-gen-3d, compliance-iarc, compliance-ai-disclosure, distribution-steam, distribution-itch, online-services-baas-nakama]
 ---
 
 # Factory State — game-factory
@@ -39,7 +39,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 - `.reference/vsdd-factory` @ develop `82163b7` (gitignored; Phase-0 extraction source)
 - `.mcp.json` = gitignored (contains local API keys)
 
-**Thesis (do not silently drop):** engine-agnostic / four-seam / no-lock-in — REAFFIRMED by human. Adapter seams (8 contract schemas) are mandatory architecture, not optional scaffolding.
+**Thesis (do not silently drop):** engine-agnostic / five-seam / no-lock-in — REAFFIRMED by human. Adapter seams are mandatory architecture, not optional scaffolding. Five seams: engine, asset, compliance, analytics, online-services (CAP-015/SS-13; Pass-13 C13-01 resolution).
 
 ---
 
@@ -66,10 +66,10 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 |------|-------------|--------|
 | create-domain-spec | L2 domain spec (10 shards; 18 entities, 14 caps) | DONE |
 | create-prd | PRD + 168 BCs across 14 caps → SS-01..SS-12 | DONE |
-| create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
+| create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–11 resolved (see phase-1-log.md rows 9–19); Pass 12 FINDINGS (0C/2I; BC-8.08.004 lowercase D-PLAY fixed; check n case-insensitive; CI v1.12 17 sub-assertions; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–12 resolved (see phase-1-log.md rows 9–20); Pass 13 FINDINGS (1C/1I; C13-01 online-services gap resolved via CAP-015/SS-13 build; I13-01 role-58 anchor; 190 BCs/213 codes; CI v1.13; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,18 +78,18 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 13** (candidate clean #1 of 3). Pass 12 FINDINGS: 0C/2I/3obs all resolved; BC-8.08.004 lowercase D-PLAY status tokens mapped to canonical (green→GREEN, red→BLOCKED, amber→DEGRADED, pending→DEGRADED-PENDING); CI check (n.i) now case-insensitive; methodology §3.1 PO Change List converted to past-tense + Pass-12 note. Counter stays 0/3.
-**Spec state:** PRD v1.6; BC-INDEX v1.4; error-taxonomy v1.7 (198 codes / 30 families / 189 active; E-GEN retired); subsystem-decomposition v1.4 (P0=117/P1=39/P2=22); ARCH-INDEX v1.6; VP-INDEX v1.3; methodology-layer v1.6 (§3.1 PO Change List past-tense; Pass-12 BC-8.08.004 note); ADR-0006 v1.2; studio-of-agents v1.2; verification-architecture.md v1.0; verification-coverage-matrix.md v1.2; nfr-catalog v1.2; prd-cap-011 v1.3; BC-7.05.001 v1.1; BC-7.07.001 v1.1; BC-7.08.001 v1.2; BC-7.12.001 v1.1; BC-8.08.004 v1.2. 178 BCs / 198 codes / 35 NFRs / 66 studio roles. CI count-gate v1.12 (checks a–n, 17 sub-assertions incl. case-insensitive n.i + coverage log + n.ii + n.iii).
+**NEXT: `phase-1d-adversarial` — Pass 14** (candidate clean #1 of 3). Pass 13 FINDINGS: 1C/1I — C13-01 online-services/BaaS entirely absent; resolved by building CAP-015/SS-13 per human decision (12 BCs, 5th adapter seam, E-OSVC 15 codes, 6 NFRs, DTU-08 wired); I13-01 role-58 anchor corrected to SS-13. Counter stays 0/3. Pass 14 must audit new CAP-015 surface.
+**Spec state:** PRD v1.9; BC-INDEX v1.5; error-taxonomy v1.9 (213 codes / 31 families total / 204 active; E-GEN 9 codes retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22; SS-13 added); ARCH-INDEX v1.8 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.6; ADR-0004 v1.1 (five-seam); ADR-0006 v1.2; adapter-protocols.md v1.2 (§6 5th seam); studio-of-agents v1.3 (SS-13; role 58 reassigned); dtu-assessment v1.1 (DTU-08 wired); nfr-catalog v1.3 (41 NFRs); prd-cap-015.md (new); capabilities.md (CAP-015 added). 190 BCs / 15 capabilities / 13 subsystems / 41 NFRs / 66 studio roles. CI count-gate v1.13 (checks a–n, 17 sub-assertions; SS-11=10/SS-13=1 expected values updated).
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented. lint job now includes Spec count consistency (S2-02) gate.
 
 ### Phase-1d Adversarial Convergence
 
 | Pass | Date | Verdict | Findings | Resolved | Clean-pass counter |
 |------|------|---------|----------|----------|--------------------|
-| 1–9 | 2026-06-08 | FINDINGS×8 / CLEAN×1 | (see phase-1-log.md rows 9–17) | ALL RESOLVED | 1/3 after Pass-7; reset on Pass-8 → 0/3 |
-| 10 | 2026-06-08 | FINDINGS | 0C / 3I / 0 obs | ALL RESOLVED | **0/3** |
+| 1–10 | 2026-06-08 | FINDINGS×9 / CLEAN×1 | (see phase-1-log.md rows 9–18) | ALL RESOLVED | 1/3 after Pass-7; reset on Pass-8 → 0/3; back to 0/3 after Pass-10 |
 | 11 | 2026-06-08 | FINDINGS | 0C / 2I / 3 obs | ALL RESOLVED | **0/3** |
 | 12 | 2026-06-08 | FINDINGS | 0C / 2I / 3 obs | ALL RESOLVED | **0/3** |
+| 13 | 2026-06-08 | FINDINGS | 1C / 1I / 0 obs | RESOLVED via CAP-015 build (human-approved scope completion) | **0/3** |
 
 ---
 
@@ -105,7 +105,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–11 all findings resolved (see phase-1-log.md); Pass 12 FINDINGS (0C/2I; BC-8.08.004 lowercase D-PLAY fixed; check n case-insensitive; CI v1.12; counter stays 0/3); Pass 13 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–12 all findings resolved (see phase-1-log.md); Pass 13 FINDINGS (1C/1I; C13-01 online-services gap resolved by CAP-015/SS-13 build; I13-01 role-58 anchor; CI v1.13; counter stays 0/3); Pass 14 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -119,7 +119,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 |-------|------|--------|-------|
 | pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED (D-006/07/08 human-ratified) |
 | 0 | Brownfield Extraction | PASSED | VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; quality model REPLACE; seam: 4 config/content swap interfaces; human-approved |
-| 1 | Spec Crystallization | IN PROGRESS | Steps 1–7 DONE (L2→PRD+168 BCs→architecture+VPs→prd-revision→PRD v1.1 170 BCs 35 NFRs 21 error families); see cycles/v0.1.0-greenfield/phase-1-log.md |
+| 1 | Spec Crystallization | IN PROGRESS | Steps 1–8 DONE (L2→PRD+190 BCs→architecture+VPs→prd-revision→CI/CD→adversarial Pass 1–13); 13 subsystems / 15 caps / 41 NFRs / 213 error codes; see phase-1-log.md |
 | 2–7 | Story Decomp → Convergence | PENDING | — |
 
 ---
@@ -143,6 +143,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | D-013 | sequence-graph directed:true = creative gate distinct from DI-006 external-human-gate (ADR-0007) | ACCEPTED (architect, 2026-06-08) |
 | D-014 | DI-008 engine-neutrality scope = Layer-1/Layer-2 core+spec artifacts only; L3 adapter-behavior BCs may name specific engines illustratively (adapters are engine-specific by design); O1 adjudicated IN-BOUNDS | ACCEPTED (orchestrator, 2026-06-08) — FLAG FOR HUMAN RATIFICATION at Phase-1 gate |
 | D-015 | VP-TBD-NNN labels are BC-LOCAL placeholder identifiers; canonical form is `<BC-ID>/VP-TBD-NNN` (e.g., BC-6.01.001/VP-TBD-001); VP-INDEX is not required to enumerate all BC-local VP-TBDs globally; Phase-6 formal hardening promotes BC-local VP-TBDs to canonical VP-NNN identifiers | ACCEPTED (architect, 2026-06-08) — FLAG FOR HUMAN AWARENESS at Phase-1 gate |
+| D-016 | Online-services/BaaS (Nakama) = Tier-1 v1 ship-prerequisite capability CAP-015; built faithful to product brief per human decision 2026-06-08; five-seam adapter model (engine/asset/compliance/analytics/online-services); `serverAuthoritative` required for leaderboards + entitlements; `offlineProject` off-by-default | ACCEPTED (human, 2026-06-08) |
 
 ---
 
@@ -162,7 +163,7 @@ _(none open)_
 
 | Item | Action | When |
 |------|--------|------|
-| DTU clone existence check | Verify 10 clones DTU-01..DTU-10 built (see `specs/architecture/dtu-assessment.md`) | Before Phase 3 |
+| DTU clone existence check | Verify 11 clones DTU-01..DTU-11 built (DTU-08 Nakama wired to CAP-015/SS-13; see `specs/architecture/dtu-assessment.md` v1.1) | Before Phase 3 |
 | CI/CD verification | DONE: 3 workflows on main @ de99845 (ci.yml/release.yml/security.yml; SHA-pinned actions; timeout-minutes; least-priv perms; 4 stub jobs); cicd-setup.md @ cf9fc6a. lint job now includes **Spec count consistency (S2-02)** gate (`scripts/check-spec-counts.sh`). Required status checks: `CI / lint`, `CI / test`, `CI / build`, `CI / pure-sim-verify`. Branch protection NOT yet applied — pending. | Before Phase 3 |
 | LiteLLM proxy + API keys | Start proxy; populate `.env` / `.envrc`; verify GPT adversary route | Before Phase 5 |
 
@@ -172,10 +173,7 @@ _(none open)_
 
 | ID | Item | Owner | When |
 |----|------|-------|------|
-| FU-001 | DI-010/011 dedicated BCs | — | **CLOSED** — BC-1.15.002 (DI-010, SS-01) + BC-13.01.004 (DI-011, SS-11) added in PRD v1.1 |
-| FU-002 | NFR numeric targets for CAP-001–003, 006–007, 009–011, 013–014 | — | **CLOSED** — NFR-020..NFR-035 added in nfr-catalog.md v1.1 |
-| FU-003 | Missing error families: E-GEN, E-ETH, E-XR + ~7 others | — | **CLOSED** — 10 new families added (E-CONF, E-REPLAY, E-GEN, E-SIM, E-CONV, E-PLAY, E-ETH, E-KB, E-GENRE, E-XR); total now 21 families / 137 codes |
-| FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers | — | CLOSED (c29f412) |
+| FU-001..004 | DI-010/011 BCs; NFR numeric targets; missing error families; SS-TBD identifiers | — | **ALL CLOSED** (see phase-1-log.md steps 7/9) |
 | FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013 + BC-1.15.002 + BC-13.01.004. **Pass-1 status: ALL VALIDATED WITH CORRECTIONS** — D-010 confirmed; D-011 confirmed; D-012 DI-012 normalization applied (I4); D-013 creative-gate disambiguation applied (I5); BC-1.15.002 pattern list extended (I7); BC-13.01.004 cert path completed (I8). Pending: 3 clean passes from Pass 2 onward. | Phase-1d adversary | ONGOING |
 | FU-006 | **DTU framing divergence (human-gate awareness):** DTU clone enumeration DTU-01..10 (post-architecture) differs from product-brief §10 service list (pre-architecture framing). Both enumerate 10 services but names/groupings differ. DTU-01..10 is authoritative; brief §10 is pre-architecture intent. Human should confirm at Phase-1 gate that DTU-01..10 is the operative enumeration. Flagged by Pass-4 O3. | human (Phase-1 gate) | OPEN — awaiting human gate |
 | FU-007 | **E-GLG-001 changelog attribution (O7-01 from Pass 7):** error-taxonomy.md line ~596 Coverage Note under E-GLG-001 under-attributes the code — omits BC-13.02.002/004/005 and BC-13.03.001 as emitters. Section header (line ~516) is correct and CI check (k) is GREEN; this is a changelog-summary granularity nit only. Deferred optional cleanup — may fold into a later doc-cleanup pass. | product-owner | OPEN — non-blocking; deferred |
@@ -186,15 +184,15 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–12 DONE.
-**Phase-1d Pass 12 FINDINGS resolved:** (F-12-01) BC-8.08.004 lowercase D-PLAY status tokens (`green`/`red`/`amber`/`pending`) — BC-8.08.004 was the one D-PLAY producer missing from §3.1 PO Change List; mapped green→GREEN, red→BLOCKED, amber→DEGRADED, pending→DEGRADED-PENDING (per owner BC-7.05.001 v1.1); BC-8.08.004 v1.2. (F-12-02) CI check (n) was uppercase-only — let lowercase tokens evade 11 passes; check (n.i) v1.12 now case-insensitive (fold-to-uppercase before membership test; flags wrong-case canonical AND non-canonical lowercase); anchored to dim_context_lines; coverage log added. OBS-1 RESOLVED: methodology §3.1 "PO Change List" future-tense → past-tense + Pass-12 note; methodology-layer v1.6. OBS-2/OBS-3 non-blocking deferred. Clean-pass counter: stays 0/3.
-**Next action:** `phase-1d-adversarial` — **Pass 13** (candidate clean #1 of 3). Need 3 clean passes to converge.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–13 DONE.
+**Phase-1d Pass 13 FINDINGS resolved:** (C13-01 CRITICAL) Online-services/BaaS (Tier-1 v1 brief req) entirely absent from spec; DTU-08 Nakama orphaned; ADR-0004 "four-seam" title contradicted its own body. Human decision: build it now faithful to brief. Resolution: CAP-015 Online-Services Adapter — SS-13 new subsystem; 12 BCs (BC-15.01.001..BC-15.11.001; 9 P0/3 P1); 5th adapter seam in adapter-protocols.md §6 (identity/cloud_save/leaderboards/matchmaking/entitlements/remote_config/conformance; serverAuthoritative required for leaderboards+entitlements; offlineProject off-by-default); ADR-0004 reconciled to five-seam (v1.1); E-OSVC error family (15 codes E-OSVC-001..015); DTU-08 wired to CAP-015; 6 new NFRs (NFR-036..041); prd-cap-015.md authored. (I13-01 IMPORTANT) Role 58 artifacts reassigned SS-11→SS-13; SS-11 count corrected 11→10; SS-13=1. CI gate v1.13 SS-11=10/SS-13=1 expected values updated. ALL CHECKS PASSED exit 0.
+**Next action:** `phase-1d-adversarial` — **Pass 14** (candidate clean #1 of 3; must audit new CAP-015/SS-13 surface). Need 3 consecutive clean passes to converge.
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v1.6. 178 BCs; 35 NFRs; 198 error codes / 30 families (189 active; E-GEN retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred). FU-008 open (§3.0 Subsystem col dual-meaning, non-blocking deferred).
-**BC versions changed Pass 12:** BC-8.08.004 v1.2 (D-PLAY status tokens canonicalized). methodology-layer v1.6 (§3.1 past-tense + Pass-12 note). CI gate v1.12 (checks a–n, 17 sub-assertions incl. case-insensitive n.i + coverage log + n.ii + n.iii).
-**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.6 (11 convergence dims + §3.0 canonical field table + §3.1 status-value enum + per-dim subsets); 66-role studio (57N+9A; 53T1+13T2); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.2). 10 VPs (6 P0, 4 P1). Priority: 178 BCs / P0=117 / P1=39 / P2=22.
-**Verification docs:** verification-architecture.md v1.0, verification-coverage-matrix.md v1.2. All 11 formal VP↔BC back-refs present. Kani=4, proptest=7 (dual-count VP-001).
+**PRD status:** v1.9. 190 BCs; 41 NFRs; 213 error codes / 31 families total (204 active; E-GEN 9 codes retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred). FU-008 open (§3.0 Subsystem col dual-meaning, non-blocking deferred).
+**Architecture:** 13 subsystems (SS-01..SS-13); 4-layer stack; 5 adapter seams; methodology-layer v1.6 (11 convergence dims); 66-role studio (53T1+13T2); DTU_REQUIRED=true, 11 clones (DTU-01..DTU-08 + DTU-09..11) pending. ADR-0004 v1.1 (five-seam) / ADR-0006 v1.2. 10 VPs (6 P0, 4 P1). Priority: 190 BCs / P0=126 / P1=42 / P2=22.
+**Key versions changed Pass 13:** prd-cap-015.md (new); BC-15.01.001..BC-15.11.001 (12 new BCs); adapter-protocols.md v1.2; ADR-0004 v1.1; error-taxonomy.md v1.9; subsystem-decomposition.md v1.6; ARCH-INDEX.md v1.8; studio-of-agents.md v1.3; dtu-assessment.md v1.1; BC-INDEX.md v1.5; nfr-catalog.md v1.3; prd.md v1.9; capabilities.md (CAP-015); CI gate v1.13.
 **D-014:** DI-008 engine-neutrality scope = Layer-1/Layer-2 only; L3 adapter-behavior BCs may name engines illustratively. FLAG FOR HUMAN RATIFICATION at Phase-1 gate.
 **D-015:** VP-TBD-NNN are BC-local placeholders; canonical form `<BC-ID>/VP-TBD-NNN`; Phase-6 promotes to VP-NNN. FLAG FOR HUMAN AWARENESS at Phase-1 gate.
+**D-016:** CAP-015 Online-Services Adapter = Tier-1 v1 capability per product brief; human-approved build 2026-06-08; five-seam model.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
 **File manifest:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

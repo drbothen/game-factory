@@ -174,3 +174,27 @@ is deferred until Unity/Godot adapters are proven.
 
 CAP-014 covers the XR seam because the product brief declares "seam reserved; impl deferred"
 for XR (Brief §Scope: Out of Scope / Deferred). Grounded in RECONCILIATION §5A and §10 Tier 3.
+
+## CAP-015 — Online-Services Adapter (P1, Tier 1)
+
+**Subsystem: SS-13**
+
+The factory integrates with Backend-as-a-Service (BaaS) platforms via the online-services
+adapter seam, providing a capability surface for: player identity (account creation,
+authentication, session token management), cloud save (per-player persistence with
+conflict resolution), leaderboards (server-authoritative score submission with variant
+support), matchmaking (lobby lifecycle, player matching), entitlements (server-authoritative
+purchase verification, DLC unlock, human-gated platform-store-review path), and remote
+config (feature-flag fetch with contract binding). The reference implementation targets
+Nakama (self-hostable, Docker-in-CI via DTU-08); EOS and PlayFab follow as alternative
+adapters. Offline/single-player projects may disable all online services via
+`online_features: false` in the project genre-profile, producing zero BaaS configuration
+artifacts without pipeline failure.
+
+CAP-015 covers online services as a Tier-1 (v1 ship prerequisite) because:
+(1) the five-seam adapter architecture (ADR-0004) explicitly reserves the online-services
+seam as a first-class anti-lock-in boundary (adapter-protocols.md §6, Pass-13 adversarial
+defect C13-01); (2) competitive multiplayer and live-service games require BaaS as a
+foundational dependency; (3) server-authority enforcement for leaderboards and entitlements
+is required by the D-SEC convergence dimension (BC-7.11.002, BC-7.11.008). Grounded in
+adapter-protocols.md §6 (five-seam reconciliation) and the Tier-1 ship prerequisite posture.

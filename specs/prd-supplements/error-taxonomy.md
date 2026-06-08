@@ -2,11 +2,11 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "1.7"
+version: "1.9"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
-phase: 1a
+phase: 1d
 traces_to: prd.md
 inputs:
   - .factory/specs/prd-supplements/prd-cap-001.md
@@ -60,6 +60,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | E-MKT | CAP-013 | Marketing lane asset conformance errors (BC-13.04.*) | error-taxonomy.md §E-MKT (added PRD rev 1.6) |
 | E-XR | CAP-014 | XR platform seam errors | error-taxonomy.md §E-XR (added PRD rev 1.1) |
 | E-PRV | CAP-004 | Provenance sidecar field validation errors (`disclosure_class` + sidecar completeness) | error-taxonomy.md §E-PRV (added PRD rev 1.2; extended rev 1.6) |
+| E-OSVC | CAP-015 | Online-Services Adapter errors (identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity) | prd-supplements/prd-cap-015.md §5 (populated PRD rev 1.9) |
 
 ---
 
@@ -582,7 +583,61 @@ and marketing asset manifest completeness (BC-13.04.002).
 
 ---
 
+## E-OSVC — Online-Services Adapter (CAP-015)
+
+> **Populated in PRD rev 1.9 (CAP-015 delivery).** 15 codes covering all seven
+> capability areas plus seam integrity.
+>
+> **Naming rationale.** `E-SVC` is taken by CAP-004 (GenerationRequest service
+> validation). `E-OSVC` = Online Services Capability.
+>
+> **Note on E-EAP-012 (MalformedManifest):** When `serverAuthoritative: false` is
+> declared on leaderboards or entitlements with non-none fidelity, the error is
+> `E-EAP-012` (MalformedManifest) — not an E-OSVC code. Manifest-level violations
+> always route to E-EAP-012 per adapter-protocols.md §1.5.
+
+All E-OSVC errors have `exit_code: 1` unless marked `degraded` (exit code 0).
+Message format uses `<placeholder>` syntax.
+
+| Error Code | Category | Severity | Exit Code | Message Format | Enforcing BC |
+|-----------|----------|----------|-----------|----------------|-------------|
+| E-OSVC-001 | Backend unreachable | broken | 1 | `online-services: backend '<targetId>' unreachable — connection failed or timed out` | BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001 |
+| E-OSVC-002 | Session expired or invalid credentials | broken | 1 | `online-services: session token expired or credentials rejected for playerId '<id>' via provider '<provider>'; error.data.reason = SESSION_EXPIRED \| INVALID_CREDENTIALS` | BC-15.02.001 |
+| E-OSVC-003 | Score rejected by server | broken | 1 | `online-services: leaderboard.submit: score <score> for board '<boardId>' rejected by server — exceeds server-computed maximum for playerId '<playerId>'` | BC-15.04.001 |
+| E-OSVC-004 | Entitlement not found in store registry | broken | 1 | `online-services: entitlement.verify: entitlementId '<id>' not registered in backend store '<targetId>'` | BC-15.06.001 |
+| E-OSVC-005 | Save conflict unresolvable | broken | 1 | `online-services: save.write: conflict for playerId '<id>' key '<key>' — strategy '<strategy>' could not resolve; winner_version in error.data` | BC-15.03.001 |
+| E-OSVC-006 | Remote config stale | broken | 1 | `online-services: remote_config.fetch: namespace '<ns>' cache expired at '<expiry>'; backend unreachable; cache cannot be used` | BC-15.07.001 |
+| E-OSVC-007 | Remote config contract violation | broken | 1 | `online-services: remote_config.fetch: namespace '<ns>' key '<key>' value '<v>' fails contract '<contract_ref>' schema at '<path>'` | BC-15.07.001 |
+| E-OSVC-008 | Remote config namespace not found | broken | 1 | `online-services: remote_config.fetch: namespace '<ns>' not configured in backend '<targetId>'` | BC-15.07.001 |
+| E-OSVC-009 | Online artifact leak in offline project | broken | 1 | `online-services: BaaS artifact '<path>' found in output tree but project declares online_features: false or offlineProject: true — zero-artifact invariant violated (BC-15.01.002)` | BC-15.01.002 |
+| E-OSVC-010 | No conformance suite | degraded | 0 | `online-services: adapter '<targetId>' declares conformance_suite: none — accepted for dev/sandbox only; not eligible for production pipeline gate` | BC-15.08.001 |
+| E-OSVC-011 | Online-services core coupling detected | broken | 1 | `online-services: adapter add/remove caused core file '<file>' to change — violates seam isolation (BC-15.09.001, ADR-0004)` | BC-15.09.001 |
+| E-OSVC-012 | CapabilityUnsupported suppressed | broken | 1 | `online-services: adapter '<targetId>' returned nominal success for none-fidelity capability '<cap>' — E-EAP-002 required; conformance failure (BC-15.10.001)` | BC-15.10.001 |
+| E-OSVC-013 | Unsupported auth provider | broken | 1 | `online-services: identity: authProvider '<provider>' not in adapter's declared authProviders list` | BC-15.02.001 |
+| E-OSVC-014 | Lobby capacity exceeded | broken | 1 | `online-services: matchmaking.joinLobby: lobby '<lobbyId>' is at max capacity (<maxPlayers>) — join rejected` | BC-15.05.001 |
+| E-OSVC-015 | Lobby not found | broken | 1 | `online-services: matchmaking.joinLobby: joinCode '<code>' does not resolve to an active lobby — code may be expired or invalid` | BC-15.05.001 |
+
+---
+
 ## Coverage Notes
+
+### PRD Revision 1.8 Changes (Pass-13 C13-01 — online-services seam)
+
+| Change | Detail |
+|--------|--------|
+| E-OSVC family reserved | **ARCHITECT (C13-01):** Family `E-OSVC` (Online-Services Adapter, CAP-015, SS-13) reserved for future PO population. Zero active codes added. Family registry updated (30 → 31 families; 29 active + 1 retired E-GEN + **1 reserved E-OSVC**). Active code count unchanged: **189**. Total registered count unchanged: **198**. |
+| Collision check | `E-SVC` (CAP-004 GenerationRequest) is DIFFERENT from `E-OSVC`. No collision. |
+
+---
+
+### PRD Revision 1.9 Changes (CAP-015 online-services adapter delivery)
+
+| Change | Detail |
+|--------|--------|
+| E-OSVC populated (15 codes) | **PRODUCT-OWNER (CAP-015 delivery):** Family `E-OSVC` (Online-Services Adapter, CAP-015, SS-13) promoted from reserved to active. 15 codes added: E-OSVC-001..015 covering identity/session (001/002/013), cloud-save (005), leaderboards (003), matchmaking (014/015), entitlements (004), remote-config (006/007/008), offline-project seam (009), conformance (010/012), and seam isolation (011). Active code count: 189 → **204**. Total registered count: 198 → **213**. Active families: 29 (reserved E-OSVC) → **30**. Total families (incl. retired E-GEN): 31 (unchanged). |
+| Headline updated | Authoritative total headline updated from 198 to **213** (30 active families + 1 retired E-GEN = 31 total). |
+
+---
 
 ### PRD Revision 1.7 Changes (Pass-9 adversarial fixes: I-1, I-2, O-1)
 
@@ -613,7 +668,7 @@ and marketing asset manifest completeness (BC-13.04.002).
 | Total 139 → 196 (CI-computed) | **Net:** +57 new codes (E-AAG×7 + E-SVC×6 + E-PRV×5 + E-QG×11 + E-SHIP×3 + E-ING×4 + E-GLG×5 + E-MOD×11 + E-MKT×4 + E-XR×1) = 139 + 57 = **196 total registered codes** (CI computes all distinct E-xxx-NNN tokens including retired E-GEN). E-GEN (9 codes) retired but its codes remain in the taxonomy as a retired table, so CI still counts them. Active families: 22 − 1 (E-GEN retired) + 8 new = **29 active families**. Active codes only (excl. E-GEN): **187**. |
 | Total 196 → 198 (PRD rev 1.7) | **+E-COMP-011** (out-of-vocabulary `disclosure_class` at manifest aggregation; I-1 fix) and **+E-COMP-012** (`nft_blockchain`/`nft_mechanics` inconsistency seam guard; I-2 fix). E-COMP family: 2 → 4. Total all registered (incl. retired E-GEN): **198**. Active codes only (excl. E-GEN): **189**. |
 
-**Total defined error codes: 198** across 30 families (29 active + 1 retired E-GEN). Per-family breakdown (active codes: 189; retired codes: 9 E-GEN):
+**Total defined error codes: 213** across 31 families (30 active + 1 retired E-GEN). Per-family breakdown (active codes: 204; retired codes: 9 E-GEN):
 
 | Family | Code Count | Notes |
 |--------|-----------|-------|
@@ -647,8 +702,9 @@ and marketing asset manifest completeness (BC-13.04.002).
 | E-MKT | 4 | v1.6 addition: marketing lane (BC-13.04.*) |
 | E-XR | 7 | v1.1: 6 codes; v1.6: +E-XR-007 (visionOS/OpenXR namespace error) |
 | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** — orphaned placeholder; no BC ever referenced these codes |
-| **TOTAL (all registered incl. retired)** | **198** | Sum of all rows including retired E-GEN; this is the CI-computed total |
-| *(active only, excl. E-GEN retired)* | *189* | Active codes only |
+| E-OSVC | 15 | v1.9 addition: online-services adapter (CAP-015) — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity |
+| **TOTAL (all registered incl. retired E-GEN)** | **213** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 213 |
+| *(active only, excl. E-GEN retired)* | *204* | Active codes only (30 active families) |
 
 ---
 

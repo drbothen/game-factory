@@ -1,11 +1,11 @@
 ---
 document_type: dtu-assessment
 level: L4
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 DTU_REQUIRED: true
 traces_to: ARCH-INDEX.md
 inputs:
@@ -19,6 +19,14 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # DTU Assessment — game-factory
+
+> **v1.1 — Pass-13 adversarial defect C13-01 (DTU-08 wiring fix).**
+> - **C13-01:** DTU-08 (Nakama BaaS Double) subsystem corrected SS-11 → SS-13.
+>   Online-services is Tier-1 always-on (not genre-gated); SS-11 is the wrong
+>   subsystem home. SS-13 (Online-Services Adapter) is the correct owner. The
+>   DTU-08 conformance suite maps to CAP-015 BCs (PO to author). Negative-path
+>   assertions (blocked-backend, score rejection, server-authority enforcement) are
+>   documented in §6.5 of adapter-protocols.md (online-services conformance suite).
 
 ## DTU_REQUIRED: true
 
@@ -103,13 +111,22 @@ to complete the human task autonomously.
 ### 4. Online Services / BaaS (BIDIRECTIONAL — factory wires BaaS; game runtime uses it)
 
 **Category:** Persistence and state (identity, saves, leaderboards, matchmaking, entitlements)
+**Subsystem:** SS-13 (Online-Services Adapter, CAP-015 — v1.1: corrected from orphan SS-11)
 
-| Service | Role | DTU Strategy |
-|---------|------|--------------|
-| Nakama (reference, self-hostable) | Identity/saves/leaderboards/matchmaking | **L3 Behavioral Clone** — self-hostable means Docker-in-CI is feasible; Nakama is the preferred testable reference |
-| EOS (Epic Online Services) | Cross-platform (free, VERIFIED) | **L2 Stateful Clone** — EOS SDK has test mode; entitlement + leaderboard paths cloned |
-| PlayFab | Managed BaaS ($0 < 100K) | **L2 Stateful Clone** — API key + sandbox environment |
-| mod.io | UGC distribution (VERIFIED) | **L3 Behavioral Clone** — REST API; round-trip conformance (BC-13.03.004); genre-gated (SS-11) |
+| Service | Role | DTU Strategy | BC Mapping |
+|---------|------|--------------|------------|
+| Nakama (reference, self-hostable) | Identity/saves/leaderboards/matchmaking | **L3 Behavioral Clone** — self-hostable means Docker-in-CI is feasible; Nakama is the preferred testable reference (DTU-08) | CAP-015 BCs (PO to author) |
+| EOS (Epic Online Services) | Cross-platform (free, VERIFIED) | **L2 Stateful Clone** — EOS SDK has test mode; entitlement + leaderboard paths cloned | CAP-015 BCs (same conformance suite) |
+| PlayFab | Managed BaaS ($0 < 100K) | **L2 Stateful Clone** — API key + sandbox environment | CAP-015 BCs (same conformance suite) |
+| mod.io | UGC distribution (VERIFIED) | **L3 Behavioral Clone** — REST API; round-trip conformance (BC-13.03.004); genre-gated (SS-11) | BC-13.03.004 (unchanged) |
+
+**Negative-path and server-authority assertions.** DTU-08 must exercise:
+- Score submission rejected by server when client-tampered (server-authority conformance)
+- Entitlement verification returns `granted: false` for unowned DLC
+- Blocked-backend path: if a BaaS target is not in the accepted_targets matrix,
+  the adapter must return `CapabilityUnsupported` (not a crash or silent success)
+- `offlineProject: true` path: all capability calls return `CapabilityUnsupported`;
+  no BaaS config artifacts emitted
 
 ---
 
@@ -150,7 +167,7 @@ The following are the required doubles to build, in priority order:
 | DTU-05 | Voice Backend Double with SAG-AFTRA path | Consent-trigger behavioral clone | SS-03 | P0 | L3 Behavioral |
 | DTU-06 | steamcmd / butler Distribution Clone | Non-interactive upload + build-record | SS-08 | P1 | L3 Behavioral |
 | DTU-07 | Human-Gated Task Surfacing Validator | Confirms task surface, never auto-completes | SS-08 | P1 | L2 Stateful |
-| DTU-08 | Nakama BaaS Double (Docker-in-CI) | Online services behavioral clone | SS-11 | P2 | L3 Behavioral |
+| DTU-08 | Nakama BaaS Double (Docker-in-CI) | Online services behavioral clone | SS-13 | P1 | L3 Behavioral |
 | DTU-09 | C2PA Mark Embedding Validator | Confirms mark presence + format | SS-08 | P1 | L2 Stateful |
 | DTU-10 | T3 Tolerance-Window Engine Double (Godot) | Metric-snapshot comparison stub | SS-02 | P1 | L2 Stateful |
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -22,6 +22,7 @@ inputs:
   - .factory/specs/behavioral-contracts/ss-12/
   - .factory/specs/behavioral-contracts/ss-13/
   - .factory/specs/behavioral-contracts/ss-14/
+  - .factory/specs/behavioral-contracts/ss-15/
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
@@ -33,7 +34,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
 > architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
-**Grand total: 178 behavioral contracts** across 14 capabilities. (168 original + 2 added in PRD revision v1.1 to close FU-001: BC-1.15.002 for DI-010, BC-13.01.004 for DI-011; +8 added in PRD revision v1.2 to resolve Phase-1d adversarial pass-1: BC-11.03.006 for DP-007; BC-7.11.002..008 for D-SEC server-authority invariant suite CWE-602. Note: corrected from 179 in v1.3 — BC-INDEX.md itself was erroneously counted in the prior total. v1.4: normalized all 15 ss-04 BC frontmatter blocks to canonical schema (added version, status, producer, timestamp, phase, inputs, lifecycle block); reconciled two H1↔INDEX title drifts: BC-1.15.002 and BC-4.03.004.)
+**Grand total: 190 behavioral contracts** across 15 capabilities. (178 from CAP-001..014 + 12 added in v1.5 for CAP-015 online-services adapter: BC-15.01.001, BC-15.01.002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001. v1.5: CAP-015/SS-13 online-services seam BCs (12 BCs); new E-OSVC error family (15 codes) registered.)
 
 ---
 
@@ -345,6 +346,27 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 
 ---
 
+## CAP-015 — Online-Services Adapter (P1, Tier 1) — 11 BCs
+
+Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
+
+| BC ID | Title | Priority | File | Lifecycle |
+|-------|-------|----------|------|-----------|
+| BC-15.01.001 | Online-Services Manifest Schema Validation and serverAuthoritative Enforcement | P0 | ss-15/BC-15.01.001.md | active |
+| BC-15.01.002 | Off-by-Default Posture — Offline/Single-Player Zero-Artifact Guarantee | P0 | ss-15/BC-15.01.002.md | active |
+| BC-15.02.001 | Identity — Player Account Create and Authenticate with Session Token and Expiry | P0 | ss-15/BC-15.02.001.md | active |
+| BC-15.03.001 | Cloud Save — Write/Read Round-Trip and Conflict Resolution | P1 | ss-15/BC-15.03.001.md | active |
+| BC-15.04.001 | Leaderboards — Server-Authoritative Submit, Tampered Score Rejection, Variants, and Pagination | P0 | ss-15/BC-15.04.001.md | active |
+| BC-15.05.001 | Matchmaking — Lobby Lifecycle (Create and Join) | P1 | ss-15/BC-15.05.001.md | active |
+| BC-15.06.001 | Entitlements — Server-Authoritative Verify, Granted:False for Unowned, Human-Gated Platform-Store-Review Path | P0 | ss-15/BC-15.06.001.md | active |
+| BC-15.07.001 | Remote Config — Fetch, Remote-Config-Contract Binding, and Stale-Data Handling | P1 | ss-15/BC-15.07.001.md | active |
+| BC-15.08.001 | Conformance Suite Self-Report (Full vs. None Fidelity) | P0 | ss-15/BC-15.08.001.md | active |
+| BC-15.09.001 | Online-Services Seam Isolation — Zero Core Changes on Adapter Add/Remove | P0 | ss-15/BC-15.09.001.md | active |
+| BC-15.10.001 | Online-Services Graceful Degradation — CapabilityUnsupported for None-Fidelity Capabilities | P0 | ss-15/BC-15.10.001.md | active |
+| BC-15.11.001 | Entitlement and Leaderboard Integrity — D-SEC Reference Contract (100-Token Active Cap) | P0 | ss-15/BC-15.11.001.md | active |
+
+---
+
 ## Summary Counts
 
 | Capability | Priority | Subsystem | BC Count |
@@ -363,4 +385,5 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 | CAP-012 — Canon KB | P1 | SS-10 | 9 |
 | CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 15 |
 | CAP-014 — XR Seam | P2 | SS-12 | 7 |
-| **TOTAL** | | | **178** |
+| CAP-015 — Online-Services Adapter | P0/P1 | SS-13 | 12 (v1.5: all new; P0×9: BC-15.01.001/002, 15.02.001, 15.04.001, 15.06.001, 15.08.001, 15.09.001, 15.10.001, 15.11.001; P1×3: BC-15.03.001, 15.05.001, 15.07.001) |
+| **TOTAL** | | | **190** |

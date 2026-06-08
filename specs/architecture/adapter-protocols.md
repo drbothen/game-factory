@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -14,6 +14,7 @@ traces_to_caps:
   - CAP-004
   - CAP-009
   - CAP-014
+  - CAP-015
 traces_to_adrs:
   - ADR-0002
   - ADR-0004
@@ -39,6 +40,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Adapter Protocol Family
 
+> **v1.2 changes (Pass-13 adversarial defect C13-01 — five-seam reconciliation):**
+> - Added §6 Online-Services Adapter Seam (SS-13, CAP-015): capability surface,
+>   manifest schema, fidelity tiers, JSON-RPC method set, conformance suite requirement,
+>   and off-by-default posture for offline/single-player projects.
+> - Updated §7 Compatibility Matrix to add `online-services-adapter` seam entry.
+> - §1.7 Conformance Suite preamble updated: "all four seams" → "all five seams".
+>
 > **v1.1 changes (Phase-1d arch alignment — C4 JSON-RPC reconciliation):**
 > - §1.5 error table: added `E-EAP Code` column mapping every JSON-RPC code to its
 >   error-taxonomy E-EAP-NNN entry.
@@ -48,18 +56,18 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > - `-32007 MalformedManifest` retains its code; now registered as E-EAP-012.
 > - `-32008 HumanGatedTaskPending` retains its code; now registered as E-EAP-013.
 
-> **Pass 2a scope.** This document defines the four-seam adapter protocol as one
-> coherent pattern and then shows how each seam instantiates that pattern with its
+> **Pass 2a / v1.2 scope.** This document defines the five-seam adapter protocol as
+> one coherent pattern and then shows how each seam instantiates that pattern with its
 > own delta. The base protocol mechanics (transport, lifecycle, capability negotiation,
 > fidelity model, versioning) are defined once here and are NOT repeated per seam.
-> All four seams inherit these mechanics; each seam section describes only what
+> All five seams inherit these mechanics; each seam section describes only what
 > differs from the base.
 
 ---
 
 ## 1. Base Protocol Pattern
 
-All four adapter seams share one structural pattern, established in ADR-0002 and
+All five adapter seams share one structural pattern, established in ADR-0002 and
 ADR-0004:
 
 > **Capability-negotiation manifest + fidelity grading + driver hook + conformance
@@ -123,7 +131,7 @@ common subset.
 
 ### 1.3 Capability Manifest Schema
 
-The `initialize` response returns a Capability Manifest. All four seams use a variant
+The `initialize` response returns a Capability Manifest. All five seams use a variant
 of this top-level shape:
 
 ```jsonc
@@ -167,7 +175,7 @@ the full enum is:
 | `human-gated` | Automatable prefix complete; single checklisted human task surfaced | **Blocks progression** until human acknowledgment is recorded; suppression is a hook-detectable defect (DI-006) |
 
 **Fidelity-to-convergence-dimension coupling.** The convergence engine (SS-06) reads
-fidelity grades from all four seams as first-class signals. A dimension whose
+fidelity grades from all five seams as first-class signals. A dimension whose
 underlying capability grade is `none` degrades to its declared fallback; a dimension
 with an unacknowledged `human-gated` task is blocked. This is the mechanism by which
 honest capability declarations drive honest convergence outcomes.
@@ -237,13 +245,13 @@ nor the reason) is forbidden.
 
 ### 1.7 Conformance Suite (CAP-002 Pattern)
 
-Every seam has a conformance suite that gates adapter acceptance. The suite is
+Every adapter seam has a conformance suite that gates adapter acceptance. The suite is
 **capability-gated** (CRI/CSI-style): the suite runs only the test cases for
 capabilities that the manifest declares. An adapter that declares `capture: full`
 must pass the capture conformance cases; an adapter that declares `capture: none`
 is not tested for capture.
 
-**Structure of each seam's conformance suite:**
+**Structure of each seam's conformance suite (applies to all five adapter seams):**
 
 1. **Manifest validation** — required fields present, fidelity values are valid
    enum members, no contradictory declarations.
@@ -258,7 +266,8 @@ is not tested for capture.
    correctly to `ProtocolVersionMismatch` for an incompatible core.
 
 The engine-adapter conformance suite (CAP-002) is the P0 reference implementation.
-Asset, distribution, and XR conformance suites follow the same five-part structure.
+Asset, distribution, online-services, and XR conformance suites follow the same
+five-part structure.
 
 ---
 
@@ -716,9 +725,183 @@ constraint. The `human-gated` tier applies (DI-006).
 
 ---
 
-## 6. Conformance Hooks: CAP-002 Gating Each Seam
+## 6. Online-Services Adapter Seam
 
-CAP-002 defines conformance gating. The same pattern applies to all four seams.
+**Lock-in prevented:** N BaaS backends for one online-services capability surface.
+**Subsystem:** SS-13 (CAP-015)
+**Transport:** JSON-RPC 2.0 stdio (same as engine-adapter) for subprocess adapters;
+  HTTP/REST for cloud BaaS adapters (same pattern as asset-adapter §3.1).
+**Status:** Seam contract defined here; reference implementation targets Nakama
+  (self-hostable; Docker-in-CI feasible). EOS and PlayFab follow as alternative adapters.
+
+> **Tier and activation.** Online-services is Tier-1 (v1 ship prerequisite).
+> However, offline/single-player projects MUST be able to disable it entirely by
+> declaring `online_features: false` in the project genre-profile. When
+> `online_features: false`, the adapter declares all capabilities as `none` fidelity
+> and the factory produces zero BaaS configuration artifacts. This is NOT a
+> genre-gated lane — it is a project-level toggle.
+
+---
+
+### 6.1 Online-Services Capability Surface
+
+The capabilities every online-services adapter declares:
+
+| Capability | What the adapter does | Fidelity range |
+|------------|----------------------|----------------|
+| `identity` | Player account creation, authentication, session token management | `full` / `partial` / `none` |
+| `cloud_save` | Per-player save data: write, read, conflict resolution | `full` / `partial` / `none` |
+| `leaderboards` | Submit score, retrieve ranked list, configurable board variants | `full` / `partial` / `none` |
+| `matchmaking` | Lobby creation, player matching by skill/region/latency | `full` / `partial` / `none` |
+| `entitlements` | Purchase verification, DLC unlock, entitlement query | `full` / `partial` / `human-gated` / `none` |
+| `remote_config` | Feature-flag fetch, A/B config, remote-config-contract wire | `full` / `partial` / `none` |
+| `conformance_suite` | Self-reports whether the adapter ships its conformance suite | `full` / `none` |
+
+**Capability independence.** Each capability is independently fidelity-graded.
+A Nakama adapter may declare `matchmaking: none` if the project does not require it.
+No capability is bundled with any other.
+
+**Server-authority coupling.** Leaderboard score submission and entitlement verification
+MUST be server-authoritative (D-SEC dimension, BC-7.11.*). An online-services adapter
+that allows client-submitted leaderboard scores without server validation is non-conformant.
+The online-services conformance suite includes a server-authority test case for every
+capability that modifies ranked or monetized game state.
+
+---
+
+### 6.2 Online-Services Manifest Schema
+
+Fields extending the base manifest schema (§1.3):
+
+```jsonc
+{
+  "seam":            "online-services-adapter",
+  "targetId":        "<nakama | eos | playfab | custom>",
+  "targetVersion":   "<pinned version string>",       // mandatory
+  "adapterVersion":  "<semver>",
+  "protocolVersion": "<semver>",
+
+  "selfHostable":    true | false,                    // true → Docker-in-CI feasible
+  "testModeSupport": true | false,                    // true → BaaS SDK has sandbox/test env
+  "offlineProject":  false,                           // set true when online_features=false;
+                                                      //   all caps become "none"; no BaaS config produced
+
+  "capabilities": {
+    "identity":       { "fidelity": "full | partial | none",
+                        "authProviders": ["<provider>"],     // e.g. ["email", "steam", "device-id"]
+                        "sessionTTLSeconds": 0 },            // 0 = adapter default
+
+    "cloud_save":     { "fidelity": "full | partial | none",
+                        "conflictResolution": "last-write-wins | server-authoritative | client-authoritative" },
+
+    "leaderboards":   { "fidelity": "full | partial | none",
+                        "serverAuthoritative": true,         // MUST be true for non-none fidelity
+                        "variantsSupported": ["daily", "weekly", "all-time"] },
+
+    "matchmaking":    { "fidelity": "full | partial | none",
+                        "method": "skill-based | region | latency | custom",
+                        "lobbyMaxPlayers": 0 },              // 0 = adapter default
+
+    "entitlements":   { "fidelity": "full | partial | human-gated | none",
+                        "serverAuthoritative": true,         // MUST be true for non-none fidelity
+                        "checklist_item": "<platform>-entitlement-store-review" }, // human-gated path
+
+    "remote_config":  { "fidelity": "full | partial | none",
+                        "contract_ref": "<remote-config-contract document ID>" },
+
+    "conformance_suite": { "fidelity": "full | none" }
+  }
+}
+```
+
+**Mandatory field rules:**
+- `selfHostable` must be declared. Nakama = `true`; EOS/PlayFab = `false`.
+- `serverAuthoritative: true` is required for any `leaderboards` or `entitlements`
+  capability with non-`none` fidelity. A manifest declaring `serverAuthoritative: false`
+  on these capabilities is malformed (returns `MalformedManifest` / E-EAP-012).
+- `offlineProject: true` causes the core to skip all online-services configuration
+  and produce no BaaS artifacts. No conformance run is triggered.
+
+---
+
+### 6.3 Fidelity Tiers
+
+| Grade | Online-services meaning |
+|-------|------------------------|
+| `full` | Capability fully implemented and server-side verification available | 
+| `partial` | Capability available with documented limitations (e.g., matchmaking without skill rating) |
+| `none` | Capability not implemented; core degrades gracefully (no error, no artifact) |
+| `human-gated` | Entitlement terminal step requires store platform review action |
+
+**`human-gated` in online-services context.** Entitlement verification for some store
+platforms (e.g., Apple IAP receipt validation) requires a platform store review step.
+When `entitlements: human-gated`, the adapter surfaces a checklist item
+`<platform>-entitlement-store-review`. The same `human-gated` surfacing contract
+applies as in distribution (§4.4): suppression is a hook-detectable defect (DI-006).
+
+---
+
+### 6.4 JSON-RPC Method Set
+
+Online-services adapters using subprocess transport expose these JSON-RPC 2.0 methods
+(in addition to the base lifecycle methods §1.2):
+
+| Method | Direction | Kind | Purpose |
+|--------|-----------|------|---------|
+| `initialize` | core → adapter | request | Base lifecycle; returns online-services manifest |
+| `online.identity.create` | core → adapter | request | Create player account; params: `{playerId, authProvider, credentials}`; returns `{token, playerId, created: bool}` |
+| `online.identity.authenticate` | core → adapter | request | Authenticate player session; params: `{playerId, authProvider, credentials}`; returns `{token, expiresAt}` |
+| `online.save.write` | core → adapter | request | Write cloud save; params: `{playerId, saveKey, data, version?}`; returns `{version, timestamp}` |
+| `online.save.read` | core → adapter | request | Read cloud save; params: `{playerId, saveKey}`; returns `{data, version, timestamp}` |
+| `online.leaderboard.submit` | core → adapter | request | Submit score (server-authoritative); params: `{playerId, boardId, score, metadata?}`; returns `{rank, score}` |
+| `online.leaderboard.query` | core → adapter | request | Query leaderboard; params: `{boardId, variant, limit, cursor?}`; returns `{entries: [{rank, playerId, score}], nextCursor?}` |
+| `online.matchmaking.createLobby` | core → adapter | request | Create matchmaking lobby; params: `{hostPlayerId, config}`; returns `{lobbyId, joinCode}` |
+| `online.matchmaking.joinLobby` | core → adapter | request | Join lobby; params: `{playerId, joinCode}`; returns `{lobbyId, players: []}` |
+| `online.entitlement.verify` | core → adapter | request | Verify player holds entitlement; params: `{playerId, entitlementId}`; returns `{granted: bool, expiresAt?}` |
+| `online.remoteConfig.fetch` | core → adapter | request | Fetch remote config values; params: `{playerId?, namespace}`; returns `{values: {key: value}}` |
+| `$/progress` | adapter → core | notification | Progress on long-running operation (e.g., matchmaking wait) |
+| `$/log` | adapter → core | notification | Structured log line |
+| `shutdown` | core → adapter | request | Graceful stop |
+
+**Error codes specific to online-services** (within E-OSVC family; PO to populate
+specific codes): backend unreachable, session expired, score rejected by server,
+entitlement not found, save conflict unresolvable, remote-config stale. Error family
+reserved as `E-OSVC` (see §7 of error-taxonomy.md for family registration by PO).
+
+---
+
+### 6.5 Conformance Suite Requirements
+
+The online-services conformance suite follows the five-part structure (§1.7) with these
+online-services-specific test cases:
+
+1. **Manifest validation** — all mandatory fields present; `serverAuthoritative: true`
+   for leaderboard/entitlement; fidelity values are valid enum members.
+2. **Per-capability functional tests** — for each declared non-`none` capability:
+   happy-path round-trip and at least one error path (e.g., invalid token, score
+   rejection, save conflict).
+3. **Graceful degradation** — `CapabilityUnsupported` returned for `none`-fidelity
+   capabilities; no crash.
+4. **Server-authority enforcement** — for `leaderboards` and `entitlements`: the
+   conformance suite submits a tampered score/entitlement claim and asserts the adapter
+   rejects it server-side. Any adapter that accepts client-asserted leaderboard scores
+   unconditionally fails this case.
+5. **`human-gated` surfacing** — for `entitlements: human-gated`: adapter surfaces
+   correct checklist item; does NOT autonomously complete the terminal step.
+6. **Offline project path** — when `offlineProject: true`, all capability calls return
+   `CapabilityUnsupported`; no BaaS configuration is emitted.
+
+**DTU-08 (Nakama BaaS Double) maps to this conformance suite.** Docker-in-CI is the
+test execution strategy for the Nakama reference adapter. The behavioral clone (L3
+Behavioral) validates round-trip identity, save, leaderboard, and entitlement paths.
+Negative-path (blocked-backend) assertions are exercised in the graceful-degradation
+and server-authority test cases.
+
+---
+
+## 7. Conformance Hooks: CAP-002 Gating Each Seam (applies to all five adapter seams)
+
+CAP-002 defines conformance gating. The same pattern applies to all five adapter seams.
 An adapter is **not accepted** until it passes conformance for its declared
 capabilities. The hook chain enforces this gate:
 
@@ -736,7 +919,7 @@ does NOT simulate the human action. It tests that:
 
 ---
 
-## 7. Compatibility Matrix Format
+## 8. Compatibility Matrix Format
 
 The core publishes a compatibility matrix file at a well-known path
 (`.factory/adapter-compatibility-matrix.json`):
@@ -780,6 +963,18 @@ The core publishes a compatibility matrix file at a well-known path
       "accepted_targets": {
         "openxr-1.1": { "status": "seam-defined-implementation-deferred" },
         "visionos":   { "status": "seam-defined-implementation-deferred" }
+      }
+    },
+    "online-services-adapter": {
+      "protocol_major": "1",
+      "accepted_targets": {
+        "nakama":   { "status": "reference-implementation-v1",
+                      "selfHostable": true, "testStrategy": "docker-in-ci",
+                      "dtu": "DTU-08" },
+        "eos":      { "status": "planned",
+                      "selfHostable": false, "testStrategy": "sdk-test-mode" },
+        "playfab":  { "status": "planned",
+                      "selfHostable": false, "testStrategy": "sandbox-env" }
       }
     }
   }

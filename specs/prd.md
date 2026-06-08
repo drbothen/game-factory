@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "1.6"
+version: "1.9"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -17,6 +17,7 @@ supplements:
   - prd-supplements/prd-cap-009-010.md
   - prd-supplements/prd-cap-011.md
   - prd-supplements/prd-cap-013-014.md
+  - prd-supplements/prd-cap-015.md
   - prd-supplements/nfr-catalog.md
   - prd-supplements/error-taxonomy.md
 inputs:
@@ -114,7 +115,11 @@ Must ship in v1. These capabilities form the load-bearing factory spine.
 | CAP-006 | Contract-Driven Simulation Quality Verification | 11 |
 | CAP-007 | 11-Dimension Convergence Tracking | 19 (+7 v1.2: BC-7.11.002..008 server-authority invariant suite CWE-602) |
 
-**Tier 1 total: 111 BCs** (103 original + 1 added in v1.1: BC-1.15.002 for DI-010; +7 added in v1.2: BC-7.11.002..008 server-authority invariant suite)
+**Tier 1 total: 123 BCs** (111 prior + 12 added in v1.9: BC-15.01.001/002, BC-15.02.001, BC-15.04.001, BC-15.06.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001 are P0; BC-15.03.001, BC-15.05.001, and BC-15.07.001 are P1 but CAP-015 is Tier-1)
+
+| Capability | Description | BC Count |
+|-----------|-------------|---------|
+| CAP-015 | Online-Services Adapter (BaaS seam; Nakama reference; DTU-08; server-authority enforcement) | 12 (+12 v1.9) |
 
 ### Tier 2 — Optional / P1 (ship-required per product brief, P1 priority)
 
@@ -141,7 +146,7 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 
 **Tier 3 total: 22 BCs** (21 original + 1 added in v1.1: BC-13.01.004 for DI-011)
 
-**Grand total: 178 BCs**
+**Grand total: 190 BCs**
 
 ---
 
@@ -163,19 +168,20 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 | CAP-012 | P1 | 2 | prd-supplements/prd-cap-008-012.md | ss-12/ | 9 |
 | CAP-013 | P2 | 3 | prd-supplements/prd-cap-013-014.md | ss-13/ | 15 |
 | CAP-014 | P2 | 3 | prd-supplements/prd-cap-013-014.md | ss-14/ | 7 |
+| CAP-015 | P1 | 1 | prd-supplements/prd-cap-015.md | ss-15/ | 12 |
 
-> **Note on ss-NN directories:** Directory names `ss-01` through `ss-14` mirror capability
+> **Note on ss-NN directories:** Directory names `ss-01` through `ss-15` mirror capability
 > numbers for navigability. They are NOT architecture subsystem IDs. Subsystem IDs have
 > been assigned from `.factory/specs/architecture/subsystem-decomposition.md` (see
 > ARCH-INDEX.md). All BC frontmatter `subsystem:` fields are now populated with real SS-NN
-> values (SS-01 through SS-12). CAP-002 is merged into SS-01 (Engine-Adapter Protocol);
-> CAP-010 is merged into SS-08 (Cert+Distribution).
+> values (SS-01 through SS-12; CAP-015 uses SS-13). CAP-002 is merged into SS-01
+> (Engine-Adapter Protocol); CAP-010 is merged into SS-08 (Cert+Distribution).
 
 ---
 
 ## Section 4 — Cross-Cutting NFRs
 
-Full NFR catalog: `.factory/specs/prd-supplements/nfr-catalog.md` (35 NFRs, NFR-001 through NFR-035).
+Full NFR catalog: `.factory/specs/prd-supplements/nfr-catalog.md` (41 NFRs, NFR-001 through NFR-041). v1.9: +6 NFRs for CAP-015 (NFR-036..041: identity auth latency, leaderboard submit latency, entitlement verify latency, cloud save write latency, graceful degradation gate, tampered-score rejection rate).
 
 NFR summary — capabilities now with defined numeric targets (v1.1 additions marked with `*`):
 
@@ -223,9 +229,9 @@ NFR summary — capabilities now with defined numeric targets (v1.1 additions ma
 
 ## Section 5 — Consolidated Error Taxonomy
 
-Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (198 error codes, 29 active families + 1 retired — v1.7). Note: 9 of the 198 are in the retired E-GEN family (never referenced by any BC); 189 are active codes. (v1.7: +E-COMP-011 disclosure_class out-of-vocabulary; +E-COMP-012 NFT flag divergence seam guard.)
+Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (213 error codes, 30 active families + 1 retired — v1.9). Note: 9 of the 213 are in the retired E-GEN family; 204 are active codes. (v1.9: +E-OSVC family, 15 codes for CAP-015 online-services adapter.)
 
-Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`; v1.6 additions marked with `***`):
+Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`; v1.6 additions marked with `***`; v1.9 additions marked with `****`):
 
 | Family | Owning Capability | Code Count |
 |--------|------------------|-----------|
@@ -259,9 +265,10 @@ Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`;
 | E-MOD *** | CAP-013 (Modding/UGC lane, BC-13.03.*) | 11 |
 | E-MKT *** | CAP-013 (Marketing lane, BC-13.04.*) | 4 |
 | E-XR * | CAP-014 (XR seam) | 7 (v1.1: 6 codes; v1.6: +E-XR-007 visionOS/OpenXR) |
-| **TOTAL (all registered incl. retired E-GEN)** | **29 active + 1 retired** | **198** |
+| E-OSVC **** | CAP-015 (Online-Services Adapter — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity) | 15 (v1.9: all new) |
+| **TOTAL (all registered incl. retired E-GEN)** | **30 active + 1 retired** | **213** |
 
-**Error family gap status:** All 14 capability families have error families defined. v1.6 closes CI check (k): 57 unregistered E-codes registered; E-GEN orphan retired. v1.7 adds E-COMP-011 (disclosure_class out-of-vocabulary) and E-COMP-012 (NFT flag divergence seam guard; DI-011). See `error-taxonomy.md §Coverage Notes`.
+**Error family gap status:** All 15 capability families have error families defined. v1.9 adds E-OSVC (15 codes, CAP-015/SS-13). See `error-taxonomy.md §Coverage Notes`.
 
 ---
 
@@ -348,18 +355,19 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | 1.5 | 2026-06-08 | product-owner | Phase-1d adversarial pass-6 I6-02 fix: +5 E-ETH codes (E-ETH-010..014) for DP-003/004/005/006/008; DP→E-ETH crosswalk + SS-09 symbolic-name crosswalk added to error-taxonomy.md; all dark-pattern BCs (BC-11.03.001..005) updated to cite registered E-ETH codes; SS-09 ethics BCs (BC-11.01.001, BC-11.02.001, BC-11.02.003, BC-11.04.002) crosswalked to registered parent codes; error total 134→139, E-ETH family 9→14; BC count unchanged at 178 |
 | 1.6 | 2026-06-08 | product-owner | CI check (k) completeness fix: registered 57 E-codes referenced by ss-04 (BC-4.01.*–4.06.*) and ss-13 (BC-13.02.*–13.04.*) BCs that were unregistered. New families: E-AAG (7), E-SVC (6), E-QG (11), E-SHIP (3), E-ING (4), E-GLG (5), E-MOD (11), E-MKT (4). E-PRV extended (+5 codes: 001/002/003/020/030). E-XR extended (+1 code: 007). E-GEN retired — orphaned placeholder, never referenced by any BC (9 codes remain in retired table, still counted by CI). CI-computed total: 139 + 57 = **196 total registered codes** (187 active, 9 retired E-GEN). 29 active families. BC count unchanged at 178 |
 | 1.7 | 2026-06-08 | product-owner | Pass-9 adversarial fixes: E-COMP-011 registered (disclosure_class out-of-vocabulary at manifest aggregation — distinct from E-COMP-010 missing-field; BC-10.05.001 v1.2 uses E-COMP-011 for vocab fault); E-COMP-012 registered (NFT flag divergence seam guard — nft_blockchain/nft_mechanics inconsistency; BC-10.01.001 v1.1 emits on divergence; INV-2 fail-closed: PEGI-18 if EITHER NFT flag true). +2 codes: **198 total registered codes** (189 active, 9 retired E-GEN). BC count unchanged at 178. methodology-layer v1.3 §3.0 canonical dimension field table added; BC-9.04.001/9.06.001/9.06.002 dimension field renamed distribution_readiness→cert_preflight. |
+| 1.9 | 2026-06-08 | product-owner | CAP-015 Online-Services Adapter (fifth seam, SS-13, Tier 1): +12 BCs (BC-15.01.001..002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001); new E-OSVC error family (15 codes); CAP-015 added to domain-spec/capabilities.md; prd-cap-015.md created; NFR-036..041 added (identity/leaderboard/entitlement/save latency, graceful degradation, tampered-score rejection). Grand total: 178→190 BCs. Error codes: 198→213 total (189→204 active). Families: 29→30 active. |
 
 ### 8.1 Subsystem Assignment (Resolved)
 
-**All 178 behavioral contracts have been assigned to architecture subsystems (SS-01 through
-SS-12).** The `subsystem: SS-TBD` placeholder has been replaced in all BC frontmatter.
+**All 189 behavioral contracts have been assigned to architecture subsystems (SS-01 through
+SS-13).** The `subsystem: SS-TBD` placeholder has been replaced in all BC frontmatter.
 The assignment was propagated from `.factory/specs/architecture/subsystem-decomposition.md`
 (see ARCH-INDEX.md Subsystem Registry). BC file paths (directory `ss-NN/`, filename) are
 immutable per `append_only_numbering` policy.
 
 Subsystem distribution: SS-01 (41 BCs: CAP-001+002 + BC-1.15.002), SS-02 (9), SS-03 (15),
 SS-04 (16), SS-05 (11), SS-06 (19: CAP-007 12 original + 7 server-authority invariant BCs v1.2), SS-07 (5), SS-08 (17: CAP-009+010), SS-09 (14: CAP-011 13 original + BC-11.03.006 v1.2),
-SS-10 (9), SS-11 (15: CAP-013 + BC-13.01.004), SS-12 (7).
+SS-10 (9), SS-11 (15: CAP-013 + BC-13.01.004), SS-12 (7), SS-13 (12: CAP-015 online-services adapter, v1.9).
 
 ### 8.2 BC Frontmatter Priority Gap — CLOSED (v1.3)
 
@@ -370,7 +378,7 @@ Priority fields have been backfilled on all 178 BCs across all directories.
 
 **CAP-011 priority split (D-008 compliance = P0):** BCs that enforce regulatory-mandatory consumer-protection obligations (ethics contract gate, forbidden dark patterns with legal basis, minor protection with COPPA/PEGI-16, no-unconstrained-LTV) are P0. BCs that enforce economy-quality properties (economy-spine propagation, pity correctness, Gini guardrail, loss-triggered-offers) are P1. See BC-INDEX §CAP-011 for the per-BC assignments.
 
-All 178 BCs now have explicit `priority:` fields in frontmatter.
+All 178 pre-v1.9 BCs have explicit `priority:` fields in frontmatter. All 12 new CAP-015 BCs (BC-15.*) also carry explicit `priority:` fields (9×P0, 3×P1).
 
 ### 8.3 Domain Invariant Coverage — CLOSED (v1.1)
 
@@ -387,7 +395,9 @@ Previously two invariants had no dedicated behavioral contract. Both are now cov
 
 **No orphan invariants remain. FU-001 closed.**
 
-### 8.4 Error Taxonomy — Updated (v1.7)
+### 8.4 Error Taxonomy — Updated (v1.9)
+
+*v1.9 (CAP-015 delivery):* E-OSVC family registered — 15 codes covering CAP-015 online-services adapter (identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity). Total: **213 registered codes (204 active + 9 retired E-GEN) across 30 active families**.
 
 *v1.7 (pass-9 I-1, I-2):* E-COMP-011 added (disclosure_class out-of-vocabulary at manifest aggregation; distinct fault class from E-COMP-010 missing-field). E-COMP-012 added (NFT flag divergence seam guard; nft_blockchain/nft_mechanics inconsistency; DI-011). Total: **198 registered codes (189 active + 9 retired E-GEN) across 29 active families**.
 

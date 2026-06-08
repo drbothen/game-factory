@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.6"
+version: "1.8"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -31,6 +31,21 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v1.8 — CAP-015 BCs delivered by PO; SS-13 count finalized.**
+> - SS-13 BC count updated TBD → 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1).
+>   Grand total: 178 → **190**. Priority subtotals: P0 117→126, P1 39→42, P2=22. Sum: 190. ✓
+>   subsystem-decomposition.md updated to v1.6. ARCH-INDEX BC count table updated.
+>
+> **v1.7 — Pass-13 adversarial defect C13-01 / I13-01 (online-services seam).**
+> - **C13-01:** Added SS-13 (Online-Services Adapter, CAP-015) to Subsystem Registry.
+>   Subsystem count 12 → 13. ADR-0004 title updated "Four-Seam" → "Five-Seam".
+>   adapter-protocols.md updated to v1.2 (§6 online-services seam added).
+>   studio-of-agents.md role 58 subsystem corrected SS-11 → SS-13.
+>   DTU-08 subsystem corrected SS-11 → SS-13 in dtu-assessment.md.
+>   Directory→Subsystem alias table extended with ss-15/ → SS-13.
+> - **I13-01:** (same fix) studio-of-agents §3 SS-11 count corrected 11→10.
+>   PO FLAG: capability count 14→15 (CAP-015 authored); BC total now 190.
+>
 > **v1.6 — Pass-6 adversarial defect resolution (I6-01 / O6-01).**
 > - **I6-01:** BC priority subtotals corrected to frontmatter ground truth. The stale
 >   P0=111/P1=45 values misattributed the 8 P0 dark-pattern/ethics BCs in SS-09
@@ -104,9 +119,9 @@ traces_to: .factory/specs/product-brief.md
 |------|-----------------|---------------|
 | `ARCH-INDEX.md` (this file) | Subsystem Registry, ADR registry, VP registry, document map | ~500 |
 | `layered-architecture.md` | 4-layer model, reuse/replace/adapt table, config/content seam | ~1,000 |
-| `subsystem-decomposition.md` | SS-01..SS-12 definitions, BC→Subsystem assignment table (all 178), Directory→Subsystem alias table | ~1,400 |
+| `subsystem-decomposition.md` | SS-01..SS-13 definitions, BC→Subsystem assignment table (190 total), Directory→Subsystem alias table | ~1,600 |
 | `dtu-assessment.md` | DTU analog: replay harness + conformance doubles; DTU_REQUIRED verdict | ~900 |
-| `adapter-protocols.md` | Layer 3 adapter protocol spec: JSON-RPC transport, capability schema, fidelity grades, conformance suite, compatibility matrix | ~1,100 |
+| `adapter-protocols.md` | Layer 3 adapter protocol spec: JSON-RPC transport, capability schema, fidelity grades, conformance suite, compatibility matrix; v1.2: §6 online-services seam (SS-13) added | ~1,500 |
 | `methodology-layer.md` | Layer 2 game methodology: sim-BC schema, design-intent contract, replay-regression contract, asset-provenance, 11-dim convergence criteria; **§3.0 = canonical `convergence-report.dimensions.<field>` name registry (single source of truth for all 11 dimension field names)** | ~1,200 |
 | `studio-of-agents.md` | 66-role Studio-of-Agents roster; producer-orchestrator scheduling; cross-discipline DAG; change-propagation rules | ~1,200 |
 | `adrs/ADR-0004-adapter-family-anti-lock-in.md` | Four-seam adapter family as primary anti-lock-in mechanism | ~400 |
@@ -154,8 +169,9 @@ traces_to: .factory/specs/product-brief.md
 | SS-10 | Canon Knowledge-Base | CAP-012 | BC-12.* | P1 |
 | SS-11 | Genre-Gated Lanes | CAP-013 | BC-13.* | P2 |
 | SS-12 | XR Platform Seam | CAP-014 | BC-14.* | P2 |
+| SS-13 | Online-Services Adapter | CAP-015 | BC-15.* | P1 (Tier-1 always-on; disableable for offline projects) |
 
-**BC count by subsystem (v1.3 — 178 total):**
+**BC count by subsystem (v1.8 — 190 total):**
 
 | Subsystem | BC Count | Change from v1.0 |
 |-----------|----------|-----------------|
@@ -171,7 +187,8 @@ traces_to: .factory/specs/product-brief.md
 | SS-10 | 9 | — |
 | SS-11 | 15 (14 original + 1 BC-13.01.004) | +1 v1.1 |
 | SS-12 | 7 | — |
-| **TOTAL** | **178** | **+10** |
+| SS-13 | 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1) | +12 v1.8 |
+| **TOTAL** | **190** | +12 from CAP-015 (v1.8) |
 
 ---
 
@@ -182,7 +199,7 @@ traces_to: .factory/specs/product-brief.md
 | ADR-0001 | Founding engine pair: Bevy + Unity | Accepted | `planning/decisions/0001-founding-engine-pair.md` |
 | ADR-0002 | Protocol and conformance stance (hybrid LSP+Terraform+CRI) | Accepted | `planning/decisions/0002-protocol-and-conformance-stance.md` |
 | ADR-0003 | Determinism tier as a capability dimension | Accepted | `planning/decisions/0003-determinism-tier-capability.md` |
-| ADR-0004 | Four-seam adapter family as primary anti-lock-in mechanism | Draft | `adrs/ADR-0004-adapter-family-anti-lock-in.md` |
+| ADR-0004 | Five-seam adapter family as primary anti-lock-in mechanism (v1.1: reconciled from four-seam; online-services seam SS-13 added) | Draft | `adrs/ADR-0004-adapter-family-anti-lock-in.md` |
 | ADR-0005 | Config/content extraction seam (spine vs quality-model) | Draft | `adrs/ADR-0005-config-content-extraction-seam.md` |
 | ADR-0006 | 11-dimension convergence model | Draft | `adrs/ADR-0006-11-dimension-convergence-model.md` |
 | ADR-0007 | human-gated as a first-class fidelity tier | Draft | `adrs/ADR-0007-human-gated-fidelity-tier.md` |

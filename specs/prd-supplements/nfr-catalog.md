@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: nfr-catalog
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -66,6 +66,12 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | NFR-033 | Inactive lane zero-artifact guarantee verification | CAP-013 | CI check that no artifacts from inactive lanes appear in build output | p99 < 30 s for full artifact manifest scan | Timed CI artifact-scan step | prd-cap-013-014.md §FU-002 (CAP-013) |
 | NFR-034 | XR adapter manifest schema validation time | CAP-014 | XR adapter manifest schema validation at adapter registration | p99 < 500 ms per manifest | CI integration test: validate 100 XR manifests; measure median + p99 | prd-cap-013-014.md §FU-002 (CAP-014) |
 | NFR-035 | XR seam isolation check | CAP-014 | Verify zero core changes required when XR adapter is added or removed (BC-14.01.004) | 0 core files modified in git diff between XR-adapter-present and XR-adapter-absent builds | Static analysis: git diff check; CI gate | prd-cap-013-014.md §FU-002 (CAP-014) |
+| NFR-036 | Identity authentication latency | CAP-015 | online.identity.authenticate p95 latency (Nakama Docker-in-CI) | ≤ 500 ms p95 | DTU-08 integration test: 100 sequential authenticate calls; measure p95 | prd-cap-015.md §4 |
+| NFR-037 | Leaderboard submit latency | CAP-015 | online.leaderboard.submit p95 latency (Nakama Docker-in-CI) | ≤ 300 ms p95 | DTU-08 integration test: 100 sequential submit calls; measure p95 | prd-cap-015.md §4 |
+| NFR-038 | Entitlement verify latency | CAP-015 | online.entitlement.verify p95 latency (Nakama Docker-in-CI) | ≤ 200 ms p95 | DTU-08 integration test: 100 sequential verify calls; measure p95 | prd-cap-015.md §4 |
+| NFR-039 | Cloud save write latency | CAP-015 | online.save.write p95 latency (Nakama Docker-in-CI) | ≤ 400 ms p95 | DTU-08 integration test: 100 sequential write calls; measure p95 | prd-cap-015.md §4 |
+| NFR-040 | Online-services graceful degradation | CAP-015 | Zero pipeline halts from CapabilityUnsupported in online-services path | 0 pipeline halts from E-EAP-002 in any online capability call | Conformance suite part 3: call all none-fidelity methods; assert zero pipeline halts | prd-cap-015.md §4 |
+| NFR-041 | Tampered score rejection rate | CAP-015 | Server-side rejection of scores exceeding server-computed maximum | 100% rejection of implausible scores | DTU-08 server-authority test: 1000 tampered submissions; assert 1000/1000 rejected | prd-cap-015.md §4 |
 
 ---
 
