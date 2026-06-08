@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.14
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.15
 #
 # PURPOSE
 # -------
@@ -15,6 +15,15 @@
 # prevention). Also adds check (o) — seam-count consistency: FAIL if any
 # scoped spec file contains stale "four adapter seam" / "four-seam adapter"
 # in operative content (O14-01 recurrence prevention). POSIX/BSD compatible.
+# extended in v1.15 to add check (p) — cross-reference ID/description
+# consistency: for each Related-BCs citation of a SS-07 dimension-owner BC
+# (BC-7.01.001..BC-7.11.001), assert the inline description does NOT contain a
+# distinctive compound dimension keyword that maps to a DIFFERENT dimension owner
+# than the one cited. Catches the CI false-green class exposed in Pass-15 (e.g.,
+# BC-7.05.001 cited with "Cert Pre-Flight" description; BC-7.07.001 cited with
+# "playtest-satisfaction" description). Scope limited to SS-07 dimension-owner
+# citations to avoid false positives on legitimate paraphrases. (P15-01
+# recurrence prevention). POSIX/BSD compatible.
 # extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
 # (F8-01 recurrence prevention);
 # extended in v1.7 to add check (m) — convergence-report dimension field name
@@ -162,6 +171,24 @@
 #       (case-insensitive) in operative content (changelog/reason lines
 #       excluded). Prevents I14-01 recurrence. Will go green after PO updates
 #       domain-spec/prd/product-brief prose; architect files are clean now.
+#   (p) [NEW v1.15, P15-01] Cross-reference ID/description consistency:
+#       For each Related-BCs citation line of the form "- BC-X.Y.Z — <desc>"
+#       (or "- BC-X.Y.Z — <desc>") in any BC body, scoped to citations of the
+#       11 SS-07 dimension-owner BCs (BC-7.01.001..BC-7.11.001): extract the
+#       inline description text and check for DISTINCTIVE compound dimension
+#       keywords (e.g., "playtest-satisfaction", "cert-preflight",
+#       "cert pre-flight", "perf-budget", "monetization-ethics",
+#       "security-invariants", "asset-completeness", "tests/replay",
+#       "sim/spec", "provenance/legal") that map to a specific dimension-owner
+#       BC. If the keyword maps to a DIFFERENT dimension-owner BC than the one
+#       cited, FAIL with the citing BC + cited ID + inline description vs actual
+#       title. Changelog "reason:" lines excluded. Scope is intentionally
+#       limited to SS-07 dimension-owner cross-references (BC-7.01.001..
+#       BC-7.11.001) to avoid false positives on legitimate paraphrases.
+#       Positive-coverage log: "Check (p): N cross-references validated."
+#       WILL FAIL until PO fixes the 2 known mis-anchors (BC-9.01.001 citing
+#       BC-7.05.001 for Cert Pre-Flight; BC-8.08.004 citing BC-7.07.001 for
+#       playtest-satisfaction). Becomes green after PO work.
 #   (l) [NEW v1.6] disclosure_class closed-enum consistency (F8-01 recurrence
 #       prevention): derives the canonical allowed-value set programmatically from
 #       the producer BC ss-04/BC-4.03.002.md (source of truth; authoritative closed
@@ -257,7 +284,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.14) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.15) ==="
 echo ""
 
 # ============================================================================
@@ -2175,6 +2202,176 @@ fi
 echo ""
 
 # ============================================================================
+# (p) CROSS-REFERENCE ID/DESCRIPTION CONSISTENCY  [NEW v1.15, P15-01]
+# ============================================================================
+# For each Related-BCs citation line in any BC body that cites one of the 11
+# SS-07 dimension-owner BCs (BC-7.01.001..BC-7.11.001), assert that the inline
+# description does NOT contain a DISTINCTIVE compound dimension keyword that
+# unambiguously identifies a DIFFERENT dimension owner than the one cited.
+#
+# SCOPE: citations of BC-7.01.001..BC-7.11.001 only (dimension-owner BCs).
+# This scope is intentionally narrow to avoid false positives on legitimate
+# paraphrases in citations to other BCs. Cross-references that cite non-SS-07
+# BCs, or SS-07 BCs with generic relationship prose ("composes with",
+# "depended on by", "convergence loop reads this dimension") that carry no
+# distinctive dimension keyword, are silently skipped.
+#
+# KEYWORD→OWNER MAP (compound/distinctive forms only — simple words excluded):
+#   playtest-satisfaction  → BC-7.05.001  (Playtest-Satisfaction)
+#   cert-preflight         → BC-7.06.001  (Cert-Preflight and Distribution-Readiness)
+#   cert pre-flight        → BC-7.06.001  (same; space form used in prose)
+#   cert preflight         → BC-7.06.001  (no-hyphen normalisation)
+#   perf-budget            → BC-7.07.001  (Perf-Budget)
+#   monetization-ethics    → BC-7.10.001  (Monetization-Ethics)
+#   security-invariants    → BC-7.11.001  (Security-Invariants)
+#   asset-completeness     → BC-7.04.001  (Asset-Completeness)
+#   tests/replay           → BC-7.02.001  (Tests/Replay)
+#   tests-replay           → BC-7.02.001  (hyphen normalisation)
+#   sim/spec               → BC-7.01.001  (Sim/Spec)
+#   sim-spec               → BC-7.01.001  (hyphen normalisation)
+#   provenance/legal       → BC-7.08.001  (Provenance/Legal)
+#   provenance-legal       → BC-7.08.001  (hyphen normalisation)
+#   docs convergence       → BC-7.09.001  (Docs; scoped to "docs convergence" compound
+#                                          to avoid flagging "docs dim" / generic "docs")
+#
+# Simple single-word forms ("playtest", "cert", "perf", "provenance") are NOT
+# used as triggers because they appear legitimately in descriptions for many
+# non-dimension-owner BCs (e.g., "Cert Pre-Flight Checklist" = BC-9.01.001).
+# Compound forms are required for the trigger to fire.
+#
+# CITATION LINE EXTRACTION:
+#   Pattern: "^- BC-7\.[0-9]+\.001" (bullet list items in Related-BCs sections).
+#   Separator: Unicode em-dash (—, U+2014) or ASCII hyphen-minus; both handled
+#   by extracting everything after the first whitespace following the BC-ID.
+#   The grep -E pattern "^- BC-7\.[0-9]+\.001" is POSIX/BSD compatible.
+#
+# EXCLUSIONS:
+#   - Lines containing "reason:" (YAML frontmatter changelog prose).
+#   - Lines containing "through BC-" (range references like "BC-7.01.001 through
+#     BC-7.11.001") — these are not specific single citations.
+#
+# POSITIVE-COVERAGE LOG: always printed.
+# WILL FAIL until PO fixes the 2 known mis-anchors:
+#   (1) BC-9.01.001 citing BC-7.05.001 for "Cert Pre-Flight" description
+#       (BC-7.05.001 = Playtest-Satisfaction; cert-preflight → BC-7.06.001)
+#   (2) BC-8.08.004 citing BC-7.07.001 for "playtest-satisfaction" description
+#       (BC-7.07.001 = Perf-Budget; playtest-satisfaction → BC-7.05.001)
+# Becomes green automatically after PO work.
+#
+# POSIX/BSD grep compatible (no -P; uses -E and -i only).
+echo ""
+echo "--- (p) cross-reference ID/description consistency (SS-07 dimension-owner citations) ---"
+echo "    Scope: citations of BC-7.01.001..BC-7.11.001 with distinctive dimension keywords"
+
+xref_violations=0
+xref_violation_msgs=()
+xref_validated=0
+
+# Keyword→owner-BC mapping.
+# Each entry is "KEYWORD_PATTERN:OWNER_BC_ID" where KEYWORD_PATTERN is a
+# lowercase string to match (case-insensitively) against the inline description.
+# We use a bash array and loop, checking each keyword against each citation line.
+# POSIX/BSD: we use grep -i -F (fixed-string, case-insensitive) for each keyword.
+declare -a KW_OWNER_MAP=(
+  "playtest-satisfaction:BC-7.05.001"
+  "cert-preflight:BC-7.06.001"
+  "cert pre-flight:BC-7.06.001"
+  "cert preflight:BC-7.06.001"
+  "perf-budget:BC-7.07.001"
+  "monetization-ethics:BC-7.10.001"
+  "security-invariants:BC-7.11.001"
+  "asset-completeness:BC-7.04.001"
+  "tests/replay:BC-7.02.001"
+  "tests-replay:BC-7.02.001"
+  "sim/spec:BC-7.01.001"
+  "sim-spec:BC-7.01.001"
+  "provenance/legal:BC-7.08.001"
+  "provenance-legal:BC-7.08.001"
+  "docs convergence:BC-7.09.001"
+)
+
+while IFS= read -r -d $'\0' bc_file; do
+  bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
+
+  # Extract lines that cite a SS-07 dimension-owner BC (BC-7.NN.001), excluding
+  # changelog reason: lines and range-reference "through BC-" lines.
+  # The em-dash separator (—, U+2014) is a multi-byte UTF-8 sequence; grep -E
+  # with a literal UTF-8 string works on both BSD and GNU grep in a UTF-8 locale.
+  # We match on the simpler "^- BC-7\.[0-9]+\.001" prefix and exclude exclusions.
+  xref_lines=$(grep -E "^- BC-7\.[0-9]+\.001" "$bc_file" 2>/dev/null \
+    | grep -v "reason:" \
+    | grep -v "through BC-" \
+    || true)
+
+  [[ -z "$xref_lines" ]] && continue
+
+  while IFS= read -r xref_line; do
+    [[ -z "$xref_line" ]] && continue
+
+    # Extract the cited BC-ID: the second whitespace-delimited token on the line
+    # (the first is "-", the second is "BC-X.Y.Z").
+    cited_id=$(printf '%s' "$xref_line" | awk '{print $2}')
+    [[ -z "$cited_id" ]] && continue
+
+    # Validate it is a BC-7.NN.001 form (not BC-7.01.001 from a range-ref; already
+    # excluded by "through BC-" filter above, but double-check the ID format).
+    if ! printf '%s' "$cited_id" | grep -qE '^BC-7\.[0-9]+\.001$' 2>/dev/null; then
+      continue
+    fi
+
+    # Extract inline description: everything after the BC-ID on the line.
+    # This includes the em-dash (or hyphen) separator and any text after it,
+    # including parenthetical relationship clauses. We drop the leading "- BC-ID"
+    # prefix and work with the rest.
+    inline_desc=$(printf '%s' "$xref_line" \
+      | sed "s/^- ${cited_id}//" \
+      | sed 's/^[[:space:]]*//')
+
+    xref_validated=$(( xref_validated + 1 ))
+
+    # For each keyword in the map, check if the inline description (case-insensitively)
+    # contains that keyword. If yes, and the expected owner differs from the cited BC,
+    # record a violation.
+    # POSIX/BSD: use printf + grep -i -F for case-insensitive fixed-string search.
+    for kw_entry in "${KW_OWNER_MAP[@]}"; do
+      kw_keyword="${kw_entry%%:*}"
+      kw_owner="${kw_entry##*:}"
+
+      # Check if the inline description contains this keyword (case-insensitive)
+      if printf '%s' "$inline_desc" | grep -qiF "$kw_keyword" 2>/dev/null; then
+        # Keyword found — check if cited BC == expected owner
+        if [[ "$cited_id" != "$kw_owner" ]]; then
+          # Look up the cited BC's actual title from BC-INDEX (for the error message)
+          actual_title=$(grep -E "^\| ${cited_id} \|" "$BC_INDEX" 2>/dev/null \
+            | awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/,"",$3); print $3}' \
+            | head -1 || true)
+          xref_violations=$(( xref_violations + 1 ))
+          xref_violation_msgs+=("${bc_rel}: cites ${cited_id} (actual title: '${actual_title:-NOT_FOUND}') but inline description contains '${kw_keyword}' which maps to ${kw_owner}")
+          break  # One violation per citation line is enough
+        fi
+      fi
+    done
+
+  done <<< "$xref_lines"
+
+done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+# Positive-coverage log line (always printed — detects zero-scan / inert run).
+echo "    Check (p): $xref_validated cross-references to SS-07 dimension-owner BCs validated against cited BC titles."
+echo "    Cross-reference ID/description violations found: $xref_violations"
+
+if [[ $xref_violations -gt 0 ]]; then
+  echo ""
+  echo "    CROSS-REFERENCE ID/DESCRIPTION MISMATCHES (cited BC ID does not match dimension keyword in description):"
+  for msg in "${xref_violation_msgs[@]}"; do
+    echo "      $msg"
+  done
+  errors+=("MISMATCH [cross-reference ID/description (p)]: $xref_violations BC cross-reference(s) cite a dimension-owner BC ID whose title contradicts the dimension keyword in the inline description — PO must fix cited BC ID (see list above)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -2200,6 +2397,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Dimension status-value enum (n.i):  all BC convergence-dimension status values are canonical ($dim_status_assignments_checked assignments validated across $dim_status_bcs_with_context BCs)"
   echo "  Per-dim subset enforcement (n.ii): all dimension-value assignments within allowed subsets"
   echo "  Bare token scan (n.iii):           no bare non-canonical hyphenated tokens in dim-context"
+  echo "  Cross-ref ID/desc consistency (p): $xref_validated SS-07 dim-owner citations validated, 0 ID/description mismatches"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
