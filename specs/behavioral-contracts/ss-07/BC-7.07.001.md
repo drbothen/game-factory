@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,9 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - pass: "Pass-11"
+    reason: "F-11-01 validation: postconditions #4 (DEGRADED-PENDING for GPU gate pending) and #5 (DEGRADED-PENDING for XR gate pending) are confirmed canonical per methodology-layer §3.1 v1.5 which now formally includes D-PERF in the DEGRADED-PENDING allowed subset. No operative text changed; version bumped to record formal validation."
 deprecated: null
 deprecated_by: null
 replacement: null

@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,39 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.5 changes (Pass-11 F-11-01/F-11-02 resolution — status-value model end-to-end reconciliation):**
+> - **F-11-01 fixed (Direction A — widen DEGRADED-PENDING applicability):** §3.1 Per-Dimension
+>   Allowed Value Subsets table for D-PLAY and D-PERF now include `DEGRADED-PENDING`. The
+>   owner BCs (BC-7.05.001 postcon #2 + EC-007; BC-7.07.001 postcon #4 + #5 + EC-003) already
+>   used DEGRADED-PENDING correctly — the §3.1 table was the inconsistency. DEGRADED-PENDING
+>   means "factory automatable work is complete; a human or on-device act is outstanding." For
+>   D-PLAY this is "playtest scheduled, not yet run"; for D-PERF this is "CPU gate GREEN, GPU/XR
+>   hardware not yet available." Both are legitimate DEGRADED-PENDING cases. DI-007 is not
+>   violated: DEGRADED-PENDING is not an automated fun-score substitution — it is an honest
+>   statement that a real playtest has been scheduled but not yet completed. The canonical
+>   DEGRADED-PENDING "Applicable Dimensions" table cell now includes D-PLAY and D-PERF. The
+>   §3 D-PLAY prose ("No degradation") is updated to clarify that DEGRADED-PENDING (scheduled
+>   but not yet run) is permitted; DEGRADED (automated substitute) is what is forbidden. The
+>   ADR-0006 D-PLAY "Fallback on degradation" column is updated from "N/A — non-substitutable"
+>   to "DEGRADED-PENDING: playtest scheduled, not yet completed." ADR-0006 D-PERF column
+>   updated to name DEGRADED-PENDING explicitly for GPU/XR gate pending.
+> - **F-11-02 fixed (non-canonical token elimination):** Three non-canonical tokens eliminated
+>   from SS-07 owner BCs: BC-7.05.001 EC-001 `BLOCKED-PENDING` → `BLOCKED` (report not produced
+>   is a hard precondition gap); BC-7.05.001 EC-002 `DEGRADED-ACCEPTED` → `DEGRADED` (human
+>   override with documented rationale is the definition of DEGRADED); BC-7.08.001 EC-001
+>   `DEGRADED-advisory` → `DEGRADED` (pre-deadline advisory is a partial-met DEGRADED state).
+>   These three BCs are bumped to v1.1 / v1.2. The ONLY status tokens anywhere in
+>   convergence-dimension context are now the 4 canonical values: GREEN, DEGRADED,
+>   DEGRADED-PENDING, BLOCKED.
+> - **check (n) extended:** scripts/check-spec-counts.sh v1.11 adds:
+>   (n.ii) per-dimension subset enforcement — parses §3.1 per-dimension allowed subsets and
+>   asserts each BC dimension-value assignment is legal for that specific dimension; catches
+>   F-11-01-class regressions (enum-valid but dimension-illegal value).
+>   (n.iii) bare table-cell token scan — widens token extraction to catch BLOCKED-PENDING /
+>   DEGRADED-ACCEPTED / DEGRADED-advisory style tokens in markdown table cells without
+>   backtick/verb anchors; catches F-11-02-class tokens. Changelog reason: lines remain
+>   excluded. POSIX/BSD-grep compatible.
 
 > **v1.4 changes (Pass-10 I-2/I-3 resolution — status-value enum + stale-note fix):**
 > - **I-2 fixed:** The v1.3 "Known consumer drift (PO action required)" note (§3.0 table
@@ -538,7 +571,7 @@ subordinate consumers and must adopt this vocabulary.
 |-------|---------|----------------------|
 | `GREEN` | All pass predicates satisfied; no outstanding gates. | All 11 dimensions (subject to per-dimension rules below) |
 | `DEGRADED` | Pass preconditions partially met with an explicit, documented fallback; human acknowledgment recorded. Generic intermediate state when a degradation path exists. | D-SIM, D-REPLAY, D-ASSET, D-CERT, D-PERF, D-PROV, D-SEC (offline only) |
-| `DEGRADED-PENDING` | All automatable work is complete; one or more `human-gated` tasks are outstanding (e.g. console cert sign-off, attorney review, store publish account). Distinct from DEGRADED in that the factory has done its full automated share — only an external human act remains. | D-CERT, D-PROV |
+| `DEGRADED-PENDING` | All automatable work is complete; one or more human or on-device acts are outstanding (e.g. console cert sign-off, attorney review, store publish, playtest session not yet run, GPU/XR hardware not yet available). Distinct from DEGRADED in that the factory has done its full automated share — only an external human act or on-device measurement remains. | D-CERT, D-PROV, D-PLAY, D-PERF |
 | `BLOCKED` | A hard failure predicate is met; the dimension cannot proceed. A BLOCKED dimension halts release. | All 11 dimensions |
 
 **Rationale for DEGRADED vs AMBER:** The dimension predicates throughout §3 and
@@ -562,9 +595,9 @@ not suppressed).
 | D-REPLAY | GREEN, DEGRADED, BLOCKED | Degradation path: `replay: none` adapter with playtest evidence. |
 | D-IMPL | GREEN, BLOCKED | No degradation path defined; CI either passes or fails. |
 | D-ASSET | GREEN, DEGRADED, BLOCKED | Degradation path: placeholder assets with documented gaps. |
-| D-PLAY | GREEN, BLOCKED | Human gate; non-substitutable. No automated degradation. |
+| D-PLAY | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED-PENDING: playtest scheduled; playable build available; sessions not yet completed. DEGRADED: playtest run, scores below threshold, but human reviewer has approved with documented rationale (human override). No automated fun-score substitution ever permitted (DI-007). |
 | D-CERT | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED for NDA-gated platform or no platforms declared. DEGRADED-PENDING when automatable prefix complete but human-gated tasks outstanding. |
-| D-PERF | GREEN, DEGRADED, BLOCKED | Degradation path: manual profiler evidence in lieu of CI gate. |
+| D-PERF | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED-PENDING: CPU gate is GREEN; GPU/XR hardware not yet available for on-device measurement. DEGRADED: GPU metrics unavailable from engine adapter; best-effort advisory. |
 | D-PROV | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED-PENDING when schema checks pass but consent/legal tasks outstanding. |
 | D-DOCS | GREEN, BLOCKED | No degradation path defined. |
 | **D-ETHICS** | **GREEN, BLOCKED** | **Binary. No degradation path. DI-005: unconstrained LTV = factory defect. If monetization is active, the ethics contract must be present and clean-reviewed — no intermediate fallback. See ADR-0006.** |
@@ -696,13 +729,24 @@ criteria and task set; 3-lens convergence report (say / do / behave) completed;
 GEQ / PENS / SUS instrument scores meet declared targets; human sign-off recorded
 by a named human principal.
 
-**Degraded:** No degradation — D-PLAY is a non-substitutable human gate (DI-007).
-Any automated metric, agent fun-score, or synthetic playtest evidence substituted for
-the structured protocol is a factory defect.
+**DEGRADED-PENDING predicate:** Playtest has been scheduled; playable build is available;
+sessions not yet completed. The dimension is pending, not blocked. Release is blocked
+until human sign-off is obtained, but the factory can continue other convergence work.
+This is the correct state when a real playtest is imminent but incomplete — NOT a degradation
+of the quality bar. Major gameplay change after sign-off also reverts to DEGRADED-PENDING.
 
-**Blocked predicate:** Playtest protocol not run; human sign-off absent; any agent
-or hook emitting an automated fun-score in the playtest-satisfaction dimension (defect
-per DI-007).
+**DEGRADED predicate:** Playtest sessions completed; human reviewer has approved with
+documented rationale despite scores below declared thresholds (human override). This is
+valid — human principal judgment supersedes metric thresholds when explicitly recorded.
+
+**No automated DEGRADED path:** Any automated metric, agent fun-score, or synthetic
+playtest evidence substituted for the structured protocol is a factory defect (DI-007).
+The distinction is critical: DEGRADED-PENDING means "a real human playtest is scheduled
+but not yet run"; it does NOT mean "an automated score is substituting for the playtest."
+
+**Blocked predicate:** Playtest protocol not run and not scheduled; human sign-off absent
+with no DEGRADED-PENDING declaration; any agent or hook emitting an automated fun-score
+in the playtest-satisfaction dimension (defect per DI-007).
 
 **XR note.** For XR targets, D-PLAY requires physical headset sessions. This is a
 harder boundary than flat-screen: motion sickness cannot be evaluated without the
@@ -740,9 +784,15 @@ items with hard deadlines unmet (e.g., EU AI Act 2026-08-02 if applicable).
 thresholds on all declared target hardware; 1%/0.1%-low frame time within declared
 bound; memory soak within limit; thermal within envelope on declared target device.
 
-**Degraded predicate:** GPU/XR gate deferred to on-device test (not in CI); CPU
-gate passes; GPU evidence provided from manual profiler session with declared
-methodology.
+**DEGRADED-PENDING predicate:** CPU gate is GREEN; GPU or XR hardware not yet available
+for on-device measurement. The factory has completed all CPU-bound automated work; the
+GPU/XR gate is outstanding pending hardware availability. This is the canonical state for
+"CPU GREEN, GPU/XR gate not yet scheduled." Major GPU regression after prior GREEN also
+reverts to DEGRADED-PENDING until re-measurement.
+
+**DEGRADED predicate:** GPU metrics not exportable from the engine adapter (best-effort
+advisory); CPU gate passes; manual profiler evidence provided with declared methodology
+as substitute. This is the weaker path (metrics approximated, not measured).
 
 **Blocked predicate:** CPU frame time gate fails in CI; memory soak exceeds limit;
 `perf-budget-contract` absent; XR targets active without per-eye frame-time budget

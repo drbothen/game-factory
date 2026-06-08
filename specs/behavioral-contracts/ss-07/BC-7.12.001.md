@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -20,7 +20,9 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - pass: "Pass-11"
+    reason: "F-11-01 reconciliation: postcondition #1 and EC-004 updated to correctly distinguish DEGRADED-PENDING from DEGRADED. DEGRADED-PENDING dimensions (playtest scheduled not yet run; GPU/XR hardware not yet available) block release but do NOT reset the streak counter — the factory can continue other convergence work. Postcondition #1 now lists GREEN, DEGRADED, and DEGRADED-PENDING as non-BLOCKED states for streak purposes; release unblocked only when no DEGRADED-PENDING remains. Postcondition #3 (DEGRADATION ACCEPTED) updated to cover both DEGRADED and DEGRADED-PENDING. EC-004 corrected from 'playtest-pending is DEGRADED not BLOCKED' to 'DEGRADED-PENDING' (canonical token)."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -37,10 +39,12 @@ Defines the release-gating rule and the convergence loop engine behavior
 (reused from vsdd-factory per extraction-boundary-validated.md §3.2). The
 convergence loop engine evaluates all 11 dimensions, applies novelty-decay to
 repeated findings, and requires 3 consecutive clean evaluations before declaring
-convergence. Release is blocked until all required dimensions are GREEN or
-explicitly DEGRADED to a declared fallback. No dimension may be BLOCKED at release.
-The 3-clean-streak and novelty-decay mechanisms are the same as vsdd-factory's
-convergence; only the dimension set is replaced.
+convergence. Release is blocked until all required dimensions are GREEN, explicitly
+DEGRADED to a declared fallback, or DEGRADED-PENDING (all automatable work done,
+human/on-device act outstanding — release remains blocked until the pending act
+completes). No dimension may be BLOCKED at release. The 3-clean-streak and
+novelty-decay mechanisms are the same as vsdd-factory's convergence; only the
+dimension set is replaced.
 
 ## Preconditions
 
@@ -58,21 +62,31 @@ convergence; only the dimension set is replaced.
 
 ## Postconditions
 
-1. **CONVERGENCE ACHIEVED:** All 11 applicable dimensions are GREEN or
-   DEGRADED (with explicit declared fallback). Three consecutive clean evaluations
-   have been completed (no new findings in adversarial review; no dim transitions
-   from GREEN/DEGRADED to BLOCKED). `convergence-streak-state.json` records
-   streak=3. Release is unblocked.
+1. **CONVERGENCE ACHIEVED:** All 11 applicable dimensions are GREEN or DEGRADED
+   (with explicit declared fallback), with no dimension in DEGRADED-PENDING state.
+   Three consecutive clean evaluations have been completed (no new findings in
+   adversarial review; no dim transitions from GREEN/DEGRADED to BLOCKED).
+   `convergence-streak-state.json` records streak=3. Release is unblocked.
 2. **CONVERGENCE ITERATION:** One or more dimensions are BLOCKED or the adversarial
    review found novel findings. The loop iterates: defects are addressed, dimensions
    re-evaluated, adversarial review re-run. Streak counter resets on any novel finding.
 3. **DEGRADATION ACCEPTED:** A dimension is in DEGRADED state with an explicit
    declared fallback entry in the convergence-report. DEGRADED dimensions count as
    satisfied for the purpose of release gating. The fallback must be substantive
-   (not just "acknowledged").
+   (not just "acknowledged"). See also: DEGRADED-PENDING (precondition #5) — a
+   DEGRADED-PENDING dimension does NOT block the streak counter but DOES block
+   release until the pending human/on-device act completes.
 4. **RELEASE BLOCKED:** Any dimension is BLOCKED with no declared degradation.
    The release-gate hook fires and prevents the release pipeline from proceeding.
-5. **NOVELTY DECAY:** A repeated adversarial finding (identical finding text to a
+5. **DEGRADED-PENDING DIMENSIONS:** A dimension in DEGRADED-PENDING state (all
+   automatable work done; a specific human act or on-device measurement is
+   outstanding) does NOT block the streak counter — the factory can continue other
+   convergence work. However, release is blocked until all DEGRADED-PENDING
+   dimensions resolve (the pending act completes). This applies to D-PLAY
+   (playtest scheduled, sessions not yet completed), D-PERF (CPU GREEN, GPU/XR
+   hardware pending), D-CERT (automatable prefix complete, human-gated cert tasks
+   outstanding), and D-PROV (schema checks GREEN, consent/legal review pending).
+6. **NOVELTY DECAY:** A repeated adversarial finding (identical finding text to a
    prior pass, same artifact, same location) is marked non-novel. Non-novel findings
    do NOT reset the streak counter. This prevents convergence stall on known
    acknowledged issues.
@@ -97,7 +111,7 @@ convergence; only the dimension set is replaced.
 | EC-001 | Streak=2, adversarial review finds a novel finding | Streak resets to 0; finding logged; iteration continues |
 | EC-002 | Streak=2, adversarial review finds the same finding as pass 1 (non-novel) | Non-novel finding; streak does NOT reset; streak stays at 2; next clean pass achieves convergence |
 | EC-003 | A dimension transitions from GREEN to BLOCKED between iteration 2 and 3 | Streak resets to 0; the regression is the priority defect |
-| EC-004 | Playtest-satisfaction dimension is DEGRADED-PENDING (human gate outstanding) | Release is blocked until human sign-off; but playtest-pending is DEGRADED not BLOCKED; the factory can complete other convergence work |
+| EC-004 | Playtest-satisfaction dimension is DEGRADED-PENDING (playtest scheduled, sessions not yet completed) | Release is blocked until human sign-off obtained; D-PLAY DEGRADED-PENDING does NOT reset the streak counter; the factory can complete other convergence work in parallel |
 | EC-005 | All dims GREEN; adversarial review finds a MEDIUM finding, not in any dim | Medium finding does NOT block convergence unless it affects a specific dim. Logged in convergence-report; must be resolved or accepted |
 | EC-006 | `convergence-streak-state.json` file is missing | Streak treated as 0; fresh start; iteration must reach 3 again; not an error |
 | EC-007 | Human overrides a BLOCKED dimension without declaring a fallback | DI-006 / governance violation; human override without fallback declaration = factory defect; blocked |
@@ -109,7 +123,7 @@ convergence; only the dimension set is replaced.
 | All 11 dims GREEN; 3 clean adversarial passes; no novel findings | CONVERGENCE ACHIEVED; release unblocked | happy-path |
 | All dims GREEN; pass 2 finds novel finding; pass 3 clean | Streak reset to 0 after pass 2; streak at 1 after pass 3; NOT convergence yet | edge-case |
 | 10 dims GREEN; dim 7 BLOCKED (perf); no declared fallback | RELEASE BLOCKED; dim 7 must be resolved or degradation declared | error |
-| Dim 5 (playtest) DEGRADED-PENDING; all others GREEN; streak=3 | CONVERGENCE DEGRADED (playtest pending); release blocked until human sign-off | edge-case (human-gate) |
+| Dim 5 (playtest) DEGRADED-PENDING; all others GREEN; streak=3 | CONVERGENCE DEGRADED-PENDING (playtest pending); release blocked until human sign-off; factory work complete on all other dims | edge-case (human-gate) |
 | Same finding in passes 1 and 2 (non-novel) | Non-novel; streak continues; pass 2 counts as clean for streak | edge-case (novelty-decay) |
 
 ## Verification Properties

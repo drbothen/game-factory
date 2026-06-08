@@ -2,7 +2,7 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0006"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -22,6 +22,17 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 **Status:** Draft
 **Date:** 2026-06-08
 **Driver:** AAA-RECONCILIATION §7; architecture.md §Convergence dimensions; CAP-007
+
+> **v1.2 (Pass-11 F-11-01 resolution):** D-PLAY and D-PERF fallback columns corrected
+> to reflect DEGRADED-PENDING as the legitimate "scheduled but not yet run / hardware
+> not yet available" state. Previously D-PLAY showed "N/A — non-substitutable" and D-PERF
+> showed only "Degraded: manual profiler evidence" — both were incomplete. The owner BCs
+> (BC-7.05.001, BC-7.07.001) already used DEGRADED-PENDING correctly; this table now
+> matches. DEGRADED-PENDING for D-PLAY means a real playtest is scheduled but sessions
+> are not yet completed — it is NOT an automated substitute (DI-007 is not violated).
+> DEGRADED-PENDING for D-PERF means CPU gate is GREEN but GPU/XR hardware is not yet
+> available for on-device measurement. The authoritative per-dimension allowed subsets
+> are in methodology-layer.md §3.1; this table is a summary view.
 
 > **v1.1 (S2-03 resolution):** D-SEC degradation fallback column corrected.
 > The original "Degraded: manual security review" was inconsistent with the
@@ -53,9 +64,9 @@ game-factory uses an **11-dimension convergence model** replacing the vsdd 7-dim
 | 2 | D-REPLAY | Tests / Replay | Yes (replay harness, tier-dependent) | Degraded: playtest evidence if `replay: none` |
 | 3 | D-IMPL | Implementation | Yes (CI, wave integration gate) | — |
 | 4 | D-ASSET | Asset Completeness | Yes (quality gate + provenance check) | Degraded: placeholder assets with documented gaps |
-| 5 | D-PLAY | Playtest / Feel | **Human gate** (never automated) | N/A — non-substitutable |
+| 5 | D-PLAY | Playtest / Feel | **Human gate** (never automated) | DEGRADED-PENDING: playtest scheduled, sessions not yet completed. DEGRADED: human reviewer approved below-threshold scores with documented rationale. No automated substitute (DI-007). |
 | 6 | D-CERT | Cert-Preflight + Distribution-Readiness | Yes (machine-checkable subset) + Human gate (cert sign-off) | Degraded: human-gated task surfaced |
-| 7 | D-PERF | Perf Budget (frame-time, not throughput) | Yes (CI profiler gate) | Degraded: manual profiler evidence |
+| 7 | D-PERF | Perf Budget (frame-time, not throughput) | Yes (CI profiler gate) | DEGRADED-PENDING: CPU GREEN, GPU/XR hardware not yet available. DEGRADED: GPU metrics unavailable from adapter; manual profiler evidence. |
 | 8 | D-PROV | Provenance / Legal + Compliance | Yes (sidecar completeness + IARC auto-fill) + Human gate (ratings sign-off) | Degraded: human legal review flag |
 | 9 | D-DOCS | Docs | Yes (structural completeness) | — |
 | 10 | D-ETHICS | Monetization Ethics | Yes (ethics contract schema) + Adversarial review | Non-substitutable adversarial review gate |

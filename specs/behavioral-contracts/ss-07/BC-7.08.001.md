@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -21,6 +21,8 @@ introduced: v0.1.0
 modified:
   - pass: "Pass-10"
     reason: "I-3 status-value enum reconciliation: postcondition #3 label changed from 'DEGRADED (human-gated pending)' to canonical 'DEGRADED-PENDING' per methodology-layer.md §3.1."
+  - pass: "Pass-11"
+    reason: "F-11-02 status-value reconciliation: EC-001 DEGRADED-advisory → DEGRADED. A pre-deadline advisory is not a new state — it is a DEGRADED state (partially met, documented advisory, human acknowledgment implicit in the scheduled-shipping date). Non-canonical token eliminated per methodology-layer §3.1 v1.5 closed enum."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,7 +89,7 @@ for any game shipping after that date.
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Game shipping 2026-07-01 (before EU AI Act date) | C2PA marks recommended but not yet required; DEGRADED-advisory for pre-deadline; BLOCKED if shipping post-deadline with same build |
+| EC-001 | Game shipping 2026-07-01 (before EU AI Act date) | C2PA marks recommended but not yet required; DEGRADED (pre-deadline advisory: C2PA marks absent but deadline not yet active; documented and acknowledged) for pre-deadline builds; BLOCKED if shipping post-deadline with same build |
 | EC-002 | Voice asset with `likeness_consent_ref` = null (no named performer) | Schema valid; no SAG-AFTRA gate triggered; PASS for this field |
 | EC-003 | `legal-doc-set` templates generated but attorney review not scheduled | DEGRADED-PENDING; human-gated task emitted: "Schedule attorney review of EULA/Privacy Policy before ship" |
 | EC-004 | IARC content-intensity question (not auto-fillable) in compliance-checklist | Item marked as human-judgment-required; `human-gated` task emitted; not a BLOCKED state |

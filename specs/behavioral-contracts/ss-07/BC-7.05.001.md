@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,9 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - pass: "Pass-11"
+    reason: "F-11-01/F-11-02 status-value reconciliation: EC-001 BLOCKED-PENDING → BLOCKED (report-not-produced is a hard precondition gap, not a new state); EC-002 DEGRADED-ACCEPTED → DEGRADED (human override with documented rationale is exactly the DEGRADED definition). Both tokens were non-canonical per methodology-layer §3.1 v1.5 closed enum. Postcondition #2 DEGRADED-PENDING confirmed valid; D-PLAY allowed subset now includes DEGRADED-PENDING per methodology-layer §3.1 v1.5."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -82,8 +84,8 @@ than flat-screen (not degradable to screen-based testing).
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Playtest conducted but convergence report not produced | BLOCKED-PENDING; report production is a precondition for human review |
-| EC-002 | GEQ scores below threshold but human reviewer approves anyway with documented rationale | DEGRADED-ACCEPTED; human override is valid if documented; design revision loop recommended |
+| EC-001 | Playtest conducted but convergence report not produced | BLOCKED; report production is a hard precondition for human review — dimension is blocked until the report exists |
+| EC-002 | GEQ scores below threshold but human reviewer approves anyway with documented rationale | DEGRADED; human override with documented rationale is valid and is exactly the definition of DEGRADED; design revision loop recommended |
 | EC-003 | Automated fun-score emitted by an analytics hook | Factory defect recorded; DI-007 violation; hook emitting fun-score is flagged for removal |
 | EC-004 | XR game tested on PC screen instead of headset | Playtest does not satisfy this dimension for XR games; BLOCKED until headset playtest conducted |
 | EC-005 | Playtest budget exhausted, no more sessions possible | BLOCKED; producer must decide to ship with incomplete playtest (recorded degradation) or fund additional sessions |
