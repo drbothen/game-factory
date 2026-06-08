@@ -46,7 +46,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 26 CLEAN (0C/0I/1 LOW); clean passes: **2/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 27 FINDINGS (0C/1I RESOLVED); counter RESET **0/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -55,9 +55,9 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 27** (consecutive clean pass 3 of 3 — convergence pass). Pass 26 CLEAN: 0C/0I/1 LOW obs (FU-010 deferred). Clean-pass counter: **2/3**. Spec STABLE — no spec changes in Pass 26. NOTE: keep spec unchanged through Pass 27 to prove 3 consecutive clean. If Pass 27 CLEAN → Phase-1d CONVERGED.
+**NEXT: `phase-1d-adversarial` — Pass 28** (candidate clean #1, counter restart). Pass 27 FINDINGS (0C/1I): 3rd dimension-owner mislabel (methodology line 714) fixed; check (t) broadened v1.22→v1.23; counter RESET **0/3**. FU-007, FU-008, FU-010 remain open (non-blocking).
 
-**Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.9; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; CI gate v1.22 (checks a–t, ~28 sub-assertions; banner string confirmed v1.22). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.10; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; CI gate v1.23 (checks a–t, ~28 sub-assertions; dimension-owner class comprehensively gated). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -75,6 +75,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | 24 | 2026-06-08 | FINDINGS | 0C / 1I / 3 obs | Novelty MEDIUM. I24-01: methodology-layer prose + changelog + CI comment lines labeled BC-7.* dimension-owner family as "SS-07" — authoritative is SS-06. Root cause: ss-07/ directory name vs SS-06 subsystem alias. Also BC range ~616 included BC-7.12.001 (loop engine); corrected to BC-7.01.001..BC-7.11.001 (11 owners). 7 sites corrected. FU-009 CLOSED. Check (t) added — BC-7.* owner-attribution guard; 4,145 lines scanned, 0 violations. O24-01/02/03 non-blocking. methodology-layer v1.9; CI gate v1.22. | **CLEAN-PASS COUNTER: 0/3** (streak restart pending) |
 | 25 | 2026-06-08 | CLEAN | 0C / 0I / 1 cosmetic-resolved | Novelty VERY LOW. Pass-24 SS-06 owner-attribution fix confirmed correct (7 sites, check t 0 violations). Cross-doc mappings all agree (cap→ss, BC→cap, err→cap, DTU→ss, VP→BC). VP-INDEX + file-path anchors clean. DI-001..012 enforced. E-CONV-006/E-OSVC semantics clean. Count surfaces consistent. 11-dim model + release-gate coherent. Frontmatter-body coherent (12 BCs spot-checked). O-25 (LOW cosmetic): CI banner v1.22 already correct — pre-resolved in Pass-24; no file change. Spec STABLE. | **CLEAN-PASS COUNTER: 1/3** |
 | 26 | 2026-06-08 | CLEAN | 0C / 0I / 1 LOW | Novelty LOW. Independent fresh-context concurrence with Pass 25. Verified clean: 11-dim model e2e (§3.0/§3.1 + per-dim subsets + D-ETHICS binary + D-PLAY/D-PERF DEGRADED-PENDING); ADR-0006↔methodology §3 (owner-vs-producing-subsystem); ADR-0007 human-gated tier + D-013 creative-gate; DI-001..012 enforced; error-code meaning-vs-usage (6 DP→BC mappings, E-CIN, E-EAP-013); VP-INDEX coherence + back-refs + arithmetic + dir-alias; five-seam thesis/ADR-0004 propagated; determinism tiers; dir-vs-subsystem alias (ss-01/03/06/11/12/13). O26-01 (LOW): methodology §4.3 ~line 1066 uses release-gating verb "blocked" for DEGRADED-PENDING D-CERT; reconcilable (DEGRADED-PENDING blocks release); deferred FU-010 (polish before Phase-1 human gate, not mid-streak). Spec STABLE. | **CLEAN-PASS COUNTER: 2/3** |
+| 27 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | Novelty MEDIUM. I27-01: methodology-layer.md line ~714 "Resolved in Pass-12" note mislabeled BC-8.08.004 as "D-PLAY dimension owner, SS-07/SS-08 interface" — BC-8.08.004 is D-PLAY status PRODUCER (SS-07 sign-off gate); D-PLAY owner is BC-7.05.001 (SS-06); "SS-08" reference also erroneous. 3rd instance of dimension-owner mislabel class (same class as I24-01/FU-009/F15). Check (t) v1.22 narrow patterns evaded by line-714 phrasing. RESOLVED: line 714 corrected; check (t) broadened (v1.22→v1.23) — now triggers on ANY "dimension owner"/"dimension-owner" line; asserts named BCs are BC-7.0[1-9].001/BC-7.10.001/BC-7.11.001 AND SS-06 present if any SS-NN cited; 4,165 lines scanned, 0 violations. methodology-layer v1.10; CI gate v1.23. O27 (LOW): VP-006 proptest clause #1 comment-scoped — test-scoping choice, non-blocking. **CLEAN-PASS COUNTER RESET: 2/3 → 0/3** (streak restarts at Pass 28). | **RESET: 0/3** |
 
 ---
 
@@ -90,7 +91,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–25 all resolved/clean; Pass 26 CLEAN (0C/0I/1 LOW); clean-pass counter 2/3; Pass 27 pending (convergence pass) | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–26 all resolved/clean; Pass 27 FINDINGS (0C/1I RESOLVED; 3rd dimension-owner mislabel fixed; check t broadened v1.23); counter RESET 0/3; Pass 28 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -164,12 +165,12 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–26 DONE.
-**Phase-1d Pass 26:** CLEAN — 0C/0I/1 LOW obs (deferred FU-010). Independent fresh-context concurrence with Pass 25. 11-dim model, ADR-0006/ADR-0007, DI-001..012, error-code semantics, VP-INDEX, five-seam thesis, determinism tiers, dir-alias all verified clean. O26-01: methodology §4.3 release-gating verb "blocked" for DEGRADED-PENDING D-CERT — reconcilable, deferred as FU-010. No spec changes. **Clean-pass counter: 2/3**.
-**Next action:** `phase-1d-adversarial` — **Pass 27** (consecutive clean pass 3 of 3 — convergence pass). If CLEAN → Phase-1d CONVERGED. NOTE: do NOT modify spec before Pass 27.
-**Phase 1 remaining:** Phase-1d adversarial convergence (2/3 clean passes, need 1 more) → consistency audit → drift check → Phase-1 human gate.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–27 DONE.
+**Phase-1d Pass 27:** FINDINGS — 0C/1I RESOLVED. I27-01: methodology-layer.md line ~714 "Resolved in Pass-12" note mislabeled BC-8.08.004 as "D-PLAY dimension owner, SS-07/SS-08 interface." BC-8.08.004 is D-PLAY status PRODUCER (SS-07); D-PLAY owner is BC-7.05.001 (SS-06). 3rd instance of dimension-owner mislabel class. Check (t) broadened v1.22→v1.23 to comprehensively gate the class. O27 (LOW): VP-006 proptest clause #1 comment-scoped — test-scoping choice, non-blocking. **Clean-pass counter RESET: 0/3**.
+**Next action:** `phase-1d-adversarial` — **Pass 28** (candidate clean #1, counter restart). FU-007/FU-008/FU-010 remain open (non-blocking).
+**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit → drift check → Phase-1 human gate.
 **PRD status:** v2.2. 190 BCs; 41 NFRs; 255 error codes / 31 families total (246 active; E-GEN 9 retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006/007/008/010 open (non-blocking). FU-009 CLOSED.
-**Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.9 (11 dims; SS-06 owner-attribution corrected); 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: P0=126 / P1=42 / P2=22.
-**Version bumps this pass:** none (spec stable).
+**Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.10 (line 714 dimension-owner mislabel fixed); 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: P0=126 / P1=42 / P2=22.
+**Version bumps this pass:** methodology-layer v1.9→v1.10; CI gate v1.22→v1.23.
 **D-014/015/016:** see Decisions Log. D-014/D-015 flagged for human gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.9"
+version: "1.10"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,26 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.10 changes (Pass-27 I27-01 fix — BC-8.08.004 mislabel in "Resolved in Pass-12" note; broadened CI guard (t)):**
+> - **I27-01 fixed (dimension-owner mislabel, third instance of the class):** The "Resolved in
+>   Pass-12" inline note (formerly line ~714) incorrectly called BC-8.08.004 the
+>   "D-PLAY dimension owner" and referenced "SS-07/SS-08 interface". BC-8.08.004 is the
+>   Human Playtest Sign-Off Gate — a D-PLAY status PRODUCER in SS-07 that feeds the D-PLAY
+>   dimension owner BC-7.05.001 (SS-06). The note now correctly describes BC-8.08.004 as the
+>   "D-PLAY status producer / SS-07 sign-off gate feeding the SS-06 dimension owner
+>   BC-7.05.001". The spurious "SS-08" reference (a directory-name conflation) is also removed.
+> - **CI guard (t) broadened (v1.23):** The prior v1.22 check matched only two narrow compound
+>   patterns ("dimension-owner (SS-0X" and "owner BCs (SS-0X") and missed line-714-style phrasing
+>   where "dimension owner" (space, no parenthetical) was used. The rewritten check (t) now covers
+>   the full mis-attribution class: any operative line containing "dimension owner" or
+>   "dimension-owner" (hyphen OR space variant) that also names a BC ID not of the form
+>   BC-7.0[1-9].001 or BC-7.1[01].001 (the 11 dimension owners) FAILS; any such line that names
+>   a subsystem other than SS-06 in an owner-attribution context also FAILS. Blockquote (">")
+>   lines excluded. Calibrated against line 637 (correct SS-06 + BC-7.* owner — not flagged),
+>   the producer table (lines 701-709 — uses "writes"/"maps", not "owner" — not flagged), and
+>   per-dimension "Subsystem:" headers (no "dimension owner" phrase — not flagged). Script
+>   version bumped to v1.23.
 
 > **v1.9 changes (Pass-24 I24-01 fix — SS-06 owner-attribution for BC-7.* dimension-evaluator family):**
 > - **I24-01 fixed (subsystem-label mis-anchor):** Several §3.1 operative passages and v1.4/v1.5
@@ -711,8 +731,8 @@ check (n) (added in v1.9 of check-spec-counts.sh) became green after these updat
 
 #### Resolved in Pass-12 — BC-8.08.004 Lowercase D-PLAY Status Values
 
-**Resolved in Pass-12:** BC-8.08.004 (`playtest-satisfaction` D-PLAY dimension owner,
-SS-07/SS-08 interface) was absent from the Pass-10 change list above — it was the root
+**Resolved in Pass-12:** BC-8.08.004 (`playtest-satisfaction` D-PLAY status producer;
+SS-07 sign-off gate feeding the SS-06 dimension owner BC-7.05.001) was absent from the Pass-10 change list above — it was the root
 cause of F-12-01 (CI false-green that survived 11 adversarial passes). Unlike the
 Pass-10 BCs which used uppercase `AMBER`, BC-8.08.004 used **lowercase** status tokens
 (`green`, `red`, `amber`, `pending`) which were structurally invisible to check (n)'s
