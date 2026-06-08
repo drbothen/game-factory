@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.25
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.26
 #
 # PURPOSE
 # -------
@@ -107,9 +107,10 @@
 # guard (Pass-28 I28-01 recurrence prevention):
 # CANONICAL RULE (methodology §2.8 / ADR-0007): the `directed:true`
 # cinematic-director creative sign-off is an INTERNAL creative gate (E-CIN-003,
-# DI-007). It MUST NOT use `human-gated` fidelity-tier vocabulary, which is
+# D-013). It MUST NOT use `human-gated` fidelity-tier vocabulary, which is
 # reserved for EXTERNAL third-party acts (SAG-AFTRA consent, console cert sign-off,
-# store publish, legal review). The check scans all BC files.
+# store publish, legal review). DI-007 is the PLAYTEST gate (BC-8.08.*/7.05.001),
+# not the cinematic creative gate. The check scans all BC files.
 #
 # TRIGGER: an operative line that contains a human-gated vocabulary term AND a
 # creative-gate context keyword in proximity (same line).
@@ -179,6 +180,24 @@
 # (the brief at line 111 says "sixth"). Positive-coverage log always printed.
 # WILL FAIL until PO fixes capabilities.md and prd-cap-008-012.md; architect files
 # must be clean after this pass. POSIX/BSD compatible.
+# extended in v1.26 to:
+#   (1) Fix O-PASS32-02: correct v1.24 check (u) comment text — the cinematic
+#       creative gate's invariant is "E-CIN-003, D-013" (NOT "DI-007"). DI-007 is
+#       the PLAYTEST human gate (enforcer set: BC-8.08.004, BC-7.05.001, BC-8.08.005).
+#       All occurrences of "E-CIN-003, DI-007" / "E-CIN-003; invariant: DI-007" in
+#       check (u) comments and fix messages have been corrected to reference D-013.
+#   (2) Add check (w) — DI-007-on-creative-gate mis-anchor guard (I-PASS32-01
+#       recurrence prevention): scans BC bodies for OPERATIVE lines that cite DI-007
+#       IN PROXIMITY to a CINEMATIC-CREATIVE-GATE context keyword (cinematic-director,
+#       D-013, E-CIN-003, directed:true/directed: true, "creative gate", "creative
+#       sign-off", "creative-gate"). DI-007 (the playtest invariant) MUST NOT be
+#       cited for the cinematic creative gate. Legitimate DI-007 usages (playtest
+#       contexts: "playtest", "fun-score", "playtest-satisfaction", BC-8.08.*, BC-14.*)
+#       do NOT contain these cinematic-creative-gate keywords and do not trigger.
+#       Blockquote (">") and "reason:" lines excluded. Positive-coverage log always
+#       printed. WILL FAIL until PO removes 4 DI-007 cinematic grafts; becomes green
+#       automatically after PO work. POSIX/BSD compatible. (I-PASS32-01 recurrence
+#       prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -332,9 +351,23 @@
 #       e.g. "NOT the `human-gated` fidelity tier"). Blockquote lines (">") and
 #       "reason:" changelog lines excluded. Catches the I28-01 class: BC bodies
 #       applying `human-gated` fidelity-tier vocabulary to the cinematic-director
-#       internal creative gate (correct term: E-CIN-003, DI-007). Positive-coverage
+#       internal creative gate (correct term: E-CIN-003, D-013; DI-007 is the
+#       PLAYTEST gate, not the cinematic creative gate). Positive-coverage
 #       log always printed. WILL FAIL until PO fixes BC-5.06.001, BC-12.12.008,
 #       BC-7.04.001, BC-7.05.001. (I28-01 recurrence prevention). POSIX/BSD.
+#   (w) [NEW v1.26, I-PASS32-01] DI-007-on-creative-gate mis-anchor guard: scans
+#       all BC files for OPERATIVE lines that cite DI-007 IN PROXIMITY to a
+#       CINEMATIC-CREATIVE-GATE context keyword (cinematic-director; D-013;
+#       E-CIN-003; directed:true / directed: true; creative gate / creative-gate /
+#       creative sign-off; cinematic + creative on same line). DI-007 is the PLAYTEST
+#       invariant — it MUST NOT be cited in a cinematic-director creative gate context.
+#       Playtest exemption: lines containing "playtest", "fun-score", "playtest-
+#       satisfaction", or "BC-8.08" are treated as playtest-domain and pass (belt-and-
+#       suspenders; in practice playtest lines never contain cinematic-creative-gate
+#       keywords). Blockquote (">") and "reason:" changelog lines excluded.
+#       Positive-coverage log always printed.
+#       WILL FAIL until PO removes 4 DI-007 cinematic grafts; green after PO fix.
+#       (I-PASS32-01 recurrence prevention). POSIX/BSD compatible.
 #   (t) [NEW v1.22, BROADENED v1.23, I24-01/I27-01] BC-7.* owner-attribution guard:
 #       scans methodology-layer.md and architecture/*.md for operative lines that
 #       mis-attribute OWNERSHIP of the BC-7.* dimension-evaluator family to any
@@ -561,6 +594,10 @@ s_violations=0
 u_lines_scanned=0
 u_creative_gate_lines=0
 u_violations=0
+# (w) DI-007-on-creative-gate mis-anchor counters: initialized here so SUMMARY is safe if skipped
+w_lines_scanned=0
+w_creative_gate_lines=0
+w_violations=0
 # (o.ii) Canon-KB ordinal counters: initialized here so SUMMARY is safe if check is skipped
 ordinal_files_scanned=0
 ordinal_violations=0
@@ -584,7 +621,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.25) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.26) ==="
 echo ""
 
 # ============================================================================
@@ -4087,9 +4124,11 @@ echo ""
 # ============================================================================
 # CANONICAL RULE (methodology §2.8 / ADR-0007):
 #   The `directed:true` cinematic-director creative sign-off is an INTERNAL creative
-#   gate (error code: E-CIN-003; invariant: DI-007). It MUST NOT use `human-gated`
+#   gate (error code: E-CIN-003; dimension: D-013). It MUST NOT use `human-gated`
 #   fidelity-tier vocabulary, which is reserved for EXTERNAL third-party acts
 #   (SAG-AFTRA consent, console cert sign-off, store publish, legal review).
+#   NOTE: DI-007 is the PLAYTEST gate invariant (enforcer set: BC-8.08.004,
+#   BC-7.05.001, BC-8.08.005) — it is NOT the cinematic creative gate's invariant.
 #
 # TRIGGER: any operative BC line containing both:
 #   (1) a human-gated vocabulary term:
@@ -4124,8 +4163,9 @@ echo ""
 # Green automatically after PO work.
 echo "--- (u) human-gated/creative-gate term-misuse guard (I28-01 recurrence prevention) ---"
 echo "    Convention: directed:true cinematic-director sign-off is an internal creative gate"
-echo "    (E-CIN-003 / DI-007). human-gated vocabulary is reserved for external acts"
+echo "    (E-CIN-003 / D-013). human-gated vocabulary is reserved for external acts"
 echo "    (SAG-AFTRA consent, console cert, store publish, legal review)."
+echo "    NOTE: DI-007 is the PLAYTEST gate, not the cinematic creative gate."
 
 u_violations=0
 u_lines_scanned=0
@@ -4249,7 +4289,7 @@ while IFS= read -r bcfile; do
     # without any external-act exemption or negation exemption.
     u_violations=$(( u_violations + 1 ))
     rel_bcfile="${bcfile#$BC_DIR/}"
-    u_violation_msgs+=("$rel_bcfile: human-gated vocabulary applied to creative-gate context (must use E-CIN-003/DI-007, not human-gated/DI-006) — line: $(printf '%s' "$uline" | cut -c1-120)")
+    u_violation_msgs+=("$rel_bcfile: human-gated vocabulary applied to creative-gate context (must use E-CIN-003/D-013, not human-gated/DI-006; DI-007 is the playtest gate) — line: $(printf '%s' "$uline" | cut -c1-120)")
 
   done < "$bcfile"
 done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort)
@@ -4261,11 +4301,167 @@ echo "    Human-gated/creative-gate term-misuse violations: $u_violations"
 if [[ $u_violations -gt 0 ]]; then
   echo ""
   echo "    HUMAN-GATED/CREATIVE-GATE TERM MISUSE (BC body uses human-gated vocabulary for cinematic-director creative gate):"
-  echo "    FIX: replace human-gated/DI-006 with E-CIN-003/DI-007; use 'creative gate checklist item' not 'human-gated task'."
+  echo "    FIX: replace human-gated/DI-006 with E-CIN-003/D-013; use 'creative gate checklist item' not 'human-gated task'."
+  echo "    NOTE: DI-007 is the PLAYTEST gate — do NOT graft DI-007 onto cinematic-director CREATIVE gate contexts."
   for umsg in "${u_violation_msgs[@]}"; do
     echo "      $umsg"
   done
-  errors+=("MISMATCH [human-gated/creative-gate term misuse (u)]: $u_violations operative BC line(s) apply human-gated fidelity-tier vocabulary to the cinematic-director internal creative gate — fix per methodology §2.8 / ADR-0007: use E-CIN-003, DI-007, 'creative gate checklist item' (not 'human-gated task')")
+  errors+=("MISMATCH [human-gated/creative-gate term misuse (u)]: $u_violations operative BC line(s) apply human-gated fidelity-tier vocabulary to the cinematic-director internal creative gate — fix per methodology §2.8 / ADR-0007: use E-CIN-003, D-013, 'creative gate checklist item' (not 'human-gated task'); DI-007 is the playtest gate, not the cinematic creative gate")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
+# (w) DI-007-ON-CREATIVE-GATE MIS-ANCHOR GUARD  [NEW v1.26, I-PASS32-01]
+# ============================================================================
+# CANONICAL RULE: DI-007 is the PLAYTEST human gate invariant (enforcer set:
+#   BC-8.08.004, BC-7.05.001, BC-8.08.005). It MUST NOT be cited for the
+#   cinematic-director CREATIVE gate. The creative gate is governed by D-013 +
+#   E-CIN-003. Grafting DI-007 onto a cinematic-creative-gate context is a
+#   mis-anchor of the I-PASS32-01 class — discovered when check (u)'s guard
+#   validated removal of human-gated vocabulary but did NOT check that the
+#   substituted invariant was correct, allowing DI-007 to be silently grafted
+#   into 4 BCs' cinematic CREATIVE gate contexts.
+#
+# TRIGGER: an operative BC line contains BOTH:
+#   (1) DI-007 citation (the token "DI-007" anywhere on the line)
+#   (2) a CINEMATIC-CREATIVE-GATE context keyword — any of:
+#         "cinematic-director"
+#         "D-013"
+#         "E-CIN-003"
+#         "directed: true" / "directed:true"
+#         "creative gate" / "creative-gate" / "creative sign-off"
+#         "cinematic" + "creative"  (both on same line)
+#
+# FAIL: DI-007 (playtest invariant) cited in a cinematic-creative-gate context.
+#
+# FALSE-POSITIVE AVOIDANCE:
+#   Legitimate DI-007 usages live in:
+#     — Playtest contexts: lines containing "playtest", "fun-score", or
+#       "playtest-satisfaction" — these do NOT contain the cinematic-creative-gate
+#       keywords listed above, so they cannot trigger this check.
+#     — XR-comfort analogical DI-007 (BC-14.*): these BCs contain neither
+#       "cinematic-director", "D-013", "E-CIN-003", "directed:true", nor
+#       "creative gate" — they will NOT trigger.
+#   The check is therefore narrow: only lines that simultaneously cite DI-007 AND
+#   contain a cinematic-creative-gate keyword are flagged. Pure playtest or XR
+#   lines never contain those keywords.
+#
+#   Additional playtest-context exemption: if a triggering line also contains
+#   any of "playtest", "fun-score", "playtest-satisfaction", "BC-8.08" it is
+#   treated as a playtest-domain line and passes — belt-and-suspenders for any
+#   edge-case proximity.
+#
+# EXCLUSIONS (suppress trigger entirely):
+#   Lines starting with ">" (blockquote / changelog annotation lines)
+#   Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#
+# SCANS: all BC-*.md files under BC_DIR ss-NN/ subdirectories.
+#
+# EXPECTED: FAIL until PO removes 4 DI-007 cinematic grafts (the 4 BCs whose
+# cinematic CREATIVE gate blocks were incorrectly annotated with DI-007 by the
+# Pass-28 I28-01 fix). Green automatically after PO fix. (I-PASS32-01).
+# POSIX/BSD compatible (no grep -P). Positive-coverage log always printed.
+echo "--- (w) DI-007-on-creative-gate mis-anchor guard (I-PASS32-01 recurrence prevention) ---"
+echo "    Convention: DI-007 is the PLAYTEST gate invariant. Cinematic creative gate uses D-013."
+echo "    FAIL: any operative BC line cites DI-007 in a cinematic-creative-gate context."
+
+w_violations=0
+w_lines_scanned=0
+w_creative_gate_lines=0
+w_violation_msgs=()
+
+while IFS= read -r bcfile; do
+  [[ ! -f "$bcfile" ]] && continue
+  while IFS= read -r wline; do
+    w_lines_scanned=$(( w_lines_scanned + 1 ))
+
+    # --- Exclusion rules ---
+    # (1) blockquote lines: start with ">"
+    case "$wline" in
+      ">"*) continue ;;
+    esac
+    # (2) reason: lines (YAML frontmatter changelog prose)
+    case "$wline" in
+      *"reason:"*) continue ;;
+    esac
+
+    # --- Test for DI-007 citation (condition 1) ---
+    # Case-insensitive via lowercased copy
+    wline_lc=$(printf '%s' "$wline" | tr '[:upper:]' '[:lower:]')
+    case "$wline_lc" in
+      *"di-007"*) ;;
+      *) continue ;;  # no DI-007 on this line — skip
+    esac
+
+    # --- Test for cinematic-creative-gate context keyword (condition 2) ---
+    has_cin_creative=0
+    case "$wline_lc" in
+      *"cinematic-director"*)    has_cin_creative=1 ;;
+      *"d-013"*)                 has_cin_creative=1 ;;
+      *"e-cin-003"*)             has_cin_creative=1 ;;
+      *"directed: true"*)        has_cin_creative=1 ;;
+      *"directed:true"*)         has_cin_creative=1 ;;
+      *"creative gate"*)         has_cin_creative=1 ;;
+      *"creative-gate"*)         has_cin_creative=1 ;;
+      *"creative sign-off"*)     has_cin_creative=1 ;;
+    esac
+    # "cinematic" + "creative" combination (both on same line)
+    if [[ $has_cin_creative -eq 0 ]]; then
+      case "$wline_lc" in
+        *"cinematic"*)
+          case "$wline_lc" in
+            *"creative"*) has_cin_creative=1 ;;
+          esac
+          ;;
+      esac
+    fi
+    [[ $has_cin_creative -eq 0 ]] && continue
+
+    # This line has DI-007 AND a cinematic-creative-gate context keyword.
+    w_creative_gate_lines=$(( w_creative_gate_lines + 1 ))
+
+    # --- Belt-and-suspenders playtest exemption ---
+    # If the line is anchored to a playtest or XR context, it is a legitimate
+    # DI-007 usage that was incorrectly triggered. In practice this should not
+    # fire (legitimate DI-007 lines do not contain cinematic-creative-gate
+    # keywords), but guard it anyway.
+    has_playtest_ctx=0
+    case "$wline_lc" in
+      *"playtest"*)                  has_playtest_ctx=1 ;;
+      *"fun-score"*)                 has_playtest_ctx=1 ;;
+      *"playtest-satisfaction"*)     has_playtest_ctx=1 ;;
+      *"bc-8.08"*)                   has_playtest_ctx=1 ;;
+    esac
+    if [[ $has_playtest_ctx -eq 1 ]]; then
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [w playtest-exempt] $bcfile: playtest context — DI-007 is legitimate here — line: $(printf '%s' "$wline" | cut -c1-100)"
+      fi
+      continue
+    fi
+
+    # FAIL: DI-007 cited in a cinematic-creative-gate context with no playtest exemption.
+    w_violations=$(( w_violations + 1 ))
+    rel_bcfile="${bcfile#$BC_DIR/}"
+    w_violation_msgs+=("$rel_bcfile: DI-007 (playtest gate) cited in cinematic-creative-gate context (D-013 is the correct creative gate dimension; DI-007 must not appear here) — line: $(printf '%s' "$wline" | cut -c1-120)")
+
+  done < "$bcfile"
+done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort)
+
+# Positive-coverage log (always printed — detects zero-scan / inert run)
+echo "    Check (w): $w_lines_scanned BC lines scanned for DI-007-on-creative-gate mis-anchor, $w_creative_gate_lines DI-007+creative-gate co-occurrence lines evaluated."
+echo "    DI-007-on-creative-gate mis-anchor violations: $w_violations"
+
+if [[ $w_violations -gt 0 ]]; then
+  echo ""
+  echo "    DI-007-ON-CREATIVE-GATE MIS-ANCHOR VIOLATIONS (I-PASS32-01 class):"
+  echo "    FIX: remove DI-007 from cinematic-director creative gate context."
+  echo "    The correct creative gate invariant dimension is D-013 (not DI-007)."
+  echo "    DI-007 belongs only in playtest contexts (BC-8.08.*, BC-7.05.001, fun-score)."
+  for wmsg in "${w_violation_msgs[@]}"; do
+    echo "      $wmsg"
+  done
+  errors+=("MISMATCH [DI-007-on-creative-gate mis-anchor (w)]: $w_violations operative BC line(s) cite DI-007 (the playtest gate invariant) in a cinematic-director creative gate context — DI-007 must NOT appear for cinematic creative gate; use D-013 instead (I-PASS32-01 recurrence prevention)")
   fail=1
 fi
 echo ""
@@ -4306,6 +4502,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  §3.1 cross-table consistency (s):  $s_dims_in_map dims × 4 values, 0 mismatches ($s_comparisons pairs verified)"
   echo "  BC-7.* owner-attribution (t):      $t_scanned_lines lines scanned, 0 mis-attribution violations"
   echo "  human-gated/creative-gate (u):    $u_lines_scanned lines scanned, $u_creative_gate_lines creative-gate lines validated, 0 term-misuse violations"
+  echo "  DI-007-on-creative-gate (w):      $w_lines_scanned lines scanned, $w_creative_gate_lines DI-007+creative-gate lines evaluated, 0 mis-anchor violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
