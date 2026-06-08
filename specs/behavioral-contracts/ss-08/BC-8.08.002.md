@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -88,8 +88,8 @@ evaluator. All three lanes are stored as session evidence records with provenanc
 | EC-001 | Telemetry drops out mid-session (connectivity loss or crash) | DO lane records partial data up to the dropout with `do_lane.partial: true` annotation; session continues if possible; partial evidence is not automatically discarded |
 | EC-002 | Participant does not complete all instrument questions | SAY lane stored as partial with `say_lane.complete: false`; missing items flagged per-item; human evaluator is notified and must decide whether to include the record in analysis |
 | EC-003 | Biometric capture device fails mid-session | BEHAVE lane transitions to `null` with `behave_lane.capture_error: <reason>`; session continues with DO+SAY lanes |
-| EC-004 | Session is started before build is verified running | Factory returns `BUILD_NOT_RUNNING` error; session record is not created until build is confirmed active |
-| EC-005 | Same participant attempts to submit instrument responses twice (UI error / double-submit) | Second submission is rejected with `DUPLICATE_PARTICIPANT_SUBMISSION`; first record retained |
+| EC-004 | Session is started before build is verified running | Factory returns E-PLAY-009 (`BUILD_NOT_RUNNING`); session record is not created until build is confirmed active |
+| EC-005 | Same participant attempts to submit instrument responses twice (UI error / double-submit) | Second submission is rejected with E-PLAY-010 (`DUPLICATE_PARTICIPANT_SUBMISSION`); first record retained |
 | EC-006 | Session involves a minor (age < 13 in COPPA jurisdiction) | Factory refuses to capture biometric data and enforces `say_lane.coppa_compliant: true` mode (requires parent/guardian consent token in session config); if consent token absent, session for that participant is blocked |
 
 ## Canonical Test Vectors
@@ -99,7 +99,7 @@ evaluator. All three lanes are stored as session evidence records with provenanc
 | Session with 5 participants, GEQ+PENS instruments, telemetry active, no biometrics | 5 `session-evidence-record`s with `say_lane` (GEQ/PENS subscale vectors), `do_lane` (timestamped events), `behave_lane: null`; all `status: captured` | happy-path |
 | Telemetry drops at T+300s during session (EC-001) | `session-evidence-record` with `do_lane.partial: true`, events up to T+300s captured, session not aborted | edge-case |
 | Participant submits GEQ partial (7/28 items answered) | Record created with `say_lane.complete: false`, flagged items listed, human evaluator notified | edge-case (EC-002) |
-| Build crashes before session start | Error: `BUILD_NOT_RUNNING`; no session record created | error (EC-004) |
+| Build crashes before session start | E-PLAY-009 (`BUILD_NOT_RUNNING`); no session record created | error (EC-004) |
 
 ## Verification Properties
 

@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "2.1"
+version: "2.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -230,7 +230,7 @@ NFR summary — capabilities now with defined numeric targets (v1.1 additions ma
 
 ## Section 5 — Consolidated Error Taxonomy
 
-Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (213 error codes, 30 active families + 1 retired — v1.9). Note: 9 of the 213 are in the retired E-GEN family; 204 are active codes. (v1.9: +E-OSVC family, 15 codes for CAP-015 online-services adapter.)
+Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (255 error codes, 30 active families + 1 retired — v2.0). Note: 9 of the 255 are in the retired E-GEN family; 246 are active codes. (v2.0: +42 codes across E-KB/E-PLAY/E-REPLAY/E-NAR — Pass-20 symbolic token reconciliation + F-20-02 E-NAR fix.)
 
 Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`; v1.6 additions marked with `***`; v1.9 additions marked with `****`):
 
@@ -238,7 +238,7 @@ Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`;
 |--------|------------------|-----------|
 | E-EAP | CAP-001 (Engine Adapter Protocol) | 13 (v1.1: +E-EAP-011; v1.2: +E-EAP-012 MalformedManifest, +E-EAP-013 HumanGatedTaskPending) |
 | E-CONF * | CAP-002 (Conformance suite) | 5 |
-| E-REPLAY * | CAP-003 (Replay harness) | 7 |
+| E-REPLAY * | CAP-003 (Replay harness) | 18 (v2.0: +E-REPLAY-008..018 — Pass-20 symbolic token reconciliation) |
 | ~~E-GEN *~~ | ~~CAP-004 (Asset generation placeholder)~~ | ~~9~~ — **RETIRED v1.6**: orphaned placeholder; never referenced by any BC |
 | E-AAG *** | CAP-004 (Asset-adapter routing, BC-4.01.*) | 7 |
 | E-SVC *** | CAP-004 (GenerationRequest validation, BC-4.02.*) | 6 |
@@ -249,27 +249,27 @@ Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`;
 | E-DES | CAP-005 (Design artifacts) | 5 |
 | E-ART | CAP-005 (Art quality gate) | 3 |
 | E-AUD | CAP-005 (Audio build) | 4 |
-| E-NAR | CAP-005 (Narrative graph) | 4 |
+| E-NAR | CAP-005 (Narrative graph) | 6 (v2.0: +E-NAR-005/006 — F-20-02 fix: undeclared variable + invalid naming-registry regex) |
 | E-ENG | CAP-005 (Code separation) | 2 |
 | E-CIN | CAP-005 (Cinematic graph) | 4 |
 | E-PROD | CAP-005 (Production / wave) | 3 |
 | E-SIM * | CAP-006 (Simulation QA) | 9 |
 | E-CONV * | CAP-007 (Convergence) | 6 |
-| E-PLAY * | CAP-008 (Playtest) | 5 |
+| E-PLAY * | CAP-008 (Playtest) | 15 (v2.0: +E-PLAY-006..015 — Pass-20 symbolic token reconciliation) |
 | E-CERT | CAP-009 (Cert pre-flight) | 3 |
 | E-DIST | CAP-009 (Distribution tools) | 19 |
 | E-COMP | CAP-010 (Compliance) | 2 |
 | E-ETH * | CAP-011 (Monetization Ethics) | 14 (v1.2: +E-ETH-009 DP-007; v1.5: +E-ETH-010..014 DP-005/004/003/008/006) |
-| E-KB * | CAP-012 (Canon KB) | 7 |
+| E-KB * | CAP-012 (Canon KB) | 26 (v2.0: +E-KB-008..026 — Pass-20 symbolic token reconciliation) |
 | E-GENRE * | CAP-013 (Genre lanes — core activation BCs) | 6 |
 | E-GLG *** | CAP-013 (Genre sub-lane gate config, BC-13.01.*/13.02.*/13.03.*/13.04.*) | 5 |
 | E-MOD *** | CAP-013 (Modding/UGC lane, BC-13.03.*) | 11 |
 | E-MKT *** | CAP-013 (Marketing lane, BC-13.04.*) | 4 |
 | E-XR * | CAP-014 (XR seam) | 7 (v1.1: 6 codes; v1.6: +E-XR-007 visionOS/OpenXR) |
 | E-OSVC **** | CAP-015 (Online-Services Adapter — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity) | 15 (v1.9: all new) |
-| **TOTAL (all registered incl. retired E-GEN)** | **30 active + 1 retired** | **213** |
+| **TOTAL (all registered incl. retired E-GEN)** | **30 active + 1 retired** | **255** |
 
-**Error family gap status:** All 15 capability families have error families defined. v1.9 adds E-OSVC (15 codes, CAP-015/SS-13). See `error-taxonomy.md §Coverage Notes`.
+**Error family gap status:** All 15 capability families have error families defined. v2.0 (Pass-20) extends E-KB (7→26), E-PLAY (5→15), E-REPLAY (7→18), E-NAR (4→6) to cover all symbolic tokens emitted by their BCs. Every registered non-retired family is now cited by ≥1 BC. See `error-taxonomy.md §Coverage Notes`.
 
 ---
 
@@ -357,6 +357,7 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | 1.6 | 2026-06-08 | product-owner | CI check (k) completeness fix: registered 57 E-codes referenced by ss-04 (BC-4.01.*–4.06.*) and ss-13 (BC-13.02.*–13.04.*) BCs that were unregistered. New families: E-AAG (7), E-SVC (6), E-QG (11), E-SHIP (3), E-ING (4), E-GLG (5), E-MOD (11), E-MKT (4). E-PRV extended (+5 codes: 001/002/003/020/030). E-XR extended (+1 code: 007). E-GEN retired — orphaned placeholder, never referenced by any BC (9 codes remain in retired table, still counted by CI). CI-computed total: 139 + 57 = **196 total registered codes** (187 active, 9 retired E-GEN). 29 active families. BC count unchanged at 178 |
 | 1.7 | 2026-06-08 | product-owner | Pass-9 adversarial fixes: E-COMP-011 registered (disclosure_class out-of-vocabulary at manifest aggregation — distinct from E-COMP-010 missing-field; BC-10.05.001 v1.2 uses E-COMP-011 for vocab fault); E-COMP-012 registered (NFT flag divergence seam guard — nft_blockchain/nft_mechanics inconsistency; BC-10.01.001 v1.1 emits on divergence; INV-2 fail-closed: PEGI-18 if EITHER NFT flag true). +2 codes: **198 total registered codes** (189 active, 9 retired E-GEN). BC count unchanged at 178. methodology-layer v1.3 §3.0 canonical dimension field table added; BC-9.04.001/9.06.001/9.06.002 dimension field renamed distribution_readiness→cert_preflight. |
 | 1.9 | 2026-06-08 | product-owner | CAP-015 Online-Services Adapter (fifth seam, SS-13, Tier 1): +12 BCs (BC-15.01.001..002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001); new E-OSVC error family (15 codes); CAP-015 added to domain-spec/capabilities.md; prd-cap-015.md created; NFR-036..041 added (identity/leaderboard/entitlement/save latency, graceful degradation, tampered-score rejection). Grand total: 178→190 BCs. Error codes: 198→213 total (189→204 active). Families: 29→30 active. |
+| 2.2 | 2026-06-08 | product-owner | Pass-20 symbolic token reconciliation: E-KB extended 7→26 (+19 codes E-KB-008..026); E-PLAY extended 5→15 (+10 codes E-PLAY-006..015); E-REPLAY extended 7→18 (+11 codes E-REPLAY-008..018); E-NAR extended 4→6 (+2 codes E-NAR-005/006 — F-20-02 fix: "E-NAR-003 variant" language removed). OBS-20-A: BC-12.12.004 Invariant 2 reworded to permit shared ordinals for concurrent:true events. OBS-20-B: CAP-012 Canon-KB declared authoritative timeline store; CAP-005 BC-5.04.002 declared consumer view. Total error codes: 213→255 (204→246 active). BC count unchanged: 190. |
 | 2.1 | 2026-06-08 | product-owner | Pass-17 adversarial fix F-17-01: corrected stale BC count 189→190 in §8.1 subsystem-assignment prose (was copied from the 189-active-error-codes figure; grand total is 190 per BC-INDEX, ARCH-INDEX, and per-subsystem distribution). BC count unchanged: 190. |
 | 2.0 | 2026-06-08 | product-owner | Pass-14 adversarial defect fixes: C14-01 — E-OSVC error-code mis-citations corrected in BC-15.02.001 (E-OSVC-003→013 UnsupportedAuthProvider) and BC-15.05.001 (E-OSVC-004→014 LobbyCapacityExceeded, E-OSVC-006→015 LobbyNotFound); I14-03 — orphan "(100-Token Active Cap)" fragment removed from BC-15.11.001 H1 and BC-INDEX row (title now accurately describes D-SEC routing contract); I14-01 — seam-count prose updated from "four adapter seams" to "five adapter seams (engine / asset / distribution / XR / online-services)" in prd.md, L2-INDEX.md, capabilities.md, invariants.md, prd-cap-002-003.md, and product-brief.md; canon-KB clarified as sixth load-bearing (non-adapter) seam. BC count unchanged: 190. Error code count unchanged: 213. |
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -61,7 +61,7 @@ gate (CAP-008).
 2. **Dead-end check**: any node with zero outgoing edges that is NOT declared `type: "end"`
    is flagged as an unintended dead-end → E-NAR-001 raised per dead-end node.
 3. **Variable consistency check**: every variable referenced in a `condition` or `content_ref`
-   field is present in the `variables` array. Undeclared variable → E-NAR-003 variant raised.
+   field is present in the `variables` array. Undeclared variable → E-NAR-005 raised.
 4. **Canon grounding check**: every `canon_entity_refs[]` entry in every node resolves to
    an existing `CanonKBEntry.id` in the current Canon-KB. Dangling reference → E-NAR-003
    raised per dangling ref.
@@ -102,7 +102,7 @@ gate (CAP-008).
 | Same graph but one choice branch has no outgoing edge and `type: "dialogue"` (not "end") | E-NAR-001: node '<id>' dead-end (not declared end); graph rejected | error |
 | Dialogue node references `entity_id: "faction_001"` not in Canon-KB | E-NAR-003: dangling entity ref faction_001; graph rejected | error |
 | Start node with no outgoing edges, declared `type: "end"` | Validation passes (trivially complete graph) | edge-case |
-| Node references variable `$player_level` not in `variables` array | E-NAR-003 variant: undeclared variable $player_level | error |
+| Node references variable `$player_level` not in `variables` array | E-NAR-005: undeclared variable $player_level | error |
 
 ## Verification Properties
 

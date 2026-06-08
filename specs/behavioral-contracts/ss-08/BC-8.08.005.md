@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -49,7 +49,7 @@ circumvention from the automated side.
 1. If any artifact written by a factory agent (not a human reviewer) contains a field
    matching the fun-score detection ruleset (see Invariants), the hook chain intercepts
    the write and:
-   - Rejects the artifact write with error: `FUN_SCORE_EMISSION_FORBIDDEN`
+   - Rejects the artifact write with E-PLAY-014 (`FUN_SCORE_EMISSION_FORBIDDEN`)
    - Records a defect event: `{defect_type: fun_score_emission, artifact_path, agent_id,
      field_name, field_value_hash}`
    - Does NOT silently pass or log-only — the write is blocked
@@ -86,10 +86,10 @@ circumvention from the automated side.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Agent writes artifact with field `fun_score: 7.3` | Write rejected: `FUN_SCORE_EMISSION_FORBIDDEN`; defect event recorded | error (DI-007 violation) |
+| Agent writes artifact with field `fun_score: 7.3` | Write rejected: E-PLAY-014 (`FUN_SCORE_EMISSION_FORBIDDEN`); defect event recorded | error (DI-007 violation) |
 | Agent writes artifact with field `frustration_signal: 0.82` (proxy metric) | Write accepted; no defect | happy-path (proxy metric, not verdict) |
 | Human reviewer writes `playtest-signoff-record` with `verdict: SATISFIED` | Write accepted; this is the only legitimate satisfaction verdict field | happy-path (human-authored sign-off) |
-| Third-party integration writes `user_satisfaction_score: 4.1` | Write rejected: `FUN_SCORE_EMISSION_FORBIDDEN`; defect event recorded | error (EC-004) |
+| Third-party integration writes `user_satisfaction_score: 4.1` | Write rejected: E-PLAY-014 (`FUN_SCORE_EMISSION_FORBIDDEN`); defect event recorded | error (EC-004) |
 
 ## Verification Properties
 

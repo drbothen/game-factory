@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -80,12 +80,12 @@ regression system has no reliable baseline and produces noise.
 
 2. When a golden state is invalidated:
    - Status is set to `invalidated`; reason is recorded.
-   - Replay regression for this game+adapter pair is blocked with error
-     `GOLDEN_STATE_INVALIDATED` until a new golden state is captured.
+   - Replay regression for this game+adapter pair is blocked with E-REPLAY-011
+     (`GOLDEN_STATE_INVALIDATED`) until a new golden state is captured.
    - The invalidated record is retained for audit (not deleted).
 
 3. When golden state is absent (never captured or invalidated with no replacement):
-   - Replay regression returns error `GOLDEN_STATE_ABSENT`.
+   - Replay regression returns E-REPLAY-012 (`GOLDEN_STATE_ABSENT`).
    - The `tests/replay` dimension is set to `blocked: golden_state_required`.
    - A checklisted task is generated: "Bootstrap golden state for [game_id] + [adapter_id]."
 
@@ -110,7 +110,7 @@ regression system has no reliable baseline and produces noise.
 | EC-001 | First pipeline run for a new game; golden state not yet captured | `GOLDEN_STATE_ABSENT`; bootstrap task generated; regression blocked. |
 | EC-002 | Game spec updated with a deliberate balance change (enemy HP ×2 by design) | Producer invalidates golden state; re-capture required; regression blocked until new golden state captured and approved. |
 | EC-003 | Code bug fixed: golden state was captured when the bug was present; now the "correct" state differs from golden | Producer must decide: the golden state is the baseline. If the fix is intentional, invalidate and re-capture. If the fix reveals a dormant bug in the golden, the same applies. |
-| EC-004 | Automated pipeline attempts to re-capture golden state without producer-role token | Rejected: `UNAUTHORIZED_GOLDEN_STATE_CAPTURE`. |
+| EC-004 | Automated pipeline attempts to re-capture golden state without producer-role token | Rejected: E-REPLAY-013 (`UNAUTHORIZED_GOLDEN_STATE_CAPTURE`). |
 | EC-005 | Recording associated with a golden state is deleted (storage expiry) | Golden state automatically invalidated; `tests/replay` dimension blocked; task generated to re-capture recording + golden state. |
 | EC-006 | Multiple golden states exist for the same game+adapter pair (history) | Only the most recent `active` golden state is used for regression. Prior golden states are retained as `superseded` for audit. |
 | EC-007 | T2 adapter; golden state was captured on pinned runner A; pinned runner A is decommissioned | Golden state remains valid for history but T2 regression is no longer executable. Adapter's accepted record must be updated with a new pinned runner; new golden state captured. |
@@ -119,10 +119,10 @@ regression system has no reliable baseline and produces noise.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| First run for game G, adapter A; no golden state | `GOLDEN_STATE_ABSENT`; bootstrap task generated; regression blocked. | happy-path (first run) |
+| First run for game G, adapter A; no golden state | E-REPLAY-012 (`GOLDEN_STATE_ABSENT`); bootstrap task generated; regression blocked. | happy-path (first run) |
 | Producer bootstraps golden state at commit X; all checkpoints captured | Golden state created with status `active`; `golden_state_id` assigned; regression pipeline unlocked. | happy-path (bootstrap) |
-| Design change: balance update; producer invalidates golden state | Status = `invalidated`; regression blocked; new bootstrap task generated. | happy-path (invalidation) |
-| Automated agent attempts golden re-capture without producer token | Rejected: `UNAUTHORIZED_GOLDEN_STATE_CAPTURE`. | error (auth) |
+| Design change: balance update; producer invalidates golden state | Status = `invalidated`; E-REPLAY-011 (`GOLDEN_STATE_INVALIDATED`) on next regression attempt; new bootstrap task generated. | happy-path (invalidation) |
+| Automated agent attempts golden re-capture without producer token | E-REPLAY-013 (`UNAUTHORIZED_GOLDEN_STATE_CAPTURE`). | error (auth) |
 | Associated recording deleted | Golden state auto-invalidated; dimension blocked. | edge-case |
 
 ## Verification Properties

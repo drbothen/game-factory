@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "1.9"
+version: "2.0"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -121,12 +121,21 @@ Message format uses `<placeholder>` syntax for dynamic values.
 
 ## E-NAR — Narrative Graph (CAP-005)
 
+The symbolic error names emitted by individual BCs are carried as the `error.data.reason`
+sub-code of the registered parent E-NAR-NNN code where the condition does not warrant its
+own registered code. E-NAR-003 covers the broad class of dangling references; E-NAR-005
+and E-NAR-006 are dedicated codes for conditions that were previously incorrectly described
+as "E-NAR-003 variants" (F-20-02 fix: no "variant" language is permitted — every condition
+resolves to a registered code).
+
 | Error Code | Category | Severity | Exit Code | Message Format |
 |-----------|----------|----------|-----------|----------------|
 | E-NAR-001 | Dead-end node | broken | 1 | `narrative-graph '<graph_id>' dead-end detected at node '<node_id>': no outgoing edges and not declared end` |
 | E-NAR-002 | Unreachable node | broken | 1 | `narrative-graph '<graph_id>' unreachable node '<node_id>': no path from start` |
 | E-NAR-003 | Dangling entity ref | broken | 1 | `narrative node '<node_id>' references canon entity '<entity_id>' not in Canon-KB` |
 | E-NAR-004 | Timeline inconsistency | broken | 1 | `Canon-KB timeline event '<event_id>' at t=<t1> conflicts with event '<event_id2>' at t=<t2>: <conflict>` |
+| E-NAR-005 | Undeclared variable reference | broken | 1 | `narrative-graph '<graph_id>' node '<node_id>' references variable '<var_name>' not declared in variables array (BC-5.04.001 postcondition 3)` |
+| E-NAR-006 | Invalid naming-registry pattern | broken | 1 | `canon-kb naming_registry entry '<registry_id>' pattern is not valid regex or string template syntax: <parse_error> (BC-5.04.002 EC-004 schema check)` |
 
 ---
 
@@ -230,6 +239,25 @@ a conformance run from completing or reporting correctly.
 Replay regression failures are reported in the `TestResult` schema. The error codes below
 cover harness infrastructure failures distinct from regression detection results.
 
+The symbolic error names emitted by individual BCs are carried as the `error.data.reason`
+sub-code of the registered parent E-REPLAY-NNN code (same pattern as E-ETH).
+
+**E-REPLAY Symbolic→Registered Code Crosswalk:**
+
+| Symbolic Token | Registered E-REPLAY Code | Context / Enforcing BC |
+|---|---|---|
+| REPLAY_CAPABILITY_NONE | E-REPLAY-008 | BC-3.03.001 EC-007: recording attempted on adapter with replay: none |
+| RECORDING_FRAME_GAP | E-REPLAY-009 | BC-3.03.002 EC-001: gap in frame numbers in recording |
+| INCOMPATIBLE_REPLAY_ENGINE_VERSION | E-REPLAY-010 | BC-3.03.002 Invariant 4: replay engine version outside valid range for recording |
+| GOLDEN_STATE_INVALIDATED | E-REPLAY-011 | BC-3.03.008 Postconditions for Invalidation: golden state explicitly invalidated |
+| GOLDEN_STATE_ABSENT | E-REPLAY-012 | BC-3.03.008 EC-001/003: no golden state ever captured or replaced after invalidation |
+| UNAUTHORIZED_GOLDEN_STATE_CAPTURE | E-REPLAY-013 | BC-3.03.008 EC-004: capture attempted without producer-role authorization |
+| INSUFFICIENT_DETERMINISM_TIER_FOR_EXPORT | E-REPLAY-014 | BC-3.03.009 EC-001: demo/anti-cheat export rejected for T3 adapter |
+| LANE_NOT_ACTIVE | E-REPLAY-015 | BC-3.03.009 EC-002: esports/demo export when competitive lane not active |
+| SERVER_STATE_MISSING | E-REPLAY-016 | BC-3.03.009 EC-005: anti-cheat evidence package blocked; server snapshots absent |
+| BROADCAST_DELAY_ZERO_STREAM_SNIPE_RISK | E-REPLAY-017 | BC-3.03.009 EC-004: broadcast delay 0 for demo export (cosmetic warning) |
+| CHECKPOINT_MISMATCH | E-REPLAY-018 | BC-3.03.003 EC-002: checkpoint frames in golden and replay do not align |
+
 | Error Code | Category | Severity | Exit Code | Message Format |
 |-----------|----------|----------|-----------|----------------|
 | E-REPLAY-001 | Input stream | broken | 1 | `replay: input-stream file '<path>' missing or corrupt for session '<session_id>'` |
@@ -239,6 +267,17 @@ cover harness infrastructure failures distinct from regression detection results
 | E-REPLAY-005 | Regression detected | broken | 1 | `replay: T1 regression at frame <frame_id>: snapshot hash mismatch — injected change or non-determinism detected` |
 | E-REPLAY-006 | Replay diverged (T2) | degraded | 1 | `replay: T2 pinned-runner divergence at frame <frame_id>: <diff_summary>` |
 | E-REPLAY-007 | Tolerance exceeded (T3) | degraded | 1 | `replay: T3 metric '<metric>' at frame <frame_id> = <value>, tolerance = ±<tol>` |
+| E-REPLAY-008 | Replay capability none | broken | 1 | `replay: recording rejected — adapter '<adapter_id>' declares replay: none; no input-stream recording possible; error.data.reason = REPLAY_CAPABILITY_NONE` |
+| E-REPLAY-009 | Recording frame gap | broken | 1 | `replay: recording '<recording_id>' has gap in frame sequence — frame <frame_id> absent; recording invalid for regression use; error.data.reason = RECORDING_FRAME_GAP` |
+| E-REPLAY-010 | Incompatible engine version | broken | 1 | `replay: engine version '<engine_ver>' for replay is outside the valid range for recording from '<recorded_ver>'; error.data.reason = INCOMPATIBLE_REPLAY_ENGINE_VERSION` |
+| E-REPLAY-011 | Golden state invalidated | broken | 1 | `replay: golden state '<golden_state_id>' for game '<game_id>' + adapter '<adapter_id>' is invalidated — reason: <reason>; re-bootstrap required before regression can run; error.data.reason = GOLDEN_STATE_INVALIDATED` |
+| E-REPLAY-012 | Golden state absent | broken | 1 | `replay: no active golden state found for game '<game_id>' + adapter '<adapter_id>'; tests/replay dimension blocked: golden_state_required; bootstrap task generated; error.data.reason = GOLDEN_STATE_ABSENT` |
+| E-REPLAY-013 | Unauthorized golden state capture | broken | 1 | `replay: golden state capture for '<game_id>' rejected — producer-role authorization required; error.data.reason = UNAUTHORIZED_GOLDEN_STATE_CAPTURE` |
+| E-REPLAY-014 | Insufficient determinism tier for export | broken | 1 | `replay: demo/anti-cheat export rejected — adapter '<adapter_id>' has determinism_tier: tolerance-only; T1 or T2 required for export integrity; error.data.reason = INSUFFICIENT_DETERMINISM_TIER_FOR_EXPORT` |
+| E-REPLAY-015 | Lane not active for export | broken | 1 | `replay: esports/anti-cheat export rejected — competitive-multiplayer lane is not active for game '<game_id>'; error.data.reason = LANE_NOT_ACTIVE` |
+| E-REPLAY-016 | Server state missing | broken | 1 | `replay: anti-cheat evidence package cannot be produced — server-authoritative state snapshots absent for recording '<recording_id>'; error.data.reason = SERVER_STATE_MISSING` |
+| E-REPLAY-017 | Broadcast delay zero | cosmetic | 0 | `replay: demo export for '<recording_id>' has broadcast_delay = 0s — stream-snipe risk in live tournaments; error.data.reason = BROADCAST_DELAY_ZERO_STREAM_SNIPE_RISK` |
+| E-REPLAY-018 | Checkpoint mismatch | degraded | 0 | `replay: golden and replay checkpoint frames do not fully align for recording '<recording_id>'; comparison performed on intersection only — non-intersecting golden frames flagged; error.data.reason = CHECKPOINT_MISMATCH` |
 
 ---
 
@@ -421,6 +460,24 @@ violations.
 Playtest protocol errors cover infrastructure and gate enforcement failures. Sign-off
 blocking is a task state managed by the convergence engine (D-PLAY dimension).
 
+The symbolic error names emitted by individual BCs are carried as the `error.data.reason`
+sub-code of the registered parent E-PLAY-NNN code (same pattern as E-ETH).
+
+**E-PLAY Symbolic→Registered Code Crosswalk:**
+
+| Symbolic Token | Registered E-PLAY Code | Context / Enforcing BC |
+|---|---|---|
+| PLAYTEST_PROTOCOL_ALREADY_APPROVED | E-PLAY-006 | BC-8.08.001 EC-003: approved protocol already exists; overwrite blocked |
+| PLAYTEST_PROTOCOL_IN_PROGRESS | E-PLAY-007 | BC-8.08.001 EC-006: concurrent generation attempt rejected |
+| BUILD_NOT_ARCHIVED | E-PLAY-008 | BC-8.08.001 EC-002: no stable build_id to reference |
+| BUILD_NOT_RUNNING | E-PLAY-009 | BC-8.08.002 EC-004: build not confirmed active before session starts |
+| DUPLICATE_PARTICIPANT_SUBMISSION | E-PLAY-010 | BC-8.08.002 EC-005: second instrument submission for same participant |
+| SESSION_NOT_COMPLETE | E-PLAY-011 | BC-8.08.003 EC-004: convergence report requested before session closed |
+| AGENT_SIGN_OFF_FORBIDDEN | E-PLAY-012 | BC-8.08.004 EC-001: automated process attempted sign-off creation |
+| CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT | E-PLAY-013 | BC-8.08.004 EC-004: CONDITIONAL verdict missing conditions_for_satisfaction text |
+| FUN_SCORE_EMISSION_FORBIDDEN | E-PLAY-014 | BC-8.08.005 Postcondition 1: factory artifact contains fun-score field |
+| DEFAULT_INSTRUMENTS_APPLIED | E-PLAY-015 | BC-8.08.001 EC-001: no instruments in GameSpec; defaulted to [GEQ, PENS, SUS] (cosmetic advisory) |
+
 | Error Code | Category | Severity | Exit Code | Message Format |
 |-----------|----------|----------|-----------|----------------|
 | E-PLAY-001 | Protocol schema | broken | 1 | `playtest: protocol document '<doc_id>' failed schema validation: <field> missing` |
@@ -428,6 +485,16 @@ blocking is a task state managed by the convergence engine (D-PLAY dimension).
 | E-PLAY-003 | Fun score emitted | broken | 1 | `playtest: agent '<agent_id>' emitted automated fun-score '<score>' — violates DI-007; artifact rejected` |
 | E-PLAY-004 | Evidence incomplete | broken | 1 | `playtest: convergence report '<report_id>' missing lens evidence for '<lens>'; 3-lens (say/do/behave) required` |
 | E-PLAY-005 | Sign-off suppressed | broken | 1 | `playtest: human sign-off gate for session '<session_id>' was suppressed or bypassed — violates DI-006` |
+| E-PLAY-006 | Protocol already approved | broken | 1 | `playtest: protocol for milestone '<milestone_id>' already has status: approved — overwrite is forbidden; error.data.reason = PLAYTEST_PROTOCOL_ALREADY_APPROVED` |
+| E-PLAY-007 | Protocol generation in progress | broken | 1 | `playtest: protocol generation for milestone '<milestone_id>' is already in progress — concurrent generation rejected; error.data.reason = PLAYTEST_PROTOCOL_IN_PROGRESS` |
+| E-PLAY-008 | Build not archived | broken | 1 | `playtest: playtest protocol generation blocked — no archived build with stable build_id for milestone '<milestone_id>'; archive build first; error.data.reason = BUILD_NOT_ARCHIVED` |
+| E-PLAY-009 | Build not running | broken | 1 | `playtest: session '<session_id>' start blocked — build '<build_id>' is not confirmed running; verify build is active; error.data.reason = BUILD_NOT_RUNNING` |
+| E-PLAY-010 | Duplicate participant submission | broken | 1 | `playtest: participant '<participant_id>' has already submitted instrument responses for session '<session_id>' — duplicate submission rejected; error.data.reason = DUPLICATE_PARTICIPANT_SUBMISSION` |
+| E-PLAY-011 | Session not complete | broken | 1 | `playtest: convergence report generation requires session '<session_id>' to be closed first — session is still active; error.data.reason = SESSION_NOT_COMPLETE` |
+| E-PLAY-012 | Agent sign-off forbidden | broken | 1 | `playtest: automated process '<agent_id>' attempted to create playtest-signoff-record — only human reviewers may sign off; gate remains open; error.data.reason = AGENT_SIGN_OFF_FORBIDDEN` |
+| E-PLAY-013 | Conditions required for conditional verdict | broken | 1 | `playtest: sign-off verdict CONDITIONAL requires non-empty conditions_for_satisfaction text — sign-off rejected until conditions are authored; error.data.reason = CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT` |
+| E-PLAY-014 | Fun score emission forbidden | broken | 1 | `playtest: artifact '<artifact_path>' written by agent '<agent_id>' contains fun-score field '<field_name>' — write blocked; DI-007 violation; error.data.reason = FUN_SCORE_EMISSION_FORBIDDEN` |
+| E-PLAY-015 | Default instruments applied | cosmetic | 0 | `playtest: no playtest_instruments declared in GameSpec for genre '<genre>'; defaulted to [GEQ, PENS, SUS]; review protocol before approval; error.data.reason = DEFAULT_INSTRUMENTS_APPLIED` |
 
 ---
 
@@ -487,15 +554,69 @@ provides human-readable context in the error payload.
 Canon-KB structural errors are returned in query results. The error codes below cover
 ingest-time structural violations that are hard stops.
 
+The symbolic error names emitted by individual BCs (e.g., `CANONICAL_NAME_COLLISION`,
+`DANGLING_ENTITY_REFERENCE`) are carried as the `error.data.reason` sub-code of the
+registered parent E-KB-NNN code. The registered code is the machine-checkable,
+CI-resolvable identifier; the symbolic name provides human-readable context in the error
+payload (same pattern as E-ETH).
+
+**E-KB Symbolic→Registered Code Crosswalk:**
+
+| Symbolic Token | Registered E-KB Code | Context / Enforcing BC |
+|---|---|---|
+| CANON_KB_ALREADY_EXISTS | E-KB-024 | BC-12.12.001 EC-001: initialization attempted when KB exists |
+| GAME_ID_REQUIRED | E-KB-025 | BC-12.12.001 EC-002: GameSpec missing game_id |
+| CANON_KB_INIT_PARTIAL_FAILURE | E-KB-026 | BC-12.12.001 EC-003: partial init rolled back |
+| CANONICAL_NAME_COLLISION | E-KB-005 | BC-12.12.002 EC-001/EC-005: name collision (case-insensitive); error.data.reason distinguishes exact vs. case-insensitive |
+| RETIRED_NAME_REUSE | E-KB-008 | BC-12.12.002 EC-002: name of a retired entity being reused |
+| FORBIDDEN_NAME | E-KB-010 | BC-12.12.002 EC-003: name in forbidden_names list |
+| ENTITY_ID_IMMUTABLE | E-KB-009 | BC-12.12.002 EC-004: attempt to change entity_id after assignment |
+| DANGLING_ENTITY_REFERENCE | E-KB-003 | BC-12.12.003 EC-001, BC-12.12.007 check 1/5: edge or artifact references entity not in registry; error.data.reason DANGLING_ENTITY_REFERENCE |
+| DUPLICATE_RELATIONSHIP | E-KB-011 | BC-12.12.003 Invariant 4: duplicate edge (same subject, predicate, object) |
+| INVALID_TEMPORAL_WINDOW | E-KB-012 | BC-12.12.003 EC-002: valid_to precedes valid_from on edge |
+| UNKNOWN_PREDICATE | E-KB-013 | BC-12.12.003 EC-003: predicate not in declared vocabulary |
+| TIMELINE_EVENT_NOT_FOUND | E-KB-014 | BC-12.12.003 EC-005: valid_from_event_id references absent event |
+| ENTITY_NOT_FOUND | E-KB-003 | BC-12.12.004 EC-001: entity not found in participating_entity_ids; error.data.reason = ENTITY_NOT_FOUND |
+| ORDINAL_INSERTION_PERFORMED | E-KB-016 | BC-12.12.004 EC-002: ordinal conflict → insertion performed (informational) |
+| CHRONOLOGICAL_REFERENCE_VIOLATION | E-KB-015 | BC-12.12.004 Invariant 1, EC-003, BC-12.12.007 check 4: entity referenced outside its validity window |
+| INVALID_ENTITY_VALIDITY_WINDOW | E-KB-017 | BC-12.12.004 EC-004: departed_event precedes introduced_event |
+| HARD_CANON_CONTRADICTION | E-KB-018 | BC-12.12.006 EC-001: two hard-canon facts conflict on same subject/predicate/window |
+| MISSING_PROVENANCE | E-KB-019 | BC-12.12.006 EC-004: source_artifact_ref empty or null |
+| NAMING_REGISTRY_BYPASSED | E-KB-020 | BC-12.12.005 Invariant 4, BC-12.12.007 check 2: naming check was skipped |
+| PHONOTACTIC_VIOLATION | E-KB-021 | BC-12.12.005 Postcondition 4, BC-12.12.007 check 3: name violates culture phonotactic rules |
+| TERMINOLOGY_DRIFT | E-KB-022 | BC-12.12.007 check 7: canonical spelling mismatch in artifact |
+| GROUNDING_BYPASSED | E-KB-007 | BC-12.12.009 Invariant 1: generation without grounded_against tag; error.data.reason = GROUNDING_BYPASSED |
+| GROUNDING_TIMEOUT | E-KB-023 | BC-12.12.009 EC-005: KB query timed out blocking generation (distinct from absent: KB exists but retrieval failed) |
+| UNREGISTERED_NAME_IN_CONTENT | E-KB-003 | BC-12.12.005 EC-002: name in artifact not in entity-registry; routes to E-KB-003 dangling-ref with error.data.reason = UNREGISTERED_NAME_IN_CONTENT |
+
 | Error Code | Category | Severity | Exit Code | Message Format |
 |-----------|----------|----------|-----------|----------------|
 | E-KB-001 | Schema init | broken | 1 | `canon-kb: KB '<kb_id>' failed schema initialization: <field> missing` |
 | E-KB-002 | Entity ID collision | broken | 1 | `canon-kb: entity_id '<id>' already registered; duplicate entity registration rejected` |
-| E-KB-003 | Dangling ref | broken | 1 | `canon-kb: relationship edge '<edge_id>' references entity '<entity_id>' not in registry` |
+| E-KB-003 | Dangling ref | broken | 1 | `canon-kb: entity '<entity_id>' not found in registry; error.data.reason = <DANGLING_ENTITY_REFERENCE \| ENTITY_NOT_FOUND \| UNREGISTERED_NAME_IN_CONTENT>` |
 | E-KB-004 | Timeline conflict | broken | 1 | `canon-kb: event '<event_id>' at t=<t1> conflicts with event '<event_id2>' at t=<t2> for entity '<entity_id>'` |
-| E-KB-005 | Naming collision | broken | 1 | `canon-kb: name '<name>' conflicts with existing registry entry '<existing_id>'` |
+| E-KB-005 | Naming collision | broken | 1 | `canon-kb: name '<name>' conflicts with existing registry entry '<existing_id>'; error.data.reason = CANONICAL_NAME_COLLISION` |
 | E-KB-006 | Retcon unresolved | degraded | 0 | `canon-kb: retcon '<retcon_id>' affects <n> downstream entities; impact analysis incomplete — grounding agents paused` |
-| E-KB-007 | Grounding absent | broken | 1 | `canon-kb: artifact '<artifact_id>' from required-grounding agent '<agent_id>' missing grounded_against tag` |
+| E-KB-007 | Grounding absent / bypassed | broken | 1 | `canon-kb: artifact '<artifact_id>' from required-grounding agent '<agent_id>' missing grounded_against tag; error.data.reason = GROUNDING_BYPASSED` |
+| E-KB-008 | Retired name reuse | degraded | 0 | `canon-kb: name '<name>' was used by retired entity '<retired_id>'; reuse permitted with warning; new entity_id assigned; error.data.reason = RETIRED_NAME_REUSE` |
+| E-KB-009 | Entity ID immutable | broken | 1 | `canon-kb: entity_id '<id>' may not be changed after assignment — rename updates canonical_name and aliases only; error.data.reason = ENTITY_ID_IMMUTABLE` |
+| E-KB-010 | Forbidden name | broken | 1 | `canon-kb: name '<name>' is in the forbidden_names list and may not be registered as a canonical entity name` |
+| E-KB-011 | Duplicate relationship | broken | 1 | `canon-kb: relationship edge (subject='<s>', predicate='<p>', object='<o>') already exists with no validity window distinction — duplicate rejected` |
+| E-KB-012 | Invalid temporal window on edge | broken | 1 | `canon-kb: edge '<edge_id>' valid_to '<to_event>' precedes valid_from '<from_event>' — temporal window is inverted; error.data.reason = INVALID_TEMPORAL_WINDOW` |
+| E-KB-013 | Unknown predicate | broken | 1 | `canon-kb: predicate '<predicate>' is not in the declared relationship vocabulary for game '<game_id>'; nearest valid predicate: '<suggestion>'` |
+| E-KB-014 | Timeline event not found | broken | 1 | `canon-kb: event_id '<event_id>' referenced in edge validity window does not exist in timeline; error.data.reason = TIMELINE_EVENT_NOT_FOUND` |
+| E-KB-015 | Chronological reference violation | broken | 1 | `canon-kb: entity '<entity_id>' referenced at era-ordinal <ref_ordinal> but introduced at ordinal <intro_ordinal> (or departed at ordinal <depart_ordinal>); error.data.reason = CHRONOLOGICAL_REFERENCE_VIOLATION` |
+| E-KB-016 | Ordinal insertion performed | cosmetic | 0 | `canon-kb: event ordinal <ordinal> already occupied in era '<era>'; insertion performed — subsequent events shifted up; error.data.reason = ORDINAL_INSERTION_PERFORMED` |
+| E-KB-017 | Invalid entity validity window | broken | 1 | `canon-kb: entity '<entity_id>' departed_event_id ordinal <depart> precedes introduced_event_id ordinal <intro> — validity window is inverted; error.data.reason = INVALID_ENTITY_VALIDITY_WINDOW` |
+| E-KB-018 | Hard-canon contradiction | broken | 1 | `canon-kb: hard-canon fact '<new_fact_id>' (subject='<s>', predicate='<p>') conflicts with existing fact '<conflict_fact_id>' in overlapping temporal window — retcon required; error.data.reason = HARD_CANON_CONTRADICTION` |
+| E-KB-019 | Missing provenance | broken | 1 | `canon-kb: fact registration requires non-empty source_artifact_ref — provenance is mandatory; error.data.reason = MISSING_PROVENANCE` |
+| E-KB-020 | Naming registry bypassed | broken | 1 | `canon-kb: name '<name>' was accepted into canon without passing naming-registry check — bypassed invariant violated; error.data.reason = NAMING_REGISTRY_BYPASSED` |
+| E-KB-021 | Phonotactic violation | degraded | 0 | `canon-kb: name '<name>' violates phonotactic rule '<rule>' for culture '<culture>'; suggestion: '<suggestion>'; error.data.reason = PHONOTACTIC_VIOLATION` |
+| E-KB-022 | Terminology drift | degraded | 0 | `canon-kb: artifact '<artifact_id>' uses '<found_spelling>' but canonical spelling is '<canonical>'; error.data.reason = TERMINOLOGY_DRIFT` |
+| E-KB-023 | Grounding timeout | broken | 1 | `canon-kb: grounding retrieval for entity_context_ids '<ids>' timed out after <ms>ms — generation blocked; error.data.reason = GROUNDING_TIMEOUT` |
+| E-KB-024 | KB already exists | broken | 1 | `canon-kb: initialization rejected — KB for game_id '<game_id>' already exists; use versioned update path; error.data.reason = CANON_KB_ALREADY_EXISTS` |
+| E-KB-025 | Game ID required | broken | 1 | `canon-kb: initialization rejected — GameSpec is missing game_id field; error.data.reason = GAME_ID_REQUIRED` |
+| E-KB-026 | Partial initialization failure | broken | 1 | `canon-kb: initialization failed at subsystem '<subsystem>'; all created KB files rolled back; retry is safe; error.data.reason = CANON_KB_INIT_PARTIAL_FAILURE` |
 
 ---
 
@@ -621,6 +742,20 @@ Message format uses `<placeholder>` syntax.
 
 ## Coverage Notes
 
+### PRD Revision 2.0 Changes (Pass-20 — symbolic token reconciliation: E-KB, E-PLAY, E-REPLAY, E-NAR)
+
+| Change | Detail |
+|--------|--------|
+| E-KB extended (+19 codes: E-KB-008..026) | **CRITICAL (Pass-20 orphan reconciliation):** E-KB was under-provisioned relative to the 20+ symbolic tokens emitted by BCs BC-12.12.001..009. The 7 original codes could not cover all conditions. Added: E-KB-008 (RETIRED_NAME_REUSE), E-KB-009 (ENTITY_ID_IMMUTABLE), E-KB-010 (FORBIDDEN_NAME), E-KB-011 (DUPLICATE_RELATIONSHIP), E-KB-012 (INVALID_TEMPORAL_WINDOW on edge), E-KB-013 (UNKNOWN_PREDICATE), E-KB-014 (TIMELINE_EVENT_NOT_FOUND), E-KB-015 (CHRONOLOGICAL_REFERENCE_VIOLATION), E-KB-016 (ORDINAL_INSERTION_PERFORMED — cosmetic), E-KB-017 (INVALID_ENTITY_VALIDITY_WINDOW), E-KB-018 (HARD_CANON_CONTRADICTION), E-KB-019 (MISSING_PROVENANCE), E-KB-020 (NAMING_REGISTRY_BYPASSED), E-KB-021 (PHONOTACTIC_VIOLATION), E-KB-022 (TERMINOLOGY_DRIFT), E-KB-023 (GROUNDING_TIMEOUT — distinct from E-KB-007 absent), E-KB-024 (CANON_KB_ALREADY_EXISTS), E-KB-025 (GAME_ID_REQUIRED), E-KB-026 (CANON_KB_INIT_PARTIAL_FAILURE). E-KB-003/005/007 extended with error.data.reason sub-codes for overlapping conditions. Symbolic→code crosswalk added to E-KB section. E-KB: 7 → **26 codes**. |
+| E-PLAY extended (+10 codes: E-PLAY-006..015) | **CRITICAL (Pass-20 orphan reconciliation):** E-PLAY was under-provisioned relative to symbolic tokens emitted by BCs BC-8.08.001..005. Added: E-PLAY-006 (PLAYTEST_PROTOCOL_ALREADY_APPROVED), E-PLAY-007 (PLAYTEST_PROTOCOL_IN_PROGRESS), E-PLAY-008 (BUILD_NOT_ARCHIVED), E-PLAY-009 (BUILD_NOT_RUNNING), E-PLAY-010 (DUPLICATE_PARTICIPANT_SUBMISSION), E-PLAY-011 (SESSION_NOT_COMPLETE), E-PLAY-012 (AGENT_SIGN_OFF_FORBIDDEN), E-PLAY-013 (CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT), E-PLAY-014 (FUN_SCORE_EMISSION_FORBIDDEN), E-PLAY-015 (DEFAULT_INSTRUMENTS_APPLIED — cosmetic). Symbolic→code crosswalk added to E-PLAY section. E-PLAY: 5 → **15 codes**. |
+| E-REPLAY extended (+11 codes: E-REPLAY-008..018) | **CRITICAL (Pass-20 orphan reconciliation):** E-REPLAY was under-provisioned relative to symbolic tokens emitted by BCs BC-3.03.001..009. Added: E-REPLAY-008 (REPLAY_CAPABILITY_NONE), E-REPLAY-009 (RECORDING_FRAME_GAP), E-REPLAY-010 (INCOMPATIBLE_REPLAY_ENGINE_VERSION), E-REPLAY-011 (GOLDEN_STATE_INVALIDATED), E-REPLAY-012 (GOLDEN_STATE_ABSENT), E-REPLAY-013 (UNAUTHORIZED_GOLDEN_STATE_CAPTURE), E-REPLAY-014 (INSUFFICIENT_DETERMINISM_TIER_FOR_EXPORT), E-REPLAY-015 (LANE_NOT_ACTIVE for export), E-REPLAY-016 (SERVER_STATE_MISSING), E-REPLAY-017 (BROADCAST_DELAY_ZERO_STREAM_SNIPE_RISK — cosmetic), E-REPLAY-018 (CHECKPOINT_MISMATCH — degraded). Symbolic→code crosswalk added to E-REPLAY section. E-REPLAY: 7 → **18 codes**. |
+| E-NAR extended (+2 codes: E-NAR-005..006) | **CRITICAL (F-20-02 fix):** BC-5.04.001 Postcondition 3 and BC-5.04.002 EC-004 were using "E-NAR-003 variant" language for distinct conditions that lack registered backing. Added: E-NAR-005 (undeclared variable reference in narrative graph, BC-5.04.001 Post-3), E-NAR-006 (invalid naming-registry pattern regex, BC-5.04.002 EC-004). "E-NAR-003 variant" language removed from both BCs. E-NAR: 4 → **6 codes**. |
+| OBS-20-A (BC-12.12.004 Invariant 2) | **FIXED:** Invariant 2 reworded from "Ordinals within an era are unique and form a contiguous sequence" to "Ordinals within an era are unique (unless both events are explicitly concurrent: true) and form a contiguous sequence starting from 1." Contradiction between Invariant 2 and EC-005 resolved. |
+| OBS-20-B (CAP-012 / CAP-005 timeline authority) | **FIXED:** Cross-reference note added to BC-12.12.004 and BC-5.04.002 identifying CAP-012 Canon-KB as the authoritative timeline store; CAP-005 (BC-5.04.002) is the narrative-integrity consumer view. |
+| Total codes 213 → 255 | E-KB: 7→26 (+19), E-PLAY: 5→15 (+10), E-REPLAY: 7→18 (+11), E-NAR: 4→6 (+2). Net: **+42 new codes**. Active codes: 204 → **246**. Total registered (incl. retired E-GEN): 213 → **255**. Active families unchanged: **30**. Total families: **31** (unchanged). |
+
+---
+
 ### PRD Revision 1.8 Changes (Pass-13 C13-01 — online-services seam)
 
 | Change | Detail |
@@ -668,13 +803,13 @@ Message format uses `<placeholder>` syntax.
 | Total 139 → 196 (CI-computed) | **Net:** +57 new codes (E-AAG×7 + E-SVC×6 + E-PRV×5 + E-QG×11 + E-SHIP×3 + E-ING×4 + E-GLG×5 + E-MOD×11 + E-MKT×4 + E-XR×1) = 139 + 57 = **196 total registered codes** (CI computes all distinct E-xxx-NNN tokens including retired E-GEN). E-GEN (9 codes) retired but its codes remain in the taxonomy as a retired table, so CI still counts them. Active families: 22 − 1 (E-GEN retired) + 8 new = **29 active families**. Active codes only (excl. E-GEN): **187**. |
 | Total 196 → 198 (PRD rev 1.7) | **+E-COMP-011** (out-of-vocabulary `disclosure_class` at manifest aggregation; I-1 fix) and **+E-COMP-012** (`nft_blockchain`/`nft_mechanics` inconsistency seam guard; I-2 fix). E-COMP family: 2 → 4. Total all registered (incl. retired E-GEN): **198**. Active codes only (excl. E-GEN): **189**. |
 
-**Total defined error codes: 213** across 31 families (30 active + 1 retired E-GEN). Per-family breakdown (active codes: 204; retired codes: 9 E-GEN):
+**Total defined error codes: 255** across 31 families (30 active + 1 retired E-GEN). Per-family breakdown (active codes: 246; retired codes: 9 E-GEN):
 
 | Family | Code Count | Notes |
 |--------|-----------|-------|
 | E-EAP | 13 | v1.1: +E-EAP-011; v1.2: +E-EAP-012 (MalformedManifest), +E-EAP-013 (HumanGatedTaskPending) |
 | E-CONF | 5 | v1.1 addition |
-| E-REPLAY | 7 | v1.1 addition |
+| E-REPLAY | 18 | v1.1: 7 codes; v2.0: +E-REPLAY-008..018 (11 new — symbolic token reconciliation Pass-20) |
 | E-AAG | 7 | v1.6 addition: routing/backend-selection errors (BC-4.01.*) |
 | E-SVC | 6 | v1.6 addition: GenerationRequest validation (BC-4.02.*) |
 | E-PRV | 8 | v1.2: E-PRV-010/011/012 (disclosure_class); v1.6: +E-PRV-001/002/003/020/030 |
@@ -684,7 +819,7 @@ Message format uses `<placeholder>` syntax.
 | E-DES | 5 | |
 | E-ART | 3 | |
 | E-AUD | 4 | |
-| E-NAR | 4 | |
+| E-NAR | 6 | v2.0: +E-NAR-005 (undeclared variable, BC-5.04.001), +E-NAR-006 (invalid naming-registry regex, BC-5.04.002) — F-20-02 fix |
 | E-ENG | 2 | |
 | E-CIN | 4 | |
 | E-PROD | 3 | |
@@ -693,9 +828,9 @@ Message format uses `<placeholder>` syntax.
 | E-COMP | 4 | v1.7: +E-COMP-011 (out-of-vocab disclosure_class at manifest aggregation), +E-COMP-012 (nft_blockchain/nft_mechanics inconsistency seam guard) |
 | E-SIM | 9 | v1.1 addition |
 | E-CONV | 6 | v1.1 addition |
-| E-PLAY | 5 | v1.1 addition |
+| E-PLAY | 15 | v1.1: 5 codes; v2.0: +E-PLAY-006..015 (10 new — symbolic token reconciliation Pass-20) |
 | E-ETH | 14 | v1.1 addition; v1.2: +E-ETH-009; v1.5: +E-ETH-010..014 (DP-005/004/003/008/006 dedicated codes) |
-| E-KB | 7 | v1.1 addition |
+| E-KB | 26 | v1.1: 7 codes; v2.0: +E-KB-008..026 (19 new — symbolic token reconciliation Pass-20) |
 | E-GENRE | 6 | v1.1 addition |
 | E-GLG | 5 | v1.6 addition: genre sub-lane gate config errors (BC-13.01.*/13.02.*/13.03.*/13.04.*) |
 | E-MOD | 11 | v1.6 addition: modding/UGC lane (BC-13.03.*) |
@@ -703,8 +838,8 @@ Message format uses `<placeholder>` syntax.
 | E-XR | 7 | v1.1: 6 codes; v1.6: +E-XR-007 (visionOS/OpenXR namespace error) |
 | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** — orphaned placeholder; no BC ever referenced these codes |
 | E-OSVC | 15 | v1.9 addition: online-services adapter (CAP-015) — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity |
-| **TOTAL (all registered incl. retired E-GEN)** | **213** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 213 |
-| *(active only, excl. E-GEN retired)* | *204* | Active codes only (30 active families) |
+| **TOTAL (all registered incl. retired E-GEN)** | **255** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 255 |
+| *(active only, excl. E-GEN retired)* | *246* | Active codes only (30 active families) |
 
 ---
 

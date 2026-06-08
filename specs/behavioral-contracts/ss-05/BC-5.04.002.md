@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -93,7 +93,7 @@ Creative quality (worldbuilding depth, prose quality) is a human gate via playte
 | EC-001 | Relationship graph edge references an entity that was deleted from registry | E-NAR-003: dangling relationship ref; loremaster must remove or update the relationship |
 | EC-002 | Timeline uses ordinal timestamps; topological sort has a cycle (event A "before" B and B "before" A) | E-NAR-004: timeline cycle detected between event A and event B |
 | EC-003 | Canon-KB has zero entities (empty game with no narrative, genre=no-narrative) | Integrity checks trivially pass; all arrays empty; report emitted with all counts=0 |
-| EC-004 | Naming convention pattern regex is invalid syntax | Schema validation rejects the naming_registry entry; E-NAR-003 variant at schema check |
+| EC-004 | Naming convention pattern regex is invalid syntax | Schema validation rejects the naming_registry entry; E-NAR-006 raised |
 | EC-005 | Entity name "Zephyr_001" violates naming_registry pattern requiring no underscores, but `enforce: false` | Warning in report; KB accepted; downstream generation agents see the warning |
 | EC-006 | New entity added to registry but old relationship edge still references the old entity ID under a different ID | E-NAR-003 for the stale relationship edge |
 

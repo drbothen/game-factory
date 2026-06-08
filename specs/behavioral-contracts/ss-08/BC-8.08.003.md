@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -95,7 +95,7 @@ reviewer who will sign off in BC-8.08.004.
 | EC-001 | Only 1 participant completed the session | Report generated with N=1 noted prominently; factory warns "N=1 is insufficient for reliable GUR findings; consider scheduling additional sessions" — but does not block generation |
 | EC-002 | All evidence records have `say_lane.complete: false` | Report notes 100% partial instrument completion; recommends re-run; human evaluator retains ability to use the data at their discretion |
 | EC-003 | SAY and DO data strongly diverge (e.g. low PENS competence but high task completion rate) | `divergence_flags` entry added: "Investigate: Low self-reported competence with high task completion — possible discrepancy between perceived and actual performance" |
-| EC-004 | Report generation requested before session is marked complete | Factory returns `SESSION_NOT_COMPLETE` error; convergence report may only be generated once the evaluator closes the session |
+| EC-004 | Report generation requested before session is marked complete | Factory returns E-PLAY-011 (`SESSION_NOT_COMPLETE`); convergence report may only be generated once the evaluator closes the session |
 | EC-005 | Multiple sessions across different builds for the same milestone | Factory requires evaluator to specify which session to synthesize; cross-session aggregation across builds is NOT performed automatically (different builds = different context) |
 | EC-006 | Convergence thresholds were not declared in the approved protocol | Report generated but `convergence_threshold_comparison` section contains a warning: "No thresholds declared in protocol — comparison not possible; human reviewer must apply judgment without declared baselines" |
 
@@ -106,7 +106,7 @@ reviewer who will sign off in BC-8.08.004.
 | 8 participants, all complete, GEQ+PENS instruments, telemetry data present, thresholds declared | `playtest-convergence-report` with `say_section` (subscale distributions), `do_section` (task funnels), `convergence_threshold_comparison` (no verdict column), `divergence_flags: []`, `status: draft` | happy-path |
 | 1 participant only | Report with N=1 warning, all sections populated, factory advisory note added; report still generated | edge-case (EC-001) |
 | SAY shows PENS competence mean=2.1 (below threshold=3.5), DO shows 95% task completion | `divergence_flags`: `["Investigate: Low self-reported competence (PENS competence mean=2.1) vs. high task completion (95%) — investigate perception gap"]` | edge-case (EC-003) |
-| Session not yet marked complete | Error: `SESSION_NOT_COMPLETE` | error (EC-004) |
+| Session not yet marked complete | E-PLAY-011 (`SESSION_NOT_COMPLETE`) | error (EC-004) |
 
 ## Verification Properties
 

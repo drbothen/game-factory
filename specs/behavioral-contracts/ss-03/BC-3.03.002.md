@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -88,7 +88,7 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 4. **Engine version range:** Replay is only valid against the same engine version (or a
    minor-version range defined in the compatibility matrix). Replaying a recording from
    engine version X against engine version Y where Y is outside the valid range produces
-   an `INCOMPATIBLE_REPLAY_ENGINE_VERSION` error, not a false regression signal.
+   E-REPLAY-010 (`INCOMPATIBLE_REPLAY_ENGINE_VERSION`), not a false regression signal.
 5. **Tier constraint enforcement:** T2 replay on a non-pinned runner is allowed but the
    result is flagged `runner_not_pinned: true` and treated as informational (not a
    gate-blocking regression result).
@@ -97,7 +97,7 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Recording has a gap in frame numbers (frame 50 missing) | Replay aborted; error `RECORDING_FRAME_GAP`; result is invalid for regression use. |
+| EC-001 | Recording has a gap in frame numbers (frame 50 missing) | Replay aborted; E-REPLAY-009 (`RECORDING_FRAME_GAP`); result is invalid for regression use. |
 | EC-002 | Simulation crashes during replay at frame N | Replay result marked `replay_crashed_at_frame: N`; all snapshots up to N retained; treated as regression signal (crash was not present in original). |
 | EC-003 | External input source fires during replay (user presses key) | External inputs filtered and discarded; not injected into simulation. |
 | EC-004 | Replaying against a different engine minor version than recording | Compatibility check per BC-2.02.004 semantics; proceed if within range; error if out of range. |
@@ -109,7 +109,7 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | Recording: 100 frames, 5 input events; code at commit A | Replay result: 100 ticks executed, 5 inputs injected at recorded frames, checkpoints captured. No crash. | happy-path |
-| Recording with frame gap (frame 50 absent) | Error `RECORDING_FRAME_GAP`; replay aborted; no result usable for regression. | error |
+| Recording with frame gap (frame 50 absent) | E-REPLAY-009 (`RECORDING_FRAME_GAP`); replay aborted; no result usable for regression. | error |
 | External keyboard input fires during replay | Input discarded; simulation state unaffected by external input. | edge-case |
 | Replay requested for T2 adapter on non-pinned runner | Replay proceeds; result flagged `runner_not_pinned: true`. | edge-case |
 | Recording from engine v0.15; replay with engine v0.16 (in-range per matrix) | Replay proceeds with compatibility note in result. | edge-case |

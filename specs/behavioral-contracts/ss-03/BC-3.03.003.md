@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -86,7 +86,7 @@ checked checkpoint frame.
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Replay snapshot at frame F has one-bit difference from golden (injected regression) | `fail` at frame F; regression detected. |
-| EC-002 | Checkpoint frames in golden and replay do not perfectly align (e.g., golden has frame 50 but replay only has frame 49) | `CHECKPOINT_MISMATCH` warning; comparison only on intersecting frames; if divergence exists, may be missed. Non-intersecting golden frames flagged. |
+| EC-002 | Checkpoint frames in golden and replay do not perfectly align (e.g., golden has frame 50 but replay only has frame 49) | E-REPLAY-018 (`CHECKPOINT_MISMATCH`) warning; comparison only on intersecting frames; if divergence exists, may be missed. Non-intersecting golden frames flagged. |
 | EC-003 | Simulation snapshot is very large (millions of entities) | Hash computed on the canonical serialization of the full state; no partial hash. Performance may require snapshot streaming — but correctness is not affected. |
 | EC-004 | Comparison run on a different OS than golden capture | Result must be identical (this is the T1 guarantee). If it is not, the adapter's T1 claim is invalid and must be downgraded. |
 | EC-005 | Code change that only affects rendering, not simulation state | Simulation snapshot hash unchanged; `pass`. Rendering-only changes do not produce false regressions. |

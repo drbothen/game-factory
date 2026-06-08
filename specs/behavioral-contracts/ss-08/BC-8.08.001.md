@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -85,22 +85,22 @@ session — the factory owns its structure and completeness; the human owns exec
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | `genre_profile.playtest_instruments` is empty in the GameSpec | Factory defaults to `[GEQ, PENS, SUS]` and adds a warning annotation to the document noting the default was applied |
-| EC-002 | The playable build has not been archived (no stable `build_id`) | Factory refuses to generate the protocol; emits a blocking human-gate task to the producer to archive the build first |
-| EC-003 | A `playtest-protocol` with `status: approved` already exists for this milestone | Factory does NOT overwrite the approved protocol; returns an error: `PLAYTEST_PROTOCOL_ALREADY_APPROVED` |
+| EC-001 | `genre_profile.playtest_instruments` is empty in the GameSpec | Factory defaults to `[GEQ, PENS, SUS]` and adds E-PLAY-015 (`DEFAULT_INSTRUMENTS_APPLIED`) advisory to the document noting the default was applied |
+| EC-002 | The playable build has not been archived (no stable `build_id`) | Factory refuses to generate the protocol; emits E-PLAY-008 (`BUILD_NOT_ARCHIVED`) and a blocking human-gate task to the producer to archive the build first |
+| EC-003 | A `playtest-protocol` with `status: approved` already exists for this milestone | Factory does NOT overwrite the approved protocol; returns E-PLAY-006 (`PLAYTEST_PROTOCOL_ALREADY_APPROVED`) |
 | EC-004 | `target_participant_count` derived from genre profile is 0 or less | Factory clamps to minimum of 5 and emits a warning |
 | EC-005 | XR game (`xr_target != none`) at playtest milestone | Factory adds `headset_required: true`, `comfort_cert_note: "XR comfort / nausea boundary requires physical headset and vestibular response — cannot be simulated"`, and requires a separate `xr_comfort_cert_human_gate` task to be emitted |
-| EC-006 | Multiple simultaneous playtest protocol generation requests for the same milestone | Only one request proceeds; subsequent requests receive `PLAYTEST_PROTOCOL_IN_PROGRESS` error |
+| EC-006 | Multiple simultaneous playtest protocol generation requests for the same milestone | Only one request proceeds; subsequent requests receive E-PLAY-007 (`PLAYTEST_PROTOCOL_IN_PROGRESS`) |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | `GameSpec{genre=roguelike, xr_target=none, playtest_instruments=[GEQ,PENS]}` | `playtest-protocol` doc with `instruments: [GEQ, PENS]`, `status: draft`, no fun-score field, human-gate task emitted | happy-path |
-| `GameSpec{genre=puzzle, playtest_instruments=[]}` | `playtest-protocol` doc with `instruments: [GEQ, PENS, SUS]`, warning annotation `DEFAULT_INSTRUMENTS_APPLIED`, status `draft` | edge-case (EC-001) |
+| `GameSpec{genre=puzzle, playtest_instruments=[]}` | `playtest-protocol` doc with `instruments: [GEQ, PENS, SUS]`, E-PLAY-015 advisory (`DEFAULT_INSTRUMENTS_APPLIED`), status `draft` | edge-case (EC-001) |
 | `GameSpec{genre=vr-action, xr_target=openxr}` | `playtest-protocol` with `headset_required: true`, `comfort_cert_note` populated, two human-gate tasks emitted (evaluator review + xr_comfort) | edge-case (EC-005) |
-| Build not yet archived when milestone reached | Error: `BUILD_NOT_ARCHIVED`; blocking human-gate task to producer | error (EC-002) |
-| Protocol already `status: approved` for this milestone | Error: `PLAYTEST_PROTOCOL_ALREADY_APPROVED`; no write occurs | error (EC-003) |
+| Build not yet archived when milestone reached | E-PLAY-008 (`BUILD_NOT_ARCHIVED`); blocking human-gate task to producer | error (EC-002) |
+| Protocol already `status: approved` for this milestone | E-PLAY-006 (`PLAYTEST_PROTOCOL_ALREADY_APPROVED`); no write occurs | error (EC-003) |
 
 ## Verification Properties
 

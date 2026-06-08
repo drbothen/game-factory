@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -96,7 +96,7 @@ does not modify simulation behavior.
 | EC-004 | RNG seed fork (new RNG stream spawned during gameplay) | Fork event recorded with: parent RNG ID, child RNG ID, child seed, fork tick. |
 | EC-005 | Very long session (10,000+ frames) | Recording stream is chunked into fixed-size segments; seal checksum covers all segments. |
 | EC-006 | Adapter declares `replay: partial`; recording still attempted | Recording proceeds; but per BC-2.02.003 the adapter's replay fidelity is `partial`. Recording completeness may be limited to the partial-tier input sources only; documented in recording header as `fidelity: partial`. |
-| EC-007 | Recording is requested on an adapter with `replay: none` | Recording returns error `REPLAY_CAPABILITY_NONE`; no recording started. |
+| EC-007 | Recording is requested on an adapter with `replay: none` | Recording returns E-REPLAY-008 (`REPLAY_CAPABILITY_NONE`); no recording started. |
 
 ## Canonical Test Vectors
 
@@ -104,7 +104,7 @@ does not modify simulation behavior.
 |-------|----------------|----------|
 | 100-frame game session, Bevy T1 adapter, 5 player input events at frames 10, 20, 30, 40, 50 | Recording with 100 tick records; 5 have non-empty events; sealed with checksum. | happy-path |
 | 100-frame session; no input events | Recording with 100 tick records all with empty events; valid sealed recording. | edge-case (no input) |
-| Request recording on adapter with `replay: none` | Error: `REPLAY_CAPABILITY_NONE`; no recording file created. | error |
+| Request recording on adapter with `replay: none` | E-REPLAY-008 (`REPLAY_CAPABILITY_NONE`); no recording file created. | error |
 | RNG seed fork at frame 42 | Frame 42 record contains: player events (if any) + RNG-fork event with parent/child/seed. | edge-case |
 | Session with 10,000 frames; all frames recorded | Chunked recording with seal covering all chunks; accessible via `recording_id`. | edge-case (large) |
 

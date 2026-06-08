@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -96,10 +96,10 @@ always human-authored.
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | An agent (automated process) attempts to create a `playtest-signoff-record` | Factory rejects with `AGENT_SIGN_OFF_FORBIDDEN` error; the attempt is logged as a security/integrity event; the gate remains open |
+| EC-001 | An agent (automated process) attempts to create a `playtest-signoff-record` | Factory rejects with E-PLAY-012 (`AGENT_SIGN_OFF_FORBIDDEN`); the attempt is logged as a security/integrity event; the gate remains open |
 | EC-002 | Human reviewer requests to modify the convergence report before signing | Reviewer may annotate the report (append `human_annotations`) but may not modify the captured evidence sections; the `human_verdicts` section is theirs to author |
 | EC-003 | No human reviewer has been assigned to the gate task | Gate task remains open; convergence dimension remains `DEGRADED-PENDING`; factory emits a reminder at next milestone gate evaluation |
-| EC-004 | Reviewer signs off with `CONDITIONAL` but no `conditions_for_satisfaction` text | Factory returns `CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT`; sign-off not accepted until conditions are authored |
+| EC-004 | Reviewer signs off with `CONDITIONAL` but no `conditions_for_satisfaction` text | Factory returns E-PLAY-013 (`CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT`); sign-off not accepted until conditions are authored |
 | EC-005 | Design revision loop triggered (NOT_SATISFIED verdict) and a new playtest is run on the revised build | A new `playtest-protocol`, `session-evidence-record`s, and `playtest-convergence-report` must be generated for the new build; the previous NOT_SATISFIED record is retained and linked via `previous_iteration_ref` |
 | EC-006 | Production milestone gate (MilestoneGate) is evaluated while `playtest-satisfaction` is `DEGRADED-PENDING` | Milestone gate MUST block on `playtest-satisfaction = DEGRADED-PENDING`; no path to cert/release without playtest sign-off |
 
@@ -109,8 +109,8 @@ always human-authored.
 |-------|----------------|----------|
 | Human reviewer signs off `verdict: SATISFIED`, `human_verdicts_summary` authored | `playtest-signoff-record` created; `playtest-satisfaction` dimension → `GREEN`; human-gate task → `complete` | happy-path |
 | Human reviewer signs off `verdict: NOT_SATISFIED` | `playtest-signoff-record` created; dimension → `BLOCKED`; design revision loop blocked item surfaced; human-gate task → `complete` | happy-path (negative verdict) |
-| Agent process attempts to POST a `playtest-signoff-record` | Error: `AGENT_SIGN_OFF_FORBIDDEN`; gate remains open; security event logged | error (EC-001) |
-| `CONDITIONAL` verdict submitted without `conditions_for_satisfaction` | Error: `CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT` | error (EC-004) |
+| Agent process attempts to POST a `playtest-signoff-record` | E-PLAY-012 (`AGENT_SIGN_OFF_FORBIDDEN`); gate remains open; security event logged | error (EC-001) |
+| `CONDITIONAL` verdict submitted without `conditions_for_satisfaction` | E-PLAY-013 (`CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT`) | error (EC-004) |
 | MilestoneGate evaluated when playtest still `DEGRADED-PENDING` | Milestone gate blocks; `playtest_satisfaction_unresolved` blocking item listed | error (EC-006) |
 
 ## Verification Properties
