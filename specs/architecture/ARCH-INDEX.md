@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -31,6 +31,12 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v1.9 — Pass-14 adversarial defect I14-02 (Document Map ADR-0004 row description).**
+> - **I14-02:** Document Map row for `ADR-0004-adapter-family-anti-lock-in.md` (line ~127)
+>   corrected "Four-seam adapter family" → "Five-seam adapter family". The ADR Registry
+>   row (line ~202) was already correct; only the Document Map description was stale.
+>   No remaining "four-seam"/"four adapter seam" occurrences in this file.
+>
 > **v1.8 — CAP-015 BCs delivered by PO; SS-13 count finalized.**
 > - SS-13 BC count updated TBD → 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1).
 >   Grand total: 178 → **190**. Priority subtotals: P0 117→126, P1 39→42, P2=22. Sum: 190. ✓
@@ -124,7 +130,7 @@ traces_to: .factory/specs/product-brief.md
 | `adapter-protocols.md` | Layer 3 adapter protocol spec: JSON-RPC transport, capability schema, fidelity grades, conformance suite, compatibility matrix; v1.2: §6 online-services seam (SS-13) added | ~1,500 |
 | `methodology-layer.md` | Layer 2 game methodology: sim-BC schema, design-intent contract, replay-regression contract, asset-provenance, 11-dim convergence criteria; **§3.0 = canonical `convergence-report.dimensions.<field>` name registry (single source of truth for all 11 dimension field names)** | ~1,200 |
 | `studio-of-agents.md` | 66-role Studio-of-Agents roster; producer-orchestrator scheduling; cross-discipline DAG; change-propagation rules | ~1,200 |
-| `adrs/ADR-0004-adapter-family-anti-lock-in.md` | Four-seam adapter family as primary anti-lock-in mechanism | ~400 |
+| `adrs/ADR-0004-adapter-family-anti-lock-in.md` | Five-seam adapter family as primary anti-lock-in mechanism | ~400 |
 | `adrs/ADR-0005-config-content-extraction-seam.md` | Extraction seam: spine vs quality-model at content/config boundary | ~400 |
 | `adrs/ADR-0006-11-dimension-convergence-model.md` | 11-dim convergence model replacing vsdd 7-dim | ~350 |
 | `adrs/ADR-0007-human-gated-fidelity-tier.md` | human-gated as a first-class fidelity value | ~350 |

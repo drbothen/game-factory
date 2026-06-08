@@ -1,7 +1,7 @@
 ---
 document_type: domain-spec-index
 level: L2
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
@@ -40,8 +40,9 @@ sections:
 game-factory is a Dark Factory for AAA game development: a lights-out, multi-agent
 production system that applies vsdd-factory governance rigor to games and generates
 every artifact a game requires — design, art, audio, narrative, code, QA artifacts —
-at AAA quality, for any genre, against any engine via four adapter seams (engine /
-asset / distribution / XR) plus a canon knowledge-base.
+at AAA quality, for any genre, against any engine via five adapter seams (engine /
+asset / distribution / XR / online-services) plus a canon knowledge-base (sixth
+load-bearing seam).
 
 ## Document Map
 

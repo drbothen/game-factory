@@ -22,7 +22,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > **Gate purpose.** This is a mandatory pre-spec-crystallization gate for the EXPANDED
 > game-factory scope: a lights-out, multi-agent "Dark Factory for AAA game development"
 > that generates EVERYTHING a game needs across all genres at AAA quality, with full asset
-> generation, via four adapter seams and a canon knowledge-base.
+> generation, via five adapter seams and a canon knowledge-base.
 >
 > **Scope note.** The prior empty-quadrant GO finding (`prior-art-and-precedents.md`) was
 > validated for the NARROW "engine-agnostic build-AND-test factory." This assessment

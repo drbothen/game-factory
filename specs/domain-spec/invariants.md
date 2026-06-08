@@ -2,7 +2,7 @@
 document_type: domain-spec-section
 level: L2
 section: invariants
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
@@ -43,7 +43,8 @@ for all of its declared capabilities. An adapter that claims a capability but fa
 conformance test is not accepted at any fidelity level.
 
 DI-002 is a business invariant because it is the anti-drift mechanism — without it the
-four-seam adapter pattern decays into engine-specific special cases. Grounded in ADR-0002
+five-seam adapter pattern (engine / asset / distribution / XR / online-services) decays
+into engine-specific special cases. Grounded in ADR-0002
 ("conformance suite is the load-bearing anti-drift artifact") and Brief §Success Criteria.
 
 ---

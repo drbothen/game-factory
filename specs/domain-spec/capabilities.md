@@ -2,7 +2,7 @@
 document_type: domain-spec-section
 level: L2
 section: capabilities
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
@@ -34,9 +34,10 @@ engine via the Engine Adapter Protocol, without naming or coupling to any specif
 in the factory core.
 
 CAP-001 covers the full engine adapter protocol surface because the product brief declares
-"engine-agnostic via four adapter seams" as the primary thesis, grounded in Brief §What
-Is This and §Success Criteria ("New engine/tool/platform onboarding cost: implement adapter
-+ pass conformance; ZERO core changes").
+"engine-agnostic via five adapter seams (engine / asset / distribution / XR / online-services)"
+as the primary thesis, grounded in Brief §What Is This and §Success Criteria ("New
+engine/tool/platform onboarding cost: implement adapter + pass conformance; ZERO core
+changes"). Canon-KB is the sixth load-bearing (non-adapter) seam.
 
 ## CAP-002 — Engine Adapter Conformance Gating (P0)
 

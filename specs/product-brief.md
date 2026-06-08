@@ -1,7 +1,7 @@
 ---
 document_type: product-brief
 level: L1
-version: "2.0"
+version: "2.2"
 status: draft
 producer: "human+planning-research"
 timestamp: 2026-06-07T00:00:00
@@ -26,8 +26,8 @@ traces_to: ""
 game-factory is a **Dark Factory for AAA game development**: a lights-out, multi-agent system
 that applies vsdd-factory's governance rigor to game production and generates EVERYTHING a game
 needs — design, art, audio, narrative, code, QA artifacts — for any genre, at AAA quality. It
-is engine-, tool-, and platform-agnostic via four adapter seams (engine / asset / distribution /
-XR) plus a canon knowledge-base. Authoritative charter: `planning/research/aaa/AAA-RECONCILIATION.md` (v2.0).
+is engine-, tool-, and platform-agnostic via five adapter seams (engine / asset / distribution /
+XR / online-services) plus a canon knowledge-base (sixth load-bearing seam). Authoritative charter: `planning/research/aaa/AAA-RECONCILIATION.md` (v2.0).
 
 ## Who Is It For?
 
@@ -45,7 +45,7 @@ XR) plus a canon knowledge-base. Authoritative charter: `planning/research/aaa/A
 - **Game methodology layer** — simulation BCs, design-intent contracts, replay-regression, playtest protocol, 11-dimension convergence model.
 - **Engine-adapter protocol + conformance suite** — JSON-RPC 2.0; Bevy + Unity founding pair; Godot third; conformance is load-bearing.
 - **Asset generation (pure-maximal)** — all assets (hero art, music, voice) with NO mandatory human creative finishing; auto-provenance sidecar per asset (`disclosure_class` incl.).
-- **Four adapter seams** — engine / asset / distribution (`human-gated` for cert/publish) / XR (seam reserved; impl. deferred).
+- **Five adapter seams** — engine / asset / distribution (`human-gated` for cert/publish) / XR (seam reserved; impl. deferred) / online-services (BaaS — identity/saves/leaderboards/matchmaking/entitlements; Nakama self-hostable reference; Tier-1 v1).
 - **Canon knowledge-base** — entity-registry + relationship-graph + timeline; RAG anchor for all generative agents.
 - **All-genre core contract set + det-sim pilot** — genre-universal contracts (design, systems, economy, narrative, audio, cert, compliance, security-authority-invariants); one Bevy+Rapier (T1) game proves end-to-end.
 
@@ -68,7 +68,7 @@ vetting; live esports/anti-cheat ops.
 | Engine-agnostic by construction | Engine adapters passing conformance suite | ≥ 3 (Bevy, Unity, Godot) |
 | One spec → many engines | Reference game from a single engine-neutral spec | Runs on ≥ 2 engines |
 | Replay-regression works | Injected sim regression detected at T1 (bitwise) | 100% on reference game |
-| No lock-in (all four seams) | New engine/tool/platform onboarding cost | Implement adapter + pass conformance; ZERO core changes |
+| No lock-in (all five seams) | New engine/tool/platform onboarding cost | Implement adapter + pass conformance; ZERO core changes |
 | Full asset provenance | Generated assets with complete provenance sidecar | 100%; 0 missing `disclosure_class` |
 | All-genre + pilot proven | Core contract set defined; det-sim pilot ships end-to-end | Contract set complete; pilot on Bevy |
 
@@ -106,9 +106,9 @@ for the verifiable subset of feel; playtest protocol (never an auto-fun-score) f
 remainder; deterministic replay harness instead of DTU; asset lane; reshaped 11-dimension
 convergence model.
 
-**Four-seam + canon-KB thesis.** The capability-negotiation + fidelity-grading + conformance-suite
-pattern applies identically to engines, assets, distribution/stores, and XR runtimes. The
-canon-KB is the fifth load-bearing seam: the shared lore/entity/timeline RAG anchor. The
+**Five-seam + canon-KB thesis.** The capability-negotiation + fidelity-grading + conformance-suite
+pattern applies identically to engines, assets, distribution/stores, XR runtimes, and online-services
+(BaaS). The canon-KB is the sixth load-bearing seam: the shared lore/entity/timeline RAG anchor. The
 `human-gated` fidelity value means "automatable prefix complete; one checklisted human task
 surfaced." Suppressing a `human-gated` task is hook-checkable as a defect.
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -363,7 +363,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
 | BC-15.08.001 | Conformance Suite Self-Report (Full vs. None Fidelity) | P0 | ss-15/BC-15.08.001.md | active |
 | BC-15.09.001 | Online-Services Seam Isolation — Zero Core Changes on Adapter Add/Remove | P0 | ss-15/BC-15.09.001.md | active |
 | BC-15.10.001 | Online-Services Graceful Degradation — CapabilityUnsupported for None-Fidelity Capabilities | P0 | ss-15/BC-15.10.001.md | active |
-| BC-15.11.001 | Entitlement and Leaderboard Integrity — D-SEC Reference Contract (100-Token Active Cap) | P0 | ss-15/BC-15.11.001.md | active |
+| BC-15.11.001 | Entitlement and Leaderboard Integrity — D-SEC Reference Contract | P0 | ss-15/BC-15.11.001.md | active |
 
 ---
 

@@ -92,10 +92,11 @@ from day one.
 
 **v2.0 architectural thesis** (recurring pattern across all 22 research vectors):
 
-1. **One adapter pattern, four seams + canon-KB.** The same capability-negotiation +
+1. **One adapter pattern, five seams + canon-KB.** The same capability-negotiation +
    fidelity-grading + conformance-suite architecture that prevents engine lock-in applies
-   identically to assets (asset-adapter), distribution/store (distribution-adapter), and XR
-   platforms (xr-adapter). The canon-KB is the fifth load-bearing seam: the shared lore/
+   identically to assets (asset-adapter), distribution/store (distribution-adapter), XR
+   platforms (xr-adapter), and online-services (BaaS — identity/saves/leaderboards/
+   matchmaking/entitlements). The canon-KB is the sixth load-bearing seam: the shared lore/
    entity/timeline knowledge base that grounds all generative agents.
 
 2. **Deterministic replay spine is cross-cutting and load-bearing.** A single replay
@@ -218,7 +219,7 @@ that grounds the mapping.
 | **7-Dimension Convergence** | **Reshaped convergence model** (see §7) — 9 dimensions + new v2.0 extensions: monetization-ethics, compliance, security-invariants, distribution-readiness | Game quality has axes that software quality does not | architecture.md §Convergence dimensions; §7 below |
 | **Demo Recorder** | **Adapter `capture` backend** + ffmpeg fallback; **`capture-recipe`** artifact (v2.0) — deterministic gameplay capture using replay/render profile for marketing screenshots/trailers | Games need gameplay capture for observable behavior AND for marketing assets | engine-adapter-protocol.md; marketing-store-community.md |
 | **Wave Scheduling** | **Wave Scheduling retained** — discipline-DAG-ordered waves (design → art → audio → engineering → QA → cert/launch) with cross-discipline dependency contracts | v2.0 adds a GTM/launch wave after cert pre-flight | production-pipeline.md §5; marketing-store-community.md |
-| **Gene Transfusion** | **Adapter Conformance Suite** — engine-adapter (existing) + asset-adapter (v2.0) + distribution-adapter + xr-adapter | Four adapter seams; same conformance pattern for all | engine-adapter-protocol.md; §5A below |
+| **Gene Transfusion** | **Adapter Conformance Suite** — engine-adapter (existing) + asset-adapter (v2.0) + distribution-adapter + xr-adapter + online-services-adapter | Five adapter seams; same conformance pattern for all | engine-adapter-protocol.md; §5A below |
 | **State Manager** | **Retained** — `.factory/STATE.md` plus game-specific decision log; v2.0 adds `compliance-checklist`, `ratings-submission-manifest` tracking | No change to mechanism; game-factory adds game-domain decision entries | vsdd-factory CLAUDE.md §State Manager |
 
 ---

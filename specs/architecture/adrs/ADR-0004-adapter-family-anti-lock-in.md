@@ -2,7 +2,7 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0004"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # ADR-0004 — Five-Seam Adapter Family as Primary Anti-Lock-In Mechanism
 
+> **v1.2 — Pass-14 adversarial defect O14-02 (Canon-KB seam ordinal fix).**
+> §Context incorrectly called Canon-KB "a fifth load-bearing seam" when there are five
+> adapter seams (engine, asset, distribution, xr, online-services) making Canon-KB the
+> sixth load-bearing seam. Corrected "fifth" → "sixth" at line ~39. The §Decision and
+> §Consequences already correctly state "sixth load-bearing seam" (lines ~57-58, ~103);
+> the §Context sentence was the only straggler.
+>
 > **v1.1 — Pass-13 adversarial defect C13-01 (five-seam reconciliation).**
 > The previous title and body §Consequences were inconsistent: the title said
 > "Four-Seam" but §Rationale bullet 4 already enumerated the online-services
@@ -36,7 +43,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ADR-0001 and ADR-0002 established the engine adapter protocol (one seam). Research
 across 22 AAA vectors confirmed the same lock-in problem exists on three additional
 orthogonal axes: generative asset backends, store/distribution platforms, and XR
-runtimes. Additionally, the Canon Knowledge-Base emerged as a fifth load-bearing seam
+runtimes. Additionally, the Canon Knowledge-Base emerged as a sixth load-bearing seam
 (shared lore/entity/timeline RAG anchor). The question is whether each seam requires
 a separate design or whether the same adapter pattern applies uniformly.
 

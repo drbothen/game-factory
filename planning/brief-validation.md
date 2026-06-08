@@ -29,20 +29,20 @@ section structure and word profile).
   (acceptable) vs prescriptive impl-choice (flagged).
 - Locked product decisions (NOT flaws): pure-maximal lights-out asset generation (no mandatory
   human-in-loop creative finishing); all-genre core + deterministic-sim pilot; the `human-gated` tier
-  for external third-party acts; four adapter seams + canon-KB.
+  for external third-party acts; five adapter seams + canon-KB.
 - "Overflow Context" is **exempt** from the core word/bloat limit.
 
 ## Section Assessment
 
 | Section | Status | Finding |
 |---------|--------|---------|
-| What Is This? (L24–30) | PASS | 67 words. Crisp definition: "Dark Factory for AAA game development," lights-out, multi-agent, all-genre, AAA quality. Load-bearing defining property (engine/tool/platform-agnostic via four seams + canon-KB) stated. Points to authoritative charter. Non-vague. |
+| What Is This? (L24–30) | PASS | 67 words. Crisp definition: "Dark Factory for AAA game development," lights-out, multi-agent, all-genre, AAA quality. Load-bearing defining property (engine/tool/platform-agnostic via five seams + canon-KB) stated. Points to authoritative charter. Non-vague. |
 | Who Is It For? (L32–38) | PASS | 58 words. Three specific, requirement-generating personas, each with a concrete pain point (siloed per-engine CI; want adversarially-reviewed pipelines but lack team; black-box pixel/OCR tools). |
-| Scope — In Scope (L42–50) | PASS | Seven bounded capabilities (orchestration spine, methodology layer, engine-adapter protocol+conformance, asset-gen, four seams, canon-KB, all-genre core+pilot). Capabilities not features/stories. Slightly above the 3–7 guideline ceiling but each is a distinct load-bearing seam; acceptable. |
+| Scope — In Scope (L42–50) | PASS | Seven bounded capabilities (orchestration spine, methodology layer, engine-adapter protocol+conformance, asset-gen, five seams, canon-KB, all-genre core+pilot). Capabilities not features/stories. Slightly above the 3–7 guideline ceiling but each is a distinct load-bearing seam; acceptable. |
 | Scope — Out of Scope / Deferred (L52–62) | PASS | Three-bucket structure (Deferred-Tier-3 / OUT-never / Human-Gated). Each item carries rationale. Human-gated steps explicitly distinguished from "dropped" and from "creative finishing" — resolves the obvious contradiction risk against pure-maximal. |
 | Success Criteria (L64–73) | PASS | 123 words. Six outcomes, all numeric/binary (≥3 adapters; runs on ≥2 engines; 100% T1 bitwise regression detection; ZERO core changes on onboarding; 100% provenance w/ 0 missing `disclosure_class`; pilot ships end-to-end). Measurable. |
 | Constraints & Integration Points (L75–84) | PASS | 151 words. Eight actionable constraints, each with real cost-of-not-knowing (built-by-vsdd + Phase-0 extraction; pure-maximal IP/legal handling; monetization-ethics envelope; EU AI Act Art.50 deadline+C2PA; ToS-excluded tools; determinism tiers; capture-needs-GPU myth-buster; SAG-AFTRA consent flow). |
-| Overflow Context (L86–139) | PASS (exempt) | 412 words. Carries charter pointer, lights-out principles, vsdd reuse/replace split, four-seam thesis, three-tier scope model, pilot bias, founding-pair rationale, evidence base. Correctly placed and exempt from core word/bloat limits. |
+| Overflow Context (L86–139) | PASS (exempt) | 412 words. Carries charter pointer, lights-out principles, vsdd reuse/replace split, five-seam thesis, three-tier scope model, pilot bias, founding-pair rationale, evidence base. Correctly placed and exempt from core word/bloat limits. |
 
 **Status legend:** PASS = complete & well-specified · FAIL = missing/incomplete · WEAK = lacks
 specificity/testable criteria · BLOATED = exceeds scope, split/condense.
