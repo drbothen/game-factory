@@ -1,17 +1,13 @@
 ---
 document_type: product-brief
 level: L1
-version: "1.0"
+version: "2.0"
 status: draft
 producer: "human+planning-research"
 timestamp: 2026-06-07T00:00:00
 phase: 1a
 inputs:
-  - planning/research/RECONCILIATION.md
-  - planning/research/bevy-capabilities.md
-  - planning/research/unity-capabilities.md
-  - planning/research/godot-capabilities.md
-  - planning/research/prior-art-and-precedents.md
+  - planning/research/aaa/AAA-RECONCILIATION.md
   - planning/design/architecture.md
   - planning/design/engine-adapter-protocol.md
   - planning/design/protocol-schema.md
@@ -27,118 +23,116 @@ traces_to: ""
 
 ## What Is This?
 
-game-factory is an **engine-agnostic, multi-agent factory for game development**:
-it turns an engine-neutral game specification into production-grade game code
-across multiple engines (Bevy, Unity, Godot, …) via a pluggable engine-adapter
-protocol. It is a sibling of vsdd-factory that reuses vsdd-factory's orchestration
-spine but replaces its verification/quality model with one suited to games —
-deterministic-simulation contracts that are machine-verifiable, plus design-intent
-contracts validated by structured playtesting. The defining property is no engine
-lock-in: the factory core never references a specific engine; every engine is a
-swappable adapter that passes a conformance suite.
+game-factory is a **Dark Factory for AAA game development**: a lights-out, multi-agent system
+that applies vsdd-factory's governance rigor to game production and generates EVERYTHING a game
+needs — design, art, audio, narrative, code, QA artifacts — for any genre, at AAA quality. It
+is engine-, tool-, and platform-agnostic via four adapter seams (engine / asset / distribution /
+XR) plus a canon knowledge-base. Authoritative charter: `planning/research/aaa/AAA-RECONCILIATION.md` (v2.0).
 
 ## Who Is It For?
 
-| Persona | Pain Point | Current Workaround |
-|---------|-----------|-------------------|
-| Multi-engine studio tooling/platform teams | Maintain separate, siloed CI/test pipelines per engine; deepest cross-engine test SDKs cover only Unity+Unreal | Hand-rolled per-engine GitHub Actions (GameCI, godot-ci, UAT) with no shared abstraction or semantic test layer |
-| Indie / small-studio tech leads shipping on one engine | Want rigorous, automated, spec-driven pipelines but lack the team to build TDD + regression + review infra | Manual playtesting, ad-hoc unit tests, no replay-regression, no adversarial spec review |
-| Solo / AI-assisted game developers | Want spec-driven, test-backed game development with multi-agent automation, not black-box "AI plays the build" QA | Black-box tools (Airtest, modl.ai) that see pixels/OCR only, with no semantic engine access and no build integration |
+| Persona | Pain Point |
+|---------|-----------|
+| Multi-studio platform teams | Siloed per-engine CI; no shared semantic test/replay layer |
+| Indie / small-studio tech leads | Want spec-driven, adversarially reviewed pipelines; lack team to build them |
+| Solo / AI-assisted developers | Want multi-agent automation across all disciplines; current tools are black-box pixel/OCR only |
 
 ## Scope
 
 ### In Scope
 
-- **Engine-adapter protocol** — the stable anti-lock-in seam (JSON-RPC 2.0): capability
-  negotiation, normalized result schemas, two execution profiles, determinism tiering.
-- **Engine adapters** — founding pair Bevy + Unity (designed-against), then Godot, each
-  implementing the protocol's eight capabilities at declared fidelity.
-- **Conformance suite + reference mini-game** — the capability-gated, anti-drift
-  mechanism every adapter must pass to be accepted.
-- **Reused orchestration spine** — the engine- and game-neutral core extracted from
-  vsdd-factory (dispatcher, hook chain, agent framework, state, workflows, PR/worktree
-  lifecycle, adversarial review).
-- **Game methodology layer** — design-intent contracts + simulation behavioral
-  contracts, deterministic replay-regression, playtest protocols, an asset-tracking
-  lane, and game-appropriate convergence dimensions.
-- **Capability-driven graceful degradation** — gates that degrade by declared adapter
-  capability/fidelity rather than assuming uniform engine support.
+- **Orchestration spine** — extracted vsdd-factory core: dispatcher, hook chain, adversarial review, wave scheduling, worktree lifecycle.
+- **Game methodology layer** — simulation BCs, design-intent contracts, replay-regression, playtest protocol, 11-dimension convergence model.
+- **Engine-adapter protocol + conformance suite** — JSON-RPC 2.0; Bevy + Unity founding pair; Godot third; conformance is load-bearing.
+- **Asset generation (pure-maximal)** — all assets (hero art, music, voice) with NO mandatory human creative finishing; auto-provenance sidecar per asset (`disclosure_class` incl.).
+- **Four adapter seams** — engine / asset / distribution (`human-gated` for cert/publish) / XR (seam reserved; impl. deferred).
+- **Canon knowledge-base** — entity-registry + relationship-graph + timeline; RAG anchor for all generative agents.
+- **All-genre core contract set + det-sim pilot** — genre-universal contracts (design, systems, economy, narrative, audio, cert, compliance, security-authority-invariants); one Bevy+Rapier (T1) game proves end-to-end.
 
-### Out of Scope
+### Out of Scope / Deferred
 
-- Building a game *engine* (game-factory orchestrates existing engines, it is not one).
-- Generating game *assets* (art/audio/models) — assets are tracked as story
-  dependencies, not produced.
-- Automatically scoring subjective "fun" — feel is validated by human playtest +
-  metrics, never an automated fun-score.
-- Unreal Engine support in v1 — the genuine Tier-3 outlier (headless/determinism/CLI
-  friction); deferred until the protocol is proven on Bevy/Unity/Godot.
-- Console/platform certification and store submission.
-- Real-time multiplayer netcode as a product feature (deterministic-lockstep concepts
-  are used *internally* for replay; shipping netcode is not a v1 capability).
+**DEFERRED — Tier 3 (seam reserved; not built):** Unreal Engine adapter; VR/AR/XR implementation.
+
+**OUT (never):** Building a game engine; auto-scoring "fun"; kernel anti-cheat authoring;
+virtual-production hardware; running live esports/events; unconstrained LTV optimization.
+
+**HUMAN-GATED external steps** (automatable work done; single checklisted task surfaced —
+NOT creative finishing, NOT dropped): console cert sign-off; store publish/pricing;
+SAG-AFTRA/likeness consent signatures; legal-opinion sign-off; XR comfort-cert; paid-UGC
+vetting; live esports/anti-cheat ops.
 
 ## Success Criteria
 
 | Outcome | Metric | Target |
 |---------|--------|--------|
-| Engine-agnostic by construction | Engine adapters passing the conformance suite | ≥ 3 (Bevy, Unity, Godot) |
-| Core is genuinely engine/methodology-neutral | VSDD-specific dependencies remaining in the extracted core | 0 (core builds + passes conformance with no vsdd-methodology coupling) |
-| One spec → many engines | A reference game built end-to-end through the factory from a single engine-neutral spec | runs on ≥ 2 engines |
-| Replay-regression actually catches regressions | Injected simulation regression detected at tier-1 (bitwise) determinism | 100% detection on the reference game |
-| No-lock-in is sustainable, not aspirational | New-engine onboarding cost | adding an engine = "implement adapter + pass conformance," with **zero** changes to the factory core |
+| Engine-agnostic by construction | Engine adapters passing conformance suite | ≥ 3 (Bevy, Unity, Godot) |
+| One spec → many engines | Reference game from a single engine-neutral spec | Runs on ≥ 2 engines |
+| Replay-regression works | Injected sim regression detected at T1 (bitwise) | 100% on reference game |
+| No lock-in (all four seams) | New engine/tool/platform onboarding cost | Implement adapter + pass conformance; ZERO core changes |
+| Full asset provenance | Generated assets with complete provenance sidecar | 100%; 0 missing `disclosure_class` |
+| All-genre + pilot proven | Core contract set defined; det-sim pilot ships end-to-end | Contract set complete; pilot on Bevy |
 
 ## Constraints & Integration Points
 
-- **Built BY vsdd-factory via greenfield + Phase-0 extraction** — vsdd-factory greenfields
-  the new layers (methodology, protocol, adapters) and runs a Phase-0 brownfield ingestion
-  of vsdd-factory's own engine-neutral core to identify and extract the reusable spine
-  (see `planning/design/extraction-boundary.md`).
-- **Adapter protocol = JSON-RPC 2.0 over stdio**, LSP-style lifecycle + dynamic capability
-  registration (`planning/design/protocol-schema.md`).
-- **Conformance is load-bearing** — hybrid stance: LSP-style negotiation + Terraform-style
-  versioning/acceptance + CRI/CSI-style capability-gated conformance; the Testcontainers
-  "no conformance" approach is explicitly rejected (Decision 0002).
-- **Capture requires a GPU backend on every engine** — "headless = no GPU" is false; capture
-  runs a separate `render` execution profile (Bevy windowless+lavapipe; Unity/Godot
-  xvfb+software-GPU). Confirmed by research.
-- **Determinism is opt-in and tiered** — cross-platform *bitwise* determinism only via Rapier
-  (Bevy); replay-regression strictness degrades by declared `determinism_tier` (Decision 0003).
-- **Engine operational constraints** — Unity requires a per-CI-agent license; Bevy's pre-1.0
-  API churn requires pinned engine versions + per-release adapter maintenance.
-- **Verify engine APIs against version-tagged primary docs** — AI summarizers confabulate
-  fast-moving engine APIs (documented in `planning/research/bevy-capabilities.md`).
+- **Built BY vsdd-factory** — greenfield new layers + Phase-0 brownfield extraction of vsdd-factory core (`planning/design/extraction-boundary.md`).
+- **Pure-maximal + auto-provenance** — IP/legal risks recorded in risk register; not used as human gates. `human-gated` = external third-party acts ONLY (not creative quality).
+- **Monetization-ethics envelope** — constrained optimization only; unconstrained LTV maximize is a factory defect; adversarial review of `monetization-ethics-contract` mandatory.
+- **EU AI Act Art. 50** — applies 2026-08-02; C2PA marks generated from provenance sidecar; `ai-disclosure-manifest` is a required pipeline output.
+- **ToS-excluded tools** — Suno/Udio (litigation), Riot Vanguard (not licensable), kernel AC drivers blocked by policy.
+- **Determinism tiers** — T1 Bevy+Rapier (bitwise), T2 Unity PhysX (pinned-runner), T3 Godot (tolerance-window); det-sim pilot targets T1.
+- **Capture requires GPU** — "headless = no GPU" is false; separate `render` profile per engine (confirmed by research).
+- **SAG-AFTRA / likeness consent** — any voice/face with consent ref triggers `human-gated` signature flow; not automatable.
 
-## Overflow Context (Optional — Reference Only)
+---
 
-**Why this is viable (market gap).** Research pass 1 confirmed no engine-agnostic
-build-AND-test factory spans Unity/Godot/Unreal/Bevy as of 2026: build CI is mature but
-single-engine; the deepest cross-engine test SDKs (GameDriver, AltTester) reach only two
-engines; engine-agnostic testing exists only black-box (pixels/OCR). The target quadrant —
-unified build + *semantic/deterministic* test/replay across engines — is empty. Full prior-art
-survey: `planning/research/prior-art-and-precedents.md`.
+## Overflow Context (Reference Only — exempt from word limit)
 
-**Founding-pair rationale (Decision 0001).** The protocol is designed against Bevy + Unity
-because they are maximally dissimilar (compiled-code-first vs editor/GUI-first;
-windowless-capture vs `-nographics`-conflict). Godot then interpolates (validated: it sits
-between the two on 7/8 capability axes). The two-adapter rule prevents single-backend
-assumptions leaking into the "neutral" protocol.
+**Authoritative charter.** `planning/research/aaa/AAA-RECONCILIATION.md` (v2.0) is the
+single source of truth for the full methodology, agent roster (66 roles), artifact taxonomy,
+convergence model (11 dimensions), and risk register (R-001 through R-017). Pipeline agents
+should load the charter directly; do not treat this section as exhaustive.
 
-**Architecture (four layers).** (1) core orchestration engine [extracted], (2) game
-methodology layer, (3) engine-adapter protocol, (4) adapters. Full detail in
-`planning/design/architecture.md`. Quality-model delta vs VSDD: BCs kept for the
-deterministic-sim slice; new Design Intent Contracts for feel; holdout-eval → playtest
-protocol; DTU → deterministic replay harness; formal hardening applies only to the pure-sim
-slice; new asset lane; reshaped convergence dimensions.
+**Dark Factory lights-out principles.** game-factory applies vsdd-factory's Dark Factory
+paradigm (StrongDM lineage: Seed → Validation Harness → Feedback Loop) to games. No step
+requires mandatory human authorship except declared `human-gated` external acts. Every
+discipline decomposes into a machine-verifiable spine (the factory owns it) and a subjective
+shell (governed by structured human gates — playtest, monetization-ethics review — never
+collapsed to an automated scalar).
 
-**Reuse vs build.** Reuse engine-native build runners (GameCI, godot-ci, UAT, Cargo) and
-Rapier-class determinism — wrap, don't reinvent. Build the protocol, the conformance suite,
-and the semantic/replay layer (especially for Godot/Bevy where no deep SDK exists).
+**vsdd rigor tailored to game dev.** 70% of vsdd-factory's machinery carries over unchanged
+(orchestration, worktrees, adversarial review, wave scheduling, conformance gating, TDD Red Gate,
+hook chain). The 30% replaced: simulation BCs for the verifiable spine; design-intent contracts
+for the verifiable subset of feel; playtest protocol (never an auto-fun-score) for the subjective
+remainder; deterministic replay harness instead of DTU; asset lane; reshaped 11-dimension
+convergence model.
 
-**Research evidence base.** Per-engine capability reports + reconciliation:
-`planning/research/{bevy,unity,godot}-capabilities.md`, `prior-art-and-precedents.md`,
-`RECONCILIATION.md`. Decisions: `planning/decisions/000{1,2,3}.md`.
+**Four-seam + canon-KB thesis.** The capability-negotiation + fidelity-grading + conformance-suite
+pattern applies identically to engines, assets, distribution/stores, and XR runtimes. The
+canon-KB is the fifth load-bearing seam: the shared lore/entity/timeline RAG anchor. The
+`human-gated` fidelity value means "automatable prefix complete; one checklisted human task
+surfaced." Suppressing a `human-gated` task is hook-checkable as a defect.
 
-**Pilot bias.** First reference game should be a Bevy/Rapier deterministic-simulation genre
-(factory/automation, roguelike, sim, deterministic RTS) — tier-1 determinism gives the
-strongest replay-regression and maximum reuse of vsdd-factory's existing verification
-machinery.
+**Three-tier scope model (from AAA-RECONCILIATION §10).**
+- *Tier 1 — default-on, v1 ship prerequisite:* engine protocol + adapters (Bevy/Unity/Godot),
+  conformance suite, orchestration spine, game methodology layer, all-genre core contract set,
+  asset generation pipeline (pure-maximal), cert pre-flight + distribution-readiness, compliance
+  pipeline, security invariant suite, online-services adapter, ranking-system-contract, det-sim pilot.
+- *Tier 2 — v1-ready, genre-gated opt-in:* competitive-multiplayer/esports lane, modding/UGC,
+  monetization mechanics, marketing/GTM lane, multiplayer tiers.
+- *Tier 3 — seam reserved; implementation deferred:* Unreal Engine, VR/AR/XR, MMO-scale server
+  orchestration, runtime generative NPC dialogue as a shipping feature.
+
+**Pilot bias.** First reference game = Bevy + Rapier deterministic-simulation genre (factory/
+automation, roguelike, det-RTS, management sim, card game). Maximizes verifiable spine, gives T1
+bitwise replay-regression, minimizes subjective shell. Pilot parameters: `monetization_model =
+premium`, `modding_enabled = false`, `esports_enabled = false`, `xr_target = none`.
+
+**Founding-pair rationale.** Bevy + Unity are maximally dissimilar (compiled-code-first vs
+editor/GUI-first; windowless-capture vs `-nographics`-conflict). Godot interpolates on 7/8
+capability axes. Two-adapter rule prevents single-backend assumptions in the neutral protocol
+(Decision 0001).
+
+**Research evidence base.** Full 22-vector corpus: `planning/research/aaa/`. Per-engine reports:
+`planning/research/{bevy,unity,godot}-capabilities.md`. Prior art:
+`planning/research/prior-art-and-precedents.md`. Decisions: `planning/decisions/000{1,2,3}.md`.
+Architecture: `planning/design/architecture.md`.
