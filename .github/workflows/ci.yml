@@ -86,6 +86,15 @@ jobs:
           echo "  - No engine SDK imports (bevy::prelude, MonoBehaviour, etc.)."
           echo "  This stub exits 0 so the CI gate exists as a required check now."
 
+      # ── Spec count consistency check (S2-02 — count-drift prevention) ────────
+      # Counts BC files, error codes, and priority-field coverage; asserts they
+      # match stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
+      # / error-taxonomy.  Catches count-drift introduced by hand-edited spec files
+      # without requiring a full spec review cycle.
+      # See: scripts/check-spec-counts.sh for implementation.
+      - name: Spec count consistency (S2-02)
+        run: bash scripts/check-spec-counts.sh
+
   # ─────────────────────────────────────────────────────────────────────────────
   # test — cargo nextest (workspace unit + integration tests)
   # Required status check: "CI / test"
