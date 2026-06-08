@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.20
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.21
 #
 # PURPOSE
 # -------
@@ -72,6 +72,19 @@
 # compatible. Positive-coverage log always printed. WILL FAIL until the PO
 # reconciles E-KB / E-PLAY / E-REPLAY (families registered but not yet cited by
 # any BC); becomes green automatically after PO work.
+# extended in v1.21 to add check (s) — §3.1 cross-table consistency (Pass-23
+# I23-01 recurrence prevention): parses BOTH §3.1 tables in methodology-layer.md
+# and asserts, for each of the 4 canonical status values (GREEN, DEGRADED,
+# DEGRADED-PENDING, BLOCKED), that the set of dimensions listed in the
+# "Applicable Dimensions" cell of the Canonical Status-Value Enum table (A)
+# exactly equals the set of dimensions that include that value in the
+# Per-Dimension Allowed Value Subsets table (B). FAIL lists any mismatch as:
+# "status value V: dimension D in table (B) but not table (A)" or vice versa.
+# Closes the intra-§3.1 contradiction class which check (q) (prose restatement)
+# and check (n.ii) (BC usage enforcement) do not cover — they both consume
+# table (B) but neither compares table (A) against table (B). POSIX/BSD-awk
+# compatible. Positive-coverage log always printed. Green after the I23-01 fix
+# in methodology-layer.md v1.8.
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -416,6 +429,10 @@ q_violations=0
 # (r) reverse-coverage counters: initialized here so SUMMARY is safe if check is skipped
 active_family_count=0
 r_orphans=()
+# (s) cross-table consistency counters: initialized here so SUMMARY is safe if check is skipped
+s_dims_in_map=0
+s_comparisons=0
+s_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -436,7 +453,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.20) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.21) ==="
 echo ""
 
 # ============================================================================
@@ -3462,6 +3479,204 @@ fi
 echo ""
 
 # ============================================================================
+# (s) §3.1 CROSS-TABLE CONSISTENCY  [NEW v1.21, Pass-23 I23-01]
+# ============================================================================
+# For each of the 4 canonical status values (GREEN, DEGRADED, DEGRADED-PENDING,
+# BLOCKED), assert:
+#   set_A(V) == set_B(V)
+# where:
+#   set_A(V) = dimensions listed in table (A) "Applicable Dimensions" cell for V
+#   set_B(V) = dimensions that list V in their table (B) "Allowed Values" cell
+#
+# Table (A) layout: "| `VALUE` | Meaning | Applicable Dimensions |"
+#   - GREEN and BLOCKED use sentinel text "All 11 dimensions"
+#   - DEGRADED and DEGRADED-PENDING list explicit comma-separated D-XX codes
+#
+# Table (B) layout: "| D-DIM | GREEN, DEGRADED, ... | Rationale |"
+#   - Each row is a dimension; field 3 (awk F=|) is the allowed-values column
+#
+# The 11 canonical dimension IDs (from §3.0):
+#   D-SIM D-REPLAY D-IMPL D-ASSET D-PLAY D-CERT D-PERF D-PROV D-DOCS D-ETHICS D-SEC
+#
+# Algorithm:
+#   Step 1: From table (B), build a map: dim -> set of status values it allows.
+#           Already done in check (n.ii) as DIM_ALLOWED_MAP; re-use it here.
+#           If DIM_ALLOWED_MAP is empty (check n skipped), parse table (B) fresh.
+#   Step 2: Derive set_B(V) for each V by iterating DIM_ALLOWED_MAP.
+#   Step 3: Parse table (A) for DEGRADED and DEGRADED-PENDING explicit dimension
+#           lists; treat GREEN and BLOCKED as "all 11".
+#   Step 4: Compare set_A(V) vs set_B(V) for each V; report any dim in one but
+#           not the other.
+#
+# POSIX/BSD-awk compatible (no grep -P, no associative arrays in awk).
+# Positive-coverage log always printed.
+# ============================================================================
+echo ""
+echo "--- (s) §3.1 cross-table consistency (Canonical Status-Value Enum A vs Per-Dimension Subsets B) ---"
+
+if [[ ! -f "$METHODOLOGY_LAYER" ]]; then
+  echo "    SKIP: methodology-layer.md not found at $METHODOLOGY_LAYER"
+else
+  s_violations=0
+  s_violation_msgs=()
+
+  # Canonical dimension ID set (all 11, space-separated, ordered)
+  ALL_DIMS="D-SIM D-REPLAY D-IMPL D-ASSET D-PLAY D-CERT D-PERF D-PROV D-DOCS D-ETHICS D-SEC"
+  ALL_DIMS_COUNT=11
+
+  # ----------------------------------------------------------------
+  # Step 1: Build set_B(V) — for each status value V, the set of
+  # dimensions whose table-(B) row includes V in their allowed list.
+  # Always parse table (B) fresh to guarantee all 11 dimension rows
+  # are captured, including rows that use bold markup (| **D-ETHICS** |).
+  # DIM_ALLOWED_MAP (from check n.ii) uses a narrower grep pattern that
+  # misses the **D-ETHICS** bold row, so we do not rely on it here.
+  # ----------------------------------------------------------------
+  declare -A S_DIM_ALLOWED_MAP
+
+  # Parse table (B) fresh, stripping bold markers before field extraction.
+  # Rows match either "^\| D-[A-Z]+" (plain) or "^\| **D-[A-Z]+" (bold).
+  while IFS= read -r row; do
+    # Strip bold markers so **D-ETHICS** → D-ETHICS in field 2
+    clean_row=$(printf '%s' "$row" | sed 's/\*\*//g')
+    dim_id=$(printf '%s' "$clean_row" | awk -F'|' '{gsub(/[[:space:]]/,"",$2); print $2}')
+    allowed_raw=$(printf '%s' "$clean_row" | awk -F'|' '{print $3}')
+    allowed_vals=$(printf '%s' "$allowed_raw" \
+      | grep -oE '[A-Z][A-Z-]+-?[A-Z]*' \
+      | grep -E '^[A-Z][A-Z-]+$' \
+      | tr '\n' ' ')
+    if [[ -n "$dim_id" ]] && printf '%s' "$dim_id" | grep -qE '^D-[A-Z]+$'; then
+      S_DIM_ALLOWED_MAP["$dim_id"]="$allowed_vals"
+    fi
+  done < <(grep -E '^\| (\*\*)?D-[A-Z]+' "$METHODOLOGY_LAYER" 2>/dev/null \
+    | grep 'GREEN' || true)
+
+  s_dims_in_map=${#S_DIM_ALLOWED_MAP[@]}
+  echo "    Table (B) dimensions parsed: $s_dims_in_map (expected: $ALL_DIMS_COUNT)"
+
+  # Derive set_B(V) for each of the 4 canonical status values
+  # set_B is a space-separated list of dimension IDs
+  declare -A SET_B
+  SET_B["GREEN"]=""
+  SET_B["DEGRADED"]=""
+  SET_B["DEGRADED-PENDING"]=""
+  SET_B["BLOCKED"]=""
+
+  for dim in $ALL_DIMS; do
+    allowed="${S_DIM_ALLOWED_MAP[$dim]:-}"
+    [[ -z "$allowed" ]] && continue
+    for val in GREEN DEGRADED "DEGRADED-PENDING" BLOCKED; do
+      if printf '%s' " $allowed " | grep -qF " $val "; then
+        SET_B["$val"]="${SET_B[$val]} $dim"
+      fi
+    done
+  done
+
+  # Trim leading spaces
+  for val in GREEN DEGRADED "DEGRADED-PENDING" BLOCKED; do
+    SET_B["$val"]=$(printf '%s' "${SET_B[$val]}" | sed 's/^ *//')
+  done
+
+  # ----------------------------------------------------------------
+  # Step 2: Parse table (A) to get set_A(V) for each status value.
+  # Table (A) rows match: "^\| `VALUE`" in methodology-layer.md
+  # GREEN and BLOCKED rows contain "All 11 dimensions" (sentinel).
+  # DEGRADED and DEGRADED-PENDING rows list explicit D-XX IDs.
+  # ----------------------------------------------------------------
+  declare -A SET_A
+  SET_A["GREEN"]=""
+  SET_A["DEGRADED"]=""
+  SET_A["DEGRADED-PENDING"]=""
+  SET_A["BLOCKED"]=""
+
+  # Extract table (A) rows — lines starting "| `" that contain a status value token
+  # These are the 4 data rows of the Canonical Status-Value Enum table.
+  while IFS= read -r trow; do
+    # Determine which status value this row represents by checking backtick token
+    row_val=""
+    for v in GREEN DEGRADED "DEGRADED-PENDING" BLOCKED; do
+      if printf '%s' "$trow" | grep -qF "\`${v}\`"; then
+        row_val="$v"
+        break
+      fi
+    done
+    [[ -z "$row_val" ]] && continue
+
+    # Extract the "Applicable Dimensions" cell — field 4 (awk F=|)
+    appdim_cell=$(printf '%s' "$trow" | awk -F'|' '{print $4}')
+
+    if printf '%s' "$appdim_cell" | grep -qiE 'All 11'; then
+      # Sentinel: all 11 dimensions apply
+      SET_A["$row_val"]="$ALL_DIMS"
+    else
+      # Extract explicit D-XX dimension IDs from the cell
+      dims_in_cell=$(printf '%s' "$appdim_cell" \
+        | grep -oE 'D-[A-Z]+' \
+        | sort -u \
+        | tr '\n' ' ' \
+        | sed 's/ *$//')
+      SET_A["$row_val"]="$dims_in_cell"
+    fi
+  done < <(grep -E "^\| \`(GREEN|DEGRADED|DEGRADED-PENDING|BLOCKED)\`" "$METHODOLOGY_LAYER" 2>/dev/null || true)
+
+  # Diagnostic: log parsed sets
+  if [[ "$VERBOSE" == true ]]; then
+    for val in GREEN DEGRADED "DEGRADED-PENDING" BLOCKED; do
+      echo "    set_A($val): ${SET_A[$val]:-<empty>}"
+      echo "    set_B($val): ${SET_B[$val]:-<empty>}"
+    done
+  fi
+
+  # ----------------------------------------------------------------
+  # Step 3: Compare set_A(V) vs set_B(V) for all 4 values
+  # For each value V, every dim in set_B(V) must be in set_A(V) and vice versa.
+  # ----------------------------------------------------------------
+  s_comparisons=0
+  for val in GREEN DEGRADED "DEGRADED-PENDING" BLOCKED; do
+    a_set="${SET_A[$val]:-}"
+    b_set="${SET_B[$val]:-}"
+
+    # Normalize to sorted newline-separated lists for comparison
+    a_sorted=$(printf '%s\n' $a_set | sort -u | grep -E '^D-[A-Z]+$' || true)
+    b_sorted=$(printf '%s\n' $b_set | sort -u | grep -E '^D-[A-Z]+$' || true)
+
+    # dims in B but not A
+    while IFS= read -r bdim; do
+      [[ -z "$bdim" ]] && continue
+      s_comparisons=$(( s_comparisons + 1 ))
+      if ! printf '%s\n' "$a_sorted" | grep -qxF "$bdim" 2>/dev/null; then
+        s_violations=$(( s_violations + 1 ))
+        s_violation_msgs+=("status $val: $bdim is in Per-Dimension table (B) allowed set but MISSING from Canonical Enum table (A) 'Applicable Dimensions' cell")
+      fi
+    done <<< "$b_sorted"
+
+    # dims in A but not B
+    while IFS= read -r adim; do
+      [[ -z "$adim" ]] && continue
+      if ! printf '%s\n' "$b_sorted" | grep -qxF "$adim" 2>/dev/null; then
+        s_violations=$(( s_violations + 1 ))
+        s_violation_msgs+=("status $val: $adim is in Canonical Enum table (A) 'Applicable Dimensions' cell but NOT in Per-Dimension table (B) allowed set for $adim")
+      fi
+    done <<< "$a_sorted"
+  done
+
+  # Positive-coverage log (always printed)
+  echo "    Check (s): $s_dims_in_map dimensions × 4 status values cross-checked ($s_comparisons dim-value pairs verified)."
+  echo "    §3.1 cross-table mismatches: $s_violations"
+
+  if [[ $s_violations -gt 0 ]]; then
+    echo ""
+    echo "    §3.1 CROSS-TABLE MISMATCHES (tables A and B disagree — reconcile to per-dimension prose/BC/ADR authority):"
+    for smsg in "${s_violation_msgs[@]}"; do
+      echo "      $smsg"
+    done
+    errors+=("MISMATCH [§3.1 cross-table consistency (s)]: $s_violations discrepancy/discrepancies between Canonical Status-Value Enum table (A) and Per-Dimension Allowed Value Subsets table (B) in methodology-layer.md §3.1 — reconcile both tables to match the authoritative per-dimension prose predicates, owner BCs, and ADR-0006")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -3493,6 +3708,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Cross-ref ID/desc consistency (p): $xref_validated SS-07 dim-owner citations validated, 0 ID/description mismatches"
   echo "  Prose restatement guard (q):       $q_validated prose restatements validated, 0 mismatches"
   echo "  Error-family reverse coverage (r): $active_family_count non-retired families, all cited by >=1 BC"
+  echo "  §3.1 cross-table consistency (s):  $s_dims_in_map dims × 4 values, 0 mismatches ($s_comparisons pairs verified)"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
