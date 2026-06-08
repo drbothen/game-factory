@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.22
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.23
 #
 # PURPOSE
 # -------
@@ -86,20 +86,23 @@
 # compatible. Positive-coverage log always printed. Green after the I23-01 fix
 # in methodology-layer.md v1.8.
 # extended in v1.22 to add check (t) — BC-7.* owner-attribution guard (Pass-24
-# I24-01 recurrence prevention): scans methodology-layer.md and other
-# architecture docs for operative lines that mis-attribute OWNERSHIP of the
-# BC-7.* dimension-evaluator family to a subsystem other than SS-06. The check
-# matches the two narrow compound patterns that exclusively signal a false owner
-# claim: "dimension-owner (SS-0" and "owner BCs (SS-0" where the subsystem code
-# is not SS-06. Changelog/blockquote lines (starting ">") are excluded to avoid
-# false-positives on historical notes documenting the I24-01 fix itself.
-# IMPORTANT: per-dimension "Subsystem: SS-07" producing-subsystem headers do NOT
-# contain "dimension-owner" or "owner BCs (SS-" phrasing, so they are naturally
-# excluded — no additional filter needed. Convention documented: BC-7.*
-# dimension-evaluator family is owned by SS-06 (Convergence Tracking Engine);
-# per-dimension "Subsystem:" headers in §3 denote the PRODUCING subsystem, which
-# is a legitimately different semantic. POSIX/BSD-grep compatible.
-# Positive-coverage log always printed. Green after the I24-01 fix.
+# I24-01 recurrence prevention): initial version matched two narrow compound
+# patterns: "dimension-owner (SS-0" and "owner BCs (SS-0".
+# extended in v1.23 (Pass-27 I27-01 recurrence prevention): BROADENED to cover
+# the full mislabel class. Trigger: any operative line containing "dimension owner"
+# or "dimension-owner" (space OR hyphen, case-insensitive). On triggered lines:
+#   (t.i)  Any BC ID must be a valid dimension-owner BC (BC-7.0[1-9].001,
+#          BC-7.10.001, BC-7.11.001). Non-owner BC (BC-8.*, etc.) named as
+#          dimension owner FAILS.
+#   (t.ii) If any SS-NN appears but SS-06 is absent, FAILS (non-SS-06 in
+#          owner-attribution context without the correct SS-06 also named).
+#   (t.iii) Retained: "owner BCs (SS-0X" where X != 6 compound pattern.
+# Blockquote lines (">") excluded throughout. Calibrated: line 657 correct
+# (SS-06 + BC-7.* — passes); producer table (no "dimension owner" — not triggered);
+# per-dimension "Subsystem:" headers (no "dimension owner" — not triggered).
+# Would have caught pre-fix line 714 (BC-8.08.004 named as dimension owner with
+# SS-07 and no SS-06 on the line). POSIX/BSD-grep compatible.
+# Positive-coverage log always printed. Green after I24-01 + I27-01 fixes.
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -241,15 +244,20 @@
 #       markup) are excluded. Orphan families (non-retired, zero BC citations)
 #       cause a FAIL. Positive-coverage log always printed.
 #       WILL FAIL until PO reconciles E-KB / E-PLAY / E-REPLAY.
-#   (t) [NEW v1.22, I24-01] BC-7.* owner-attribution guard: scans
-#       methodology-layer.md and architecture/*.md for operative lines that
+#   (t) [NEW v1.22, BROADENED v1.23, I24-01/I27-01] BC-7.* owner-attribution guard:
+#       scans methodology-layer.md and architecture/*.md for operative lines that
 #       mis-attribute OWNERSHIP of the BC-7.* dimension-evaluator family to any
-#       subsystem other than SS-06. The two compound trigger patterns are:
-#         "dimension-owner (SS-0X"  where X != 6
-#         "owner BCs (SS-0X"        where X != 6
-#       Changelog/blockquote lines (starting ">") excluded. Per-dimension
-#       "Subsystem: SS-07" producing-subsystem headers do NOT contain either
-#       compound pattern, so they are naturally excluded — no extra filter needed.
+#       subsystem other than SS-06, or name a non-owner BC as a dimension owner.
+#       TRIGGER: any operative line containing "dimension owner" or "dimension-owner"
+#       (space OR hyphen, case-insensitive). On triggered lines:
+#         (t.i)  Any BC-N.NN.NNN ID must be BC-7.0[1-9].001 / BC-7.10.001 /
+#                BC-7.11.001 (the 11 valid dimension owners). BC-8.*, etc. FAILS.
+#         (t.ii) Any SS-NN must include SS-06; SS-NN without SS-06 also present FAILS.
+#         (t.iii) Also catches: "owner BCs (SS-0X" where X != 6 (I24-01 class).
+#       Blockquote lines (">") excluded. Calibrated: line 657 (correct SS-06 +
+#       BC-7.*) passes; producer table (no "dimension owner") not triggered;
+#       per-dimension "Subsystem:" headers (no "dimension owner") not triggered.
+#       Catches both I24-01-style and I27-01-style (space variant) phrasing.
 #       Positive-coverage log always printed. POSIX/BSD compatible.
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (a.ii) [NEW v1.16] BC-INDEX per-capability section-header count: for each H2
@@ -478,7 +486,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.22) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.23) ==="
 echo ""
 
 # ============================================================================
@@ -3702,45 +3710,75 @@ fi
 echo ""
 
 # ============================================================================
-# (t) BC-7.* OWNER-ATTRIBUTION GUARD  [NEW v1.22, I24-01]
+# (t) BC-7.* OWNER-ATTRIBUTION GUARD  [NEW v1.22, BROADENED v1.23, I24-01/I27-01]
 # ============================================================================
 # The BC-7.* dimension-evaluator family (BC-7.01.001..BC-7.11.001) is owned by
 # SS-06 (Convergence Tracking Engine). Per-dimension "Subsystem:" headers in §3
 # of methodology-layer.md denote the PRODUCING/EVALUATED subsystem (a legitimately
 # different semantic); those headers must NOT be corrected by this check.
 #
-# Convention: the two compound patterns that exclusively signal a false ownership
-# claim are:
-#   "dimension-owner (SS-0"  followed by a digit that is not '6'
-#   "owner BCs (SS-0"        followed by a digit that is not '6'
+# v1.22 (I24-01): two narrow compound patterns caught "dimension-owner (SS-0X" and
+# "owner BCs (SS-0X". Missed line-714-style phrasing where "dimension owner" (space,
+# no parenthetical) was used instead — root cause of I27-01 surviving Pass-22..26.
 #
-# The per-dimension "Subsystem: SS-07" producing-subsystem headers do not contain
-# either of these compound patterns, so they are naturally excluded with no extra
-# filtering needed.
+# v1.23 (I27-01): BROADENED to cover the full mislabel class:
+#
+# TRIGGER: An operative line is a "dimension-owner attribution line" if it contains
+# the phrase "dimension owner" or "dimension-owner" (space OR hyphen, case-insensitive).
+#
+# CHECKS ON TRIGGERED LINES:
+#   (t.i)  If the line names ANY BC ID (BC-N.NN.NNN pattern), that ID must be one of
+#          the 11 canonical dimension-owner BCs: BC-7.0[1-9].001 or BC-7.10.001 or
+#          BC-7.11.001. A BC-8.*, BC-9.*, BC-1X.*, etc. named as a dimension owner FAILS.
+#   (t.ii) If the line names ANY subsystem ID (SS-NN pattern) in an owner context, it
+#          must be SS-06. An SS-0X (X != 6) in dimension-owner context FAILS.
+#          Exception: "feeding the SS-06 dimension owner BC-7.05.001" correctly names
+#          both a non-SS-06 producer and SS-06 owner — passes because SS-06 is present.
+#          Sub-rule: FAIL only when NO SS-06 appears on the line AND some other SS-NN does.
+#
+# ALSO RETAINS (t.iii): the original v1.22 compound patterns as a belt-and-suspenders
+# catch for "owner BCs (SS-0X" where X != 6 (I24-01 class), regardless of whether the
+# line also contains "dimension owner".
 #
 # EXCLUSIONS:
 #   - Lines starting with ">" (changelog/blockquote lines) — avoids false-positives
-#     on historical notes documenting the I24-01 fix.
-#   - Lines starting with "#" (script comments, if we ever scan this file).
+#     on historical notes documenting the I24-01/I27-01 fixes.
 #
-# FILES SCANNED: methodology-layer.md + all architecture/*.md files that might
-# embed an owner-attribution claim.
+# CALIBRATION (verified against known-good corpus):
+#   - Line 657: "SS-06 dimension-owner BCs (BC-7.01.001 through BC-7.11.001)"
+#     → triggers (has "dimension-owner"); BC IDs are BC-7.0*.001 (valid); SS-06 present → PASS
+#   - Line 735 (fixed): "SS-07 sign-off gate feeding the SS-06 dimension owner BC-7.05.001"
+#     → triggers; BC-7.05.001 is valid; SS-06 IS present → PASS
+#   - Lines 701-709 producer table: use "writes"/"maps", no "dimension owner" phrase → NOT triggered
+#   - Per-dimension "Subsystem: SS-07" headers: no "dimension owner" phrase → NOT triggered
+#   - PRE-FIX line 714 (I27-01): "BC-8.08.004 (... D-PLAY dimension owner, SS-07/SS-08 ...)"
+#     → triggers (has "dimension owner"); BC-8.08.004 is NOT a valid dimension-owner BC → FAIL
+#     Also: SS-06 absent, SS-07 present → (t.ii) FAIL → would have caught this before the fix
 #
-# POSIX/BSD grep compatible (no -P; uses -E only).
+# FILES SCANNED: methodology-layer.md + all architecture/*.md files.
+#
+# POSIX/BSD grep/awk compatible (no -P; uses -E only).
 # Positive-coverage log always printed.
 echo ""
-echo "--- (t) BC-7.* owner-attribution guard (SS-06 ownership, I24-01 recurrence prevention) ---"
+echo "--- (t) BC-7.* owner-attribution guard (SS-06 ownership, I24-01/I27-01 recurrence prevention) ---"
 echo "    Convention: BC-7.* dimension-evaluator family is owned by SS-06; per-dimension"
 echo "    'Subsystem:' headers in §3 denote the PRODUCING subsystem (a different semantic)."
 
 t_violations=0
 t_violation_msgs=()
 t_scanned_lines=0
+t_dim_owner_lines=0  # count of lines that triggered the "dimension owner" check
 
-# Patterns that are ONLY present in an erroneous owner-attribution (not in producing-subsystem headers):
-#   "dimension-owner (SS-0X" where X != 6
-#   "owner BCs (SS-0X"       where X != 6
-# We match "SS-0[^6]" after "dimension-owner (" or "owner BCs (" to catch any non-SS-06 claim.
+# Helper: returns true (0) if a BC id string is one of the 11 valid dimension-owner BCs.
+# Valid pattern: BC-7.0[1-9].001  OR  BC-7.10.001  OR  BC-7.11.001
+_t_is_valid_owner_bc() {
+  local bcid="$1"
+  # BC-7.01.001 through BC-7.09.001
+  if printf '%s' "$bcid" | grep -qE '^BC-7\.0[1-9]\.001$'; then return 0; fi
+  # BC-7.10.001 and BC-7.11.001
+  if printf '%s' "$bcid" | grep -qE '^BC-7\.1[01]\.001$'; then return 0; fi
+  return 1
+}
 
 _t_scan_file() {
   local fpath="$1"
@@ -3751,16 +3789,56 @@ _t_scan_file() {
     case "$tline" in
       ">"*) continue ;;
     esac
-    # Check for "dimension-owner (SS-0" followed by non-6 digit
-    if printf '%s' "$tline" | grep -qE 'dimension-owner \(SS-0[^6 ]'; then
-      t_violations=$(( t_violations + 1 ))
-      t_violation_msgs+=("$fpath: erroneous BC-7.* owner attribution — line: $tline")
-    fi
-    # Check for "owner BCs (SS-0" followed by non-6 digit
+
+    # ----------------------------------------------------------------
+    # (t.iii) RETAINED v1.22: compound patterns — belt-and-suspenders
+    # "owner BCs (SS-0X" where X != 6
+    # ----------------------------------------------------------------
     if printf '%s' "$tline" | grep -qE 'owner BCs \(SS-0[^6 ]'; then
       t_violations=$(( t_violations + 1 ))
-      t_violation_msgs+=("$fpath: erroneous BC-7.* owner attribution — line: $tline")
+      t_violation_msgs+=("$fpath [t.iii]: 'owner BCs' attributed to non-SS-06 subsystem — line: $tline")
     fi
+
+    # ----------------------------------------------------------------
+    # Check if this is a "dimension owner" attribution line
+    # Matches: "dimension owner" (space) OR "dimension-owner" (hyphen), case-insensitive
+    # ----------------------------------------------------------------
+    tline_lc=$(printf '%s' "$tline" | tr '[:upper:]' '[:lower:]')
+    case "$tline_lc" in
+      *"dimension owner"* | *"dimension-owner"*)
+        # This line is a dimension-owner attribution line
+        t_dim_owner_lines=$(( t_dim_owner_lines + 1 ))
+
+        # (t.i) Check any BC IDs named on this line
+        # Extract all BC-N.NN.NNN tokens
+        bc_ids_on_line=$(printf '%s' "$tline" | grep -oE 'BC-[0-9]+\.[0-9]+\.[0-9]+' || true)
+        for bc_id in $bc_ids_on_line; do
+          if ! _t_is_valid_owner_bc "$bc_id"; then
+            t_violations=$(( t_violations + 1 ))
+            t_violation_msgs+=("$fpath [t.i]: non-owner BC '$bc_id' attributed as dimension owner (valid owners: BC-7.0[1-9].001, BC-7.10.001, BC-7.11.001) — line: $tline")
+          fi
+        done
+
+        # (t.ii) Check subsystem IDs: SS-06 must be present if any SS-NN appears
+        # Extract all SS-NN tokens
+        ss_ids_on_line=$(printf '%s' "$tline" | grep -oE 'SS-[0-9]+' || true)
+        if [[ -n "$ss_ids_on_line" ]]; then
+          has_ss06=0
+          has_non_ss06=0
+          for ss_id in $ss_ids_on_line; do
+            case "$ss_id" in
+              SS-06) has_ss06=1 ;;
+              *)     has_non_ss06=1 ;;
+            esac
+          done
+          # Fail only when no SS-06 is present AND some other SS-NN is (mis-attribution without correction)
+          if [[ $has_ss06 -eq 0 ]] && [[ $has_non_ss06 -eq 1 ]]; then
+            t_violations=$(( t_violations + 1 ))
+            t_violation_msgs+=("$fpath [t.ii]: dimension-owner line names subsystem(s) but SS-06 absent — non-SS-06 subsystem in owner context — line: $tline")
+          fi
+        fi
+        ;;
+    esac
   done < "$fpath"
 }
 
@@ -3773,7 +3851,7 @@ for _t_f in "$_ARCH_DIR"/*.md; do
 done
 
 # Positive-coverage log (always printed)
-echo "    Check (t): $t_scanned_lines lines scanned across architecture docs for mis-attributed BC-7.* ownership."
+echo "    Check (t): $t_scanned_lines lines scanned; $t_dim_owner_lines dimension-owner attribution lines examined."
 echo "    Owner-attribution violations found: $t_violations"
 
 if [[ $t_violations -gt 0 ]]; then
