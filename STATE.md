@@ -4,11 +4,15 @@ phase: 1
 product: game-factory
 mode: greenfield
 brief_version: "2.0"
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-08T00:00:00Z
 brief_approval: PASSED
 preflight_verdict: READY-WITH-WARNINGS
 market_intel_verdict: PASSED
 phase0_gate: PASSED
+dtu_required: true
+dtu_assessment: 2026-06-08
+dtu_clones_built: pending
+dtu_services: [game-engine-bevy, game-engine-unity, asset-gen-visual, asset-gen-audio, asset-gen-voice, asset-gen-3d, compliance-iarc, compliance-ai-disclosure, distribution-steam, distribution-itch]
 ---
 
 # Factory State
@@ -19,7 +23,7 @@ phase0_gate: PASSED
 |-------|------|--------|-------|
 | pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED (D-006/07/08 human-ratified) |
 | 0 | Brownfield Extraction | PASSED | extraction-ingestion VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam: 4 config/content swap interfaces; phase0_gate PASSED (human approved REUSE/REPLACE/ADAPT plan + devops pipeline item) |
-| 1 | Spec Crystallization | IN PROGRESS | Steps: L2 domain spec → L3 PRD+BCs → architecture+DTU assessment → VPs → DTU assessment (dtu-assessment.md) → CI/CD (.github/workflows/ + cicd-setup.md) → Phase-1d adversarial convergence (≥3 passes) → consistency audit → human approval gate |
+| 1 | Spec Crystallization | IN PROGRESS | Steps 1–6 DONE (L2→L3 PRD+168 BCs→architecture+VPs); remaining: prd-revision → CI/CD setup → Phase-1d adversarial (≥3 passes) → consistency audit → human gate |
 | 2 | Story Decomposition | PENDING | — |
 | 3 | TDD Implementation | PENDING | — |
 | 4 | Holdout Evaluation | PENDING | — |
@@ -35,8 +39,13 @@ phase0_gate: PASSED
 | 2 | Human approved Phase-0 context: REUSE/REPLACE/ADAPT plan; devops pipeline item accepted | DONE |
 | 3 | Phase-0 gate PASSED; transitioning to Phase 1 Spec Crystallization | DONE |
 | 4 | L2 domain spec (business-analyst) — 10 shards; 18 entities, 14 caps [7P0/5P1/2P2], 12 invariants, 6 processes, 42 glossary terms, 8 assumptions, 17 risks, 10 failure-modes, 7 differentiators; committed 79a625c. Optional follow-up shards (event-flow, genre-profiles) non-blocking. | DONE |
-| 5 | L3 PRD + behavioral contracts (product-owner) — 168 BCs (CAP-001:34, 002:6, 003:9, 004:15, 005:16, 006:11, 007:12, 008:5, 009:11, 010:6, 011:13, 012:9, 013:14, 014:7); prd.md + BC-INDEX + nfr-catalog (19 NFRs) + error-taxonomy (11 families); full-depth Approach B (all 14 caps); committed e05fd9d | DONE |
-| 6 | create-architecture (architect) — sharded ADRs, subsystem decomposition + assign SS-NN to all 168 BCs from ARCH-INDEX, formalize four adapter protocols, DTU assessment, methodology layer | NEXT |
+| 5 | L3 PRD + behavioral contracts (product-owner) — 168 BCs (CAP-001:34, 002:6, 003:9, 004:15, 005:16, 006:11, 007:12, 008:5, 009:11, 010:6, 011:13, 012:9, 013:14, 014:7); prd.md + BC-INDEX + nfr-catalog (19 NFRs) + error-taxonomy (11 families); committed e05fd9d | DONE |
+| 6 | create-architecture (architect) — 12 subsystems (CAP-001+002→SS-01, CAP-009+010→SS-08); ADR-0004..0007; adapter-protocols (4 seams, 8 contract schemas); methodology-layer (11 convergence predicates, 11 dims incl. D-ETHICS+D-SEC); studio-of-agents (14 REUSE/18 ADAPT/34 NEW); 10 VPs (pure-sim slice, SS-02/05/11); DTU=REQUIRED (10 clones — GATES pre-Phase-3 check); 168 BC SS-TBD resolved (FU-004 closed); committed c29f412 | DONE |
+| 7 | prd-revision (product-owner revises PRD per architect feasibility feedback) | NEXT |
+| 8 | CI/CD setup (devops-engineer — .github/workflows/ + cicd-setup.md; D-009) | PENDING |
+| 9 | Phase-1d adversarial spec convergence (≥3 clean passes) | PENDING |
+| 10 | Consistency audit + drift check | PENDING |
+| 11 | Phase-1 human approval gate | PENDING |
 
 ## Key Facts
 
@@ -83,6 +92,16 @@ phase0_gate: PASSED
 | `.factory/specs/prd-supplements/nfr-catalog.md` | 1.0 | committed e05fd9d |
 | `.factory/specs/prd-supplements/error-taxonomy.md` | 1.0 | committed e05fd9d |
 | `.factory/specs/prd-supplements/prd-cap-{001…013-014}.md` | 1.0 | 9 supplement files; committed e05fd9d |
+| `.factory/specs/architecture/ARCH-INDEX.md` | 1.0 | committed c29f412 |
+| `.factory/specs/architecture/layered-architecture.md` | 1.0 | committed c29f412 |
+| `.factory/specs/architecture/subsystem-decomposition.md` | 1.0 | committed c29f412 |
+| `.factory/specs/architecture/adapter-protocols.md` | 1.0 | committed c29f412 |
+| `.factory/specs/architecture/methodology-layer.md` | 1.0 | committed c29f412 |
+| `.factory/specs/architecture/studio-of-agents.md` | 1.0 | committed c29f412 |
+| `.factory/specs/architecture/dtu-assessment.md` | 1.0 | committed c29f412; DTU_REQUIRED=true, 10 clones |
+| `.factory/specs/architecture/adrs/ADR-0004..0007.md` | 1.0 | 4 ADRs; committed c29f412 |
+| `.factory/specs/verification-properties/VP-INDEX.md` | 1.0 | committed c29f412 |
+| `.factory/specs/verification-properties/VP-001..VP-010.md` | 1.0 | 10 VPs; committed c29f412 |
 
 ## Decisions Log
 
@@ -97,6 +116,10 @@ phase0_gate: PASSED
 | D-007 | Music/voice: pure-maximal retained; DEFAULT ship-safe generators (licensed-output music e.g. AIVA/Stable Audio; non-performer synthetic voice); real-performer likeness = human-gated consent | RATIFIED (human, 2026-06-07) |
 | D-008 | Regulatory: compliance/provenance/ai-disclosure = P0 wave-1 (not deferred); enforced in Phase-2 wave planning | RATIFIED (human, 2026-06-07) |
 | D-009 | Extracted core needs its own release/cross-compile pipeline (dispatcher currently from marketplace tarball) — owner: devops-engineer, target Phase 1+ | ACCEPTED (human, 2026-06-07) |
+| D-010 | 11-dimension convergence model final (ADR-0006): D-ETHICS + D-SEC added to original 9 dims | ACCEPTED (architect, 2026-06-08) |
+| D-011 | compliance.iarc = objective-questions-only (no LLM inference on IARC rating) | ACCEPTED (architect, 2026-06-08) |
+| D-012 | design-intent-contract requires playtest_delegation_note schema field (methodology-layer) | ACCEPTED (architect, 2026-06-08) |
+| D-013 | sequence-graph directed:true = creative gate distinct from DI-006 external-human-gate (ADR-0007) | ACCEPTED (architect, 2026-06-08) |
 
 ## Skip Log
 
@@ -121,17 +144,20 @@ Items identified during create-prd; to be resolved by architect and/or Phase-1d 
 
 | ID | Item | Owner | When |
 |----|------|-------|------|
-| FU-001 | DI-010 (kernel-anti-cheat-never-authored) and DI-011 (NFT/Web3-off-by-default) have no dedicated BC — add lint/default BCs | architect | create-architecture |
-| FU-002 | NFR numerical-target gaps for CAP-001–003, 006–007, 009–011, 013–014 — specific thresholds TBD in architecture | architect | create-architecture |
-| FU-003 | Missing error families: E-GEN (CAP-004), E-ETH (CAP-011), E-XR (CAP-014), and ~7 others not yet modeled in error-taxonomy | architect / Phase-1d adversary | create-architecture / Phase-1d |
-| FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers from ARCH-INDEX | architect | create-architecture |
+| FU-001 | DI-010 (kernel-anti-cheat-never-authored) and DI-011 (NFT/Web3-off-by-default) have no dedicated BC — add lint/default BCs | architect | prd-revision |
+| FU-002 | NFR numerical-target gaps for CAP-001–003, 006–007, 009–011, 013–014 — specific thresholds TBD in architecture | product-owner | prd-revision |
+| FU-003 | Missing error families: E-GEN (CAP-004), E-ETH (CAP-011), E-XR (CAP-014), and ~7 others not yet modeled in error-taxonomy | product-owner / Phase-1d adversary | prd-revision / Phase-1d |
+| FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers from ARCH-INDEX | — | CLOSED (c29f412) |
+| FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013 (convergence dims final; compliance.iarc; playtest_delegation_note field; directed sequence-graph gate) | Phase-1d adversary | Phase-1d pass-1 |
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–5 DONE. L3 PRD + 168 BCs committed (e05fd9d).
-**Next action:** Dispatch architect for create-architecture (`/vsdd-factory:create-architecture`) — sharded ADRs, subsystem decomposition, assign SS-NN to all 168 BCs, formalize four adapter protocols, DTU assessment, methodology layer.
-**Phase 1 remaining steps:** create-architecture (architect) → verification properties → MANDATORY DTU assessment (dtu-assessment.md) → CI/CD setup (.github/workflows/ + cicd-setup.md) → Phase-1d adversarial convergence (≥3 clean passes) → fresh-context consistency audit → Phase-1 spec-package human approval gate.
-**PRD/BC summary:** 168 BCs across 14 caps; nfr-catalog (19 NFRs); error-taxonomy (11 families). All BCs SS-TBD pending architect. 4 follow-up items (FU-001–004) logged above.
-**Key Phase-0 findings (for context):** ~70% conceptual / ~85% file-level neutral spine REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam = 4 declarative swap interfaces. D-009: devops-engineer owns extracted-core release/cross-compile pipeline (Phase 1+).
-**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) outstanding — not current blockers.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–6 DONE. Architecture + VPs committed (c29f412).
+**Next action:** Dispatch product-owner for prd-revision (`/vsdd-factory:phase-1-prd-revision`) — incorporate architect feasibility feedback, close FU-001/002/003 (missing BCs for DI-010/011, NFR thresholds, error families).
+**Phase 1 remaining steps:** prd-revision (product-owner) → CI/CD setup (devops-engineer; D-009) → Phase-1d adversarial convergence (≥3 clean passes) → consistency audit + drift check → Phase-1 human approval gate.
+**Architecture summary:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer (11 convergence dims + 11 predicates); 66-role studio (14R/18A/34N); DTU_REQUIRED=true, 10 clones pending (GATES pre-Phase-3). ADR-0004..0007. 10 VPs (SS-02/05/11 pure-sim slice).
+**BC/VP summary:** 168 BCs all SS-TBD resolved to SS-01..SS-12 (FU-004 closed). 10 VPs (VP-001..VP-010). 5 follow-up items (FU-001..005); FU-004 closed.
+**Adversarial clarifications for Phase-1d (FU-005):** validate D-010 (11-dim convergence final), D-011 (compliance.iarc objective-only), D-012 (playtest_delegation_note field), D-013 (directed sequence-graph = creative gate distinct from DI-006).
+**Key Phase-0 findings:** ~70% conceptual / ~85% file-level neutral spine REUSE; quality model REPLACE; seam = 4 declarative swap interfaces. D-009: devops-engineer owns extracted-core pipeline.
+**Context:** .factory/ worktree on factory-artifacts healthy @ c29f412. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) outstanding — not current blockers.
