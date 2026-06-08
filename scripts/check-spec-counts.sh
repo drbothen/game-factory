@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.15
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.16
 #
 # PURPOSE
 # -------
@@ -24,6 +24,18 @@
 # "playtest-satisfaction" description). Scope limited to SS-07 dimension-owner
 # citations to avoid false positives on legitimate paraphrases. (P15-01
 # recurrence prevention). POSIX/BSD compatible.
+# extended in v1.16 to add check (a.ii) — BC-INDEX per-capability section-header
+# count consistency: for each H2 capability header of the form
+# "## CAP-0NN — <name> — N BCs", parse the stated N, then count the actual
+# "| BC-NN.NN.NNN |" rows in that capability's section table (up to the next
+# "## " header). FAIL if stated header N != counted rows. Optionally also
+# cross-checks the Summary table BC-Count cell (first integer in field 4 of the
+# matching "| CAP-NNN" row) for triple consistency. Catches the P16-01 process-
+# gap class: stale per-capability header counts that survive grand-total checks
+# unchanged (e.g., CAP-007 "12 BCs" above 19 rows; CAP-015 "11 BCs" above 12
+# rows). Positive-coverage log: "Check (a.ii): N capability section headers
+# validated." POSIX/BSD-awk/grep compatible (no grep -P). (P16-01 recurrence
+# prevention).
 # extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
 # (F8-01 recurrence prevention);
 # extended in v1.7 to add check (m) — convergence-report dimension field name
@@ -120,6 +132,15 @@
 #       context (lines that contain `convergence[-_]report` or `dimensions.` near a
 #       status keyword); standalone AMBER in non-dimension prose does NOT trigger.
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
+#   (a.ii) [NEW v1.16] BC-INDEX per-capability section-header count: for each H2
+#       "## CAP-NNN — <name> — N BCs" header, assert N equals the number of actual
+#       "| BC-NN.NN.NNN |" rows in that capability's section. Optionally also
+#       cross-checks the Summary table BC-Count cell for triple consistency.
+#       FAIL lists any capability whose header count ≠ section row count (or ≠
+#       summary cell). Catches P16-01 process-gap: stale per-capability header
+#       counts that survive grand-total checks (e.g., CAP-007 "12 BCs" above 19
+#       rows; CAP-015 "11 BCs" above 12 rows). Positive-coverage log always
+#       printed. POSIX/BSD-awk/grep compatible (no grep -P).
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
 #   (d) [NEW v1.2] VP P0/P1 counts: parse VP-INDEX table, assert P0+P1 match
@@ -284,7 +305,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.15) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.16) ==="
 echo ""
 
 # ============================================================================
@@ -327,6 +348,164 @@ echo ""
 [[ -n "$stated_bc_subdecomp" ]] && check "BC total / subsystem-decomp"        "$computed_bc" "$stated_bc_subdecomp" "subsystem-decomposition.md"
 [[ -n "$stated_bc_arch" ]]      && check "BC total / ARCH-INDEX"               "$computed_bc" "$stated_bc_arch"     "ARCH-INDEX.md"
 [[ -n "$stated_bc_prd" ]]       && check "BC total / prd.md"                   "$computed_bc" "$stated_bc_prd"      "prd.md"
+
+# ============================================================================
+# (a.ii) BC-INDEX PER-CAPABILITY SECTION-HEADER COUNT CONSISTENCY  [NEW v1.16]
+# ============================================================================
+# For each H2 capability section header of the form:
+#   ## CAP-0NN — <name> — N BCs
+# parse the stated N, then count the actual "| BC-NN.NN.NNN |" rows in that
+# capability's section table (rows up to the next "## " header). FAIL if the
+# stated header N does not equal the counted rows.
+#
+# Optionally also cross-checks the BC-INDEX Summary table's BC-Count cell for
+# each capability (first integer in the 4th pipe-delimited field of the matching
+# "| CAP-NNN" row in the Summary table). A mismatch in the summary cell is
+# reported as an additional failure for triple consistency.
+#
+# False-positive avoidance:
+#   - Headers without a "— N BCs" suffix are silently skipped (intro / summary
+#     sections, headers that use a different format).
+#   - Only rows of the exact form "| BC-[digit]" (BC file table rows) are counted;
+#     header rows, separator rows, and prose lines are excluded.
+#   - The Summary table is identified by the "## Summary" heading; capability rows
+#     in it are matched by "| CAP-" prefix (case-sensitive) in field 2.
+#
+# POSIX/BSD-grep/awk compatible (no grep -P).
+#
+# POSITIVE-COVERAGE: "Check (a.ii): N capability section headers validated."
+# EXPECTED: GREEN now that PO has landed the v1.7 header fixes. Any future
+# header drift will cause a FAIL.
+echo "--- (a.ii) BC-INDEX per-capability section-header count vs section row count ---"
+
+if [[ ! -f "$BC_INDEX" ]]; then
+  echo "    SKIP: BC-INDEX.md not found at $BC_INDEX"
+else
+  # Use awk to:
+  #   1. Track the current capability header (H2 lines starting with "## CAP-").
+  #   2. Count "| BC-" rows in the current capability's section.
+  #   3. On encountering the next "## " header (any H2), record the (header, stated, rows)
+  #      triple for the just-completed section.
+  #   4. At END, flush the last capability.
+  #   5. The Summary table section ("## Summary") is excluded from BC-row counting
+  #      because its "| CAP-" rows do not start with "| BC-" — the BC-row filter
+  #      naturally ignores them.
+  #
+  # Output format per capability: "CAP-NNN|stated_n|actual_rows"
+  # Lines where the header had no "— N BCs" suffix are emitted as "CAP-NNN||actual_rows"
+  # and are silently skipped in the check loop below.
+
+  cap_check_results=$(awk '
+    /^## CAP-[0-9]/ {
+      # Flush previous capability if any
+      if (cap_id != "") {
+        print cap_id "|" stated "|" rows
+      }
+      cap_id = ""
+      stated = ""
+      rows = 0
+      # Extract CAP-NNN id (first token like CAP-NNN after "## ")
+      for (i=2; i<=NF; i++) {
+        if ($i ~ /^CAP-[0-9]/) { cap_id=$i; break }
+      }
+      # Extract stated N from "— N BCs" suffix at end of line.
+      # Match the last integer followed by " BCs" (case sensitive).
+      # Use match() + substr() — POSIX awk compatible.
+      line = $0
+      if (match(line, /[0-9]+ BCs$/)) {
+        tok = substr(line, RSTART, RLENGTH)
+        # tok is "N BCs" — extract N
+        n = tok + 0   # awk arithmetic strips " BCs"
+        # Re-extract cleanly: split on space
+        split(tok, a, " ")
+        stated = a[1]
+      }
+      next
+    }
+    # Any other H2 header closes the current capability block
+    /^## / {
+      if (cap_id != "") {
+        print cap_id "|" stated "|" rows
+      }
+      cap_id = ""
+      stated = ""
+      rows = 0
+      next
+    }
+    # Count BC table rows: lines starting with "| BC-" followed by a digit
+    cap_id != "" && /^\| BC-[0-9]/ { rows++ }
+    END {
+      if (cap_id != "") print cap_id "|" stated "|" rows
+    }
+  ' "$BC_INDEX" 2>/dev/null || true)
+
+  # Build a Summary-table BC-Count map: CAP-NNN → first_integer_in_BC_Count_cell
+  # Summary table rows look like:
+  #   | CAP-007 — Convergence Tracking | P0 | SS-06 | 19 (+7 v1.2: ...) |
+  # Field 2 (after leading |) starts with "CAP-NNN"; field 5 is the BC-Count cell.
+  # We extract the first integer from field 5.
+  declare -A SUMMARY_BC_COUNT
+  while IFS= read -r row; do
+    # Extract CAP-NNN from field 2
+    cap_key=$(printf '%s' "$row" \
+      | awk -F'|' '{gsub(/^[[:space:]]+/,"",$2); match($2,/CAP-[0-9]+/); print substr($2,RSTART,RLENGTH)}')
+    # Extract first integer from field 5 (BC-Count cell)
+    bc_count_cell=$(printf '%s' "$row" \
+      | awk -F'|' '{print $5}')
+    first_int=$(printf '%s' "$bc_count_cell" \
+      | grep -oE '[0-9]+' | head -1 || true)
+    if [[ -n "$cap_key" ]] && [[ -n "$first_int" ]]; then
+      SUMMARY_BC_COUNT["$cap_key"]="$first_int"
+    fi
+  done < <(grep -E '^\| CAP-[0-9]' "$BC_INDEX" 2>/dev/null || true)
+
+  # Process results
+  cap_header_check_count=0
+  cap_header_violations=0
+  cap_header_violation_msgs=()
+
+  while IFS='|' read -r cap_id stated_n actual_rows; do
+    [[ -z "$cap_id" ]] && continue
+    # Skip if no stated count in header (header without "— N BCs" suffix)
+    [[ -z "$stated_n" ]] && continue
+    cap_header_check_count=$(( cap_header_check_count + 1 ))
+
+    # Check: header stated count == section row count
+    if [[ "$stated_n" != "$actual_rows" ]]; then
+      cap_header_violations=$(( cap_header_violations + 1 ))
+      cap_header_violation_msgs+=("${cap_id}: header says '${stated_n} BCs' but section contains ${actual_rows} BC rows — header must be corrected")
+    else
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [${cap_id} header]: stated=${stated_n} rows=${actual_rows}"
+      fi
+    fi
+
+    # Optional triple-consistency: cross-check against Summary table cell
+    summary_count="${SUMMARY_BC_COUNT[$cap_id]:-}"
+    if [[ -n "$summary_count" ]] && [[ "$summary_count" != "$actual_rows" ]]; then
+      cap_header_violations=$(( cap_header_violations + 1 ))
+      cap_header_violation_msgs+=("${cap_id}: Summary table BC-Count='${summary_count}' but section contains ${actual_rows} BC rows — Summary table must be corrected")
+    elif [[ "$VERBOSE" == true ]] && [[ -n "$summary_count" ]]; then
+      echo "    OK [${cap_id} summary]: summary_count=${summary_count} rows=${actual_rows}"
+    fi
+
+  done <<< "$cap_check_results"
+
+  # Positive-coverage log (always printed — detects zero-scan / inert run)
+  echo "    Check (a.ii): $cap_header_check_count capability section headers validated against section row counts."
+  echo "    Per-capability header/summary mismatches: $cap_header_violations"
+
+  if [[ $cap_header_violations -gt 0 ]]; then
+    echo ""
+    echo "    CAPABILITY SECTION-HEADER COUNT MISMATCHES (BC-INDEX.md header or Summary table must be corrected):"
+    for msg in "${cap_header_violation_msgs[@]}"; do
+      echo "      $msg"
+    done
+    errors+=("MISMATCH [per-capability section-header count (a.ii)]: $cap_header_violations count mismatch(es) between BC-INDEX.md capability headers/Summary table and actual section row counts (see list above)")
+    fail=1
+  fi
+fi
+echo ""
 
 # ============================================================================
 # (b) ERROR CODE COUNT
@@ -2385,6 +2564,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  VP P1 (computed from table):       ${computed_vp_p1:-N/A}"
   echo "  BC H1/INDEX title sync:            ${bc_title_checked} checked, 0 mismatches"
   echo "  BC frontmatter schema:             $computed_bc checked, 0 violations"
+  echo "  Cap section-header counts (a.ii):  ${cap_header_check_count:-0} headers validated, 0 mismatches"
   echo "  Studio §3/§6 counts:               verified"
   echo "  Subdecomp priority subtotals:      P0=${computed_frontmatter_p0:-?} P1=${computed_frontmatter_p1:-?} P2=${computed_frontmatter_p2:-?} sum=${computed_frontmatter_grand:-?} (computed from frontmatter)"
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
