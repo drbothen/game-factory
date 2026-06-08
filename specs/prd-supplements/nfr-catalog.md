@@ -89,11 +89,18 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 - **NFR-034, NFR-035** cover CAP-014 (XR seam). These are seam-contract NFRs; implementation-layer XR performance targets (frame time, reprojection latency) are NOT captured here — those are covered by BC-14.02.001 XR Performance Budget Schema.
 - **NFR-011** (engine-neutrality) is a correctness NFR, not a performance NFR. It is listed here because it has a numerical target (0 occurrences) and a machine-checkable validation method.
 
-**Total NFRs in this catalog: 35** (NFR-001..NFR-019 from Phase 1a; NFR-020..NFR-035 added in PRD revision v1.1 to close FU-002)
+**Total NFRs in this catalog: 41** (NFR-001..NFR-019 from Phase 1a; NFR-020..NFR-035 added in PRD revision v1.1 to close FU-002; NFR-036..NFR-041 added in v1.3 for CAP-015 online-services)
 
 ---
 
 ## Changelog
+
+### v1.3 (2026-06-08)
+
+| Change | Detail |
+|--------|--------|
+| NFR total corrected (Pass-18 sweep) | Line 92 "Total NFRs in this catalog: 35" → "Total NFRs in this catalog: 41". NFR-036..NFR-041 (CAP-015 online-services latency and correctness NFRs) were present in the table since the CAP-015 authoring burst but the summary count line was not updated from 35. |
+| v1.3 changelog added | Changelog previously stopped at v1.2 despite frontmatter `version: "1.3"`. This entry closes that gap. |
 
 ### v1.2 (2026-06-08)
 

@@ -1,7 +1,7 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -73,7 +73,7 @@ This supplement specifies the full Engine Adapter Protocol (EAP) surface:
 | 1.14 — Protocol Versioning and Compatibility | BC-1.14.001 – BC-1.14.002 |
 | 1.15 — DI-001 Enforcement (Core Never Names Engine) | BC-1.15.001 |
 
-**Total BCs in this batch: 34**
+**Total CAP-001 BCs: 35** (34 original + BC-1.15.002 added v1.1)
 
 ---
 
@@ -286,3 +286,13 @@ This batch makes the following assumptions about other CAP batches:
 | Capability negotiation accuracy | 100% of capability calls respect declared fidelity | BC-1.03.001, BC-1.13.001 |
 | Transport framing correctness | 100% of JSON-RPC messages parseable by both sides | BC-1.01.001 |
 | Determinism tier compliance | 0 DeterminismTierViolation errors on correct usage | BC-1.12.003 |
+
+---
+
+## Changelog
+
+### v1.1 (2026-06-08)
+
+| Change | Detail |
+|--------|--------|
+| BC total corrected (Pass-18 sweep) | Line 76 "Total BCs in this batch: 34" → "Total CAP-001 BCs: 35 (34 original + BC-1.15.002 added v1.1)". BC-1.15.002 was added in an earlier v1.1 authoring burst but the count line was not updated. |
