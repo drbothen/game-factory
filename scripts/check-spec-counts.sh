@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.8
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.10
 #
 # PURPOSE
 # -------
@@ -16,7 +16,38 @@
 # extended in v1.8 to extend check (m) with a second assertion: scan all BC
 # bodies for convergence-report dimension field references and reject any
 # field name not in the canonical 11-name set from methodology-layer §3.0
-# (O-2 usage-site recurrence prevention):
+# (O-2 usage-site recurrence prevention);
+# extended in v1.9 to add check (n) — convergence-dimension status-value enum
+# (I-3 recurrence prevention): parses the canonical status-value enum from
+# methodology-layer.md §3.1, extracts all values a convergence-report dimension
+# field may hold, then scans all BC files for convergence-report dimension value
+# assignments and asserts each assigned value is a member of the canonical enum.
+# FAIL lists each BC + non-canonical value. WILL FAIL until PO propagates the
+# AMBER → DEGRADED-PENDING / BLOCKED changes listed in methodology-layer §3.1.
+# Implemented now so it becomes green automatically after PO work:
+# extended in v1.10 to fix check (n) false positive: frontmatter changelog
+# `reason:` lines (YAML lifecycle prose inside `modified:` blocks) are now
+# excluded from check (n)'s dim_context_lines before status-value extraction.
+# This prevents historical changelog prose such as "D-ETHICS is BINARY {GREEN,
+# BLOCKED} per methodology-layer.md §3.1 (architect adjudication)" from being
+# flagged as a non-canonical operative status value. Only operative BC body
+# content (behavior steps, postconditions, invariants, test vectors) is scanned.
+# The check still catches a genuine non-canonical value (e.g. `AMBER`) written
+# in operative spec content. (I-3 false-positive fix)
+#   (n) [NEW v1.9] Convergence-dimension status-value enum consistency (I-3 recurrence
+#       prevention): parses the canonical status-value enum table from methodology-layer.md
+#       §3.1 (the "Canonical Status-Value Enum" table) to get the allowed set of values.
+#       Then scans all BC files for lines that assign a value to a convergence-report
+#       dimension field (patterns: `= \`VALUE\``, `set to \`VALUE\``, `= VALUE (`,
+#       `is VALUE`, `remains VALUE`, `stays VALUE`, `transitions.*to VALUE`, etc.).
+#       For each VALUE token found in a dimension-assignment context, asserts it is a
+#       member of the canonical enum. FAIL lists the offending BC + non-canonical value.
+#       Will FAIL until PO propagates AMBER → DEGRADED-PENDING / BLOCKED in
+#       SS-09/10/11/13 BCs and prd-cap-009-010.md per methodology-layer §3.1 PO change
+#       list. Implements now so it becomes green automatically after PO work.
+#       False-positive avoidance: patterns are anchored to convergence-report dimension
+#       context (lines that contain `convergence[-_]report` or `dimensions.` near a
+#       status keyword); standalone AMBER in non-dimension prose does NOT trigger.
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
@@ -148,7 +179,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.8) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.10) ==="
 echo ""
 
 # ============================================================================
@@ -1013,8 +1044,12 @@ else
   # Column layout: | D-ID | Dimension Title | `field_name` | Derivation | Owner BC |
   # awk field $4 is the third pipe-delimited column (leading | gives empty $1).
   # Extract the content inside backticks from that field.
+  # Filter: keep only values that are pure snake_case (lowercase letters + underscores
+  # only, no spaces, no uppercase, no hyphens) — this excludes §3.1 per-dimension rows
+  # whose column 4 contains prose descriptions or status-value lists.
   dim_fields=$(grep -E '^\| D-[A-Z]+ ' "$METHODOLOGY_LAYER" 2>/dev/null \
     | awk -F'|' '{gsub(/[[:space:]]/,"",$4); gsub(/`/,"",$4); print $4}' \
+    | grep -E '^[a-z][a-z_]+$' \
     | grep -v '^$' \
     | sort || true)
 
@@ -1135,6 +1170,290 @@ fi
 echo ""
 
 # ============================================================================
+# (n) CONVERGENCE-DIMENSION STATUS-VALUE ENUM CONSISTENCY  [NEW v1.9]
+# ============================================================================
+# Source of truth: methodology-layer.md §3.1 "Canonical Convergence-Dimension
+# Status-Value Enum" table.
+#
+# The §3.1 table has rows of the form:
+#   | `GREEN` | ... | All 11 dimensions ... |
+#   | `DEGRADED` | ... | ... |
+#   | `DEGRADED-PENDING` | ... | ... |
+#   | `BLOCKED` | ... | ... |
+# Column 1 (awk field $2 because leading |) contains the backtick-wrapped value.
+#
+# Step 1: Parse canonical status values from §3.1 table (rows starting with "| `").
+# Step 2: Scan every BC file for lines that contain BOTH a convergence-report
+#         dimension reference AND a status keyword token. Extraction patterns:
+#   Pattern A: lines containing "convergence[-_]report" or ".dimensions." followed
+#              by a `VALUE` token (backtick-quoted) on the same line.
+#   Pattern B: lines where `cert_preflight`, `provenance_legal_compliance`,
+#              `monetization_ethics`, or other canonical dim fields appear alongside
+#              a capitalized all-caps word that is not part of a field name.
+# Step 3: For each extracted value token, assert it is in the canonical enum.
+#         Report failures as: "BC-file: non-canonical status value 'AMBER' in
+#         convergence-dimension context."
+#
+# False-positive avoidance:
+#   - Frontmatter changelog `reason:` lines (YAML prose inside `modified:` blocks)
+#     are EXCLUDED before status-value extraction. These lines carry historical
+#     adjudication prose (e.g. "D-ETHICS is BINARY {GREEN, BLOCKED} per §3.1")
+#     that is NOT an operative dimension-status assignment. Exclusion is done by
+#     stripping lines matching `reason:` from dim_context_lines after the initial
+#     grep. Only operative BC body content is scanned.
+#   - Only tokens on lines containing a dimension-field reference are scanned.
+#   - All-caps tokens that match canonical enum values are skipped.
+#   - Single-word all-caps tokens not preceded by a dimension-field reference
+#     on the same line are excluded (avoids flagging "BLOCKED" in a prose heading).
+#   - Patterns are anchored to the convergence-report namespace.
+#   POSIX/BSD-grep compatible; no grep -P.
+#
+# EXPECTED STATUS: FAIL (await PO propagation of AMBER → DEGRADED-PENDING/BLOCKED
+# in SS-09/10/11/13 BCs and prd-cap-009-010.md). Will become green automatically
+# after PO completes changes listed in methodology-layer.md §3.1 PO change list.
+echo "--- (n) convergence-dimension status-value enum (source: methodology-layer.md §3.1) ---"
+
+if [[ ! -f "$METHODOLOGY_LAYER" ]]; then
+  echo "    SKIP: methodology-layer.md not found at $METHODOLOGY_LAYER"
+else
+  # Step 1: Parse canonical status-value enum from §3.1 table.
+  # The §3.1 table rows start with "| `" and the value is in backticks in column 1.
+  # We extract rows between the "§3.1" heading and the next "---" or "###" delimiter.
+  # Strategy: grep for rows starting "| `" that contain all-caps value tokens
+  # (GREEN, DEGRADED, BLOCKED, and hyphenated variants like DEGRADED-PENDING).
+  # This is the §3.1 table's Value column (field $2 after splitting by |).
+  dim_status_enum=$(grep -E '^\| `[A-Z][A-Z-]+` \|' "$METHODOLOGY_LAYER" 2>/dev/null \
+    | awk -F'|' '{gsub(/[[:space:]`]/,"",$2); print $2}' \
+    | grep -E '^[A-Z][A-Z-]+$' \
+    | sort -u || true)
+
+  dim_status_count=$(printf '%s\n' "$dim_status_enum" | grep -c . 2>/dev/null || echo 0)
+
+  echo "    Canonical status values parsed from §3.1 table: $dim_status_count"
+  if [[ "$VERBOSE" == true ]] && [[ -n "$dim_status_enum" ]]; then
+    printf '%s\n' "$dim_status_enum" | while IFS= read -r sv; do
+      echo "      $sv"
+    done
+  fi
+
+  if [[ "$dim_status_count" -eq 0 ]]; then
+    echo "    SKIP: §3.1 canonical status-value enum could not be parsed from methodology-layer.md"
+    echo "          (expected rows matching '| \`ALL-CAPS[-VALUE]\` |' in §3.1 table)"
+  else
+    # Step 2: Scan all BC files for convergence-dimension value assignments.
+    # We look for lines that:
+    #   (a) contain a convergence-report/convergence_report dimension reference OR
+    #       a backtick-quoted canonical dimension field name (e.g. `cert_preflight`)
+    #   AND
+    #   (b) contain a backtick-quoted all-caps token that looks like a status value.
+    #
+    # Extraction:
+    #   - Match lines containing "convergence[-_]report" or "`dimensions." or
+    #     field-name tokens like cert_preflight, provenance_legal_compliance,
+    #     monetization_ethics, tests_replay, sim_spec, asset_completeness,
+    #     playtest_satisfaction, perf_budget, implementation, docs, security_invariants.
+    #   - From those lines, extract all backtick-quoted tokens consisting of [A-Z-]+.
+    #   - Also extract unquoted uppercase tokens preceded by "= " or "to " or
+    #     "remains " or "is set to " or "is " (verb phrases used in BC prose).
+    #
+    # POSIX/BSD grep: use -E -o only; no -P.
+
+    # Build the list of DISTINCTIVE canonical dimension field name tokens for line-anchor.
+    # We exclude generic English words that are also dim field names ("implementation",
+    # "docs") to avoid false positives on lines that use those words as prose. Those two
+    # dims are captured via the "convergence[-_]report" / "`dimensions." anchors only.
+    # The distinctive_dim_fields set covers all multi-word snake_case fields that cannot
+    # appear as prose: cert_preflight, provenance_legal_compliance, monetization_ethics,
+    # tests_replay, sim_spec, asset_completeness, playtest_satisfaction, perf_budget,
+    # security_invariants.
+    # POSIX/BSD grep: use -E -o only; no -P.
+    if [[ -n "${dim_fields:-}" ]]; then
+      dim_field_pattern=$(printf '%s\n' "$dim_fields" \
+        | grep -vE '^(implementation|docs)$' \
+        | tr '\n' '|' | sed 's/|$//')
+    else
+      dim_field_pattern="cert_preflight|provenance_legal_compliance|monetization_ethics|tests_replay|sim_spec|asset_completeness|playtest_satisfaction|perf_budget|security_invariants"
+    fi
+
+    dim_status_violations=0
+    dim_status_violation_msgs=()
+
+    while IFS= read -r -d $'\0' bc_file; do
+      bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
+
+      # Grep for lines that contain a convergence-report dimension context.
+      # Anchor: lines with "convergence[-_]report" OR "`dimensions." OR one of the
+      # distinctive dim field names (distinctive = multi-word snake_case that can't
+      # appear as prose). Also match "dim-[0-9]+" (shorthand dimension references
+      # like "dim-10") and "D-ETHICS|D-CERT|D-PROV" (dimension ID references).
+      # Generic dim field names ("implementation", "docs") are excluded from this
+      # trigger to prevent false positives; they are covered by the stronger
+      # "convergence[-_]report" and "`dimensions." anchors.
+      # CHANGELOG EXCLUSION: strip frontmatter `reason:` lines (YAML lifecycle
+      # prose inside `modified:` blocks) before extracting status values. These
+      # lines carry historical adjudication prose that is NOT an operative
+      # dimension-status assignment (e.g. "D-ETHICS is BINARY {GREEN, BLOCKED}").
+      dim_context_lines=$(grep -hE \
+        'convergence[-_]report|`dimensions\.|dim-[0-9]+|D-ETHICS|D-CERT|D-PROV|D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-PERF|D-DOCS|D-SEC|'"${dim_field_pattern}" \
+        "$bc_file" 2>/dev/null \
+        | grep -v 'reason:' \
+        || true)
+
+      [[ -z "$dim_context_lines" ]] && continue
+
+      # From those lines, extract backtick-quoted all-caps tokens: `VALUE`
+      # These represent explicitly quoted status values in BC prose.
+      backtick_vals=$(printf '%s\n' "$dim_context_lines" \
+        | grep -oE '`[A-Z][A-Z-]+-?[A-Z]*`' \
+        | sed 's/`//g' \
+        | grep -E '^[A-Z][A-Z-]+$' \
+        | sort -u || true)
+
+      # Whole-file scan for backtick-quoted `AMBER` — this catches cases where the
+      # non-canonical value appears on a different line than the convergence field
+      # reference (e.g. "Update `dimensions.field`:" followed by "`AMBER` iff ...").
+      # Only runs when the file has dimension references (already checked above).
+      # This avoids false positives in files with no convergence context at all.
+      whole_file_amber=$(grep -ohE '`AMBER`' "$bc_file" 2>/dev/null \
+        | sed 's/`//g' \
+        | sort -u || true)
+
+      backtick_vals=$(printf '%s\n%s\n' "$backtick_vals" "$whole_file_amber" \
+        | sort -u | grep -v '^$' || true)
+
+      # Also extract unquoted all-caps tokens that follow status-assignment verbs:
+      # "= VALUE", "to VALUE", "remains VALUE", "is VALUE", "stays VALUE"
+      # anchored by a word boundary pattern. Use word-context grep.
+      # Only capture the all-caps token itself (2-10 chars, may contain hyphen).
+      # Also capture ": VALUE" (YAML-style colon assignment: `field: AMBER`) and
+      # "= VALUE" and common verb phrases used in BC prose.
+      verb_vals=$(printf '%s\n' "$dim_context_lines" \
+        | grep -oE '(= |: |to |remains |is set to |is |stays |transitions to |set to )[A-Z][A-Z-]+-?[A-Z]*[^a-z]' \
+        | grep -oE '[A-Z][A-Z-]+-?[A-Z]*' \
+        | grep -E '^[A-Z][A-Z-]+$' \
+        | sort -u || true)
+
+      all_status_vals=$(printf '%s\n%s\n' "$backtick_vals" "$verb_vals" \
+        | sort -u | grep -v '^$' || true)
+
+      while IFS= read -r sv; do
+        [[ -z "$sv" ]] && continue
+        # Skip tokens that are clearly not status values:
+        # - Dimension IDs like D-SIM, D-CERT (contain a single letter after D-)
+        # - Field names that happen to be uppercase (none in canonical set, but safety)
+        # - Short tokens that are common words: AND, OR, NOT, ANY, ALL, YES, NO
+        case "$sv" in
+          # Common acronyms, IDs, and non-status tokens that appear in BC prose
+          AND|OR|NOT|ANY|ALL|YES|NO|NA|API|CLI|CI|ID|BC|SS|VP|PRD|PO|TBD|DI|ADR|EC|EP)
+            continue ;;
+          CWE|PASS|FAIL|PARTIAL|PENDING|NONE|NDA|EU|JP|CN|US|IAP|LTV|AI|F2P|EOMM)
+            continue ;;
+          IARC|PEGI|ESRB|SAG|AFTRA|NFT|XR|VR|AR|OK|URL|JSON|SDK|UI|UX|ML|TLS|TDD)
+            continue ;;
+          P0|P1|P2|L1|L2|L3|L4|T1|T2|T3|CAP|WIP|TBD|NULL|TRUE|FALSE|VALID|INVALID)
+            continue ;;
+          COMPLETE|ACTIVE|DRAFT|REQUIRED|OPTIONAL|DEPRECATED)
+            continue ;;
+          # YELLOW and RED are used in compliance / prd-cap tables for non-dimension contexts
+          YELLOW|RED)
+            continue ;;
+          # Dimension IDs are line triggers, not status values — skip them
+          D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-CERT|D-PERF|D-PROV|D-DOCS|D-ETHICS|D-SEC)
+            continue ;;
+        esac
+        # Skip tokens starting with "E-" (error code prefixes like E-ETH-)
+        [[ "$sv" == E-* ]] && continue
+        # Skip if length < 3 (too short to be a meaningful status token)
+        [[ "${#sv}" -lt 3 ]] && continue
+        # Check against canonical enum
+        if ! printf '%s\n' "$dim_status_enum" | grep -qF "$sv" 2>/dev/null; then
+          dim_status_violations=$(( dim_status_violations + 1 ))
+          dim_status_violation_msgs+=("${bc_rel}: non-canonical convergence-dimension status value '$sv' (canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
+        fi
+      done <<< "$all_status_vals"
+
+    done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+    # Also scan prd-supplements for dimension status references
+    PRD_SUPP_DIR="$REPO_ROOT/.factory/specs/prd-supplements"
+    if [[ -d "$PRD_SUPP_DIR" ]]; then
+      while IFS= read -r -d $'\0' supp_file; do
+        supp_rel="prd-supplements/$(basename "$supp_file")"
+
+        # CHANGELOG EXCLUSION: same as BC loop — strip `reason:` lines.
+        dim_context_lines=$(grep -hE \
+          'convergence[-_]report|`dimensions\.|dim-[0-9]+|D-ETHICS|D-CERT|D-PROV|D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-PERF|D-DOCS|D-SEC|'"${dim_field_pattern}" \
+          "$supp_file" 2>/dev/null \
+          | grep -v 'reason:' \
+          || true)
+
+        [[ -z "$dim_context_lines" ]] && continue
+
+        backtick_vals=$(printf '%s\n' "$dim_context_lines" \
+          | grep -oE '`[A-Z][A-Z-]+-?[A-Z]*`' \
+          | sed 's/`//g' \
+          | grep -E '^[A-Z][A-Z-]+$' \
+          | sort -u || true)
+
+        whole_file_amber=$(grep -ohE '`AMBER`' "$supp_file" 2>/dev/null \
+          | sed 's/`//g' \
+          | sort -u || true)
+
+        backtick_vals=$(printf '%s\n%s\n' "$backtick_vals" "$whole_file_amber" \
+          | sort -u | grep -v '^$' || true)
+
+        verb_vals=$(printf '%s\n' "$dim_context_lines" \
+          | grep -oE '(= |: |to |remains |is set to |is |stays |transitions to |set to )[A-Z][A-Z-]+-?[A-Z]*[^a-z]' \
+          | grep -oE '[A-Z][A-Z-]+-?[A-Z]*' \
+          | grep -E '^[A-Z][A-Z-]+$' \
+          | sort -u || true)
+
+        all_status_vals=$(printf '%s\n%s\n' "$backtick_vals" "$verb_vals" \
+          | sort -u | grep -v '^$' || true)
+
+        while IFS= read -r sv; do
+          [[ -z "$sv" ]] && continue
+          case "$sv" in
+            AND|OR|NOT|ANY|ALL|YES|NO|NA|API|CLI|CI|ID|BC|SS|VP|PRD|PO|TBD|DI|ADR|EC|EP)
+              continue ;;
+            CWE|PASS|FAIL|PARTIAL|PENDING|NONE|NDA|EU|JP|CN|US|IAP|LTV|AI|F2P|EOMM)
+              continue ;;
+            IARC|PEGI|ESRB|SAG|AFTRA|NFT|XR|VR|AR|OK|URL|JSON|SDK|UI|UX|ML|TLS|TDD)
+              continue ;;
+            P0|P1|P2|L1|L2|L3|L4|T1|T2|T3|CAP|WIP|TBD|NULL|TRUE|FALSE|VALID|INVALID)
+              continue ;;
+            COMPLETE|ACTIVE|DRAFT|REQUIRED|OPTIONAL|DEPRECATED|YELLOW|RED)
+              continue ;;
+            D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-CERT|D-PERF|D-PROV|D-DOCS|D-ETHICS|D-SEC)
+              continue ;;
+          esac
+          [[ "$sv" == E-* ]] && continue
+          [[ "${#sv}" -lt 3 ]] && continue
+          if ! printf '%s\n' "$dim_status_enum" | grep -qF "$sv" 2>/dev/null; then
+            dim_status_violations=$(( dim_status_violations + 1 ))
+            dim_status_violation_msgs+=("${supp_rel}: non-canonical convergence-dimension status value '$sv' (canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
+          fi
+        done <<< "$all_status_vals"
+
+      done < <(find "$PRD_SUPP_DIR" -maxdepth 1 -name "*.md" -print0)
+    fi
+
+    echo "    BC + prd-supplement files scanned: $computed_bc (BCs) + prd-supplements"
+    echo "    Non-canonical dimension status values found: $dim_status_violations"
+    if [[ "$dim_status_violations" -gt 0 ]]; then
+      echo ""
+      echo "    NON-CANONICAL CONVERGENCE-DIMENSION STATUS VALUES (PO must update per methodology-layer §3.1):"
+      for msg in "${dim_status_violation_msgs[@]}"; do
+        echo "      $msg"
+      done
+      errors+=("MISMATCH [convergence-dimension status-value enum (n)]: $dim_status_violations non-canonical status value(s) found in dimension-context lines — PO must update to canonical enum per methodology-layer.md §3.1 (EXPECTED: await PO propagation of AMBER changes)")
+      fail=1
+    fi
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -1155,6 +1474,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
   echo "  Dimension field uniqueness:        §3.0 table has $DIM_FIELD_COUNT_EXPECTED unique field names"
   echo "  Dimension field usage-site:        all BC convergence-report dimension references use canonical field names"
+  echo "  Dimension status-value enum:       all BC convergence-dimension status values are canonical"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
