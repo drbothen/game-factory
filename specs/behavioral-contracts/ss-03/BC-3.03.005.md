@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -128,7 +128,7 @@ inherent floating-point variance of T3 engines.
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies "T3: tolerance-window" comparison behavior, which is the T3 tier clause in CAP-003's tier-degraded comparison description, grounded in ADR-0003's `tolerance-only` tier. |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed) |
-| Architecture Module | SS-TBD (Regression Comparator — filled by architect) |
+| Architecture Module | SS-02 (Regression Comparator — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 2-3 (T3 path: any machine + tolerance-window comparison) |
 | ADRs | ADR-0003 (T3 = `tolerance-only`; regression method = tolerance-window metric diff) |
@@ -142,7 +142,7 @@ inherent floating-point variance of T3 engines.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-regression-comparator.md` — Tolerance window evaluation, metric schema
+- `architecture/SS-02-regression-comparator.md` — Tolerance window evaluation, metric schema
 
 ## Story Anchor
 

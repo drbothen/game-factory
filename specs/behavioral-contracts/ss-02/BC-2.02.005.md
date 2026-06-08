@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-01
 capability: CAP-002
 lifecycle_status: active
 introduced: v0.1.0
@@ -118,7 +118,7 @@ new engine version; the old acceptance record remains valid for the old engine v
 | Capability Anchor Justification | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 — this BC specifies the scheduled conformance re-run on engine releases, which is the ongoing anti-drift mechanism that makes the conformance gate durable over the adapter lifecycle (not just at initial acceptance). |
 | L2 Domain Invariants | DI-002 (Every Engine Adapter Must Pass Conformance Before Acceptance) |
 | L2 Failure Modes | FM-001 (Adapter Capability Drift) |
-| Architecture Module | SS-TBD (Adapter Registry, Version Monitor — filled by architect) |
+| Architecture Module | SS-01 (Adapter Registry, Version Monitor — filled by architect) |
 | Stories | (filled by story-writer) |
 | ADRs | ADR-0002 §Decision point 2 (Terraform-style acceptance testing; Semport analog) |
 
@@ -130,7 +130,7 @@ new engine version; the old acceptance record remains valid for the old engine v
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-conformance-suite.md` — Scheduled re-run, version monitor, backward-compat record model
+- `architecture/SS-01-conformance-suite.md` — Scheduled re-run, version monitor, backward-compat record model
 
 ## Story Anchor
 

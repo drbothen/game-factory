@@ -15,7 +15,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: brownfield
 extracted_from: ".reference/vsdd-factory/hooks/red-gate.sh"
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -114,7 +114,7 @@ and auditable override.
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC implements the "TDD Red Gate enforcement on the pure-sim slice" component of CAP-006, including the "reused from vsdd-factory, opt-in strict" qualifier |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | red-gate-hook (SS-TBD; assigned by architect) |
+| Architecture Module | red-gate-hook (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -127,7 +127,7 @@ and auditable override.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-red-gate-hook.md` — Red Gate hook configuration and sim-slice boundary declaration
+- `architecture/SS-05-red-gate-hook.md` — Red Gate hook configuration and sim-slice boundary declaration
 
 ## Story Anchor
 

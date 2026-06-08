@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-01
 capability: CAP-002
 lifecycle_status: active
 introduced: v0.1.0
@@ -115,7 +115,7 @@ never silently assumed.
 | L2 Capability | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 |
 | Capability Anchor Justification | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 — this BC specifies the fidelity-declared conformance semantics (partial vs full), which is the "fidelity-graded" conformance behavior named in CAP-002's "fidelity-declared conformance" description. |
 | L2 Domain Invariants | DI-002 (Every Engine Adapter Must Pass Conformance Before Acceptance) |
-| Architecture Module | SS-TBD (Conformance Suite, Adapter Registry — filled by architect) |
+| Architecture Module | SS-01 (Conformance Suite, Adapter Registry — filled by architect) |
 | Stories | (filled by story-writer) |
 | ADRs | ADR-0002 (graceful degradation, not lowest-common-denominator) |
 
@@ -127,7 +127,7 @@ never silently assumed.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-conformance-suite.md` — Full vs partial tier test sets, fidelity propagation
+- `architecture/SS-01-conformance-suite.md` — Full vs partial tier test sets, fidelity propagation
 
 ## Story Anchor
 

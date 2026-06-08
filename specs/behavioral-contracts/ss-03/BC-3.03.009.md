@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -130,7 +130,7 @@ discipline as competitive-grade deterministic lockstep netcode.
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies the esports demo/anti-cheat dual-use of the replay recording, which is the "synergy that this same machinery serves esports replay + anti-cheat" cited in the product brief §In Scope and the Differentiators §D-002 ("replay primitive serves esports demo, anti-cheat spine"). |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-010 (Kernel Anti-Cheat Is Never Autonomously Authored) |
-| Architecture Module | SS-TBD (Replay Exporter, Genre-Lane Activator — filled by architect) |
+| Architecture Module | SS-02 (Replay Exporter, Genre-Lane Activator — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | CAP-013 (genre-gated lane activation), PROC-004 (Replay Regression Workflow as foundation) |
 | ADRs | ADR-0003 |
@@ -144,8 +144,8 @@ discipline as competitive-grade deterministic lockstep netcode.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-replay-exporter.md` — Demo format, anti-cheat evidence package, signing
-- `architecture/SS-TBD-genre-lane-activator.md` — Competitive-multiplayer lane gate
+- `architecture/SS-02-replay-exporter.md` — Demo format, anti-cheat evidence package, signing
+- `architecture/SS-02-genre-lane-activator.md` — Competitive-multiplayer lane gate
 
 ## Story Anchor
 

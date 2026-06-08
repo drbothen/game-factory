@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-06
 capability: CAP-007
 lifecycle_status: active
 introduced: v0.1.0
@@ -107,7 +107,7 @@ measurement with XR hardware.
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #7 (perf-budget) |
 | L2 Domain Invariants | DI-012 |
-| Architecture Module | convergence-tracker / perf-gate (SS-TBD) |
+| Architecture Module | convergence-tracker / perf-gate (SS-06) |
 | Stories | S-TBD |
 
 ## Related BCs
@@ -116,7 +116,7 @@ measurement with XR hardware.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md`
+- `architecture/SS-06-convergence-tracker.md`
 
 ## Story Anchor
 

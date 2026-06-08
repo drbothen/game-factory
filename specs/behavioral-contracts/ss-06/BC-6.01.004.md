@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -113,7 +113,7 @@ engine-bound).
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC implements the "AI behavior trees" sub-type of simulation behavioral contracts explicitly named in CAP-006 |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | ai-behavior-tree (SS-TBD; assigned by architect) |
+| Architecture Module | ai-behavior-tree (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -124,7 +124,7 @@ engine-bound).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-ai-behavior-tree.md` — AI BT evaluation module (to be created by architect)
+- `architecture/SS-05-ai-behavior-tree.md` — AI BT evaluation module (to be created by architect)
 
 ## Story Anchor
 

@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-01
 capability: CAP-002
 lifecycle_status: active
 introduced: v0.1.0
@@ -114,7 +114,7 @@ ADR-0002 and is the foundation of the "pass conformance for what you claim" acce
 | L2 Capability | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 |
 | Capability Anchor Justification | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 — this BC specifies the mechanism by which the conformance suite selects which tests to execute based on declared capabilities, which is the core capability-gated conformance behavior CAP-002 defines. |
 | L2 Domain Invariants | DI-002 (Every Engine Adapter Must Pass Conformance Before Acceptance), DI-012 (Every ContractArtifact Has a Declared Validation Method) |
-| Architecture Module | SS-TBD (Conformance Suite — filled by architect) |
+| Architecture Module | SS-01 (Conformance Suite — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-002 Stage 3 (Conformance Suite Run) |
 | ADRs | ADR-0002 (Protocol & Conformance Stance — CRI/CSI capability-gated pattern) |
@@ -127,7 +127,7 @@ ADR-0002 and is the foundation of the "pass conformance for what you claim" acce
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-conformance-suite.md` — Conformance runner, test catalog, manifest parsing
+- `architecture/SS-01-conformance-suite.md` — Conformance runner, test catalog, manifest parsing
 - `.factory/planning/decisions/0002-protocol-and-conformance-stance.md` — CRI/CSI pattern rationale
 
 ## Story Anchor

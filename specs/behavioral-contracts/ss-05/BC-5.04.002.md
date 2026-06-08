@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -120,7 +120,7 @@ Creative quality (worldbuilding depth, prose quality) is a human gate via playte
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the canon-kb is listed as the "keystone artifact" in RECONCILIATION §5.6a and is a primary artifact in CAP-005's "generates EVERYTHING a game needs — narrative" mandate. This BC defines its structural integrity contract. |
 | L2 Domain Invariants | DI-008 (engine-neutral spec layer) |
-| Architecture Module | SS-TBD — Canon-KB integrity validator; entity registry; timeline consistency checker |
+| Architecture Module | SS-04 — Canon-KB integrity validator; entity registry; timeline consistency checker |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -129,7 +129,7 @@ Creative quality (worldbuilding depth, prose quality) is a human gate via playte
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-canon-kb.md` — Canon-KB data model and integrity checker
+- `architecture/SS-04-canon-kb.md` — Canon-KB data model and integrity checker
 
 ## Story Anchor
 

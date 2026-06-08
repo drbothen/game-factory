@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -123,7 +123,7 @@ will change the hash.
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC directly operationalizes the success criterion "Injected sim regression detected at T1 (bitwise): 100% on reference game" from the product brief §Success Criteria, which is the core quality guarantee of CAP-003. |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed) |
 | L2 Success Criterion | Brief §Success Criteria: "Replay-regression works: Injected sim regression detected at T1 (bitwise): 100% on reference game" |
-| Architecture Module | SS-TBD (Regression Comparator, CI Integration — filled by architect) |
+| Architecture Module | SS-02 (Regression Comparator, CI Integration — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 full pipeline |
 | ADRs | ADR-0003 |
@@ -137,7 +137,7 @@ will change the hash.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-regression-comparator.md` — 100% sensitivity proof path (hash immutability + T1 guarantee)
+- `architecture/SS-02-regression-comparator.md` — 100% sensitivity proof path (hash immutability + T1 guarantee)
 
 ## Story Anchor
 

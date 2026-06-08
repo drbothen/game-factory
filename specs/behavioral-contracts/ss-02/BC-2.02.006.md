@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-01
 capability: CAP-002
 lifecycle_status: active
 introduced: v0.1.0
@@ -123,7 +123,7 @@ blocks acceptance even if all capability tests passed.
 | L2 Capability | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 |
 | Capability Anchor Justification | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 — this BC specifies the reference mini-game acceptance validation which is the integration-level acceptance gate named in PROC-002 Stage 5 and referenced in ADR-0002 as "acceptance tests exercise real engine build/test/replay through the real adapter." |
 | L2 Domain Invariants | DI-001 (Factory Core Never Names a Specific Engine), DI-002 (Every Engine Adapter Must Pass Conformance Before Acceptance) |
-| Architecture Module | SS-TBD (Conformance Suite, Reference Mini-Game Registry — filled by architect) |
+| Architecture Module | SS-01 (Conformance Suite, Reference Mini-Game Registry — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-002 Stage 5 (Reference Mini-Game Validation) |
 | ADRs | ADR-0002 §Decision point 2 (acceptance tests exercise real engine through real adapter), ADR-0001 (Two-Adapter Rule) |
@@ -136,7 +136,7 @@ blocks acceptance even if all capability tests passed.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-conformance-suite.md` — Reference mini-game runner, spec registry
+- `architecture/SS-01-conformance-suite.md` — Reference mini-game runner, spec registry
 - `.factory/planning/decisions/0001-founding-engine-pair.md` — Two-Adapter Rule requiring Bevy+Unity both validate same mini-game
 
 ## Story Anchor

@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -116,7 +116,7 @@ loudness check are CI gates; failure is a broken severity defect.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the audio-build-manifest is the primary audio production artifact listed in RECONCILIATION §5.5 and §6.1 as owned by the audio-implementer agent; this BC defines its machine-checkable production contract. |
 | L2 Domain Invariants | DI-009 (Suno/Udio blocked), DI-003 (provenance sidecar completeness) |
-| Architecture Module | SS-TBD — audio build pipeline; middleware CLI wrapper; loudness checker |
+| Architecture Module | SS-04 — audio build pipeline; middleware CLI wrapper; loudness checker |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -126,7 +126,7 @@ loudness check are CI gates; failure is a broken severity defect.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-audio-pipeline.md` — middleware CLI integration, bank build, loudness check
+- `architecture/SS-04-audio-pipeline.md` — middleware CLI integration, bank build, loudness check
 
 ## Story Anchor
 

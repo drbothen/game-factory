@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -122,7 +122,7 @@ validation report.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the sequence-graph is listed in RECONCILIATION §6.3 (cinematics-virtual-production.md additions) as the keystone cinematic artifact produced by the cinematic-director agent within CAP-005. |
 | L2 Domain Invariants | DI-008 (engine-neutral spec layer), DI-006 (human-gated tasks surfaced) |
-| Architecture Module | SS-TBD — sequence graph validator; Bevy sequence runtime (BUILD-new); Canon-KB entity query |
+| Architecture Module | SS-04 — sequence graph validator; Bevy sequence runtime (BUILD-new); Canon-KB entity query |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -132,7 +132,7 @@ validation report.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-cinematics-pipeline.md` — sequence-graph schema, validation, Bevy runtime gap
+- `architecture/SS-04-cinematics-pipeline.md` — sequence-graph schema, validation, Bevy runtime gap
 
 ## Story Anchor
 

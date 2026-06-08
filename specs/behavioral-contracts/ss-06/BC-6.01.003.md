@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -114,7 +114,7 @@ apply to engine-side animation state machines.
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC implements the "FSM" sub-type of simulation behavioral contracts explicitly named in CAP-006 as "ability/FSM state legality" |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | entity-fsm (SS-TBD; assigned by architect) |
+| Architecture Module | entity-fsm (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -126,7 +126,7 @@ apply to engine-side animation state machines.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-entity-fsm.md` — entity FSM module (to be created by architect)
+- `architecture/SS-05-entity-fsm.md` — entity FSM module (to be created by architect)
 
 ## Story Anchor
 

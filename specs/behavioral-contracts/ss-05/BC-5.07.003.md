@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -119,7 +119,7 @@ never silently skipped or started out of order.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the game-production-plan and wave schedule are named in RECONCILIATION §5.8 and PROC-001 as the producer-owned coordination artifacts for CAP-005's multi-discipline production workflow; this BC defines their machine-checkable ordering contract. |
 | L2 Domain Invariants | DI-006 (blocked signals surfaced not silently dropped) |
-| Architecture Module | SS-TBD — wave-gate hook; wave registry; producer-orchestrator; game-production-plan |
+| Architecture Module | SS-04 — wave-gate hook; wave registry; producer-orchestrator; game-production-plan |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -129,7 +129,7 @@ never silently skipped or started out of order.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-production-orchestration.md` — wave registry, wave-gate hook, blocked-wave-signal
+- `architecture/SS-04-production-orchestration.md` — wave registry, wave-gate hook, blocked-wave-signal
 
 ## Story Anchor
 

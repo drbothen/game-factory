@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -115,7 +115,7 @@ separately tracked with `generated_by_tool: "human-recording"`.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the `ai-audio-provenance-ledger` is listed in RECONCILIATION §5.5 as a primary audio discipline artifact; this BC defines its machine-checkable coverage contract. |
 | L2 Domain Invariants | DI-003 (provenance sidecar completeness), DI-009 (Suno/Udio blocked), DI-006 (human-gated tasks surfaced) |
-| Architecture Module | SS-TBD — audio provenance ledger builder; voice-consent-registry |
+| Architecture Module | SS-04 — audio provenance ledger builder; voice-consent-registry |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -124,7 +124,7 @@ separately tracked with `generated_by_tool: "human-recording"`.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-audio-provenance.md`
+- `architecture/SS-04-audio-provenance.md`
 
 ## Story Anchor
 

@@ -1,0 +1,287 @@
+---
+document_type: architecture
+level: L3
+section: studio-of-agents
+version: "1.0"
+status: draft
+producer: architect
+timestamp: 2026-06-08T00:00:00Z
+phase: 1b
+traces_to:
+  - ARCH-INDEX.md
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md#§5
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md#§6
+  - .factory/specs/domain-spec/capabilities.md#CAP-005
+inputs:
+  - .factory/planning/research/aaa/AAA-RECONCILIATION.md
+  - .factory/specs/architecture/subsystem-decomposition.md
+  - .factory/specs/architecture/layered-architecture.md
+  - .factory/phase-0-ingestion/component-inventory.md
+  - .factory/specs/prd.md
+input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+---
+
+# Studio-of-Agents
+
+> **Scope.** This document defines the 66-role Studio-of-Agents: the complete
+> roster of game-discipline specialist agent roles, their extraction disposition
+> (REUSE / NEW / ADAPT from vsdd-factory), their owning subsystem (SS-NN), and
+> the producer-orchestrator scheduling model including the cross-discipline
+> dependency DAG and handoff contracts.
+>
+> Source of record for the roster: RECONCILIATION §5.X.
+> Source of record for subsystem assignments: ARCH-INDEX Subsystem Registry.
+
+---
+
+## 1. Role Extraction Disposition Summary
+
+| Disposition | Count | Description |
+|-------------|-------|-------------|
+| **REUSE** | 14 | Lifted verbatim from vsdd-factory agent inventory; game knowledge not required. |
+| **ADAPT** | 18 | vsdd-factory neutral agents reshaped to handle game contracts; mechanism unchanged, domain scope changed. |
+| **NEW** | 34 | Net-new game-discipline specialists with no vsdd analog; pure game-domain roles. |
+| **Total** | 66 | |
+
+Referencing RECONCILIATION §5 and component-inventory.md: the REUSE agents
+correspond to vsdd-factory's neutral specialist set (orchestrator, adversary, state-manager,
+etc.); the ADAPT set covers vsdd agents whose mechanism is retained but whose scope
+shifts to game contracts (product-owner → game contract production, implementer →
+sim-slice TDD, formal-verifier → pure-sim hardening). The NEW set is the complete
+game-discipline surface added in v1.0/v1.5/v2.0 research integration.
+
+---
+
+## 2. Full Roster Table
+
+> Column key — **Discipline:** domain grouping per RECONCILIATION §5.
+> **SS-NN:** primary owning subsystem per ARCH-INDEX Subsystem Registry.
+> **Disposition:** REUSE (from vsdd) / ADAPT (reshaped vsdd) / NEW (game-only).
+> **Type:** S = Specialist, C = Catalyst/Shared (orchestrator role or cross-cutting).
+
+| # | Role | Discipline | SS-NN | Disposition | Type | Principal Artifacts |
+|---|------|-----------|-------|-------------|------|---------------------|
+| 1 | `creative-director` | Creative direction | SS-04 | NEW | C | `art-bible.spec`, `style-profile` |
+| 2 | `art-director` | Art direction | SS-04 | NEW | C | `art-bible.spec`, visual targets |
+| 3 | `systems-designer` | Game design | SS-04, SS-05 | NEW | S | `design-spec`, `systems-spec`, `design-intent-contract` |
+| 4 | `economy-designer` | Game design | SS-04, SS-05 | NEW | S | `economy-graph`, `economy-balance-contract`, `sink-faucet-model` |
+| 5 | `combat-designer` | Game design | SS-04, SS-05 | NEW | S | `systems-spec` (combat), `damage-io-matrix` |
+| 6 | `level-designer` | Game design | SS-04 | NEW | S | `level-spec`, `content-data` |
+| 7 | `encounter-designer` | Game design | SS-04 | NEW | S | `encounter-spec`, `content-data` |
+| 8 | `ux-accessibility-designer` | Game design | SS-04 | NEW | S | `ui-spec`, `accessibility-contract` |
+| 9 | `concept-artist` | Visual art | SS-03 | NEW | S | `asset-generation-request` (2D), `asset-provenance-sidecar` |
+| 10 | `env-modeler` | Visual art | SS-03 | NEW | S | GLB environment packages, provenance sidecar |
+| 11 | `prop-artist` | Visual art | SS-03 | NEW | S | GLB prop packages, provenance sidecar |
+| 12 | `char-modeler` | Visual art | SS-03 | NEW | S | GLB character mesh, provenance sidecar |
+| 13 | `char-texture` | Visual art | SS-03 | NEW | S | PBR texture sets, provenance sidecar |
+| 14 | `vfx-artist` | Visual art | SS-03 | NEW | S | `vfx.spec`, particle systems |
+| 15 | `pipeline-ta` | Technical art | SS-03, SS-04 | NEW | C | Asset pipeline tooling, importer config |
+| 16 | `char-rigger` | Character art | SS-03 | NEW | S | `rig.skeleton`, `skin.weights` |
+| 17 | `char-ta` | Character art | SS-03 | NEW | C | `anim-state-machine.spec` review |
+| 18 | `animator` | Character art | SS-03 | NEW | S | `anim.clips` |
+| 19 | `anim-ta` | Character art | SS-03 | NEW | C | Animation pipeline tooling |
+| 20 | `audio-designer` | Audio | SS-03, SS-04 | NEW | S | `audio-design-spec`, `sfx-manifest` |
+| 21 | `composer` | Audio | SS-03 | NEW | S | `music-interactive-spec`, AI audio generation |
+| 22 | `audio-implementer` | Audio | SS-04 | NEW | S | `audio-build-manifest`, `bus-and-mix-spec`, middleware wiring |
+| 23 | `voice-director` | Audio | SS-03 | NEW | C | `dialogue-table`, voice generation direction |
+| 24 | `narrative-designer` | Narrative | SS-04, SS-10 | NEW | S | `narrative-graph`, `quest-schema` |
+| 25 | `writer` | Narrative | SS-04 | NEW | S | `bark-rules.schema`, narrative text |
+| 26 | `localization-engineer` | Narrative | SS-04 | NEW | S | `loc-string-contract`, XLIFF 2.0 export |
+| 27 | `narrative-director` | Narrative / Lore | SS-10 | NEW | C | `story-structure-spec`, `narrative-arc-contract` |
+| 28 | `worldbuilder` | Lore | SS-10 | NEW | S | `canon-kb` (entity-registry, relationship-graph, timeline) |
+| 29 | `loremaster` | Lore | SS-10 | NEW | C | `canon-continuity-check-battery`, continuity audit |
+| 30 | `quest-designer` | Narrative | SS-04, SS-10 | NEW | S | `quest-schema`, canon binding |
+| 31 | `systemic-writer` | Narrative | SS-04 | NEW | S | `bark-rules.schema`, systemic dialogue |
+| 32 | `cinematic-writer` | Narrative | SS-04 | NEW | S | `cinematic-spec`, dialogue |
+| 33 | `copywriter` | Narrative / Marketing | SS-04, SS-08 | NEW | S | `store-text-bundle`, `press-kit` |
+| 34 | `asset-generation-orchestrator` | Asset pipeline | SS-03 | NEW | C | `asset-generation-request`, `quality-gate-report`, risk-tier routing |
+| 35 | `producer` | Production | SS-04, SS-06 | ADAPT | C | `game-production-plan`, `cross-discipline-dependency-contract`, wave schedule |
+| 36 | `cert-owner` | Cert / compliance | SS-08 | ADAPT | C | `cert-preflight-checklist`, `distribution-release-pipeline` |
+| 37 | `functional-qa` | QA | SS-05, SS-07 | ADAPT | S | `replay-regression-contract`, `test-suite-manifest` |
+| 38 | `compat-qa` | QA | SS-05 | ADAPT | S | `perf-budget-contract`, compatibility matrix |
+| 39 | `balance-qa` | QA | SS-05, SS-07 | ADAPT | S | Balance-band assertions, economy rebalance reports |
+| 40 | `localization-qa` | QA | SS-04 | ADAPT | S | Pseudo-loc, coverage check, ICU parity |
+| 41 | `compliance-qa` | QA | SS-08 | ADAPT | S | `compliance-checklist` verification |
+| 42 | `accessibility-qa` | QA | SS-04 | ADAPT | S | GAG/XAG, CVAA checklist |
+| 43 | `playtest-evaluator` | QA / Playtest | SS-07 | ADAPT | C | `playtest-protocol`, 3-lens convergence report, human-gate sign-off |
+| 44 | `monetization-designer` | Monetization | SS-09 | NEW | S | `monetization-ethics-contract`, `iap-catalog`, `gacha-spec` |
+| 45 | `economy-balancer` | Monetization | SS-09 | NEW | S | `live-economy-balance-contract`, `sink-faucet-model` |
+| 46 | `trailer-editor` | Marketing | SS-08, SS-11 | NEW | S | `capture-recipe`, `marketing-asset-manifest` |
+| 47 | `key-art-director` | Marketing | SS-08, SS-11 | NEW | C | Key art generation direction, `store-page-spec` visuals |
+| 48 | `store-copywriter` | Marketing | SS-08, SS-11 | NEW | S | `store-page-spec` text, Steam capsule lint |
+| 49 | `community-manager` | Marketing | SS-08, SS-11 | NEW | C | `campaign-beat-plan`; live engagement = human-gated |
+| 50 | `compliance-officer` | Compliance | SS-08 | NEW | C | `compliance-checklist`, `ratings-submission-manifest`, `privacy-config-contract` |
+| 51 | `ratings-submitter` | Compliance | SS-08 | NEW | S | `ai-disclosure-manifest`, `ratings-submission-manifest` |
+| 52 | `cinematic-director` | Cinematics | SS-04 | NEW | C | `cinematic-spec`, `sequence-graph`; `directed:true` = human-gated |
+| 53 | `camera-cinematography` | Cinematics | SS-04 | NEW | S | `camera-rules-profile` |
+| 54 | `lipsync-animator` | Cinematics | SS-03 | NEW | S | `lip-sync-pipeline-contract` (ARKit-52 blendshapes) |
+| 55 | `security-engineer` | Security | SS-05 | NEW | S | `security-requirements-contract`, `server-authority-invariant-suite` |
+| 56 | `anti-cheat-integrator` | Security | SS-11 | NEW | S | `anti-cheat-integration-adapter` (EAC/EOS wrap-only) |
+| 57 | `moderation-ops` | Security / Trust | SS-11 | NEW | C | `moderation-pipeline-contract`; judgment = human-gated |
+| 58 | `backend-services-engineer` | Online services | SS-11 | NEW | S | `online-services-spec`, `remote-config-contract` |
+| 59 | `platform-integrator` | Platform | SS-08 | NEW | S | `platform-integration-manifest` |
+| 60 | `release-engineer` | Distribution | SS-08 | NEW | S | `distribution-release-pipeline` (steamcmd/butler/fastlane) |
+| 61 | `liveops-sre` | LiveOps | SS-06, SS-08 | NEW | S | Crash-reporting symbol upload, feature-flag wiring, A/B runbooks |
+| 62 | `xr-adapter-owner` | XR | SS-12 | NEW | C | `xr-adapter`, `xr-comfort-spec`; deferred platform tier |
+| 63 | `mod-api-owner` | Modding | SS-11 | NEW | C | `mod-api-contract`, `ugc-content-schema` |
+| 64 | `ugc-pipeline-engineer` | Modding | SS-11 | NEW | S | `ugc-distribution-adapter`, `mod-load-spec` |
+| 65 | `ranking-systems-engineer` | Esports | SS-11 | NEW | S | `ranking-system-contract`, `matchmaking-fairness-invariants` |
+| 66 | `spectator-tournament-engineer` | Esports | SS-11 | NEW | S | `replay-format`, `spectator-spec`, `tournament-mode-spec` |
+
+---
+
+## 3. Disposition Breakdown by Subsystem
+
+| SS | Name | REUSE | ADAPT | NEW | Total principal roles |
+|----|------|-------|-------|-----|----------------------|
+| SS-03 | Asset Generation Pipeline | 0 | 0 | 14 | 14 |
+| SS-04 | Multi-Discipline Production | 0 | 6 | 16 | 22 (cross-listed) |
+| SS-05 | Simulation Quality Verification | 0 | 4 | 1 | 5 |
+| SS-06 | Convergence Tracking | 0 | 1 | 1 | 2 |
+| SS-07 | Playtest Protocol | 0 | 3 | 0 | 3 |
+| SS-08 | Cert and Distribution | 0 | 2 | 8 | 10 |
+| SS-09 | Monetization Ethics | 0 | 0 | 2 | 2 |
+| SS-10 | Canon Knowledge-Base | 0 | 0 | 4 | 4 |
+| SS-11 | Genre-Gated Lanes | 0 | 0 | 8 | 8 |
+| SS-12 | XR Platform Seam | 0 | 0 | 1 | 1 |
+
+> Note: Roles marked REUSE (orchestrator, adversary, architect, state-manager, etc.) are
+> infrastructure roles sourced from vsdd-factory Layer 1; they do not appear in this table
+> because they are not game-discipline specialists and are not owned by a game SS-NN.
+> The 14 REUSE agents from component-inventory.md all belong to Layer 1 (core orchestration).
+> The 18 ADAPT agents belong to Layer 1 or Layer 2 boundary roles.
+
+---
+
+## 4. Producer-Orchestrator Scheduling Model
+
+### 4.1 Role Types in the Scheduler
+
+The studio uses two scheduling classes:
+
+**Catalyst/Shared (C)** — Always-on; wired once at pipeline initialization; cross-discipline
+arbiters. The `producer` holds the `game-production-plan` and the
+`cross-discipline-dependency-contract` — the producer IS the scheduler.
+
+**Specialist (S)** — Activated per wave according to the dependency DAG. Each specialist
+runs within its wave, reads upstream handoff artifacts, produces its contracted outputs,
+and commits to the worktree. The wave gate validates handoff artifact presence before
+the next wave starts.
+
+### 4.2 Cross-Discipline Dependency DAG
+
+The canonical production order is a five-phase wave DAG grounded in
+RECONCILIATION §4 mechanism mapping and §7 convergence model:
+
+```
+Wave 0 — Design Foundation
+├── systems-designer (design-spec, systems-spec, balance-data, economy-graph,
+│   progression-spec, content-data, level-specs, ui-spec, accessibility-contract,
+│   design-intent-contracts)
+├── economy-designer (economy-graph, economy-balance-contract)
+├── narrative-designer (narrative-graph, quest-schema)
+├── worldbuilder, loremaster (canon-kb — entity-registry, timeline, naming-registry)
+├── narrative-director (story-structure-spec, narrative-arc-contract)
+└── combat-designer, level-designer, encounter-designer, ux-accessibility-designer
+
+  HANDOFF CONTRACT: design-spec-bundle validated; engine-neutral assertion by DI-008;
+  canon-kb structural integrity (BC-12.12.007); all downstream disciplines gate on this.
+
+Wave 1 — Art and Audio Generation
+├── asset-generation-orchestrator (routes all requests via asset-adapter; tier-assigns)
+├── concept-artist, env-modeler, prop-artist, char-modeler, char-texture, vfx-artist
+│   → asset-generation-requests → [asset-adapter] → GLB packages + provenance sidecars
+├── char-rigger, char-ta, animator, anim-ta (rig, skin.weights, anim.clips)
+├── composer, audio-designer (music-interactive-spec, sfx-manifest)
+├── voice-director (dialogue-table, voice generation; consent gate if likeness-ref != null)
+└── audio-implementer (audio-build-manifest, middleware wiring)
+
+  HANDOFF CONTRACT: all asset-provenance-sidecars complete with disclosure_class (DI-003);
+  quality-gate-report pass per risk tier; GLB topology/UV/PBR validated; loudness conformance.
+
+Wave 2 — Engineering Integration
+├── implementer (pure-sim slice: economy, FSM, AI BTs, rating-system — TDD Red Gate)
+├── test-writer (sim-BC tests, replay-regression-contract tests; failing tests first)
+├── backend-services-engineer (online-services-spec, remote-config-contract)
+├── platform-integrator (platform-integration-manifest)
+├── security-engineer (server-authority-invariant-suite)
+├── audio-implementer (bank build; loudness/true-peak CI gate)
+├── lipsync-animator (lip-sync-pipeline-contract; ARKit-52 blendshapes)
+└── cinematic-director, camera-cinematography (sequence-graph, camera-rules-profile)
+
+  HANDOFF CONTRACT: build passes CI; TDD Red Gate cleared for pure-sim slice; replay-
+  regression-contract authored and linked (BC-6.03.001); security-requirements-contract
+  structural presence validated; all asset refs in sequence-graph resolve.
+
+Wave 3 — QA, Balance, Compliance
+├── functional-qa (replay-regression suite run at declared determinism tier)
+├── balance-qa (balance-band assertions, economy rebalance, ranking-system math)
+├── compat-qa (perf-budget-contract)
+├── localization-qa (pseudo-loc, coverage, ICU parity)
+├── accessibility-qa (GAG/XAG, CVAA)
+├── compliance-qa (compliance-checklist, ratings-submission-manifest)
+├── compliance-officer (IARC auto-fill, ai-disclosure-manifest, privacy-config-contract)
+├── ratings-submitter (ratings-submission-manifest; terminal step = human-gated)
+└── monetization-designer + economy-balancer (if monetization enabled; adversary review)
+
+  HANDOFF CONTRACT: replay-regression green at declared tier; all BCs in sim-quality
+  dimensions green; compliance-checklist populated; ai-disclosure-manifest generated;
+  monetization-ethics-contract adversarially reviewed (if present).
+
+Wave 4 — Distribution and Release Prep
+├── cert-owner (cert-preflight-checklist; distribution-release-pipeline)
+├── release-engineer (steamcmd/butler/fastlane CLIs; human-gated task list emitted)
+├── trailer-editor (capture-recipe; marketing-asset-manifest)
+├── store-copywriter + key-art-director (store-page-spec; Steam capsule lint)
+├── community-manager (campaign-beat-plan)
+└── liveops-sre (telemetry-event-taxonomy, kpi-dashboard-spec, crash-reporting-wiring)
+
+  HANDOFF CONTRACT: distribution-release-pipeline CI-verified (CLI commands pass);
+  human-gated task list surfaced for console cert + store publish (DI-006);
+  store-page-spec machine-validated (dimensions, char limits, format).
+```
+
+Genre-gated agents (`ranking-systems-engineer`, `spectator-tournament-engineer`,
+`mod-api-owner`, `ugc-pipeline-engineer`, `anti-cheat-integrator`, `moderation-ops`,
+`xr-adapter-owner`) are activated only when the genre-profile declares the corresponding
+lane. Inactive agents produce zero artifacts (BC-13.01.002 inactive-lane guarantee).
+
+### 4.3 Change-Propagation Rules
+
+| Upstream change | Propagates to | Gate |
+|----------------|--------------|------|
+| `design-spec` modified | All Wave 1+ consumers via cross-discipline-dependency-contract | Dependency contract re-validated on merge |
+| `canon-kb` entity added/modified | Narrative graph, quest schema, bark rules, RAG contract | BC-12.12.008 retcon propagation: where-used impact analysis |
+| Asset GLB modified | All sequence-graph refs | sequence-validation-report re-run |
+| `economy-graph` modified | Balance-band assertions, sin/faucet model, leaderboard seeds | Balance-qa re-run; economy conservation VP re-evaluated |
+| `ranking-system-contract` modified | Matchmaking fairness invariants, tournament BCs | Ranking-system math VPs re-verified |
+| Engine adapter version bump | Conformance suite re-run for affected capabilities | BC-2.02.005 anti-drift scheduled check |
+
+---
+
+## 5. Boundary with vsdd-Factory Infrastructure Agents
+
+Game-discipline specialist agents (this document) run INSIDE the wave-DAG orchestrated
+by the vsdd-factory infrastructure agents (Layer 1, not enumerated here):
+
+- `orchestrator` dispatches waves; reads `game-production-plan` from `producer`.
+- `state-manager` bookmarks wave state; game-domain decision log entries added.
+- `adversary` reviews game-discipline outputs at convergence; `monetization-ethics-contract`
+  adversarial pass is mandatory when monetization present.
+- `consistency-validator` cross-checks IDs, BC anchors, VP anchors across all game artifacts.
+- `pr-manager` runs the 9-step PR lifecycle for each story worktree.
+
+These agents are REUSE from vsdd-factory and are not counted in the 66-role studio roster.
+
+---
+
+## 6. Activation Model (Scope Tiers)
+
+| Tier | Activated agents | Rationale |
+|------|-----------------|-----------|
+| **Tier 1 — v1 Core** | Roles 1–43, 50–54, 58–61 (~50 roles) | Det-sim pilot universal spine |
+| **Tier 2 — Genre-Gated** | Roles 44–49, 62–66 (monetization, marketing, esports, modding, XR seam) | Optional; activated per genre-profile |
+| **Tier 3 — Deferred** | `xr-adapter-owner` (role 62) implementation | Seam reserved; build deferred |
+
+> The det-sim pilot (Bevy, premium/cosmetic-DLC, no UGC, no esports) deploys
+> approximately 40 active specialists plus all catalysts.

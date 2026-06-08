@@ -165,9 +165,11 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 | CAP-014 | P2 | 3 | prd-supplements/prd-cap-013-014.md | ss-14/ | 7 |
 
 > **Note on ss-NN directories:** Directory names `ss-01` through `ss-14` mirror capability
-> numbers for navigability. They are NOT architecture subsystem IDs. The architect will
-> assign `SS-NN` IDs from ARCH-INDEX.md in Phase 1b and update all BC frontmatter
-> `subsystem:` fields from `SS-TBD` to real IDs.
+> numbers for navigability. They are NOT architecture subsystem IDs. Subsystem IDs have
+> been assigned from `.factory/specs/architecture/subsystem-decomposition.md` (see
+> ARCH-INDEX.md). All BC frontmatter `subsystem:` fields are now populated with real SS-NN
+> values (SS-01 through SS-12). CAP-002 is merged into SS-01 (Engine-Adapter Protocol);
+> CAP-010 is merged into SS-08 (Cert+Distribution).
 
 ---
 
@@ -299,13 +301,17 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 
 ## Section 8 — Open Items and Integration Notes
 
-### 8.1 SS-TBD Subsystem Placeholder
+### 8.1 Subsystem Assignment (Resolved)
 
-**ALL 168 behavioral contracts have `subsystem: SS-TBD` in their frontmatter.** This is
-correct and expected. The architect must produce `architecture/ARCH-INDEX.md` with the
-Subsystem Registry (`SS-NN` IDs), then update all BC frontmatter `subsystem:` fields in
-Phase 1b. The BC file paths (directory `ss-NN/`, filename) are immutable per
-`append_only_numbering` policy.
+**All 168 behavioral contracts have been assigned to architecture subsystems (SS-01 through
+SS-12).** The `subsystem: SS-TBD` placeholder has been replaced in all BC frontmatter.
+The assignment was propagated from `.factory/specs/architecture/subsystem-decomposition.md`
+(see ARCH-INDEX.md Subsystem Registry). BC file paths (directory `ss-NN/`, filename) are
+immutable per `append_only_numbering` policy.
+
+Subsystem distribution: SS-01 (40 BCs: CAP-001+002), SS-02 (9), SS-03 (15), SS-04 (16),
+SS-05 (11), SS-06 (12), SS-07 (5), SS-08 (17: CAP-009+010), SS-09 (13), SS-10 (9),
+SS-11 (14), SS-12 (7).
 
 ### 8.2 BC Frontmatter Priority Gap
 

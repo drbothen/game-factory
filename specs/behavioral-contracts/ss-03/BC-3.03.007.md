@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -116,7 +116,7 @@ and visible in the convergence report; it is never silent.
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies the "replay: none → degrade to human-playtest evidence" fallback described in ADR-0003 ("An adapter lacking these declares `replay: none` and the regression dimension falls back to human-playtest evidence") and in PROC-004 Stage 4 (Degradation). |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-006 (Human-Gated Tasks Are Surfaced Not Silently Dropped) |
-| Architecture Module | SS-TBD (Replay Engine, Convergence Tracker — filled by architect) |
+| Architecture Module | SS-02 (Replay Engine, Convergence Tracker — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 4 (Degradation), PROC-006 (Human-Gated Task Surfacing) |
 | ADRs | ADR-0003 §Consequences ("adapter lacking these declares `replay: none`") |
@@ -128,8 +128,8 @@ and visible in the convergence report; it is never silent.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md` — `tests/replay` dimension degradation handling
-- `architecture/SS-TBD-replay-engine.md` — Graceful skip for replay: none
+- `architecture/SS-02-convergence-tracker.md` — `tests/replay` dimension degradation handling
+- `architecture/SS-02-replay-engine.md` — Graceful skip for replay: none
 
 ## Story Anchor
 

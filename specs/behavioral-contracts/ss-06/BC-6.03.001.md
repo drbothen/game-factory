@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -112,7 +112,7 @@ accepted.
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC implements "replay-regression contract linkage" as named in CAP-006's third contract layer |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | replay-linkage-validator (SS-TBD; assigned by architect) |
+| Architecture Module | replay-linkage-validator (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -125,7 +125,7 @@ accepted.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-replay-linkage-validator.md` — replay linkage cross-reference validator
+- `architecture/SS-05-replay-linkage-validator.md` — replay linkage cross-reference validator
 
 ## Story Anchor
 

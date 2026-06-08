@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -127,7 +127,7 @@ A GLB without a complete sidecar is never ingested, per DI-003.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — art packages (GLB) are the primary art artifact produced by the Studio-of-Agents; this BC defines the machine-checkable production and ingest contract for that artifact class. |
 | L2 Domain Invariants | DI-003 (Every Generated Asset Has a Complete Provenance Sidecar) |
-| Architecture Module | SS-TBD — art quality gate; asset ingest pipeline; provenance sidecar validator |
+| Architecture Module | SS-04 — art quality gate; asset ingest pipeline; provenance sidecar validator |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -137,8 +137,8 @@ A GLB without a complete sidecar is never ingested, per DI-003.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-art-pipeline.md` — quality gate, GLB validation
-- `architecture/SS-TBD-asset-store.md` — asset ingest, provenance check
+- `architecture/SS-04-art-pipeline.md` — quality gate, GLB validation
+- `architecture/SS-04-asset-store.md` — asset ingest, provenance check
 
 ## Story Anchor
 

@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -118,7 +118,7 @@ gate (CAP-008).
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the narrative-graph is named as a primary artifact in RECONCILIATION §5.6 and §6.1 as owned by the narrative-designer agent; this BC defines its machine-checkable structural validation contract. |
 | L2 Domain Invariants | DI-008 (engine-neutral spec layer) |
-| Architecture Module | SS-TBD — narrative graph validator; Canon-KB query interface |
+| Architecture Module | SS-04 — narrative graph validator; Canon-KB query interface |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -128,7 +128,7 @@ gate (CAP-008).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-narrative-pipeline.md` — narrative graph validator, graph export
+- `architecture/SS-04-narrative-pipeline.md` — narrative graph validator, graph export
 
 ## Story Anchor
 

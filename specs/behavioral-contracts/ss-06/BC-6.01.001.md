@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -109,7 +109,7 @@ economy graph (gold, energy, action points, items, currency).
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC is a simulation behavioral contract asserting economy conservation, which is exactly what CAP-006 defines as "economy invariants" in its simulation-BC scope |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | economy-sim (SS-TBD; assigned by architect) |
+| Architecture Module | economy-sim (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -121,7 +121,7 @@ economy graph (gold, energy, action points, items, currency).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-economy-sim.md` — economy simulation module (to be created by architect)
+- `architecture/SS-05-economy-sim.md` — economy simulation module (to be created by architect)
 
 ## Story Anchor
 

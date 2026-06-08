@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-01
 capability: CAP-002
 lifecycle_status: active
 introduced: v0.1.0
@@ -123,7 +123,7 @@ acceptance tests exercise the real protocol contract rather than a stale snapsho
 | L2 Capability | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 |
 | Capability Anchor Justification | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 — this BC specifies the versioning/acceptance pattern from ADR-0002 (Terraform-style), which is the "versioning/acceptance" aspect of the conformance gating capability. |
 | L2 Domain Invariants | DI-001 (Factory Core Never Names a Specific Engine), DI-002 (Every Engine Adapter Must Pass Conformance Before Acceptance) |
-| Architecture Module | SS-TBD (Conformance Suite, Protocol Version Registry — filled by architect) |
+| Architecture Module | SS-01 (Conformance Suite, Protocol Version Registry — filled by architect) |
 | Stories | (filled by story-writer) |
 | ADRs | ADR-0002 §Decision point 2 (Versioning + acceptance testing — Terraform-style) |
 
@@ -135,7 +135,7 @@ acceptance tests exercise the real protocol contract rather than a stale snapsho
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-conformance-suite.md` — Compatibility matrix schema, version validation
+- `architecture/SS-01-conformance-suite.md` — Compatibility matrix schema, version validation
 
 ## Story Anchor
 

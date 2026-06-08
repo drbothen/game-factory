@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-06
 capability: CAP-007
 lifecycle_status: active
 introduced: v0.1.0
@@ -109,7 +109,7 @@ esports enabled) are also verified. Degrades by tier from T1 (bitwise) to T2
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #2 (tests/replay) |
 | L2 Domain Invariants | DI-004 (determinism tier declared, never assumed), DI-012 |
-| Architecture Module | convergence-tracker (SS-TBD) |
+| Architecture Module | convergence-tracker (SS-06) |
 | Stories | S-TBD |
 
 ## Related BCs
@@ -119,7 +119,7 @@ esports enabled) are also verified. Degrades by tier from T1 (bitwise) to T2
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md`
+- `architecture/SS-06-convergence-tracker.md`
 
 ## Story Anchor
 

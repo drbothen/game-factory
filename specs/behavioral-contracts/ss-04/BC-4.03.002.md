@@ -3,7 +3,7 @@ document_type: behavioral-contract
 level: L3
 id: BC-4.03.002
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-03
 capability: CAP-004
 priority: P0
 lifecycle_status: active

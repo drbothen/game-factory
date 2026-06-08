@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -110,7 +110,7 @@ skill requirement (playtest-delegated per BC-6.02.005).
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC implements "solvability" as named in CAP-006's design-intent contract scope |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | design-intent-verifier (SS-TBD; assigned by architect) |
+| Architecture Module | design-intent-verifier (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -122,7 +122,7 @@ skill requirement (playtest-delegated per BC-6.02.005).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-design-intent-verifier.md` — design intent verification module
+- `architecture/SS-05-design-intent-verifier.md` — design intent verification module
 
 ## Story Anchor
 

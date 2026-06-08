@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -121,7 +121,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the `lip-sync-pipeline-contract` is listed in RECONCILIATION §6.3 (cinematics additions) as a primary cinematic artifact produced by the lipsync-animator agent within CAP-005. |
 | L2 Domain Invariants | DI-006 (human-gated tasks surfaced — SAG-AFTRA consent) |
-| Architecture Module | SS-TBD — lip-sync pipeline; ARKit-52 blendshape validator; voice-consent-registry |
+| Architecture Module | SS-04 — lip-sync pipeline; ARKit-52 blendshape validator; voice-consent-registry |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -130,7 +130,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-cinematics-pipeline.md` — lip-sync contract, consent gate
+- `architecture/SS-04-cinematics-pipeline.md` — lip-sync contract, consent gate
 
 ## Story Anchor
 

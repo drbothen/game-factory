@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -114,7 +114,7 @@ for the pure-sim slice.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — simulation code modules are primary artifacts in CAP-005's "generates EVERYTHING a game needs — code artifacts" mandate; the TDD Red Gate is the machine-checkable production process contract for those modules per RECONCILIATION §4. |
 | L2 Domain Invariants | DI-012 (every ContractArtifact has a declared validation method — TDD Red Gate IS the validation method for pure-sim code contracts) |
-| Architecture Module | SS-TBD — TDD Red Gate hook; story audit trail; test runner |
+| Architecture Module | SS-04 — TDD Red Gate hook; story audit trail; test runner |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -123,7 +123,7 @@ for the pure-sim slice.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-engineering-pipeline.md` — TDD Red Gate hook, story audit trail
+- `architecture/SS-04-engineering-pipeline.md` — TDD Red Gate hook, story audit trail
 
 ## Story Anchor
 

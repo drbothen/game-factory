@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -121,7 +121,7 @@ Variance detected within the pinned runner is a genuine regression signal.
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies "T2: pinned-runner" comparison behavior, which is the T2 tier clause in CAP-003's tier-degraded comparison method description, grounded in ADR-0003's `same-machine` tier definition. |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed) |
-| Architecture Module | SS-TBD (Regression Comparator, CI Runner Registry — filled by architect) |
+| Architecture Module | SS-02 (Regression Comparator, CI Runner Registry — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 2-3 (T2 path: pinned runner + snapshot diff) |
 | ADRs | ADR-0003 (T2 = `same-machine`; regression method = snapshot diff on pinned runner) |
@@ -135,7 +135,7 @@ Variance detected within the pinned runner is a genuine regression signal.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-regression-comparator.md` — Structured diff algorithm, pinned runner validation
+- `architecture/SS-02-regression-comparator.md` — Structured diff algorithm, pinned runner validation
 
 ## Story Anchor
 

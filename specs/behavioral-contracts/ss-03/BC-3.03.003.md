@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -116,7 +116,7 @@ checked checkpoint frame.
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies "T1: exact snapshot-hash" comparison behavior, which is the T1 tier clause in CAP-003's description of tier-degraded comparison methods. |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed) |
-| Architecture Module | SS-TBD (Regression Comparator — filled by architect) |
+| Architecture Module | SS-02 (Regression Comparator — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 3 (Diff Evaluation — T1 path) |
 | ADRs | ADR-0003 (T1 = `bitwise-cross-platform`; regression comparison method = exact snapshot-hash diff) |
@@ -129,7 +129,7 @@ checked checkpoint frame.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-regression-comparator.md` — SHA-256 snapshot hash, canonical serialization format
+- `architecture/SS-02-regression-comparator.md` — SHA-256 snapshot hash, canonical serialization format
 
 ## Story Anchor
 

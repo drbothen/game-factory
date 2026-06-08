@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-06
 capability: CAP-007
 lifecycle_status: active
 introduced: v0.1.0
@@ -112,7 +112,7 @@ for any game shipping after that date.
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #8 (provenance/legal + compliance) |
 | L2 Domain Invariants | DI-003 (every generated asset has complete provenance sidecar), DI-006 (human-gated tasks surfaced), DI-012 |
-| Architecture Module | convergence-tracker / provenance-compliance-gate (SS-TBD) |
+| Architecture Module | convergence-tracker / provenance-compliance-gate (SS-06) |
 | Stories | S-TBD |
 
 ## Related BCs
@@ -122,7 +122,7 @@ for any game shipping after that date.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md`
+- `architecture/SS-06-convergence-tracker.md`
 
 ## Story Anchor
 

@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-01
 capability: CAP-002
 lifecycle_status: active
 introduced: v0.1.0
@@ -119,7 +119,7 @@ the operationalization of DI-002.
 | L2 Capability | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 |
 | Capability Anchor Justification | CAP-002 ("Engine Adapter Conformance Gating") per capabilities.md §CAP-002 — this BC is the direct operationalization of "No engine adapter can be used without passing conformance," which is the central statement of CAP-002. |
 | L2 Domain Invariants | DI-002 (Every Engine Adapter Must Pass Conformance Before Acceptance) |
-| Architecture Module | SS-TBD (Adapter Registry, Conformance Gate — filled by architect) |
+| Architecture Module | SS-01 (Adapter Registry, Conformance Gate — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-002 Stage 6 (Acceptance — "All declared capabilities pass conformance → adapter accepted") |
 | ADRs | ADR-0002 |
@@ -132,7 +132,7 @@ the operationalization of DI-002.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-conformance-suite.md` — Acceptance gate, adapter registry schema
+- `architecture/SS-01-conformance-suite.md` — Acceptance gate, adapter registry schema
 - `.factory/planning/decisions/0002-protocol-and-conformance-stance.md` — ADR-0002 §Consequences ("'Implement adapter + pass conformance for declared capabilities' is the formal bar")
 
 ## Story Anchor

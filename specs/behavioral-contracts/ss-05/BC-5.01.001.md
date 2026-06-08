@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -113,7 +113,7 @@ cinematics) and is consumed through the cross-discipline dependency contract.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — this BC defines the machine-checkable production contract for the core design discipline artifact stack, which is the primary artifact output of CAP-005's "generates EVERYTHING a game needs — design... artifacts" mandate. |
 | L2 Domain Invariants | DI-008 (Factory Core Spec Layer Is Engine-Portable by Construction) |
-| Architecture Module | SS-TBD — game design artifact generator; design-spec schema registry |
+| Architecture Module | SS-04 — game design artifact generator; design-spec schema registry |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -124,8 +124,8 @@ cinematics) and is consumed through the cross-discipline dependency contract.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-game-design.md` — design agent cluster, schema registry
-- `architecture/SS-TBD-design-intent-contracts.md` — design-intent-contract specification
+- `architecture/SS-04-game-design.md` — design agent cluster, schema registry
+- `architecture/SS-04-design-intent-contracts.md` — design-intent-contract specification
 
 ## Story Anchor
 

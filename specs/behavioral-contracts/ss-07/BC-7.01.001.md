@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-06
 capability: CAP-007
 lifecycle_status: active
 introduced: v0.1.0
@@ -107,7 +107,7 @@ machine-verifiable quality dimension of the 11-dimension convergence model.
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #1 (sim/spec), which is one of the 11 dimensions CAP-007 declares it tracks and gates |
 | L2 Domain Invariants | DI-006 (human-gated tasks surfaced not dropped — for degradation declarations), DI-012 (declared validation method) |
-| Architecture Module | convergence-tracker (SS-TBD; assigned by architect) |
+| Architecture Module | convergence-tracker (SS-06) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -117,7 +117,7 @@ machine-verifiable quality dimension of the 11-dimension convergence model.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md` — convergence tracking module
+- `architecture/SS-06-convergence-tracker.md` — convergence tracking module
 
 ## Story Anchor
 

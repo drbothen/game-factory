@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -116,7 +116,7 @@ human-judgment boundary is a factory defect (DI-007 enforcement).
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC enforces the explicit playtest delegation requirement named in CAP-006 as "explicit playtest delegation for non-verifiable claims" within design-intent contracts |
 | L2 Domain Invariants | DI-007 (playtest satisfaction is always a human gate), DI-012 (every contract has a declared validation method) |
-| Architecture Module | design-intent-verifier / schema-validator (SS-TBD; assigned by architect) |
+| Architecture Module | design-intent-verifier / schema-validator (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -130,7 +130,7 @@ human-judgment boundary is a factory defect (DI-007 enforcement).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-design-intent-verifier.md` — design intent verification and schema validation module
+- `architecture/SS-05-design-intent-verifier.md` — design intent verification and schema validation module
 
 ## Story Anchor
 

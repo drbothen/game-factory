@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -111,7 +111,7 @@ regression (CAP-003). The separation is checked by import lint on every CI run.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — code modules are a primary artifact class of CAP-005 ("generates EVERYTHING a game needs — code... artifacts"); this BC defines the machine-checkable architectural separation contract for code artifacts. |
 | L2 Domain Invariants | DI-008 (engine-neutral spec layer; analog: pure-sim code isolation) |
-| Architecture Module | SS-TBD — import lint gate; module type registry; presentation symbol blocklist |
+| Architecture Module | SS-04 — import lint gate; module type registry; presentation symbol blocklist |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -120,7 +120,7 @@ regression (CAP-003). The separation is checked by import lint on every CI run.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-engineering-pipeline.md` — import lint, module classification
+- `architecture/SS-04-engineering-pipeline.md` — import lint, module classification
 
 ## Story Anchor
 

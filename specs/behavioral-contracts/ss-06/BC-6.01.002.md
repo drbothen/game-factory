@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-05
 capability: CAP-006
 lifecycle_status: active
 introduced: v0.1.0
@@ -111,7 +111,7 @@ and not part of the pure-sim slice).
 | L2 Capability | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 |
 | Capability Anchor Justification | CAP-006 ("Contract-Driven Simulation Quality Verification") per capabilities.md §CAP-006 — this BC implements the "damage I/O matrices" sub-type of simulation behavioral contracts explicitly named in CAP-006 |
 | L2 Domain Invariants | DI-012 (every contract has a declared validation method) |
-| Architecture Module | combat-sim (SS-TBD; assigned by architect) |
+| Architecture Module | combat-sim (SS-05) |
 | Stories | S-TBD (assigned by story-writer) |
 
 ## Related BCs
@@ -123,7 +123,7 @@ and not part of the pure-sim slice).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-combat-sim.md` — combat simulation module (to be created by architect)
+- `architecture/SS-05-combat-sim.md` — combat simulation module (to be created by architect)
 
 ## Story Anchor
 

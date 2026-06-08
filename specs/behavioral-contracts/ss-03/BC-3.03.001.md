@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -122,7 +122,7 @@ does not modify simulation behavior.
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies the input stream recording step that CAP-003 describes as "records game input streams keyed by simulation frame," which is the first stage of the replay-regression pipeline. |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-012 (Every ContractArtifact Has a Declared Validation Method) |
-| Architecture Module | SS-TBD (Replay Recorder — filled by architect) |
+| Architecture Module | SS-02 (Replay Recorder — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 1 (Input Recording) |
 | ADRs | ADR-0003 (determinism tier + three replay prerequisites) |
@@ -136,7 +136,7 @@ does not modify simulation behavior.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-replay-recorder.md` — Recording stream format, tick-keyed event schema
+- `architecture/SS-02-replay-recorder.md` — Recording stream format, tick-keyed event schema
 - `.factory/planning/decisions/0003-determinism-tier-capability.md` — Three replay prerequisites
 
 ## Story Anchor

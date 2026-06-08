@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-06
 capability: CAP-007
 lifecycle_status: active
 introduced: v0.1.0
@@ -111,7 +111,7 @@ verified.
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #11 (security-invariants) |
 | L2 Domain Invariants | DI-010 (kernel anti-cheat never autonomously authored), DI-012 |
-| Architecture Module | convergence-tracker / security-gate (SS-TBD) |
+| Architecture Module | convergence-tracker / security-gate (SS-06) |
 | Stories | S-TBD |
 
 ## Related BCs
@@ -120,7 +120,7 @@ verified.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md`
+- `architecture/SS-06-convergence-tracker.md`
 
 ## Story Anchor
 

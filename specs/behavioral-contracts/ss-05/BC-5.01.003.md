@@ -13,7 +13,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -109,7 +109,7 @@ which tier (basic/intermediate/advanced) of GAG the game targets.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the accessibility-contract is a named design artifact in CAP-005's artifact taxonomy (RECONCILIATION §5.2, §6.1) and is part of the design discipline artifact bundle. |
 | L2 Domain Invariants | DI-008 (engine-neutral spec layer), DI-006 (human-gated tasks surfaced not dropped) |
-| Architecture Module | SS-TBD — accessibility contract validator; GAG/XAG feature registry |
+| Architecture Module | SS-04 — accessibility contract validator; GAG/XAG feature registry |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -118,7 +118,7 @@ which tier (basic/intermediate/advanced) of GAG the game targets.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-accessibility-checker.md`
+- `architecture/SS-04-accessibility-checker.md`
 
 ## Story Anchor
 

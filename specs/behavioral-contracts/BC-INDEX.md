@@ -27,11 +27,11 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Behavioral Contracts Index
 
-> **IMPORTANT — Subsystem IDs are SS-TBD.** Subsystem IDs (`SS-NN`) in each BC file's
-> frontmatter are placeholders (`SS-TBD`) pending the architect's ARCH-INDEX Subsystem
-> Registry in Phase 1b. The directory names `ss-NN` used here mirror capability numbers
-> (CAP-001 = ss-01, etc.) for navigability only and are NOT architecture subsystem IDs.
-> The architect will assign `SS-NN` IDs and update BC frontmatter after ARCH-INDEX is produced.
+> **Subsystem IDs are now assigned.** All BC frontmatter `subsystem:` fields have been
+> populated from the architect's ARCH-INDEX Subsystem Registry (see
+> `.factory/specs/architecture/subsystem-decomposition.md`). The directory names `ss-NN`
+> mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
+> architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
 **Grand total: 168 behavioral contracts** across 14 capabilities.
 
@@ -333,20 +333,20 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 
 ## Summary Counts
 
-| Capability | Priority | BC Count |
-|-----------|----------|----------|
-| CAP-001 — Engine-Agnostic Build and Test | P0 | 34 |
-| CAP-002 — Conformance Gating | P0 | 6 |
-| CAP-003 — Replay Regression | P0 | 9 |
-| CAP-004 — Asset Generation + Provenance | P0 | 15 |
-| CAP-005 — Multi-Discipline Production | P0 | 16 |
-| CAP-006 — Simulation Quality | P0 | 11 |
-| CAP-007 — Convergence Tracking | P0 | 12 |
-| CAP-008 — Playtest Protocol | P1 | 5 |
-| CAP-009 — Cert + Distribution | P1 | 11 |
-| CAP-010 — Compliance + AI Disclosure | P1 | 6 |
-| CAP-011 — Monetization Ethics | P1 | 13 |
-| CAP-012 — Canon KB | P1 | 9 |
-| CAP-013 — Genre-Gated Lanes | P2 | 14 |
-| CAP-014 — XR Seam | P2 | 7 |
-| **TOTAL** | | **168** |
+| Capability | Priority | Subsystem | BC Count |
+|-----------|----------|-----------|----------|
+| CAP-001 — Engine-Agnostic Build and Test | P0 | SS-01 | 34 |
+| CAP-002 — Conformance Gating | P0 | SS-01 (merged into Engine-Adapter Protocol) | 6 |
+| CAP-003 — Replay Regression | P0 | SS-02 | 9 |
+| CAP-004 — Asset Generation + Provenance | P0 | SS-03 | 15 |
+| CAP-005 — Multi-Discipline Production | P0 | SS-04 | 16 |
+| CAP-006 — Simulation Quality | P0 | SS-05 | 11 |
+| CAP-007 — Convergence Tracking | P0 | SS-06 | 12 |
+| CAP-008 — Playtest Protocol | P1 | SS-07 | 5 |
+| CAP-009 — Cert + Distribution | P1 | SS-08 | 11 |
+| CAP-010 — Compliance + AI Disclosure | P1 | SS-08 (merged into Cert+Distribution) | 6 |
+| CAP-011 — Monetization Ethics | P1 | SS-09 | 13 |
+| CAP-012 — Canon KB | P1 | SS-10 | 9 |
+| CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 14 |
+| CAP-014 — XR Seam | P2 | SS-12 | 7 |
+| **TOTAL** | | | **168** |

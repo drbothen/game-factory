@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -140,7 +140,7 @@ regression system has no reliable baseline and produces noise.
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies the golden state lifecycle that CAP-003 references in "compares resulting simulation state against golden references." Golden state management is a necessary precondition for all comparison BCs (BC-3.03.003–005). |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-012 (Every ContractArtifact Has a Declared Validation Method) |
 | L2 Failure Modes | FM-002 (Determinism Regression T1 Tier — golden state is the baseline that detects FM-002) |
-| Architecture Module | SS-TBD (Golden State Registry — filled by architect) |
+| Architecture Module | SS-02 (Golden State Registry — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 1 (Golden sim state captured at designated checkpoints) |
 | ADRs | ADR-0003 |
@@ -155,7 +155,7 @@ regression system has no reliable baseline and produces noise.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-golden-state-registry.md` — Golden state schema, authorization, invalidation lifecycle
+- `architecture/SS-02-golden-state-registry.md` — Golden state schema, authorization, invalidation lifecycle
 
 ## Story Anchor
 

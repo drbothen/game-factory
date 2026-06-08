@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-02
 capability: CAP-003
 lifecycle_status: active
 introduced: v0.1.0
@@ -128,7 +128,7 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies "replays them deterministically," the core replay execution step that CAP-003 names as the second stage of the replay-regression pipeline. |
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed) |
-| Architecture Module | SS-TBD (Replay Engine — filled by architect) |
+| Architecture Module | SS-02 (Replay Engine — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 2 (Tier-Appropriate Replay) |
 | ADRs | ADR-0003 (three replay prerequisites: fixed-timestep tick, seeded RNG, input injection) |
@@ -143,7 +143,7 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-replay-engine.md` — Tick schedule enforcement, input injection, external-input filtering
+- `architecture/SS-02-replay-engine.md` — Tick schedule enforcement, input injection, external-input filtering
 
 ## Story Anchor
 

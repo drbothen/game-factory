@@ -14,7 +14,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -109,7 +109,7 @@ are checked algebraically. Any band violation or conservation failure blocks the
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — this BC defines the machine-verifiable balance-band contract for the economy-graph, one of the primary named artifacts in CAP-005 ("balance data, economy graphs"). |
 | L2 Domain Invariants | DI-008 (engine-portable spec layer), DI-012 (every ContractArtifact has declared validation method) |
-| Architecture Module | SS-TBD — economy-graph validator; sim runner (Machinations-class wrapper) |
+| Architecture Module | SS-04 — economy-graph validator; sim runner (Machinations-class wrapper) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -119,7 +119,7 @@ are checked algebraically. Any band violation or conservation failure blocks the
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-economy-sim.md` — sim runner, balance-band check pipeline
+- `architecture/SS-04-economy-sim.md` — sim runner, balance-band check pipeline
 
 ## Story Anchor
 

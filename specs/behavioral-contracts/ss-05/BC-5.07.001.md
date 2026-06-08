@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -112,7 +112,7 @@ that doesn't meet its requirements.
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the cross-discipline-dependency-contract is named in RECONCILIATION §5.8 and §6.1 as owned by the producer/orchestrator and is the central new artifact for multi-discipline coordination in CAP-005. |
 | L2 Domain Invariants | DI-006 (human-gated tasks surfaced — dependency blocks are equivalent surface), DI-012 (every ContractArtifact has declared validation method) |
-| Architecture Module | SS-TBD — producer-orchestrator; dependency contract schema registry; wave-gate hook |
+| Architecture Module | SS-04 — producer-orchestrator; dependency contract schema registry; wave-gate hook |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -122,7 +122,7 @@ that doesn't meet its requirements.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-production-orchestration.md` — dependency contract management, wave gate
+- `architecture/SS-04-production-orchestration.md` — dependency contract management, wave gate
 
 ## Story Anchor
 

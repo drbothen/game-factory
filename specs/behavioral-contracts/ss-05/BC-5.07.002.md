@@ -15,7 +15,7 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: greenfield
-subsystem: SS-TBD
+subsystem: SS-04
 capability: CAP-005
 lifecycle_status: active
 introduced: v1.0.0
@@ -124,7 +124,7 @@ the central enforcement mechanism for cross-discipline quality at the integratio
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — this BC enforces the cross-discipline-dependency-contract acceptance criteria at handoff time, which is the machine-verifiable spine of RECONCILIATION §6.1's "Automated validation on merge; DAM propagation" validation method for that artifact. |
 | L2 Domain Invariants | DI-012 (every ContractArtifact has declared validation method) |
-| Architecture Module | SS-TBD — acceptance criteria runner; handoff staging; audit log writer |
+| Architecture Module | SS-04 — acceptance criteria runner; handoff staging; audit log writer |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
@@ -135,7 +135,7 @@ the central enforcement mechanism for cross-discipline quality at the integratio
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-production-orchestration.md` — acceptance criteria runner, handoff staging
+- `architecture/SS-04-production-orchestration.md` — acceptance criteria runner, handoff staging
 
 ## Story Anchor
 

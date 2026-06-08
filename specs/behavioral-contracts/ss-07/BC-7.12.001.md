@@ -15,7 +15,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: domain-spec/capabilities.md
 origin: brownfield
 extracted_from: ".reference/vsdd-factory/skills/convergence-check"
-subsystem: SS-TBD
+subsystem: SS-06
 capability: CAP-007
 lifecycle_status: active
 introduced: v0.1.0
@@ -125,7 +125,7 @@ convergence; only the dimension set is replaced.
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the convergence loop engine and release-gating rule which is the core mechanism CAP-007 declares it provides |
 | L2 Domain Invariants | DI-006 (human-gated tasks surfaced), DI-012 |
-| Architecture Module | convergence-tracker / convergence-loop-engine (SS-TBD) |
+| Architecture Module | convergence-tracker / convergence-loop-engine (SS-06) |
 | Stories | S-TBD |
 
 ## Related BCs
@@ -134,7 +134,7 @@ convergence; only the dimension set is replaced.
 
 ## Architecture Anchors
 
-- `architecture/SS-TBD-convergence-tracker.md` — convergence loop engine implementation
+- `architecture/SS-06-convergence-tracker.md` — convergence loop engine implementation
 
 ## Story Anchor
 
