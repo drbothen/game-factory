@@ -46,7 +46,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 20 FINDINGS (0C/2I/3obs) resolved; clean passes: **0/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 21 CLEAN (0C/0I/0S); clean passes: **1/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -55,7 +55,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 21** (candidate clean #1 re-attempted). Pass 20 FINDINGS: 0C/2I/3obs — F-20-01 E-KB family orphaned (all 9 ss-12 BCs used symbolic tokens; E-KB 4→22 codes; symbolic→E-KB crosswalk added); F-20-02 E-NAR-003 overloaded in BC-5.04.001/002 (E-NAR-005/006 registered; BCs v1.2); ORCHESTRATOR PROACTIVE E-PLAY+E-REPLAY sweep (same class; +10/+12 codes; ss-08/ss-03 BCs v1.1); check (r) reverse-coverage gate added. CI v1.20 ALL CHECKS PASSED. Counter stays 0/3.
+**NEXT: `phase-1d-adversarial` — Pass 22** (consecutive clean pass 2 of 3). Pass 21 CLEAN: 0C/0I/0S. Pass-20 symbolic-token reconciliation spot-checked clean at BC-body level. DI-001..012 all enforced. ADR-0001..0007 all resolve. 11-dimension model complete. Two whole defect classes (count-summary; orphaned-error-family) confirmed genuinely closed. Clean-pass counter: **1/3**. Spec STABLE — do NOT modify spec between clean passes.
 
 **Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.7; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; CI gate v1.20 (checks a–r, ~26 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
@@ -69,6 +69,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | 18 | 2026-06-08 | FINDINGS | 0C / 1I | RESOLVED (I-18-01 nfr-catalog 35→41; proactive: prd-cap-006-007 CAP-007 12→19, prd-cap-001 34→35; check a.iv; CI v1.18) | **0/3** |
 | 19 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs | RESOLVED (F1 methodology-layer D-PLAY prose omitted DEGRADED → corrected; check q added; O1 adapter-protocols wire/record naming note; CI v1.19) | **0/3** |
 | 20 | 2026-06-08 | FINDINGS | 0C / 2I / 3 obs | RESOLVED (F-20-01 E-KB orphan 4→22 codes ss-12 BCs v1.1; F-20-02 E-NAR-003 overload → E-NAR-005/006 BC-5.04.001/002 v1.2; proactive E-PLAY+E-REPLAY sweep +22 codes ss-08/ss-03 v1.1; check r reverse-coverage; OBS-20-A/B resolved; 213→255 codes; CI v1.20) | **0/3** |
+| 21 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty LOW. Pass-20 symbolic-token reconciliation spot-checked at BC-body level (E-KB +19, E-PLAY +10, E-REPLAY +11, E-NAR +2 — all crosswalk mappings match emitting BC conditions exactly). ADR-0001..0007 resolve. DI-001..012 all enforced. 11-dim model complete. Two defect classes confirmed closed. OBS-21-A/B non-blocking. | **CLEAN-PASS COUNTER: 1/3** |
 
 ---
 
@@ -84,7 +85,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–20 all findings resolved (see phase-1-log.md); Pass 20: 0C/2I + orphan-family closure (E-KB/E-PLAY/E-REPLAY/E-NAR); 213→255 codes; check r; counter 0/3; Pass 21 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–20 all findings resolved; Pass 21 CLEAN (0C/0I/0S); clean-pass counter 1/3; spec stable; Pass 22 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -156,12 +157,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–20 DONE.
-**Phase-1d Pass 20 FINDINGS resolved:** (F-20-01 IMPORTANT) E-KB family orphaned — all 9 ss-12 BCs used symbolic tokens instead of registered E-KB codes; E-KB expanded 4→22 codes; symbolic→E-KB crosswalk added; ss-12 BCs v1.1. (F-20-02 IMPORTANT) E-NAR-003 overloaded in BC-5.04.001/002; E-NAR-005 (undeclared-variable) + E-NAR-006 (invalid-regex) registered; BCs v1.2. (ORCHESTRATOR SWEEP) E-PLAY: +10 codes E-PLAY-005..014; ss-08 BCs v1.1. E-REPLAY: +12 codes E-REPLAY-005..016; ss-03 BCs v1.1. E-GEN remains retired/excluded. (process-gap) check (r) added: every non-retired registered family must be cited by >=1 BC; 30 active families all cited, 0 orphans. (OBS-20-A) BC-12.12.004 Invariant 2 reworded; v1.1. (OBS-20-B) authoritative-timeline note BC-12.01.001; v1.1. CI gate v1.20 (a–r, ~26 sub-assertions) ALL CHECKS PASSED exit 0. 213→255 error codes (246 active). Counter stays 0/3.
-**Next action:** `phase-1d-adversarial` — **Pass 21** (candidate clean #1 re-attempted). Orphaned-family class fully gated by check r. All known drift resolved. Need 3 consecutive clean passes to converge.
-**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v2.2. 190 BCs; 41 NFRs; 255 error codes / 31 families total (246 active; E-GEN 9 codes retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006/007/008 open (non-blocking).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–21 DONE.
+**Phase-1d Pass 21:** CLEAN — 0C/0I/0S. Clean-pass counter: **1/3** (restarted streak). No spec changes this pass.
+**Verified clean this pass:** Pass-20 symbolic-token reconciliation spot-checked at BC-body level (E-KB +19, E-PLAY +10, E-REPLAY +11, E-NAR +2 — every crosswalk mapping matches the emitting BC's condition exactly; no mis-mapping introduced). Error-code meaning-vs-usage for non-label-gated families clean. ADR-0001..0007 all resolve. DI-001..012 all enforced (zero orphan invariants). 11-dimension model complete and per-dimension subsets consistent with CI check n.ii. BC subsystem-label sync correct. OBS-20-A reconciliation holds. Two whole defect classes (count-summary; orphaned-error-family/symbolic-token) confirmed genuinely closed. OBS-21-A/B non-blocking.
+**Next action:** `phase-1d-adversarial` — **Pass 22** (consecutive clean pass 2 of 3). CRITICAL: do NOT modify the spec between clean passes — stability is required to prove 3 consecutive clean.
+**Phase 1 remaining:** Phase-1d adversarial convergence (1/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
+**PRD status:** v2.2 (STABLE — no changes since Pass 20). 190 BCs; 41 NFRs; 255 error codes / 31 families total (246 active; E-GEN 9 codes retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006/007/008 open (non-blocking).
 **Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.7 (11 dims); 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: 190 BCs / P0=126 / P1=42 / P2=22.
-**Key versions changed Pass 20:** error-taxonomy v2.0 (213→255 codes; E-KB/E-NAR/E-PLAY/E-REPLAY reconciled); BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); ss-08 BCs v1.1 (affected); ss-03 BCs v1.1 (affected); BC-8.08.004 v1.4 (confirmed clean); prd v2.2; CI gate v1.20 (check r).
+**No version bumps this pass.** Last version changes were Pass 20: error-taxonomy v2.0; BC-5.04.001/002 v1.2; ss-12/ss-08/ss-03 BCs v1.1; prd v2.2; CI gate v1.20 (check r).
 **D-014/015/016:** see Decisions Log. D-014/D-015 flagged for human gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
