@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-08T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -19,7 +19,9 @@ capability: CAP-005
 priority: P0
 lifecycle_status: active
 introduced: v1.0.0
-modified: []
+modified:
+  - pass: "Pass-28"
+    reason: "I28-01 fix: replaced `human-gated` vocabulary on cinematic-director creative sign-off (postcondition 5, EC-004, Traceability DI-006) with D-013 creative-gate vocabulary (E-CIN-003, DI-007). The cinematic-director is an internal creative principal — not an external third-party — so ADR-0007 `human-gated` fidelity tier does not apply. Gating semantics preserved."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -68,8 +70,10 @@ validation report.
    > 50 ms → warning in report (not block, as timing adjustments happen in engine integration).
 5. **Directed flag check**: if `directed: true`, the validation report records that a
    cinematic-director creative sign-off is REQUIRED before the sequence is accepted for
-   the ship build. A `human-gated` sign-off task is surfaced. If no sign-off record
-   exists: E-CIN-003 raised in the context of the ship-build gate (not during development).
+   the ship build. A creative gate checklist item is surfaced for the cinematic-director
+   (D-013 creative gate — NOT the `human-gated` fidelity tier per ADR-0007, which is
+   reserved for external third-party acts only). If no sign-off record exists: E-CIN-003
+   raised in the context of the ship-build gate (not during development).
 6. **Bevy engine gap flag**: if any target engine adapter is Bevy AND the sequence-graph
    uses in-engine timeline tracks, the validation report includes:
    `"bevy_sequencer_gap": true, "required_build": "bevy-sequence-runtime"`. This is
@@ -95,7 +99,7 @@ validation report.
 | EC-001 | Sequence has no subtitle track at all (game is narration-free) | If no `dialog: true` audio events, subtitle coverage check trivially passes; report notes "no dialogue" |
 | EC-002 | Bevy is the only target engine and no `bevy-sequence-runtime` is declared | Validation report: bevy_sequencer_gap=true, required_build=bevy-sequence-runtime; report is a warning; architect notified; not a spec-phase block |
 | EC-003 | Audio event at timestamp 95s in a 90s sequence | E-CIN-001 variant: timestamp out of range [0, 90]; schema check |
-| EC-004 | directed=true, sign-off record exists from cinematic-director but is marked "pending" | Ship-build gate: sign-off must be in status "signed"; "pending" does not pass the gate; human-gated task remains open |
+| EC-004 | directed=true, sign-off record exists from cinematic-director but is marked "pending" | Ship-build gate: sign-off must be in status "signed"; "pending" does not pass the gate; creative-gate checklist item remains open (E-CIN-003) |
 | EC-005 | Animation track references actor_id "hero_1" not in Canon-KB | E-CIN-001: actor_ref 'hero_1' not in Canon-KB |
 | EC-006 | Audio event tagged `dialog: true` has a subtitle but the subtitle time window misses the first 0.5 s of the audio | Warning (not block): subtitle coverage gap of 0.5 s noted in report |
 
@@ -122,7 +126,7 @@ validation report.
 |-------|-------|
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the sequence-graph is listed in RECONCILIATION §6.3 (cinematics-virtual-production.md additions) as the keystone cinematic artifact produced by the cinematic-director agent within CAP-005. |
-| L2 Domain Invariants | DI-008 (engine-neutral spec layer), DI-006 (human-gated tasks surfaced) |
+| L2 Domain Invariants | DI-008 (engine-neutral spec layer), DI-007 (creative gate — directed:true cinematic requires cinematic-director creative sign-off; this is a D-013 creative gate, not a DI-006 human-gated task) |
 | Architecture Module | SS-04 — sequence graph validator; Bevy sequence runtime (BUILD-new); Canon-KB entity query |
 | Stories | S-TBD (filled by story-writer) |
 

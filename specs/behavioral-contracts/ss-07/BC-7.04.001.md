@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-08T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -18,7 +18,9 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - pass: "Pass-28"
+    reason: "I28-01 fix: replaced `human-gated task (DI-006)` vocabulary for the directed:true cinematic creative sign-off (postcondition 3, test vector, Traceability) with D-013 creative-gate vocabulary (creative-gate checklist item, E-CIN-003, DI-007). The D-ASSET dimension remains DEGRADED while creative sign-off is pending — gating semantics preserved. ADR-0007 `human-gated` fidelity tier is reserved for external third-party acts only."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,8 +62,10 @@ assets with `directed: true` cinematics (adds human sign-off gate).
    ingested per pure-maximal policy. Quality-gate failures for Tier-2/3 are noted
    in the convergence-report but do not block GREEN. Tier-1 failures DO block.
 3. **DEGRADED (directed: true):** Cinematic assets with `directed: true` flag
-   require human cinematic-director sign-off. The dimension is DEGRADED until
-   sign-off is recorded; the sign-off is a `human-gated` task (DI-006).
+   require cinematic-director creative sign-off (D-013 creative gate). The dimension
+   is DEGRADED until sign-off is recorded; a creative-gate checklist item is surfaced
+   (E-CIN-003 if absent at ship-build gate). This is a D-013/DI-007 creative gate —
+   NOT a `human-gated` fidelity tier task per ADR-0007/DI-006.
 4. **BLOCKED:** Any Tier-1 asset fails quality-gate without a declared fallback.
    Missing `disclosure_class` on any asset. Missing `ai-disclosure-manifest`.
 
@@ -91,7 +95,7 @@ assets with `directed: true` cinematics (adds human sign-off gate).
 | 50 assets, all Tier-1, all quality-gate PASS, provenance complete | asset-completeness = GREEN | happy-path |
 | 50 assets: 48 PASS, 2 Tier-1 FAIL quality-gate | BLOCKED; "2 Tier-1 assets failed quality-gate" | error |
 | 50 assets: 48 PASS, 2 Tier-2 FAIL quality-gate | DEGRADED; "2 Tier-2 assets flagged; ingested per pure-maximal policy" | edge-case (Tier-2) |
-| 50 assets complete; 1 cinematic with directed:true pending sign-off | DEGRADED; human-gated task emitted for cinematic-director | edge-case (directed) |
+| 50 assets complete; 1 cinematic with directed:true pending sign-off | DEGRADED; creative-gate checklist item surfaced for cinematic-director (E-CIN-003 at ship-build gate) | edge-case (directed) |
 
 ## Verification Properties
 
@@ -105,7 +109,7 @@ assets with `directed: true` cinematics (adds human sign-off gate).
 |-------|-------|
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #4 (asset-completeness) |
-| L2 Domain Invariants | DI-003 (every generated asset has complete provenance sidecar), DI-006 (human-gated tasks surfaced), DI-012 |
+| L2 Domain Invariants | DI-003 (every generated asset has complete provenance sidecar), DI-007 (directed:true cinematic requires creative-gate sign-off — D-013 creative gate, not DI-006 human-gated task), DI-012 |
 | Architecture Module | convergence-tracker / asset-completeness-gate (SS-06) |
 | Stories | S-TBD |
 

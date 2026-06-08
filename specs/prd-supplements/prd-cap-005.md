@@ -2,10 +2,13 @@
 document_type: prd-supplement
 level: L3
 section: cap-005
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-08T00:00:00Z
+modified:
+  - pass: "Pass-28"
+    reason: "O28-01 fix: enriched E-CIN-003 row to match error-taxonomy.md I5 wording — changed category name from 'Directed flag missing gate' to 'Directed flag missing creative gate' and expanded message format to include '(creative gate, not human-gated fidelity tier — see D-013 distinction in methodology-layer.md §2.8)' so the canonical source and rollup agree."
 phase: 1a
 traces_to: CAP-005
 inputs:
@@ -431,7 +434,7 @@ See also: `.factory/specs/prd-supplements/error-taxonomy.md` (cross-CAP catalog)
 | E-ENG-002 | Red Gate violation | broken | 1 | `production code commit exists without a prior failing test for story '<story_id>'` |
 | E-CIN-001 | Sequence asset ref | broken | 1 | `sequence-graph '<seq_id>' asset ref '<ref>' does not resolve` |
 | E-CIN-002 | Subtitle coverage | broken | 1 | `sequence-graph '<seq_id>' audio event '<event_id>' has no subtitle track` |
-| E-CIN-003 | Directed flag missing gate | broken | 1 | `sequence-graph '<seq_id>' has directed=true but no cinematic-director sign-off record found` |
+| E-CIN-003 | Directed flag missing creative gate | broken | 1 | `sequence-graph '<seq_id>' has directed=true but no cinematic-director creative sign-off record found (creative gate, not human-gated fidelity tier — see D-013 distinction in methodology-layer.md §2.8)` |
 | E-CIN-004 | Blendshape range | broken | 1 | `lip-sync '<clip_id>' blendshape '<shape>' value <v> outside [0, 1]` |
 | E-PROD-001 | Missing dependency contract | broken | 1 | `wave '<wave_id>' starts discipline '<consumer>' but cross-discipline-dependency-contract from '<producer>' not found` |
 | E-PROD-002 | Dependency acceptance fail | broken | 1 | `cross-discipline-dependency-contract '<contract_id>' acceptance criterion '<crit_id>' failed: <assertion>` |

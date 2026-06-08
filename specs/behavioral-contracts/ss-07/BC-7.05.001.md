@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-08T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -21,6 +21,8 @@ introduced: v0.1.0
 modified:
   - pass: "Pass-11"
     reason: "F-11-01/F-11-02 status-value reconciliation: EC-001 BLOCKED-PENDING → BLOCKED (report-not-produced is a hard precondition gap, not a new state); EC-002 DEGRADED-ACCEPTED → DEGRADED (human override with documented rationale is exactly the DEGRADED definition). Both tokens were non-canonical per methodology-layer §3.1 v1.5 closed enum. Postcondition #2 DEGRADED-PENDING confirmed valid; D-PLAY allowed subset now includes DEGRADED-PENDING per methodology-layer §3.1 v1.5."
+  - pass: "Pass-28"
+    reason: "I28-01 fix: EC-006 replaced `human-gated task (DI-006)` vocabulary for the cinematic-director creative sign-off with D-013 creative-gate vocabulary (DI-007, E-CIN-003). The cinematic-director is an internal creative principal — not an external third-party — so ADR-0007 `human-gated` fidelity tier does not apply. The playtest dimension's own human gate (DI-007) is unaffected. Gating semantics preserved."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -89,7 +91,7 @@ than flat-screen (not degradable to screen-based testing).
 | EC-003 | Automated fun-score emitted by an analytics hook | Factory defect recorded; DI-007 violation; hook emitting fun-score is flagged for removal |
 | EC-004 | XR game tested on PC screen instead of headset | Playtest does not satisfy this dimension for XR games; BLOCKED until headset playtest conducted |
 | EC-005 | Playtest budget exhausted, no more sessions possible | BLOCKED; producer must decide to ship with incomplete playtest (recorded degradation) or fund additional sessions |
-| EC-006 | `directed: true` cinematic requires separate creative sign-off | Cinematic sign-off is a separate human-gated task (DI-006); it does not substitute for playtest sign-off but is a required precondition for it |
+| EC-006 | `directed: true` cinematic requires separate creative sign-off | Cinematic creative sign-off is a separate D-013 creative gate (DI-007, E-CIN-003 if absent at ship-build gate) — NOT a `human-gated` fidelity tier task (ADR-0007/DI-006); it does not substitute for playtest sign-off but is a required precondition for the ship build |
 | EC-007 | Playtest sessions completed; sign-off given; then a major gameplay change is made | Playtest dimension reverts to DEGRADED-PENDING; new playtest session required for the changed gameplay area |
 
 ## Canonical Test Vectors
