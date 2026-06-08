@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "1.3"
+version: "1.6"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -223,16 +223,22 @@ NFR summary — capabilities now with defined numeric targets (v1.1 additions ma
 
 ## Section 5 — Consolidated Error Taxonomy
 
-Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (134 error codes, 22 families — v1.3).
+Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (196 error codes, 29 active families + 1 retired — v1.6). Note: 9 of the 196 are in the retired E-GEN family (never referenced by any BC); 187 are active codes.
 
-Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`):
+Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`; v1.6 additions marked with `***`):
 
 | Family | Owning Capability | Code Count |
 |--------|------------------|-----------|
 | E-EAP | CAP-001 (Engine Adapter Protocol) | 13 (v1.1: +E-EAP-011; v1.2: +E-EAP-012 MalformedManifest, +E-EAP-013 HumanGatedTaskPending) |
 | E-CONF * | CAP-002 (Conformance suite) | 5 |
 | E-REPLAY * | CAP-003 (Replay harness) | 7 |
-| E-GEN * | CAP-004 (Asset generation) | 9 |
+| ~~E-GEN *~~ | ~~CAP-004 (Asset generation placeholder)~~ | ~~9~~ — **RETIRED v1.6**: orphaned placeholder; never referenced by any BC |
+| E-AAG *** | CAP-004 (Asset-adapter routing, BC-4.01.*) | 7 |
+| E-SVC *** | CAP-004 (GenerationRequest validation, BC-4.02.*) | 6 |
+| E-PRV ** | CAP-004 (Provenance sidecar field validation) | 8 (v1.2: E-PRV-010/011/012; v1.6: +E-PRV-001/002/003/020/030) |
+| E-QG *** | CAP-004 (Quality gate per-modality, BC-4.04.*) | 11 |
+| E-SHIP *** | CAP-004 (Ship gate license, BC-4.05.001) | 3 |
+| E-ING *** | CAP-004 (Ingest pre-flight, BC-4.06.001) | 4 |
 | E-DES | CAP-005 (Design artifacts) | 5 |
 | E-ART | CAP-005 (Art quality gate) | 3 |
 | E-AUD | CAP-005 (Audio build) | 4 |
@@ -246,14 +252,16 @@ Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`)
 | E-CERT | CAP-009 (Cert pre-flight) | 3 |
 | E-DIST | CAP-009 (Distribution tools) | 19 |
 | E-COMP | CAP-010 (Compliance) | 2 |
-| E-ETH * | CAP-011 (Monetization Ethics) | 9 (v1.2: +E-ETH-009 DP-007) |
+| E-ETH * | CAP-011 (Monetization Ethics) | 14 (v1.2: +E-ETH-009 DP-007; v1.5: +E-ETH-010..014 DP-005/004/003/008/006) |
 | E-KB * | CAP-012 (Canon KB) | 7 |
-| E-GENRE * | CAP-013 (Genre lanes) | 6 |
-| E-XR * | CAP-014 (XR seam) | 6 |
-| E-PRV ** | CAP-004 (Provenance disclosure_class) | 3 (E-PRV-010/011/012, v1.2) |
-| **TOTAL** | 22 families | **134** |
+| E-GENRE * | CAP-013 (Genre lanes — core activation BCs) | 6 |
+| E-GLG *** | CAP-013 (Genre sub-lane gate config, BC-13.01.*/13.02.*/13.03.*/13.04.*) | 5 |
+| E-MOD *** | CAP-013 (Modding/UGC lane, BC-13.03.*) | 11 |
+| E-MKT *** | CAP-013 (Marketing lane, BC-13.04.*) | 4 |
+| E-XR * | CAP-014 (XR seam) | 7 (v1.1: 6 codes; v1.6: +E-XR-007 visionOS/OpenXR) |
+| **TOTAL (all registered incl. retired E-GEN)** | **29 active + 1 retired** | **196** |
 
-**Error family gap status:** All 14 capability families now have error families defined. FU-003 closed. v1.2 adds E-PRV (3 codes, CAP-004 provenance), E-ETH-009, E-EAP-012/013. See `error-taxonomy.md §Coverage Notes`.
+**Error family gap status:** All 14 capability families have error families defined. v1.6 closes CI check (k): 57 unregistered E-codes referenced in ss-04/ss-13/ss-14 BCs now registered; E-GEN orphan retired. See `error-taxonomy.md §Coverage Notes §PRD Revision 1.6 Changes`.
 
 ---
 
@@ -337,6 +345,8 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | 1.1 | 2026-06-08 | product-owner | PRD revision (FU-001/002/003): +2 BCs (BC-1.15.002, BC-13.01.004); +16 NFRs (NFR-020..035); +10 error families, +79 error codes; all DI orphan invariants closed; incorporates DI-010 (kernel AC never authored, §DI-010) and DI-011 (NFT/web3 off by default, §DI-011) as primary architectural decisions, plus ADR-0006 (11-dim convergence model) and ADR-0007 (human-gated fidelity tier) |
 | 1.2 | 2026-06-08 | product-owner | Phase-1d adversarial pass-1 resolution: +9 BCs (BC-11.03.006 DP-007; BC-7.11.002–008 server-authority CWE-602 invariants); E-PRV family (3 codes); E-ETH-009; E-GEN-004 vocabulary corrected; E-ETH-005 mislabel fixed; E-SIM-009 identifier corrected; BC-1.15.002 kernel patterns extended (macOS/IOKit, eBPF, binary blobs, build.rs); BC-13.01.004 console cert-preflight routing added; BC-4.03.002 procedural-exempt audit controls specified; DP deny-list coverage documented; priority fields backfilled on ss-01..ss-08 BCs |
 | 1.3 | 2026-06-08 | product-owner | Phase-1d adversarial pass-2 integrity fixes (C2-01/02/03, S2-01, I2-02/03): corrected grand total 179→178 (BC-INDEX was erroneously self-counted); corrected error-code total 143/141→134 (prose change-notes were incorrectly counted as codes); per-family code-count table added to prd.md §5 and error-taxonomy.md (S2-01); priority backfill completed on remaining 44 BCs in ss-11..ss-14; CAP-011 DP-enforcement BCs escalated to P0 per D-008 compliance policy; all three locations (prd-cap-011.md, BC-INDEX, BC frontmatter) now consistent |
+| 1.5 | 2026-06-08 | product-owner | Phase-1d adversarial pass-6 I6-02 fix: +5 E-ETH codes (E-ETH-010..014) for DP-003/004/005/006/008; DP→E-ETH crosswalk + SS-09 symbolic-name crosswalk added to error-taxonomy.md; all dark-pattern BCs (BC-11.03.001..005) updated to cite registered E-ETH codes; SS-09 ethics BCs (BC-11.01.001, BC-11.02.001, BC-11.02.003, BC-11.04.002) crosswalked to registered parent codes; error total 134→139, E-ETH family 9→14; BC count unchanged at 178 |
+| 1.6 | 2026-06-08 | product-owner | CI check (k) completeness fix: registered 57 E-codes referenced by ss-04 (BC-4.01.*–4.06.*) and ss-13 (BC-13.02.*–13.04.*) BCs that were unregistered. New families: E-AAG (7), E-SVC (6), E-QG (11), E-SHIP (3), E-ING (4), E-GLG (5), E-MOD (11), E-MKT (4). E-PRV extended (+5 codes: 001/002/003/020/030). E-XR extended (+1 code: 007). E-GEN retired — orphaned placeholder, never referenced by any BC (9 codes remain in retired table, still counted by CI). CI-computed total: 139 + 57 = **196 total registered codes** (187 active, 9 retired E-GEN). 29 active families. BC count unchanged at 178 |
 
 ### 8.1 Subsystem Assignment (Resolved)
 
@@ -376,13 +386,19 @@ Previously two invariants had no dedicated behavioral contract. Both are now cov
 
 **No orphan invariants remain. FU-001 closed.**
 
-### 8.4 Error Taxonomy — Updated (v1.2)
+### 8.4 Error Taxonomy — Updated (v1.6)
 
-E-PRV family added (3 codes: E-PRV-010/011/012) to register BC-4.03.002's failure paths.
+*v1.6 (check-k):* 57 unregistered E-codes closed. 8 new families registered (E-AAG, E-SVC, E-QG, E-SHIP, E-ING, E-GLG, E-MOD, E-MKT). E-PRV extended by 5 codes. E-XR extended by 1 code. E-GEN retired as orphaned placeholder — never referenced by any BC (9 codes remain in retired table). All E-xxx-NNN tokens in ss-04/ss-13/ss-14 BCs now resolve to registered codes. CI check (k): 0 unregistered codes. Total: **196 registered codes (187 active + 9 retired E-GEN) across 29 active families**.
+
+*v1.5 (I6-02):* E-ETH-010..014 added — dedicated registered codes for DP-005 (gacha odds disclosure), DP-004 (P2W in ranked), DP-003 (loss-triggered prompt), DP-008 (minor loot box), DP-006 (best-value label). DP→E-ETH crosswalk and SS-09 symbolic-name crosswalk added to E-ETH section of error-taxonomy.md. All dark-pattern and ethics BCs now cite registered E-ETH-NNN codes; symbolic names are `error.data.reason` sub-codes only.
+Total (v1.5): 139 error codes across 22 families. See `error-taxonomy.md §Coverage Notes`.
+
+*v1.2:* E-PRV family added (3 codes: E-PRV-010/011/012) to register BC-4.03.002's failure paths.
 E-ETH-009 added for DP-007 enforcement. E-GEN-004 vocabulary corrected to canonical three
 values `[pre-generated, live-generated, procedural-exempt]`. E-ETH-005 "(DP-007 equivalent)"
 mislabel removed. E-SIM-009 identifier corrected from `(D-012)` to `(DI-012)`.
-Total: 134 error codes across 22 families. See `error-taxonomy.md §Coverage Notes`.
+
+*v1.1:* All 14 capability families had defined error families. 10 new families added.
 
 *v1.1:* All 14 capability families had defined error families. 10 new families added.
 E-EAP extended with E-EAP-011. 137 codes across 21 families. **FU-003 closed.**

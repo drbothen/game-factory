@@ -1,7 +1,7 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -147,20 +147,20 @@ This classification is intentional. The next adversarial pass should verify this
 rationale remains sound — if any "catalog-only" DP is machine-checkable at the current
 spec layer, it should be escalated to the enforced tier.
 
-| ID | Pattern | Why Forbidden | Machine-Checkable Signal | Enforcement Status |
-|----|---------|--------------|--------------------------|-------------------|
-| DP-001 | Premium-currency obfuscation without real-money-equivalent disclosure | FTC scrutiny; EU consumer protection; deceptive by design | No real-money-equivalent field in purchase UI spec | Catalog-only (no dedicated BC; deferred — UI spec field not standardized) |
-| DP-002 | FOMO / false scarcity timer on unlimited-supply items | Deceptive scarcity; EU Unfair Commercial Practices Directive | Countdown timer on item with `supply: unlimited` | Catalog-only (no dedicated BC; deferred — UI spec field not standardized) |
-| DP-003 | Time-pressure purchase prompt during loss event | Exploits emotional distress (Brignull; DiGRA games literature) | Purchase prompt event fired within N frames of loss event | **Enforced** — BC-11.03.003 |
-| DP-004 | Pay-to-win in ranked/competitive mode | Fairness violation; FTC/ESRB scrutiny | `economy-graph` shows combat-power gap between spend tiers in ranked mode | **Enforced** — BC-11.03.002 |
-| DP-005 | Loot boxes without odds disclosure | Mandatory: Apple (Dec 2017), Google Play (May 2019), ESRB (Apr 2020), PEGI 16 (Jun 2026) | `gacha-spec` present without `published_odds` field | **Enforced** — BC-11.03.001 |
-| DP-006 | Miscategorized "best value" bundle (dominated SKU labeled best value) | Deceptive pricing; FTC Section 5 risk | `iap-catalog` contains SKU where `best_value_tag = true` but per-unit EV is not maximum | **Enforced** — BC-11.03.005 |
-| DP-007 | Escalating offers on inferred high-vulnerability player (whale hunting) | Predatory targeting; EU DSA dark patterns | `segmentation-ltv-spec` contains offer-escalation rule conditioned on vulnerability proxy | **Enforced** — BC-11.03.006 |
-| DP-008 | Loot box or gacha access for minors without spending control | COPPA (FTC 2025 amendment); PEGI 16 (Jun 2026); Belgium gambling law | `minor_protection.no_loot_box_for_minors = false` in ethics contract | **Enforced** — BC-11.03.004 |
-| DP-009 | Mis-tap / disguised purchase button | FTC v. Epic finding ($245M); Cognosphere/Genshin Jan 2025 proposed order | Purchase confirmation action within 1 UI frame of non-purchase action in UI spec | Catalog-only (no dedicated BC; deferred — requires per-engine UI frame analysis) |
-| DP-010 | Confirm-shaming opt-out | Dark pattern (Brignull); EU consumer law | Opt-out button text is pejorative toward the player | Catalog-only (no dedicated BC; deferred — store-facing UI schema outside ethics domain) |
-| DP-011 | Drip pricing (price revealed in stages) | EU Omnibus Directive; FTC guidance | Total price not shown before final purchase confirmation | Catalog-only (no dedicated BC; deferred — store-facing UI schema outside ethics domain) |
-| DP-012 | Auto-enrollment subscription without explicit consent | Apple/Google billing rules; EU consumer law | Subscription `auto_enroll: true` without `explicit_consent_required: true` | Catalog-only (no dedicated BC; deferred — store-facing subscription schema outside ethics domain) |
+| ID | Pattern | Why Forbidden | Machine-Checkable Signal | Registered Error Code | Enforcement Status |
+|----|---------|--------------|--------------------------|----------------------|-------------------|
+| DP-001 | Premium-currency obfuscation without real-money-equivalent disclosure | FTC scrutiny; EU consumer protection; deceptive by design | No real-money-equivalent field in purchase UI spec | E-ETH-004 (generic) | Catalog-only (no dedicated BC; deferred — UI spec field not standardized) |
+| DP-002 | FOMO / false scarcity timer on unlimited-supply items | Deceptive scarcity; EU Unfair Commercial Practices Directive | Countdown timer on item with `supply: unlimited` | E-ETH-004 (generic) | Catalog-only (no dedicated BC; deferred — UI spec field not standardized) |
+| DP-003 | Time-pressure purchase prompt during loss event | Exploits emotional distress (Brignull; DiGRA games literature) | Purchase prompt event fired within N frames of loss event | **E-ETH-012** | **Enforced** — BC-11.03.003 |
+| DP-004 | Pay-to-win in ranked/competitive mode | Fairness violation; FTC/ESRB scrutiny | `economy-graph` shows combat-power gap between spend tiers in ranked mode | **E-ETH-011** | **Enforced** — BC-11.03.002 |
+| DP-005 | Loot boxes without odds disclosure | Mandatory: Apple (Dec 2017), Google Play (May 2019), ESRB (Apr 2020), PEGI 16 (Jun 2026) | `gacha-spec` present without `published_odds` field | **E-ETH-010** | **Enforced** — BC-11.03.001 |
+| DP-006 | Miscategorized "best value" bundle (dominated SKU labeled best value) | Deceptive pricing; FTC Section 5 risk | `iap-catalog` contains SKU where `best_value_tag = true` but per-unit EV is not maximum | **E-ETH-014** | **Enforced** — BC-11.03.005 |
+| DP-007 | Escalating offers on inferred high-vulnerability player (whale hunting) | Predatory targeting; EU DSA dark patterns | `segmentation-ltv-spec` contains offer-escalation rule conditioned on vulnerability proxy | **E-ETH-009** | **Enforced** — BC-11.03.006 |
+| DP-008 | Loot box or gacha access for minors without spending control | COPPA (FTC 2025 amendment); PEGI 16 (Jun 2026); Belgium gambling law | `minor_protection.no_loot_box_for_minors = false` in ethics contract | **E-ETH-013** | **Enforced** — BC-11.03.004 |
+| DP-009 | Mis-tap / disguised purchase button | FTC v. Epic finding ($245M); Cognosphere/Genshin Jan 2025 proposed order | Purchase confirmation action within 1 UI frame of non-purchase action in UI spec | E-ETH-004 (generic) | Catalog-only (no dedicated BC; deferred — requires per-engine UI frame analysis) |
+| DP-010 | Confirm-shaming opt-out | Dark pattern (Brignull); EU consumer law | Opt-out button text is pejorative toward the player | E-ETH-004 (generic) | Catalog-only (no dedicated BC; deferred — store-facing UI schema outside ethics domain) |
+| DP-011 | Drip pricing (price revealed in stages) | EU Omnibus Directive; FTC guidance | Total price not shown before final purchase confirmation | E-ETH-004 (generic) | Catalog-only (no dedicated BC; deferred — store-facing UI schema outside ethics domain) |
+| DP-012 | Auto-enrollment subscription without explicit consent | Apple/Google billing rules; EU consumer law | Subscription `auto_enroll: true` without `explicit_consent_required: true` | E-ETH-004 (generic) | Catalog-only (no dedicated BC; deferred — store-facing subscription schema outside ethics domain) |
 
 ### 11.4 CONSTRAINED-OPTIMIZATION Rule
 

@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -31,6 +31,20 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v1.6 — Pass-6 adversarial defect resolution (I6-01 / O6-01).**
+> - **I6-01:** BC priority subtotals corrected to frontmatter ground truth. The stale
+>   P0=111/P1=45 values misattributed the 8 P0 dark-pattern/ethics BCs in SS-09
+>   (CAP-011 BC-11.01.001/002/003, 11.02.001, 11.03.001/002/004/006 — all `priority: P0`
+>   per D-008 decision) to the P1 bucket, and counted 2 SS-03 P1 BCs (BC-4.03.003,
+>   BC-4.04.003) in P0. Corrected: P0=117, P1=39, P2=22. Sum: 178. ✓
+> - **O6-01:** SS-09 Subsystem Registry Priority column changed from "P1" to "P0/P1
+>   (split — 8 P0 / 6 P1; see CAP-011 priority rationale)" to prevent misreading as
+>   all-P1.
+> - **I6-01 (process):** check-spec-counts.sh check (i) rewritten to compute P0/P1/P2
+>   from BC frontmatter at runtime (no hardcoded constants). New check (k) added:
+>   error-identifier resolution — every E-[A-Z]+-[0-9]+ in BC files must resolve to a
+>   registered code in error-taxonomy.md.
+>
 > **v1.5 — Pass-4 adversarial defect resolution.**
 > - **C1:** Studio roster line corrected. Canonical: 57 NEW + 9 ADAPT = 66 game-discipline
 >   roles. vsdd-factory infra agents (14 REUSE) are NOT counted in the 66; they operate
@@ -136,7 +150,7 @@ traces_to: .factory/specs/product-brief.md
 | SS-06 | Convergence Tracking Engine | CAP-007 | BC-7.* | P0 |
 | SS-07 | Playtest Protocol | CAP-008 | BC-8.* | P1 |
 | SS-08 | Cert and Distribution | CAP-009, CAP-010 | BC-9.*, BC-10.* | P1 |
-| SS-09 | Monetization Ethics | CAP-011 | BC-11.* | P1 |
+| SS-09 | Monetization Ethics | CAP-011 | BC-11.* | P0/P1 (split — 8 P0 / 6 P1; see CAP-011 priority rationale) |
 | SS-10 | Canon Knowledge-Base | CAP-012 | BC-12.* | P1 |
 | SS-11 | Genre-Gated Lanes | CAP-013 | BC-13.* | P2 |
 | SS-12 | XR Platform Seam | CAP-014 | BC-14.* | P2 |
