@@ -1,6 +1,6 @@
 ---
 pipeline: IN-PROGRESS
-phase: 0
+phase: 1
 product: game-factory
 mode: greenfield
 brief_version: "2.0"
@@ -8,6 +8,7 @@ timestamp: 2026-06-07T00:00:00Z
 brief_approval: PASSED
 preflight_verdict: READY-WITH-WARNINGS
 market_intel_verdict: PASSED
+phase0_gate: PASSED
 ---
 
 # Factory State
@@ -17,8 +18,8 @@ market_intel_verdict: PASSED
 | Phase | Name | Status | Notes |
 |-------|------|--------|-------|
 | pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED (D-006/07/08 human-ratified) |
-| 0 | Brownfield Extraction | COMPLETE — awaiting gate | extraction-ingestion VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam: 4 config/content swap interfaces; devops item: extracted core needs own release/cross-compile pipeline |
-| 1 | Spec Crystallization | PENDING | — |
+| 0 | Brownfield Extraction | PASSED | extraction-ingestion VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam: 4 config/content swap interfaces; phase0_gate PASSED (human approved REUSE/REPLACE/ADAPT plan + devops pipeline item) |
+| 1 | Spec Crystallization | IN PROGRESS | Steps: L2 domain spec → L3 PRD+BCs → architecture+DTU assessment → VPs → DTU assessment (dtu-assessment.md) → CI/CD (.github/workflows/ + cicd-setup.md) → Phase-1d adversarial convergence (≥3 passes) → consistency audit → human approval gate |
 | 2 | Story Decomposition | PENDING | — |
 | 3 | TDD Implementation | PENDING | — |
 | 4 | Holdout Evaluation | PENDING | — |
@@ -26,19 +27,15 @@ market_intel_verdict: PASSED
 | 6 | Formal Hardening | PENDING | — |
 | 7 | Convergence | PENDING | — |
 
-## Current Phase Steps
+## Current Phase Steps (Phase 1 — Spec Crystallization)
 
 | # | Step | Status |
 |---|------|--------|
-| 1 | Product brief v2.0 authored (AAA Dark Factory scope) | DONE |
-| 2 | product-brief.md committed on factory-artifacts | DONE |
-| 3 | validate-brief run; brief v2.0 human-approved | DONE |
-| 4 | Pre-pipeline preflight run — READY-WITH-WARNINGS (see planning/preflight-report.md) | DONE |
-| 5 | Market-intel assessment run — CAUTION (see planning/market-intel-assessment.md) | DONE |
-| 6 | Human ratified D-006, D-007, D-008 at market-intel gate; gate PASSED | DONE |
-| 7 | Phase 0 brownfield extraction started; codebase-analyzer dispatched to .factory/phase-0-ingestion/ | DONE |
-| 8 | Phase 0 outputs validated VERIFIED-WITH-CORRECTIONS (validate-extraction); committed f77e91e | DONE |
-| 9 | Awaiting HUMAN Phase-0 context approval gate | PENDING |
+| 1 | Phase 0 outputs validated VERIFIED-WITH-CORRECTIONS (validate-extraction); committed f77e91e | DONE |
+| 2 | Human approved Phase-0 context: REUSE/REPLACE/ADAPT plan; devops pipeline item accepted | DONE |
+| 3 | Phase-0 gate PASSED; transitioning to Phase 1 Spec Crystallization | DONE |
+| 4 | L2 domain spec (business-analyst) | NEXT |
+| 5 | L3 PRD + behavioral contracts (product-owner) | PENDING |
 
 ## Key Facts
 
@@ -82,6 +79,7 @@ market_intel_verdict: PASSED
 | D-006 | IP/copyrightability: pure-maximal retained; provenance sidecar records copyrightability honestly; per-project humanization optional for IP-critical assets | RATIFIED (human, 2026-06-07) |
 | D-007 | Music/voice: pure-maximal retained; DEFAULT ship-safe generators (licensed-output music e.g. AIVA/Stable Audio; non-performer synthetic voice); real-performer likeness = human-gated consent | RATIFIED (human, 2026-06-07) |
 | D-008 | Regulatory: compliance/provenance/ai-disclosure = P0 wave-1 (not deferred); enforced in Phase-2 wave planning | RATIFIED (human, 2026-06-07) |
+| D-009 | Extracted core needs its own release/cross-compile pipeline (dispatcher currently from marketplace tarball) — owner: devops-engineer, target Phase 1+ | ACCEPTED (human, 2026-06-07) |
 
 ## Skip Log
 
@@ -103,7 +101,8 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-07
-**Phase:** 0 — COMPLETE, awaiting HUMAN approval gate. pre-1 fully PASSED (brief, preflight, market-intel). D-006/D-007/D-008 human-ratified.
-**Next action:** Human reviews Phase-0 context (project-context.md, extraction-boundary-validated.md, component-inventory.md). On approval, proceed to Phase 1 spec crystallization.
-**Key Phase-0 findings:** ~70% conceptual / ~85% file-level neutral spine REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; config/content seam = 4 declarative swap interfaces (hooks-registry guard rows, phase-4/6/7 lobster workflows, ~6 agent-routing rows, BC/VP/holdout/DTU/formal templates). Devops work item: extracted core needs its own release/cross-compile pipeline (dispatcher currently from marketplace tarball).
-**Context:** .factory/ worktree on factory-artifacts is healthy (commit f77e91e). Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) remain outstanding but are not current blockers.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Phase-0 gate PASSED (human approved REUSE/REPLACE/ADAPT plan; devops pipeline item D-009 accepted). pre-1 fully PASSED; D-006/D-007/D-008 human-ratified.
+**Next action:** Dispatch business-analyst for L2 domain spec (`/vsdd-factory:create-domain-spec`).
+**Phase 1 planned steps:** L2 domain spec (business-analyst) → L3 PRD + BCs (product-owner) → architecture + DTU assessment (architect) → verification properties → MANDATORY DTU assessment (dtu-assessment.md) → CI/CD setup (.github/workflows/ + cicd-setup.md) → Phase-1d adversarial convergence (≥3 clean passes) → fresh-context consistency audit → Phase-1 spec-package human approval gate.
+**Key Phase-0 findings (for context):** ~70% conceptual / ~85% file-level neutral spine REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam = 4 declarative swap interfaces. D-009: devops-engineer owns extracted-core release/cross-compile pipeline (Phase 1+).
+**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) outstanding — not current blockers.
