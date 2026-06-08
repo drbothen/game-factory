@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,24 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.6 changes (Pass-12 F-12-02 fix — §3.1 PO Change List converted to past-tense; OBS-1):**
+> - **OBS-1 fixed (doc currency):** The "PO Change List — Producer BCs Using Non-Canonical
+>   AMBER" block (now "Resolved in Pass-10") was stale future-tense. The 9 entries in the
+>   original list were all fixed by the Product Owner by Pass-10. The block has been
+>   rewritten as a resolved historical record. BC-8.08.004 (D-PLAY; `playtest-satisfaction`
+>   dimension values `green`/`red`/`amber`/`pending` in lowercase) was the one producer BC
+>   MISSING from the original change list — it is the root cause of F-12-01 (false-green
+>   in CI) and is being fixed by PO in Pass-12. A separate "Resolved in Pass-12" entry
+>   documents it.
+> - **F-12-02 fix (CI):** `scripts/check-spec-counts.sh` bumped to v1.12. Check (n.i) is now
+>   case-insensitive at the detection/extraction layer: lowercase backtick-quoted tokens
+>   (`green`, `red`, `amber`, `pending`, `degraded`, `blocked`) on dimension-context lines
+>   are now extracted, folded to uppercase, and tested against the canonical enum. Tokens
+>   that fold to a canonical value are flagged as "wrong-case form"; tokens that fold to a
+>   known non-canonical status word (AMBER/RED/PENDING/YELLOW) are flagged as non-canonical
+>   + wrong case. The canonical enum itself remains uppercase-only at the assertion layer.
+>   A positive-coverage log line is also added to make a zero-scan run visible.
 
 > **v1.5 changes (Pass-11 F-11-01/F-11-02 resolution — status-value model end-to-end reconciliation):**
 > - **F-11-01 fixed (Direction A — widen DEGRADED-PENDING applicability):** §3.1 Per-Dimension
@@ -613,11 +631,11 @@ as BC-11.01.002, BC-11.03.006) that writes an intermediate value for
 review is complete should be `BLOCKED` (not DEGRADED/AMBER), because the review is
 not optional and cannot be deferred.
 
-#### PO Change List — Producer BCs Using Non-Canonical `AMBER`
+#### Resolved in Pass-10 — Producer BCs Using Non-Canonical `AMBER`
 
-The following producer BCs must be updated by the Product Owner. The architect
-(SS-07 owner) establishes this canonical enum; PO owns SS-09/10/11/13 and the PRD
-supplement.
+**Resolved in Pass-10:** The following producer BCs were updated by the Product Owner to
+replace non-canonical `AMBER` with the correct canonical value per the §3.1 enum. CI
+check (n) (added in v1.9 of check-spec-counts.sh) became green after these updates.
 
 | BC | Field | Old Value | New Value | Notes |
 |----|-------|-----------|-----------|-------|
@@ -630,12 +648,20 @@ supplement.
 | BC-11.01.002 | `convergence-report.dimensions.monetization_ethics` | `AMBER` | `BLOCKED` | D-ETHICS is binary. "Contract present, adversarial review not yet complete" is BLOCKED, not a degradation. DI-005. |
 | BC-11.03.006 | `convergence-report.dimensions.monetization_ethics` | `AMBER` | `BLOCKED` | D-ETHICS is binary. Flagged-pending-review intermediate state is BLOCKED. |
 | BC-13.01.004 | `convergence-report.dimensions.cert_preflight` | `AMBER` | `DEGRADED-PENDING` | NFT/web3 console policy check pending human review → DEGRADED-PENDING. |
-| prd-cap-009-010.md §11.2 line ~339 | prose reference `provenance_legal_compliance` must be at least `AMBER` | `AMBER` | `DEGRADED-PENDING` | Update prose to: "must be at least `DEGRADED-PENDING`". |
+| prd-cap-009-010.md §11.2 line ~339 | prose reference `provenance_legal_compliance` must be at least `AMBER` | `AMBER` | `DEGRADED-PENDING` | Updated prose to: "must be at least `DEGRADED-PENDING`". |
 
-**Note to PO:** Do NOT edit SS-07 BCs (BC-7.xx.xxx). Those are architect-owned and are
-already canonical. Edit only the BCs in columns above, which are in your SS-09/10/11/13
-scope. After your updates, CI check (n) (added in v1.9 of check-spec-counts.sh) will
-turn green.
+#### Resolved in Pass-12 — BC-8.08.004 Lowercase D-PLAY Status Values
+
+**Resolved in Pass-12:** BC-8.08.004 (`playtest-satisfaction` D-PLAY dimension owner,
+SS-07/SS-08 interface) was absent from the Pass-10 change list above — it was the root
+cause of F-12-01 (CI false-green that survived 11 adversarial passes). Unlike the
+Pass-10 BCs which used uppercase `AMBER`, BC-8.08.004 used **lowercase** status tokens
+(`green`, `red`, `amber`, `pending`) which were structurally invisible to check (n)'s
+uppercase-only extraction (F-12-02). The Product Owner updated BC-8.08.004 to use
+uppercase canonical values: `GREEN`, `RED`→`BLOCKED` (D-PLAY allows GREEN/DEGRADED-PENDING/
+BLOCKED), and `PENDING`→`DEGRADED-PENDING` (scheduled but not yet run). CI check (n) was
+simultaneously extended (v1.12) to be case-insensitive at the detection layer to prevent
+recurrence.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -20,7 +20,9 @@ capability: CAP-008
 priority: P1
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - pass: "Pass-12"
+    reason: "F-12-01 canonical status fix: replaced lowercase convergence-dimension status tokens with canonical UPPERCASE enum values per methodology-layer.md §3.1 {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}. Mapping: green→GREEN (SATISFIED/passed), red→BLOCKED (NOT_SATISFIED/hard-fail), amber→DEGRADED (CONDITIONAL with documented rationale, per BC-7.05.001 EC-002), pending→DEGRADED-PENDING (no sign-off yet / sessions not yet completed, per BC-7.05.001 Postcondition #2). Applied to Postconditions #2/#3/#4, Invariant #3, EC-003, EC-006, Canonical Test Vectors, and VP-2/VP-3. Lowercase tokens silently bypassed the D-PLAY release gate in BC-7.12.001 (which only recognizes canonical UPPERCASE values)."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -63,11 +65,11 @@ always human-authored.
    - `report_ref`: reference to the `playtest-convergence-report` this sign-off covers
    - `protocol_ref`: reference to the `playtest-protocol` this sign-off covers
 2. If `verdict: SATISFIED`, the `playtest-satisfaction` convergence dimension is updated
-   to `green` in the 11-dimension tracker.
+   to `GREEN` in the 11-dimension tracker.
 3. If `verdict: NOT_SATISFIED`, the `playtest-satisfaction` convergence dimension is set
-   to `red` and the convergence tracker surfaces a blocking item: design revision loop
+   to `BLOCKED` and the convergence tracker surfaces a blocking item: design revision loop
    required (next step: revise design-intent contracts, re-build, re-playtest).
-4. If `verdict: CONDITIONAL`, the dimension is set to `amber` with the conditions recorded;
+4. If `verdict: CONDITIONAL`, the dimension is set to `DEGRADED` with the conditions recorded;
    resolution requires either a delta-playtest verifying the conditions or a human override
    with justification.
 5. The factory-emitted human-gate task transitions to `complete` only when the
@@ -82,7 +84,7 @@ always human-authored.
 2. The `verdict` field MUST be authored by the human — it cannot be populated by any
    factory process, computed from instrument scores, or pre-filled. A sign-off record
    with an auto-populated verdict is structurally invalid.
-3. The `playtest-satisfaction` convergence dimension MUST remain in `pending` state
+3. The `playtest-satisfaction` convergence dimension MUST remain in `DEGRADED-PENDING` state
    until a valid `playtest-signoff-record` exists for the current milestone build. The
    factory MUST NOT advance this dimension by any other means.
 4. If any `human-gated` task for playtest sign-off has been suppressed, bypassed, or
@@ -94,28 +96,28 @@ always human-authored.
 |----|-------------|-------------------|
 | EC-001 | An agent (automated process) attempts to create a `playtest-signoff-record` | Factory rejects with `AGENT_SIGN_OFF_FORBIDDEN` error; the attempt is logged as a security/integrity event; the gate remains open |
 | EC-002 | Human reviewer requests to modify the convergence report before signing | Reviewer may annotate the report (append `human_annotations`) but may not modify the captured evidence sections; the `human_verdicts` section is theirs to author |
-| EC-003 | No human reviewer has been assigned to the gate task | Gate task remains open; convergence dimension remains `pending`; factory emits a reminder at next milestone gate evaluation |
+| EC-003 | No human reviewer has been assigned to the gate task | Gate task remains open; convergence dimension remains `DEGRADED-PENDING`; factory emits a reminder at next milestone gate evaluation |
 | EC-004 | Reviewer signs off with `CONDITIONAL` but no `conditions_for_satisfaction` text | Factory returns `CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT`; sign-off not accepted until conditions are authored |
 | EC-005 | Design revision loop triggered (NOT_SATISFIED verdict) and a new playtest is run on the revised build | A new `playtest-protocol`, `session-evidence-record`s, and `playtest-convergence-report` must be generated for the new build; the previous NOT_SATISFIED record is retained and linked via `previous_iteration_ref` |
-| EC-006 | Production milestone gate (MilestoneGate) is evaluated while `playtest-satisfaction` is `pending` | Milestone gate MUST block on `playtest-satisfaction = pending`; no path to cert/release without playtest sign-off |
+| EC-006 | Production milestone gate (MilestoneGate) is evaluated while `playtest-satisfaction` is `DEGRADED-PENDING` | Milestone gate MUST block on `playtest-satisfaction = DEGRADED-PENDING`; no path to cert/release without playtest sign-off |
 
 ## Canonical Test Vectors
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Human reviewer signs off `verdict: SATISFIED`, `human_verdicts_summary` authored | `playtest-signoff-record` created; `playtest-satisfaction` dimension → `green`; human-gate task → `complete` | happy-path |
-| Human reviewer signs off `verdict: NOT_SATISFIED` | `playtest-signoff-record` created; dimension → `red`; design revision loop blocked item surfaced; human-gate task → `complete` | happy-path (negative verdict) |
+| Human reviewer signs off `verdict: SATISFIED`, `human_verdicts_summary` authored | `playtest-signoff-record` created; `playtest-satisfaction` dimension → `GREEN`; human-gate task → `complete` | happy-path |
+| Human reviewer signs off `verdict: NOT_SATISFIED` | `playtest-signoff-record` created; dimension → `BLOCKED`; design revision loop blocked item surfaced; human-gate task → `complete` | happy-path (negative verdict) |
 | Agent process attempts to POST a `playtest-signoff-record` | Error: `AGENT_SIGN_OFF_FORBIDDEN`; gate remains open; security event logged | error (EC-001) |
 | `CONDITIONAL` verdict submitted without `conditions_for_satisfaction` | Error: `CONDITIONS_REQUIRED_FOR_CONDITIONAL_VERDICT` | error (EC-004) |
-| MilestoneGate evaluated when playtest still `pending` | Milestone gate blocks; `playtest_satisfaction_unresolved` blocking item listed | error (EC-006) |
+| MilestoneGate evaluated when playtest still `DEGRADED-PENDING` | Milestone gate blocks; `playtest_satisfaction_unresolved` blocking item listed | error (EC-006) |
 
 ## Verification Properties
 
 | VP | Property | Proof Method |
 |----|----------|-------------|
 | VP-1 | For all `playtest-signoff-record`s, `reviewer_id` is in the project's human-reviewer allowlist and not in the agent-id registry | Validation test: attempt to create sign-off with agent ID; assert rejection |
-| VP-2 | The `playtest-satisfaction` convergence dimension can only transition from `pending` to `green`/`red`/`amber` via a valid `playtest-signoff-record`; all other transition attempts are rejected | State-machine property test: exhaustive test of all possible transition triggers; only `playtest-signoff-record` creation is a valid trigger |
-| VP-3 | If any `human-gated` playtest task is suppressed and the convergence dimension transitions to `green` without a sign-off record, the hook chain must produce a defect event within one wave | Integration test: suppress human gate; run wave gate; assert defect event emitted |
+| VP-2 | The `playtest-satisfaction` convergence dimension can only transition from `DEGRADED-PENDING` to `GREEN`/`BLOCKED`/`DEGRADED` via a valid `playtest-signoff-record`; all other transition attempts are rejected | State-machine property test: exhaustive test of all possible transition triggers; only `playtest-signoff-record` creation is a valid trigger |
+| VP-3 | If any `human-gated` playtest task is suppressed and the convergence dimension transitions to `GREEN` without a sign-off record, the hook chain must produce a defect event within one wave | Integration test: suppress human gate; run wave gate; assert defect event emitted |
 
 ## Traceability
 

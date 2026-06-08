@@ -69,7 +69,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–10 resolved (see phase-1-log.md rows 9–18); Pass 11 FINDINGS (0C/2I; status-value subset/bare-token residue; DEGRADED-PENDING widened D-PLAY+D-PERF; bare tokens mapped; CI v1.11 n.ii/n.iii; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–11 resolved (see phase-1-log.md rows 9–19); Pass 12 FINDINGS (0C/2I; BC-8.08.004 lowercase D-PLAY fixed; check n case-insensitive; CI v1.12 17 sub-assertions; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,18 +78,18 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 12** (candidate clean #1 of 3). Pass 11 FINDINGS: 0C/2I/3obs all resolved; DEGRADED-PENDING widened to D-PLAY+D-PERF (subset table + §3 prose + ADR-0006 v1.2 + owner/consumer BCs reconciled); bare tokens BLOCKED-PENDING/DEGRADED-ACCEPTED/DEGRADED-advisory mapped to canonical; CI v1.11 n.ii/n.iii added. Counter stays 0/3.
-**Spec state:** PRD v1.6; BC-INDEX v1.4; error-taxonomy v1.7 (198 codes / 30 families / 189 active; E-GEN retired); subsystem-decomposition v1.4 (P0=117/P1=39/P2=22); ARCH-INDEX v1.6; VP-INDEX v1.3; methodology-layer v1.5 (+§3.1 subset table widened; D-PLAY/D-PERF DEGRADED-PENDING; §3 prose updated); ADR-0006 v1.2 (D-PLAY/D-PERF DEGRADED-PENDING fallback cols updated); studio-of-agents v1.2; verification-architecture.md v1.0; verification-coverage-matrix.md v1.2; nfr-catalog v1.2; prd-cap-011 v1.3; BC-7.05.001 v1.1; BC-7.07.001 v1.1; BC-7.08.001 v1.2; BC-7.12.001 v1.1. 178 BCs / 198 codes / 35 NFRs / 66 studio roles. CI count-gate v1.11 (checks a–n, 16 sub-assertions incl. n.ii/n.iii).
+**NEXT: `phase-1d-adversarial` — Pass 13** (candidate clean #1 of 3). Pass 12 FINDINGS: 0C/2I/3obs all resolved; BC-8.08.004 lowercase D-PLAY status tokens mapped to canonical (green→GREEN, red→BLOCKED, amber→DEGRADED, pending→DEGRADED-PENDING); CI check (n.i) now case-insensitive; methodology §3.1 PO Change List converted to past-tense + Pass-12 note. Counter stays 0/3.
+**Spec state:** PRD v1.6; BC-INDEX v1.4; error-taxonomy v1.7 (198 codes / 30 families / 189 active; E-GEN retired); subsystem-decomposition v1.4 (P0=117/P1=39/P2=22); ARCH-INDEX v1.6; VP-INDEX v1.3; methodology-layer v1.6 (§3.1 PO Change List past-tense; Pass-12 BC-8.08.004 note); ADR-0006 v1.2; studio-of-agents v1.2; verification-architecture.md v1.0; verification-coverage-matrix.md v1.2; nfr-catalog v1.2; prd-cap-011 v1.3; BC-7.05.001 v1.1; BC-7.07.001 v1.1; BC-7.08.001 v1.2; BC-7.12.001 v1.1; BC-8.08.004 v1.2. 178 BCs / 198 codes / 35 NFRs / 66 studio roles. CI count-gate v1.12 (checks a–n, 17 sub-assertions incl. case-insensitive n.i + coverage log + n.ii + n.iii).
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented. lint job now includes Spec count consistency (S2-02) gate.
 
 ### Phase-1d Adversarial Convergence
 
 | Pass | Date | Verdict | Findings | Resolved | Clean-pass counter |
 |------|------|---------|----------|----------|--------------------|
-| 1–8 | 2026-06-08 | FINDINGS×7 / CLEAN×1 | (see phase-1-log.md rows 9–16) | ALL RESOLVED | 1/3 after Pass-7; reset on Pass-8 → 0/3 |
-| 9 | 2026-06-08 | FINDINGS | 0C / 2I / 4 obs | ALL RESOLVED | **0/3** |
+| 1–9 | 2026-06-08 | FINDINGS×8 / CLEAN×1 | (see phase-1-log.md rows 9–17) | ALL RESOLVED | 1/3 after Pass-7; reset on Pass-8 → 0/3 |
 | 10 | 2026-06-08 | FINDINGS | 0C / 3I / 0 obs | ALL RESOLVED | **0/3** |
 | 11 | 2026-06-08 | FINDINGS | 0C / 2I / 3 obs | ALL RESOLVED | **0/3** |
+| 12 | 2026-06-08 | FINDINGS | 0C / 2I / 3 obs | ALL RESOLVED | **0/3** |
 
 ---
 
@@ -105,7 +105,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–10 all findings resolved (see phase-1-log.md); Pass 11 FINDINGS (0C/2I; DEGRADED-PENDING widened D-PLAY+D-PERF; bare tokens mapped; CI v1.11; counter stays 0/3); Pass 12 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–11 all findings resolved (see phase-1-log.md); Pass 12 FINDINGS (0C/2I; BC-8.08.004 lowercase D-PLAY fixed; check n case-insensitive; CI v1.12; counter stays 0/3); Pass 13 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -186,13 +186,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–11 DONE.
-**Phase-1d Pass 11 FINDINGS resolved:** (F-11-01) DEGRADED-PENDING subset inconsistency — §3.1 subset table restricted D-PLAY/D-PERF, but owner BCs BC-7.05.001/BC-7.07.001 and consumer BC-7.12.001 already used it; Direction A: widened to D-PLAY + D-PERF (DI-007-compatible); reconciled §3.1 subset table + §3 prose + ADR-0006 v1.2 + BC-7.05.001 v1.1 + BC-7.07.001 v1.1 + BC-7.12.001 v1.1. Final DEGRADED-PENDING legality: D-PLAY, D-CERT, D-PERF, D-PROV. (F-11-02) Bare tokens in SS-07 BCs — BLOCKED-PENDING→BLOCKED, DEGRADED-ACCEPTED→DEGRADED, DEGRADED-advisory→DEGRADED; BC-7.05.001 v1.1, BC-7.08.001 v1.2. CI v1.11: n.ii per-dimension subset enforcement + n.iii bare table-cell token scan. Clean-pass counter: stays 0/3.
-**Next action:** `phase-1d-adversarial` — **Pass 12** (candidate clean #1 of 3). Need 3 clean passes to converge.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–12 DONE.
+**Phase-1d Pass 12 FINDINGS resolved:** (F-12-01) BC-8.08.004 lowercase D-PLAY status tokens (`green`/`red`/`amber`/`pending`) — BC-8.08.004 was the one D-PLAY producer missing from §3.1 PO Change List; mapped green→GREEN, red→BLOCKED, amber→DEGRADED, pending→DEGRADED-PENDING (per owner BC-7.05.001 v1.1); BC-8.08.004 v1.2. (F-12-02) CI check (n) was uppercase-only — let lowercase tokens evade 11 passes; check (n.i) v1.12 now case-insensitive (fold-to-uppercase before membership test; flags wrong-case canonical AND non-canonical lowercase); anchored to dim_context_lines; coverage log added. OBS-1 RESOLVED: methodology §3.1 "PO Change List" future-tense → past-tense + Pass-12 note; methodology-layer v1.6. OBS-2/OBS-3 non-blocking deferred. Clean-pass counter: stays 0/3.
+**Next action:** `phase-1d-adversarial` — **Pass 13** (candidate clean #1 of 3). Need 3 clean passes to converge.
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
 **PRD status:** v1.6. 178 BCs; 35 NFRs; 198 error codes / 30 families (189 active; E-GEN retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred). FU-008 open (§3.0 Subsystem col dual-meaning, non-blocking deferred).
-**BC versions changed Pass 11:** BC-7.05.001 v1.1; BC-7.07.001 v1.1; BC-7.08.001 v1.2; BC-7.12.001 v1.1. methodology-layer v1.5 (§3.1 subset widened; D-PLAY/D-PERF DEGRADED-PENDING; §3 prose). ADR-0006 v1.2 (D-PLAY/D-PERF fallback cols). CI gate v1.11 (checks a–n, 16 sub-assertions incl. n.ii/n.iii).
-**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.5 (11 convergence dims + §3.0 canonical field table + §3.1 status-value enum + per-dim subsets); 66-role studio (57N+9A; 53T1+13T2); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.2). 10 VPs (6 P0, 4 P1). Priority: 178 BCs / P0=117 / P1=39 / P2=22.
+**BC versions changed Pass 12:** BC-8.08.004 v1.2 (D-PLAY status tokens canonicalized). methodology-layer v1.6 (§3.1 past-tense + Pass-12 note). CI gate v1.12 (checks a–n, 17 sub-assertions incl. case-insensitive n.i + coverage log + n.ii + n.iii).
+**Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.6 (11 convergence dims + §3.0 canonical field table + §3.1 status-value enum + per-dim subsets); 66-role studio (57N+9A; 53T1+13T2); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.2). 10 VPs (6 P0, 4 P1). Priority: 178 BCs / P0=117 / P1=39 / P2=22.
 **Verification docs:** verification-architecture.md v1.0, verification-coverage-matrix.md v1.2. All 11 formal VP↔BC back-refs present. Kani=4, proptest=7 (dual-count VP-001).
 **D-014:** DI-008 engine-neutrality scope = Layer-1/Layer-2 only; L3 adapter-behavior BCs may name engines illustratively. FLAG FOR HUMAN RATIFICATION at Phase-1 gate.
 **D-015:** VP-TBD-NNN are BC-local placeholders; canonical form `<BC-ID>/VP-TBD-NNN`; Phase-6 promotes to VP-NNN. FLAG FOR HUMAN AWARENESS at Phase-1 gate.
