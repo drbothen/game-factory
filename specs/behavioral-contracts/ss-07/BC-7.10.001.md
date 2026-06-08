@@ -15,6 +15,7 @@ traces_to: domain-spec/capabilities.md
 origin: greenfield
 subsystem: SS-06
 capability: CAP-007
+priority: P0
 lifecycle_status: active
 introduced: v0.1.0
 modified: []

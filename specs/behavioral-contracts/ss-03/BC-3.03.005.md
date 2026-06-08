@@ -16,6 +16,7 @@ traces_to: domain-spec/L2-INDEX.md
 origin: greenfield
 subsystem: SS-02
 capability: CAP-003
+priority: P0
 lifecycle_status: active
 introduced: v0.1.0
 modified: []

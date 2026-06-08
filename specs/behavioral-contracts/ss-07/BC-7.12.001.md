@@ -17,6 +17,7 @@ origin: brownfield
 extracted_from: ".reference/vsdd-factory/skills/convergence-check"
 subsystem: SS-06
 capability: CAP-007
+priority: P0
 lifecycle_status: active
 introduced: v0.1.0
 modified: []

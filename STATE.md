@@ -69,7 +69,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) | NEXT |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Pass 1 DONE (5C/9I/4S all resolved; 170→179 BCs); clean passes: 0/3 | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,8 +78,14 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial`** — adversarial spec convergence, minimum 3 clean passes. Adversary validates D-010..D-013 (FU-005) plus new BCs BC-1.15.002 and BC-13.01.004. Skill: /vsdd-factory:phase-1d-adversarial-spec-review.
+**NEXT: `phase-1d-adversarial` — Pass 2** (fresh-context re-review; same scope). Pass 1 complete: 18 findings (5C/9I/4S) ALL RESOLVED. Need 3 consecutive clean passes from here. PRD now v1.2; error-taxonomy v1.2 (22 families / 143 codes); 179 BCs.
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented.
+
+### Phase-1d Adversarial Convergence
+
+| Pass | Date | Verdict | Findings | Resolved | Clean-pass counter |
+|------|------|---------|----------|----------|--------------------|
+| 1 | 2026-06-08 | FINDINGS | 5C / 9I / 4S | ALL 18 RESOLVED | 0/3 |
 
 ---
 
@@ -95,7 +101,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — >=3 clean passes; adversary validates D-010..D-013 (FU-005) | **NEXT** |
+| T9 | Phase-1d adversarial spec convergence — Pass 1 done (5C/9I/4S all resolved; 179 BCs); Pass 2+ pending (0/3 clean passes) | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -164,19 +170,18 @@ _(none open)_
 | FU-002 | NFR numeric targets for CAP-001–003, 006–007, 009–011, 013–014 | — | **CLOSED** — NFR-020..NFR-035 added in nfr-catalog.md v1.1 |
 | FU-003 | Missing error families: E-GEN, E-ETH, E-XR + ~7 others | — | **CLOSED** — 10 new families added (E-CONF, E-REPLAY, E-GEN, E-SIM, E-CONV, E-PLAY, E-ETH, E-KB, E-GENRE, E-XR); total now 21 families / 137 codes |
 | FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers | — | CLOSED (c29f412) |
-| FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013. Also validate: BC-1.15.002 (SS-01; kernel-anti-cheat never-author lint; exhaustiveness of kernel-AC pattern list) and BC-13.01.004 (SS-11; NFT/Web3 off-by-default; full PEGI-18 consequence path incl. console cert implications). | Phase-1d adversary | Phase-1d pass-1 |
+| FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013 + BC-1.15.002 + BC-13.01.004. **Pass-1 status: ALL VALIDATED WITH CORRECTIONS** — D-010 confirmed; D-011 confirmed; D-012 DI-012 normalization applied (I4); D-013 creative-gate disambiguation applied (I5); BC-1.15.002 pattern list extended (I7); BC-13.01.004 cert path completed (I8). Pending: 3 clean passes from Pass 2 onward. | Phase-1d adversary | ONGOING |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE (cicd-setup complete).
-**CI/CD setup DONE:** ci.yml/release.yml/security.yml on main (de99845); hardened: SHA-pinned actions, timeout-minutes, least-priv permissions, no paths-filter deadlock; 4 stub jobs wired for Phase-3/6. cicd-setup.md @ cf9fc6a.
-**Next action:** `phase-1d-adversarial` — adversarial spec convergence (>=3 clean passes; FU-005). Skill: /vsdd-factory:phase-1d-adversarial-spec-review.
-**Phase 1 remaining:** Phase-1d adversarial convergence (>=3 passes; FU-005) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v1.1. 170 BCs (168+2); 35 NFRs (19+16); 137 error codes / 21 families. FU-001/002/003 CLOSED. BC-1.15.002 (SS-01; DI-010). BC-13.01.004 (SS-11; DI-011).
-**FU-005 items for Phase-1d adversary:** D-010 (11-dim convergence final), D-011 (compliance.iarc objective-only), D-012 (playtest_delegation_note field), D-013 (directed sequence-graph = creative gate). Also validate BC-1.15.002 + BC-13.01.004.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Pass 1 DONE.
+**Phase-1d Pass 1 DONE:** 18 findings (5C/9I/4S) ALL RESOLVED. PRD v1.1→v1.2; error-taxonomy v1.1→v1.2 (22 families / 143 codes); 170→179 BCs. JSON-RPC codes reconciled (-32007/E-EAP-012, -32008/E-EAP-013, -32009/E-EAP-011). FU-005 D-010..D-013 validated with corrections. Record: `cycles/v0.1.0-greenfield/adversarial/phase-1d-pass-1.md`.
+**Next action:** `phase-1d-adversarial` — **Pass 2** (fresh-context re-review; same adversary scope). Clean-pass counter: 0/3. Need 3 consecutive clean passes to converge.
+**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
+**PRD status:** v1.2. 179 BCs; 35 NFRs; 143 error codes / 22 families. FU-001/002/003 CLOSED. FU-005 ongoing.
 **Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer (11 convergence dims + predicates); 66-role studio (14R/18A/34N); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007. 10 VPs.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
 **File manifest:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

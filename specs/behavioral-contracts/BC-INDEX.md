@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.0"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -33,11 +33,11 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
 > architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
-**Grand total: 168 behavioral contracts** across 14 capabilities.
+**Grand total: 179 behavioral contracts** across 14 capabilities. (168 original + 2 added in PRD revision v1.1 to close FU-001: BC-1.15.002 for DI-010, BC-13.01.004 for DI-011; +9 added in PRD revision v1.2 to resolve Phase-1d adversarial pass-1: BC-11.03.006 for DP-007; BC-7.11.002..008 for D-SEC server-authority invariant suite CWE-602)
 
 ---
 
-## CAP-001 — Engine-Agnostic Game Build and Test (P0) — 34 BCs
+## CAP-001 — Engine-Agnostic Game Build and Test (P0) — 35 BCs
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-001.md`
 
@@ -77,6 +77,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-001.md`
 | BC-1.14.001 | Adapter Pins Exactly One engineVersion in the Capability Manifest | P0 | ss-01/BC-1.14.001.md | active |
 | BC-1.14.002 | Core Compatibility Matrix Maps Core Version to Supported Protocol Major Versions | P0 | ss-01/BC-1.14.002.md | active |
 | BC-1.15.001 | Factory Core Source Artifacts Contain No Engine SDK Imports or Engine Name References | P0 | ss-01/BC-1.15.001.md | active |
+| BC-1.15.002 | Factory Core Output Contains No Kernel Anti-Cheat Authored Code (Never-Author Enforcement) | P0 | ss-01/BC-1.15.002.md | active |
 
 ---
 
@@ -199,6 +200,13 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-006-007.md`
 | BC-7.09.001 | Docs Convergence Dimension Evaluation | P0 | ss-07/BC-7.09.001.md | active |
 | BC-7.10.001 | Monetization-Ethics Convergence Dimension Evaluation | P0 | ss-07/BC-7.10.001.md | active |
 | BC-7.11.001 | Security-Invariants Convergence Dimension Evaluation | P0 | ss-07/BC-7.11.001.md | active |
+| BC-7.11.002 | Server-Authority Invariant — No-Trust-Client (CWE-602 Core) | P0 | ss-07/BC-7.11.002.md | active |
+| BC-7.11.003 | Server-Authority Invariant — Input Range, Rate, and Sequence Validation | P0 | ss-07/BC-7.11.003.md | active |
+| BC-7.11.004 | Server-Authority Invariant — Replay-Attack Prevention | P0 | ss-07/BC-7.11.004.md | active |
+| BC-7.11.005 | Server-Authority Invariant — Authoritative Reconciliation | P0 | ss-07/BC-7.11.005.md | active |
+| BC-7.11.006 | Server-Authority Invariant — Interest Management (Anti-Wallhack) | P0 | ss-07/BC-7.11.006.md | active |
+| BC-7.11.007 | Server-Authority Invariant — Economy Atomicity and Conservation | P0 | ss-07/BC-7.11.007.md | active |
+| BC-7.11.008 | Server-Authority Invariant — Secure Entitlement Verification | P0 | ss-07/BC-7.11.008.md | active |
 | BC-7.12.001 | Convergence Loop Engine and Release-Gating Rule | P0 | ss-07/BC-7.12.001.md | active |
 
 ---
@@ -269,6 +277,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-011.md`
 | BC-11.03.003 | Forbidden Dark Pattern — Loss-Triggered Purchase Prompt (DP-003) | P1 | ss-11/BC-11.03.003.md | active |
 | BC-11.03.004 | Forbidden Dark Pattern — Minor Loot Box / Gacha Access (DP-008) | P1 | ss-11/BC-11.03.004.md | active |
 | BC-11.03.005 | Forbidden Dark Pattern — Miscategorized Best-Value Bundle (DP-006) | P1 | ss-11/BC-11.03.005.md | active |
+| BC-11.03.006 | Forbidden Dark Pattern — Predatory Vulnerability Targeting / Whale Hunting (DP-007) | P1 | ss-11/BC-11.03.006.md | active |
 | BC-11.04.001 | Gacha EV and Pity Correctness (Ethics-Bounded) | P1 | ss-11/BC-11.04.001.md | active |
 | BC-11.04.002 | Spend-Concentration Guardrail (Gini Coefficient Bound) | P1 | ss-11/BC-11.04.002.md | active |
 
@@ -292,7 +301,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-008-012.md`
 
 ---
 
-## CAP-013 — Genre-Gated Optional Lane Activation (P2) — 14 BCs
+## CAP-013 — Genre-Gated Optional Lane Activation (P2) — 15 BCs
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 
@@ -310,6 +319,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 | BC-13.03.002 | UGC Content Schema Validation | P2 | ss-13/BC-13.03.002.md | active |
 | BC-13.03.003 | Mod Load Determinism — Topological Ordering and Conflict Detection | P2 | ss-13/BC-13.03.003.md | active |
 | BC-13.03.004 | UGC Distribution Adapter — mod.io Round-Trip Conformance | P2 | ss-13/BC-13.03.004.md | active |
+| BC-13.01.004 | Genre Profile Default Enforces NFT/Web3 Off-By-Default (DI-011) | P2 | ss-13/BC-13.01.004.md | active |
 | BC-13.04.001 | Store Page Asset Conformance | P2 | ss-13/BC-13.04.001.md | active |
 | BC-13.04.002 | Marketing Asset Manifest Completeness | P2 | ss-13/BC-13.04.002.md | active |
 
@@ -335,18 +345,18 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 
 | Capability | Priority | Subsystem | BC Count |
 |-----------|----------|-----------|----------|
-| CAP-001 — Engine-Agnostic Build and Test | P0 | SS-01 | 34 |
+| CAP-001 — Engine-Agnostic Build and Test | P0 | SS-01 | 35 |
 | CAP-002 — Conformance Gating | P0 | SS-01 (merged into Engine-Adapter Protocol) | 6 |
 | CAP-003 — Replay Regression | P0 | SS-02 | 9 |
 | CAP-004 — Asset Generation + Provenance | P0 | SS-03 | 15 |
 | CAP-005 — Multi-Discipline Production | P0 | SS-04 | 16 |
 | CAP-006 — Simulation Quality | P0 | SS-05 | 11 |
-| CAP-007 — Convergence Tracking | P0 | SS-06 | 12 |
+| CAP-007 — Convergence Tracking | P0 | SS-06 | 19 (+7 v1.2: BC-7.11.002..008 server-authority invariant suite) |
 | CAP-008 — Playtest Protocol | P1 | SS-07 | 5 |
 | CAP-009 — Cert + Distribution | P1 | SS-08 | 11 |
 | CAP-010 — Compliance + AI Disclosure | P1 | SS-08 (merged into Cert+Distribution) | 6 |
-| CAP-011 — Monetization Ethics | P1 | SS-09 | 13 |
+| CAP-011 — Monetization Ethics | P1 | SS-09 | 14 (+1 v1.2: BC-11.03.006 DP-007) |
 | CAP-012 — Canon KB | P1 | SS-10 | 9 |
-| CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 14 |
+| CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 15 |
 | CAP-014 — XR Seam | P2 | SS-12 | 7 |
-| **TOTAL** | | | **168** |
+| **TOTAL** | | | **179** |

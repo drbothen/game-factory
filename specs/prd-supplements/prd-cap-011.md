@@ -1,7 +1,7 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -124,23 +124,43 @@ The default envelope MUST be applied automatically when `monetization_model != "
 
 ### 11.3 Forbidden Dark Patterns
 
-The factory maintains a canonical deny-list. Any monetization config that
-generates or implies a forbidden pattern is flagged as an ethics violation.
+The factory maintains a canonical deny-list of 12 dark patterns (DP-001 through DP-012).
+Any monetization config that generates or implies a forbidden pattern is flagged as an
+ethics violation.
 
-| ID | Pattern | Why Forbidden | Machine-Checkable Signal |
-|----|---------|--------------|--------------------------|
-| DP-001 | Premium-currency obfuscation without real-money-equivalent disclosure | FTC scrutiny; EU consumer protection; deceptive by design | No real-money-equivalent field in purchase UI spec |
-| DP-002 | FOMO / false scarcity timer on unlimited-supply items | Deceptive scarcity; EU Unfair Commercial Practices Directive | Countdown timer on item with `supply: unlimited` |
-| DP-003 | Time-pressure purchase prompt during loss event | Exploits emotional distress (Brignull; DiGRA games literature) | Purchase prompt event fired within N frames of loss event |
-| DP-004 | Pay-to-win in ranked/competitive mode | Fairness violation; FTC/ESRB scrutiny | `economy-graph` shows combat-power gap between spend tiers in ranked mode |
-| DP-005 | Loot boxes without odds disclosure | Mandatory: Apple (Dec 2017), Google Play (May 2019), ESRB (Apr 2020), PEGI 16 (Jun 2026) | `gacha-spec` present without `published_odds` field |
-| DP-006 | Miscategorized "best value" bundle (dominated SKU labeled best value) | Deceptive pricing; FTC Section 5 risk | `iap-catalog` contains SKU where `best_value_tag = true` but per-unit EV is not maximum |
-| DP-007 | Escalating offers on inferred high-vulnerability player (whale hunting) | Predatory targeting; EU DSA dark patterns | `segmentation-ltv-spec` contains offer-escalation rule conditioned on vulnerability proxy |
-| DP-008 | Loot box or gacha access for minors without spending control | COPPA (FTC 2025 amendment); PEGI 16 (Jun 2026); Belgium gambling law | `minor_protection.no_loot_box_for_minors = false` in ethics contract |
-| DP-009 | Mis-tap / disguised purchase button | FTC v. Epic finding ($245M); Cognosphere/Genshin Jan 2025 proposed order | Purchase confirmation action within 1 UI frame of non-purchase action in UI spec |
-| DP-010 | Confirm-shaming opt-out | Dark pattern (Brignull); EU consumer law | Opt-out button text is pejorative toward the player |
-| DP-011 | Drip pricing (price revealed in stages) | EU Omnibus Directive; FTC guidance | Total price not shown before final purchase confirmation |
-| DP-012 | Auto-enrollment subscription without explicit consent | Apple/Google billing rules; EU consumer law | Subscription `auto_enroll: true` without `explicit_consent_required: true` |
+**Enforcement tiers (as of PRD v1.2):**
+
+- **Enforced (machine-checkable BC exists):** DP-003, DP-004, DP-005, DP-006, DP-007, DP-008
+  — six patterns have dedicated behavioral contracts with testable postconditions.
+- **Catalog-only (deny-list entry; no dedicated BC):** DP-001, DP-002, DP-009, DP-010,
+  DP-011, DP-012 — these patterns are on the deny-list but enforcement is currently via
+  adversarial review (§11.6 check A-03) rather than a machine-checkable BC. Rationale for
+  deferral: DP-001/002 require UI-spec schema fields that are not yet standardized in the
+  engine-neutral spec layer; DP-009 requires UI-frame-level analysis not currently
+  available at the factory's abstract spec layer (would require per-engine UI inspection);
+  DP-010/011/012 require store-facing UI schema fields that are part of store-asset-spec
+  (CAP-009 domain, not ethics enforcement domain). These patterns are detectable by the
+  adversarial reviewer from the `monetization-ethics-contract`'s declared mechanics.
+  A future iteration of the ethics enforcement layer may add machine-checkable BCs.
+
+This classification is intentional. The next adversarial pass should verify this
+rationale remains sound — if any "catalog-only" DP is machine-checkable at the current
+spec layer, it should be escalated to the enforced tier.
+
+| ID | Pattern | Why Forbidden | Machine-Checkable Signal | Enforcement Status |
+|----|---------|--------------|--------------------------|-------------------|
+| DP-001 | Premium-currency obfuscation without real-money-equivalent disclosure | FTC scrutiny; EU consumer protection; deceptive by design | No real-money-equivalent field in purchase UI spec | Catalog-only (no dedicated BC; deferred — UI spec field not standardized) |
+| DP-002 | FOMO / false scarcity timer on unlimited-supply items | Deceptive scarcity; EU Unfair Commercial Practices Directive | Countdown timer on item with `supply: unlimited` | Catalog-only (no dedicated BC; deferred — UI spec field not standardized) |
+| DP-003 | Time-pressure purchase prompt during loss event | Exploits emotional distress (Brignull; DiGRA games literature) | Purchase prompt event fired within N frames of loss event | **Enforced** — BC-11.03.003 |
+| DP-004 | Pay-to-win in ranked/competitive mode | Fairness violation; FTC/ESRB scrutiny | `economy-graph` shows combat-power gap between spend tiers in ranked mode | **Enforced** — BC-11.03.002 |
+| DP-005 | Loot boxes without odds disclosure | Mandatory: Apple (Dec 2017), Google Play (May 2019), ESRB (Apr 2020), PEGI 16 (Jun 2026) | `gacha-spec` present without `published_odds` field | **Enforced** — BC-11.03.001 |
+| DP-006 | Miscategorized "best value" bundle (dominated SKU labeled best value) | Deceptive pricing; FTC Section 5 risk | `iap-catalog` contains SKU where `best_value_tag = true` but per-unit EV is not maximum | **Enforced** — BC-11.03.005 |
+| DP-007 | Escalating offers on inferred high-vulnerability player (whale hunting) | Predatory targeting; EU DSA dark patterns | `segmentation-ltv-spec` contains offer-escalation rule conditioned on vulnerability proxy | **Enforced** — BC-11.03.006 |
+| DP-008 | Loot box or gacha access for minors without spending control | COPPA (FTC 2025 amendment); PEGI 16 (Jun 2026); Belgium gambling law | `minor_protection.no_loot_box_for_minors = false` in ethics contract | **Enforced** — BC-11.03.004 |
+| DP-009 | Mis-tap / disguised purchase button | FTC v. Epic finding ($245M); Cognosphere/Genshin Jan 2025 proposed order | Purchase confirmation action within 1 UI frame of non-purchase action in UI spec | Catalog-only (no dedicated BC; deferred — requires per-engine UI frame analysis) |
+| DP-010 | Confirm-shaming opt-out | Dark pattern (Brignull); EU consumer law | Opt-out button text is pejorative toward the player | Catalog-only (no dedicated BC; deferred — store-facing UI schema outside ethics domain) |
+| DP-011 | Drip pricing (price revealed in stages) | EU Omnibus Directive; FTC guidance | Total price not shown before final purchase confirmation | Catalog-only (no dedicated BC; deferred — store-facing UI schema outside ethics domain) |
+| DP-012 | Auto-enrollment subscription without explicit consent | Apple/Google billing rules; EU consumer law | Subscription `auto_enroll: true` without `explicit_consent_required: true` | Catalog-only (no dedicated BC; deferred — store-facing subscription schema outside ethics domain) |
 
 ### 11.4 CONSTRAINED-OPTIMIZATION Rule
 
@@ -239,6 +259,7 @@ All BCs are in `.factory/specs/behavioral-contracts/ss-11/`.
 | BC-11.03.003 | Forbidden Dark Pattern — Loss-Triggered Purchase Prompt (DP-003) | P1 | No purchase prompt event within declared loss-event proximity window |
 | BC-11.03.004 | Forbidden Dark Pattern — Minor Loot Box Access (DP-008) | P0 | minor_protection.no_loot_box_for_minors = true whenever gacha/loot-box mechanic is declared |
 | BC-11.03.005 | Forbidden Dark Pattern — Miscategorized Best-Value Bundle (DP-006) | P1 | Every SKU labeled best_value_tag=true has the highest per-unit EV in its category |
+| BC-11.03.006 | Forbidden Dark Pattern — Predatory Vulnerability Targeting / Whale Hunting (DP-007) | P1 | segmentation-ltv-spec must not contain offer-escalation rules conditioned on vulnerability proxies |
 | BC-11.04.001 | Gacha EV and Pity Correctness (Ethics-Bounded) | P1 | Gacha pull EV and worst-case cost-to-target remain within ethics-contract declared bounds |
 | BC-11.04.002 | Spend-Concentration Guardrail | P1 | Gini coefficient of spend distribution measured in sim does not exceed ethics-contract declared threshold |
 

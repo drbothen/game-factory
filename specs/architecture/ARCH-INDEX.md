@@ -1,11 +1,11 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 deployment_topology: single-service
 studio_roster_count: 66
 vp_total: 10
@@ -31,6 +31,13 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v1.2 — Phase-1d alignment.** BC count updated to 179 (was 168). Per-SS counts
+> corrected: SS-01=41, SS-06=19, SS-09=14, SS-11=15. See subsystem-decomposition.md
+> for full changelog. VP-INDEX updated with VP-TBD resolution table (I3).
+> adapter-protocols.md §1.5 JSON-RPC collision resolved (C4): E-EAP-011 reassigned
+> to -32009; E-EAP-012/013 registered. methodology-layer.md §2.5 DP table aligned
+> to canonical prd-cap-011.md §11.3 (C1); §2.8 D-013 distinction clarified (I5).
+
 > **Pass 2b complete.** This index now covers the full architecture surface:
 > pass 1 (layered architecture, subsystem decomposition, DTU, ADRs),
 > pass 2a (adapter protocols, methodology layer), and pass 2b (studio-of-agents
@@ -44,7 +51,7 @@ traces_to: .factory/specs/product-brief.md
 |------|-----------------|---------------|
 | `ARCH-INDEX.md` (this file) | Subsystem Registry, ADR registry, VP registry, document map | ~500 |
 | `layered-architecture.md` | 4-layer model, reuse/replace/adapt table, config/content seam | ~1,000 |
-| `subsystem-decomposition.md` | SS-01..SS-12 definitions, BC→Subsystem assignment table (all 168) | ~1,100 |
+| `subsystem-decomposition.md` | SS-01..SS-12 definitions, BC→Subsystem assignment table (all 179), Directory→Subsystem alias table | ~1,400 |
 | `dtu-assessment.md` | DTU analog: replay harness + conformance doubles; DTU_REQUIRED verdict | ~900 |
 | `adapter-protocols.md` | Layer 3 adapter protocol spec: JSON-RPC transport, capability schema, fidelity grades, conformance suite, compatibility matrix | ~1,100 |
 | `methodology-layer.md` | Layer 2 game methodology: sim-BC schema, design-intent contract, replay-regression contract, asset-provenance, 11-dim convergence criteria | ~1,100 |
@@ -93,23 +100,23 @@ traces_to: .factory/specs/product-brief.md
 | SS-11 | Genre-Gated Lanes | CAP-013 | BC-13.* | P2 |
 | SS-12 | XR Platform Seam | CAP-014 | BC-14.* | P2 |
 
-**BC count by subsystem:**
+**BC count by subsystem (v1.2 — 179 total):**
 
-| Subsystem | BC Count |
-|-----------|----------|
-| SS-01 | 40 (34 CAP-001 + 6 CAP-002) |
-| SS-02 | 9 |
-| SS-03 | 15 |
-| SS-04 | 16 |
-| SS-05 | 11 |
-| SS-06 | 12 |
-| SS-07 | 5 |
-| SS-08 | 17 (11 CAP-009 + 6 CAP-010) |
-| SS-09 | 13 |
-| SS-10 | 9 |
-| SS-11 | 14 |
-| SS-12 | 7 |
-| **TOTAL** | **168** |
+| Subsystem | BC Count | Change from v1.0 |
+|-----------|----------|-----------------|
+| SS-01 | 41 (34 CAP-001 + 6 CAP-002 + 1 BC-1.15.002) | +1 v1.1 |
+| SS-02 | 9 | — |
+| SS-03 | 15 | — |
+| SS-04 | 16 | — |
+| SS-05 | 11 | — |
+| SS-06 | 19 (12 original + 7 BC-7.11.002..008) | +7 v1.2 |
+| SS-07 | 5 | — |
+| SS-08 | 17 (11 CAP-009 + 6 CAP-010) | — |
+| SS-09 | 14 (13 original + 1 BC-11.03.006) | +1 v1.2 |
+| SS-10 | 9 | — |
+| SS-11 | 15 (14 original + 1 BC-13.01.004) | +1 v1.1 |
+| SS-12 | 7 | — |
+| **TOTAL** | **179** | **+11** |
 
 ---
 

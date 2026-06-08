@@ -2,11 +2,11 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 traces_to: ARCH-INDEX.md
 inputs:
   - .factory/specs/behavioral-contracts/BC-INDEX.md
@@ -18,15 +18,37 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Subsystem Decomposition
 
+> **v1.1 changes (Phase-1d arch alignment):**
+> - **I1:** BC→Subsystem table updated from 168 → 179 total. Added rows for BC-1.15.002
+>   (SS-01, v1.1), BC-13.01.004 (SS-11, v1.1), BC-11.03.006 (SS-09, v1.2), and
+>   BC-7.11.002..008 (SS-06, v1.2). Per-SS BC counts updated: SS-01=41, SS-06=19,
+>   SS-09=14, SS-11=15.
+> - **I1:** SS-09 language corrected from "five declared patterns" to "six declared
+>   patterns" (DP-003 through DP-008 inclusive is six patterns).
+> - **I6:** Added authoritative Directory→Subsystem Alias Table at end of document.
+>   Establishes explicit mapping from `ss-NN/` directory names to SS-NN subsystem IDs
+>   and documents all hazard rows (where directory suffix ≠ subsystem suffix).
+> - **I1 note in preamble:** Added anchoring hazard warning directing readers to the
+>   alias table.
+
 > **Primary purpose of this document:** (1) define each subsystem with scope, layer
 > assignment, and principal agents; (2) provide the BC→Subsystem assignment table
-> resolving the 168 SS-TBD placeholders in BC frontmatter.
+> resolving all SS-TBD placeholders in BC frontmatter; (3) provide the
+> Directory→Subsystem alias table (authoritative anchor for I6).
 >
 > **Note on directory names.** The BC file tree uses `ss-01/`…`ss-14/` as navigability
 > aliases for `CAP-001`…`CAP-014`. These directory names do NOT correspond to SS-NN IDs.
 > The authoritative SS-NN assignments are in this document and in ARCH-INDEX.md.
 > A separate mechanical pass will update the `subsystem:` frontmatter field in each BC
 > file once this document is accepted.
+>
+> **IMPORTANT — directory-to-subsystem alias (I6 resolution):** Because CAP-NNN does not
+> map 1:1 to SS-NN (CAP-001+002 → SS-01; CAP-009+010 → SS-08; all others 1:1 except
+> the CAP numbering gap at SS-11/SS-12), the `ss-NN/` directory holding a BC file is
+> NOT the same as the BC's `subsystem:` field. See the **Directory → Subsystem Alias
+> Table** at the end of this document. Always resolve subsystem membership from that
+> table or from the BC's own `subsystem:` frontmatter field — never from directory name
+> alone.
 
 ---
 
@@ -36,7 +58,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 **Layer:** 3 + 4 (protocol layer + adapter implementations)
 **Owned capabilities:** CAP-001, CAP-002
-**BC count:** 40 (34 + 6)
+**BC count:** 41 (34 CAP-001 + 6 CAP-002 + 1 v1.1: BC-1.15.002 never-author enforcement)
 **Priority:** P0
 
 Owns the complete engine adapter protocol surface (JSON-RPC 2.0 transport, capability
@@ -135,11 +157,13 @@ method) is enforced here.
 
 **Layer:** 2 (methodology layer — convergence loop)
 **Owned capabilities:** CAP-007
-**BC count:** 12
+**BC count:** 19 (+7 v1.2: BC-7.11.002..008 server-authority invariant suite CWE-602)
 **Priority:** P0
 
-Owns the 11-dimension convergence evaluation and release-gating loop. Each of the 12
-BCs maps to one convergence dimension evaluation contract plus the release-gating rule.
+Owns the 11-dimension convergence evaluation and release-gating loop. The original 12
+BCs map to convergence dimension evaluation contracts plus the release-gating rule.
+BC-7.11.001 owns D-SEC dimension evaluation; BC-7.11.002..008 are the seven individual
+server-authority invariants (CWE-602 spine) that D-SEC evaluates.
 The convergence loop engine itself (novelty-decay, 3-CLEAN streak, dimension declarations)
 is ADAPTED from vsdd-factory's 7-dim machinery (extraction-boundary-validated.md §3.2).
 A release is blocked until all required dimensions are green or explicitly degraded to a
@@ -193,13 +217,13 @@ consent flags).
 
 **Layer:** 2 (methodology layer — ethics enforcement)
 **Owned capabilities:** CAP-011
-**BC count:** 13
+**BC count:** 14 (+1 v1.2: BC-11.03.006 DP-007)
 **Priority:** P1
 
 Owns the monetization-ethics-contract schema, default ethics envelope, mandatory adversarial
 review gate, and all constrained-optimization invariants: no unconstrained LTV objective
 (DI-005), economy-spine propagation, no-progression-deadlock-without-spend, and forbidden
-dark-pattern enforcement (five declared patterns: DP-003 through DP-008). Also owns gacha
+dark-pattern enforcement (six declared enforced patterns: DP-003 through DP-008). Also owns gacha
 EV/pity correctness and spend-concentration guardrail (Gini coefficient bound). This
 subsystem applies to any game with monetization; ethics contract absence is a factory
 defect when monetization is present.
@@ -231,7 +255,7 @@ hallucinating lore. The Canon-KB is identified as the fifth load-bearing seam
 
 **Layer:** 2 (methodology layer — genre activation)
 **Owned capabilities:** CAP-013
-**BC count:** 14
+**BC count:** 15 (+1 v1.1: BC-13.01.004 NFT/web3 off-by-default DI-011)
 **Priority:** P2
 
 Owns the genre-profile schema, inactive-lane zero-artifact guarantee, lane idempotency,
@@ -269,27 +293,32 @@ when implementation begins; the adapter implementation is deferred.
 
 ## BC to Subsystem Assignment Table
 
-> This table is the authoritative resolution of all 168 SS-TBD placeholders.
+> This table is the authoritative resolution of all SS-TBD placeholders.
 > A mechanical pass will apply `subsystem: SS-NN` to each BC file's frontmatter.
 > BC directory names (ss-01/…ss-14/) are navigability aliases for CAP numbers only.
+> Grand total: **179** (168 original + 2 v1.1 + 9 v1.2).
 
 | BC ID Range | Count | Assigned Subsystem | Rationale |
 |-------------|-------|--------------------|-----------|
 | BC-1.01.001 – BC-1.15.001 | 34 | **SS-01** | CAP-001 = engine adapter protocol surface |
+| BC-1.15.002 | 1 | **SS-01** | CAP-001; v1.1 add: never-author enforcement DI-010 |
 | BC-2.02.001 – BC-2.02.006 | 6 | **SS-01** | CAP-002 = conformance gating (protocol quality gate) |
 | BC-3.03.001 – BC-3.03.009 | 9 | **SS-02** | CAP-003 = deterministic replay harness |
 | BC-4.01.001 – BC-4.06.001 | 15 | **SS-03** | CAP-004 = asset generation pipeline |
 | BC-5.01.001 – BC-5.07.003 | 16 | **SS-04** | CAP-005 = multi-discipline production |
 | BC-6.01.001 – BC-6.04.001 | 11 | **SS-05** | CAP-006 = simulation quality verification |
-| BC-7.01.001 – BC-7.12.001 | 12 | **SS-06** | CAP-007 = convergence tracking engine |
+| BC-7.01.001 – BC-7.12.001 | 12 | **SS-06** | CAP-007 = convergence tracking engine (original 12) |
+| BC-7.11.002 – BC-7.11.008 | 7 | **SS-06** | CAP-007; v1.2 add: server-authority invariant suite CWE-602 (dir: ss-07/) |
 | BC-8.08.001 – BC-8.08.005 | 5 | **SS-07** | CAP-008 = playtest protocol |
 | BC-9.01.001 – BC-9.06.002 | 11 | **SS-08** | CAP-009 = cert + distribution |
 | BC-10.01.001 – BC-10.06.001 | 6 | **SS-08** | CAP-010 = compliance pipeline (co-owned with cert) |
-| BC-11.01.001 – BC-11.04.002 | 13 | **SS-09** | CAP-011 = monetization ethics |
+| BC-11.01.001 – BC-11.04.002 | 13 | **SS-09** | CAP-011 = monetization ethics (original 13) |
+| BC-11.03.006 | 1 | **SS-09** | CAP-011; v1.2 add: DP-007 predatory targeting enforcement (dir: ss-11/) |
 | BC-12.12.001 – BC-12.12.009 | 9 | **SS-10** | CAP-012 = canon knowledge-base |
-| BC-13.01.001 – BC-13.04.002 | 14 | **SS-11** | CAP-013 = genre-gated lanes |
+| BC-13.01.001 – BC-13.04.002 | 14 | **SS-11** | CAP-013 = genre-gated lanes (original 14) |
+| BC-13.01.004 | 1 | **SS-11** | CAP-013; v1.1 add: NFT/web3 off-by-default DI-011 (dir: ss-13/) |
 | BC-14.01.001 – BC-14.02.003 | 7 | **SS-12** | CAP-014 = XR platform seam |
-| **TOTAL** | **168** | | |
+| **TOTAL** | **179** | | |
 
 ---
 
@@ -310,11 +339,51 @@ for distribution. A single subsystem boundary is cleaner than two with overlappi
 
 ---
 
+## Directory → Subsystem Alias Table (I6 — Authoritative)
+
+> **Purpose.** BC directory names (`ss-NN/`) are navigability aliases for CAP numbers,
+> NOT subsystem IDs. This table is the authoritative resolution of the off-by-one that
+> arises because two capability pairs share a subsystem (CAP-001+002 → SS-01;
+> CAP-009+010 → SS-08). Always use this table (or the BC's own `subsystem:` frontmatter)
+> to determine which SS-NN owns a BC. Never infer subsystem from directory name alone.
+>
+> **Anchoring rule.** BC frontmatter `subsystem:` field is the per-BC source of truth.
+> This table is the aggregate reference. ARCH-INDEX.md §Subsystem Registry is the
+> authoritative subsystem name and ID register. Any discrepancy between these three
+> sources is a consistency defect to be fixed in the next architecture pass.
+
+| BC Directory | CAP(s) in that directory | Resolves to Subsystem | Notes |
+|-------------|--------------------------|----------------------|-------|
+| `ss-01/` | CAP-001 | **SS-01** (Engine-Adapter Protocol) | |
+| `ss-02/` | CAP-002 | **SS-01** (Engine-Adapter Protocol) | CAP-002 is conformance gating, co-owned in SS-01 |
+| `ss-03/` | CAP-003 | **SS-02** (Deterministic Replay Harness) | |
+| `ss-04/` | CAP-004 | **SS-03** (Asset Generation Pipeline) | |
+| `ss-05/` | CAP-005 | **SS-04** (Multi-Discipline Production) | |
+| `ss-06/` | CAP-006 | **SS-05** (Simulation Quality Verification) | |
+| `ss-07/` | CAP-007 | **SS-06** (Convergence Tracking Engine) | BC-7.11.002..008 are in ss-07/ but subsystem=SS-06 |
+| `ss-08/` | CAP-008 | **SS-07** (Playtest Protocol) | |
+| `ss-09/` | CAP-009 | **SS-08** (Cert and Distribution) | |
+| `ss-10/` | CAP-010 | **SS-08** (Cert and Distribution) | CAP-010 compliance pipeline is co-owned in SS-08 |
+| `ss-11/` | CAP-011 | **SS-09** (Monetization Ethics) | BC-11.03.006 is in ss-11/ and subsystem=SS-09 ✓ |
+| `ss-12/` | CAP-012 | **SS-10** (Canon Knowledge-Base) | |
+| `ss-13/` | CAP-013 | **SS-11** (Genre-Gated Lanes) | BC-13.01.004 is in ss-13/ and subsystem=SS-11 ✓ |
+| `ss-14/` | CAP-014 | **SS-12** (XR Platform Seam) | |
+
+**Key hazard rows** (where directory ≠ subsystem suffix):
+
+| BC | Directory | Correct `subsystem:` field |
+|----|-----------|---------------------------|
+| BC-2.02.001–006 | `ss-02/` | `SS-01` |
+| BC-7.11.001–008 | `ss-07/` | `SS-06` |
+| BC-10.01.001–006 | `ss-10/` | `SS-08` |
+
+---
+
 ## Subsystem Priority Summary
 
 | Priority | Subsystems | BC Count |
 |----------|-----------|----------|
-| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06 | 103 |
-| P1 (ship v1) | SS-07, SS-08, SS-09, SS-10 | 44 |
-| P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 21 |
-| **Total** | | **168** |
+| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06 | 112 (SS-01=41, SS-02=9, SS-03=15, SS-04=16, SS-05=11, SS-06=19, +1 v1.1 SS-01) |
+| P1 (ship v1) | SS-07, SS-08, SS-09, SS-10 | 45 (SS-07=5, SS-08=17, SS-09=14, SS-10=9) |
+| P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 22 (SS-11=15, SS-12=7) |
+| **Total** | | **179** |

@@ -2,11 +2,11 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 traces_to: ARCH-INDEX.md
 traces_to_caps:
   - CAP-004
@@ -25,7 +25,7 @@ inputs:
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md
   - .factory/specs/prd-supplements/prd-cap-006-007.md
   - .factory/specs/prd-supplements/prd-cap-011.md
-  - .factory/specs/prd-supplements/prd-cap-012.md
+  - .factory/specs/prd-supplements/prd-cap-008-012.md
   - .factory/specs/domain-spec/entities.md
   - .factory/specs/domain-spec/invariants.md
   - .factory/specs/behavioral-contracts/BC-INDEX.md
@@ -33,6 +33,17 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.1 changes (Phase-1d arch alignment):**
+> - **S3 fixed:** `inputs:` frontmatter: `prd-cap-012.md` (non-existent file) replaced
+>   with `prd-cap-008-012.md` (the actual file where CAP-012 lives).
+> - **C1 fixed:** §2.5 `monetization-ethics-contract` schema `forbidden_patterns` table
+>   DP descriptions now exactly match the canonical prd-cap-011.md §11.3 meanings.
+>   Previous values were drifted from canonical (wrong pattern-to-description mapping).
+> - **I5 fixed:** §2.8 `sequence-graph` `directed: true` wording corrected to use
+>   "cinematic-director creative gate" vocabulary, distinct from ADR-0007 `human-gated`
+>   fidelity tier (which is reserved for external third-party acts only). D-013
+>   distinction is now explicit. D-ASSET degraded predicate updated to match.
 
 > **Pass 2a scope.** This document specifies the Layer-2 quality model: contract-type
 > schemas, the 11-dimension convergence model with precise pass/degraded/blocked
@@ -249,19 +260,19 @@ id: MEC-NNN
 game_id: "<game project identifier>"
 
 allowed_mechanics: ["<mechanics list>"]     # e.g., cosmetic-dlc, battle-pass
-forbidden_patterns:                         # factory-enforced never-list
+forbidden_patterns:                         # factory-enforced never-list (six enforced patterns)
   - pattern: "DP-003"
-    description: "Indefinite countdown timers that reset without player action"
+    description: "Time-pressure purchase prompt during loss event (BC-11.03.003)"
   - pattern: "DP-004"
-    description: "Loot-box odds not disclosed pre-purchase"
+    description: "Pay-to-win in ranked/competitive mode (BC-11.03.002)"
   - pattern: "DP-005"
-    description: "Progression deadlock requiring spend to continue"
+    description: "Loot boxes without odds disclosure (BC-11.03.001)"
   - pattern: "DP-006"
-    description: "Price obscuration via mandatory currency conversion"
+    description: "Miscategorized 'best value' bundle — dominated SKU labeled best value (BC-11.03.005)"
   - pattern: "DP-007"
-    description: "Targeting minors with spend-pressure mechanics"
+    description: "Escalating offers on inferred high-vulnerability player — whale hunting (BC-11.03.006)"
   - pattern: "DP-008"
-    description: "Unconstrained engagement-optimization as autonomous factory default (R-010)"
+    description: "Loot box or gacha access for minors without spending control (BC-11.03.004)"
 
 ltv_optimization_constraint:
   bounded: true                             # MUST be true; unbounded = factory defect (DI-005)
@@ -391,9 +402,16 @@ asset_refs: ["<all referenced asset IDs; must resolve in asset store>"]
 - All `asset_refs` resolve in the asset store (no dangling refs).
 - Subtitle coverage: every audio track with dialogue has a subtitle track entry.
 - Audio sync: `facial_lipsync[i].audio_ref` is present in `audio` track.
-- `directed: true` surfaces a human-gated checklist item for cinematic sign-off
-  (creative gate — not a third-party external gate; governed by DI-007 structure
-  but not DI-006 semantics).
+- `directed: true` surfaces a cinematic-director creative gate checklist item for
+  cinematic sign-off. **D-013 distinction:** this is a creative finishing gate —
+  it blocks completion of the cinematic sequence until a named cinematic director
+  reviews and approves the shot sequence. This is distinct from and must not use
+  the vocabulary of the `human-gated` fidelity tier (ADR-0007), which is reserved
+  exclusively for external, third-party-required human acts (console cert sign-off,
+  store publish, SAG-AFTRA IMA consent, XR comfort-cert, legal opinion). The
+  cinematic director is an internal creative principal, not an external third party.
+  The corresponding error code is `E-CIN-003` (cinematic-director sign-off absent),
+  not `HumanGatedTaskPending` (-32008).
 
 ---
 
@@ -483,8 +501,11 @@ all `sequence-graph` and `narrative-graph` asset refs resolve in asset store;
 
 **Degraded predicate:** Placeholder assets declared for documented gaps with
 human-ACK; quality-gate failed on Tier-2/3 risk assets but ingested per pure-maximal
-policy with risk recorded in sidecar; `directed: true` cinematic awaiting human
-sign-off (surfaced as `human-gated` checklist item, not a block on D-ASSET itself).
+policy with risk recorded in sidecar; `directed: true` cinematic awaiting
+cinematic-director creative sign-off (surfaced as a creative gate checklist item,
+not a third-party external act; this is NOT the `human-gated` fidelity tier of
+ADR-0007, which is reserved for external third-party acts such as console cert
+sign-off and SAG-AFTRA consent — see D-013 distinction in §2.8).
 
 **Blocked predicate:** Any asset missing a sidecar (DI-003 violation); any
 asset-generation-request item unfulfilled with no placeholder declared; any

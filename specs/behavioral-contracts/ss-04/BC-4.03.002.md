@@ -55,6 +55,31 @@ error that prevents the asset from being ingested. This BC defines the computati
    `training_data_provenance != "none"`), this is treated as an error:
    - Error `E-PRV-012` ("disclosure_class 'procedural-exempt' is invalid for neural-model
      adapter '<id>'; only classical procedural generation qualifies").
+7. **Procedural-exempt detection and audit control (I9 — closing silent-failure path):**
+   Adapter self-attestation (`modality: procedural`, `training_data_provenance: none`)
+   is a necessary but not sufficient condition for `procedural-exempt` assignment. The
+   following corroborating evidence controls are required to prevent false self-declaration:
+   a. **Adapter registration evidence:** Every adapter claiming `procedural` modality must
+      be registered in the `adapter-capability-registry` with a `generation_mechanism`
+      field set to one of: `wfc`, `bsp`, `noise_function`, `speedtree`, `houdini_pdg_classical`,
+      `rule_based`, or `custom_classical` (exhaustive enumerated list; additions require ADR).
+      An adapter with `training_data_provenance: none` that is NOT in this registry is
+      treated as `disclosure_class: pre-generated` — not `procedural-exempt`.
+   b. **Audit hook:** The `procedural-exempt` assignment is recorded in an audit log
+      entry: `{asset_id, adapter_id, generation_mechanism, disclosure_class: "procedural-exempt",
+      timestamp, pipeline_run_id}`. This log is the evidence artifact for downstream
+      AI-disclosure manifest generation (BC-10.05.001) and is not omissible.
+   c. **Periodic re-attestation:** Any adapter that claims `procedural` classification
+      undergoes a conformance check during the engine-adapter conformance suite
+      (CAP-002 / BC-2.02.001) to verify the declared `generation_mechanism` has not been
+      updated to incorporate ML models without re-registering. Conformance failure on this
+      check emits `E-CONF-004` and blocks the adapter from accepting `procedural-exempt`
+      assignments until re-confirmed.
+   d. **No silent pass:** If step (a) cannot be verified (adapter not in registry, or
+      `generation_mechanism` field absent), the generation pipeline emits `E-PRV-012` with
+      the message "procedural-exempt self-attestation cannot be corroborated: adapter
+      '<id>' has no registered classical generation mechanism" and the asset is treated
+      as `pre-generated`.
 
 ## Postconditions
 
@@ -87,7 +112,7 @@ error that prevents the asset from being ingested. This BC defines the computati
 | EC-006 | NVIDIA Meshtron mesh (ML-based but baked into build) | `pre-generated` (ML model output, not runtime) |
 | EC-007 | SpeedTree vegetation (procedural algorithm, no ML) | `procedural-exempt` |
 | EC-008 | `disclosure_class: "AI-generated"` (variant casing/value) | E-PRV-011 |
-| EC-009 | Adapter claims `procedural` but uses diffusion model internally | E-PRV-012 if detected; adapter must accurately report `training_data_provenance` |
+| EC-009 | Adapter claims `procedural` but uses diffusion model internally | E-PRV-012 via audit control §7(a): if adapter is not in `adapter-capability-registry` with a recognized `generation_mechanism`, the system cannot corroborate the attestation and falls back to `pre-generated`. Additionally, if during conformance re-attestation (§7(c)) the adapter is found to incorporate ML, E-CONF-004 blocks further `procedural-exempt` assignments for that adapter. The system does NOT silently pass — it requires positive corroborating evidence. |
 
 ## Canonical Test Vectors
 
@@ -100,6 +125,7 @@ error that prevents the asset from being ingested. This BC defines the computati
 | null value | — | — | — | E-PRV-010 |
 | `"ai-generated"` | — | — | — | E-PRV-011 |
 | `"procedural-exempt"` but neural adapter | `text_to_3d` | `licensed` | — | E-PRV-012 |
+| Adapter claims `procedural` / `none` but not in adapter-capability-registry | `procedural` | `none` | `build_time` | E-PRV-012 (unverifiable attestation → treat as `pre-generated`) |
 
 ## Verification Properties
 

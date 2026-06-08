@@ -2,11 +2,11 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 traces_to: ARCH-INDEX.md
 traces_to_caps:
   - CAP-001
@@ -38,6 +38,15 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Adapter Protocol Family
+
+> **v1.1 changes (Phase-1d arch alignment — C4 JSON-RPC reconciliation):**
+> - §1.5 error table: added `E-EAP Code` column mapping every JSON-RPC code to its
+>   error-taxonomy E-EAP-NNN entry.
+> - Added `-32009 KernelAntiCheatAttempted / E-EAP-011` row — this code was previously
+>   colliding with `-32007 MalformedManifest`. Collision resolved by assigning
+>   `KernelAntiCheatAttempted` to -32009 (next available in protocol-reserved range).
+> - `-32007 MalformedManifest` retains its code; now registered as E-EAP-012.
+> - `-32008 HumanGatedTaskPending` retains its code; now registered as E-EAP-013.
 
 > **Pass 2a scope.** This document defines the four-seam adapter protocol as one
 > coherent pattern and then shows how each seam instantiates that pattern with its
@@ -175,22 +184,23 @@ publish/pricing, SAG-AFTRA consent, legal opinion, XR comfort-cert, paid-UGC vet
 JSON-RPC 2.0 standard error codes (`-32600` range) plus the protocol-reserved range
 `-32000` to `-32099`:
 
-| Code | Name | Meaning |
-|------|------|---------|
-| -32700 | `ParseError` | JSON-RPC 2.0 standard: invalid JSON |
-| -32600 | `InvalidRequest` | JSON-RPC 2.0 standard: not a valid Request object |
-| -32601 | `MethodNotFound` | JSON-RPC 2.0 standard: method does not exist |
-| -32602 | `InvalidParams` | JSON-RPC 2.0 standard: invalid method parameters |
-| -32603 | `InternalError` | JSON-RPC 2.0 standard: internal adapter error |
-| -32000 | `ProtocolVersionMismatch` | Core/adapter protocol versions incompatible; response includes `supportedRange` |
-| -32001 | `CapabilityUnsupported` | Called a capability whose fidelity is `none`; core must degrade, not fail |
-| -32002 | `ProfileUnavailable` | Requested execution profile not available on this runner (e.g., no lavapipe on CI) |
-| -32003 | `EngineToolMissing` | Required binary, license, or tool not found (e.g., Unity license file, export templates) |
-| -32004 | `DeterminismTierViolation` | Core requested a comparison stricter than the declared tier supports |
-| -32005 | `OperationFailed` | Engine/tool operation ran but failed; see `data` for result detail |
-| -32006 | `Cancelled` | Request cancelled via `$/cancelRequest` |
-| -32007 | `MalformedManifest` | Manifest returned from `initialize` is missing required fields |
-| -32008 | `HumanGatedTaskPending` | Attempted to proceed past a `human-gated` boundary without acknowledgment |
+| Code | Name | E-EAP Code | Meaning |
+|------|------|------------|---------|
+| -32700 | `ParseError` | E-EAP-010 | JSON-RPC 2.0 standard: invalid JSON |
+| -32600 | `InvalidRequest` | E-EAP-008 | JSON-RPC 2.0 standard: not a valid Request object |
+| -32601 | `MethodNotFound` | E-EAP-009 | JSON-RPC 2.0 standard: method does not exist |
+| -32602 | `InvalidParams` | — | JSON-RPC 2.0 standard: invalid method parameters |
+| -32603 | `InternalError` | — | JSON-RPC 2.0 standard: internal adapter error |
+| -32000 | `ProtocolVersionMismatch` | E-EAP-001 | Core/adapter protocol versions incompatible; response includes `supportedRange` |
+| -32001 | `CapabilityUnsupported` | E-EAP-002 | Called a capability whose fidelity is `none`; core must degrade, not fail |
+| -32002 | `ProfileUnavailable` | E-EAP-003 | Requested execution profile not available on this runner (e.g., no lavapipe on CI) |
+| -32003 | `EngineToolMissing` | E-EAP-004 | Required binary, license, or tool not found (e.g., Unity license file, export templates) |
+| -32004 | `DeterminismTierViolation` | E-EAP-005 | Core requested a comparison stricter than the declared tier supports |
+| -32005 | `OperationFailed` | E-EAP-006 | Engine/tool operation ran but failed; see `data` for result detail |
+| -32006 | `Cancelled` | E-EAP-007 | Request cancelled via `$/cancelRequest` |
+| -32007 | `MalformedManifest` | E-EAP-012 | Manifest returned from `initialize` is missing required fields |
+| -32008 | `HumanGatedTaskPending` | E-EAP-013 | Attempted to proceed past a `human-gated` boundary without acknowledgment (DI-006; ADR-0007) |
+| -32009 | `KernelAntiCheatAttempted` | E-EAP-011 | Factory output artifact contains kernel-mode anti-cheat code pattern (DI-010 violation; BC-1.15.002) |
 
 `CapabilityUnsupported` is the primary graceful-degradation signal. The core is
 required to catch it and degrade the affected convergence dimension rather than

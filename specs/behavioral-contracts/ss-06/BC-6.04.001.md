@@ -17,6 +17,7 @@ origin: brownfield
 extracted_from: ".reference/vsdd-factory/hooks/red-gate.sh"
 subsystem: SS-05
 capability: CAP-006
+priority: P0
 lifecycle_status: active
 introduced: v0.1.0
 modified: []
