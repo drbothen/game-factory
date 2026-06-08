@@ -35,7 +35,8 @@ phase0_gate: PASSED
 | 2 | Human approved Phase-0 context: REUSE/REPLACE/ADAPT plan; devops pipeline item accepted | DONE |
 | 3 | Phase-0 gate PASSED; transitioning to Phase 1 Spec Crystallization | DONE |
 | 4 | L2 domain spec (business-analyst) — 10 shards; 18 entities, 14 caps [7P0/5P1/2P2], 12 invariants, 6 processes, 42 glossary terms, 8 assumptions, 17 risks, 10 failure-modes, 7 differentiators; committed 79a625c. Optional follow-up shards (event-flow, genre-profiles) non-blocking. | DONE |
-| 5 | L3 PRD + behavioral contracts (product-owner) | NEXT |
+| 5 | L3 PRD + behavioral contracts (product-owner) — 168 BCs (CAP-001:34, 002:6, 003:9, 004:15, 005:16, 006:11, 007:12, 008:5, 009:11, 010:6, 011:13, 012:9, 013:14, 014:7); prd.md + BC-INDEX + nfr-catalog (19 NFRs) + error-taxonomy (11 families); full-depth Approach B (all 14 caps); committed e05fd9d | DONE |
+| 6 | create-architecture (architect) — sharded ADRs, subsystem decomposition + assign SS-NN to all 168 BCs from ARCH-INDEX, formalize four adapter protocols, DTU assessment, methodology layer | NEXT |
 
 ## Key Facts
 
@@ -76,6 +77,12 @@ phase0_gate: PASSED
 | `.factory/specs/domain-spec/risks.md` | 1.0 | committed 79a625c |
 | `.factory/specs/domain-spec/failure-modes.md` | 1.0 | committed 79a625c |
 | `.factory/specs/domain-spec/differentiators.md` | 1.0 | committed 79a625c |
+| `.factory/specs/prd.md` | 1.0 | committed e05fd9d |
+| `.factory/specs/behavioral-contracts/BC-INDEX.md` | 1.0 | committed e05fd9d |
+| `.factory/specs/behavioral-contracts/ss-01/…ss-14/` | 1.0 | 168 BC files; see BC-INDEX; committed e05fd9d |
+| `.factory/specs/prd-supplements/nfr-catalog.md` | 1.0 | committed e05fd9d |
+| `.factory/specs/prd-supplements/error-taxonomy.md` | 1.0 | committed e05fd9d |
+| `.factory/specs/prd-supplements/prd-cap-{001…013-014}.md` | 1.0 | 9 supplement files; committed e05fd9d |
 
 ## Decisions Log
 
@@ -108,12 +115,23 @@ _(none open)_
 | GPT adversary route unverified | Once proxy running: `curl http://localhost:4000/v1/models`; confirm adversary/primary resolves | Before Phase 5 |
 | lobster-parse not generated | Generated during Phase-1 toolchain provisioning (`/vsdd-factory:toolchain-provisioning`) — not a current blocker | Phase 1 |
 
+## Drift / Follow-up Items
+
+Items identified during create-prd; to be resolved by architect and/or Phase-1d adversarial pass:
+
+| ID | Item | Owner | When |
+|----|------|-------|------|
+| FU-001 | DI-010 (kernel-anti-cheat-never-authored) and DI-011 (NFT/Web3-off-by-default) have no dedicated BC — add lint/default BCs | architect | create-architecture |
+| FU-002 | NFR numerical-target gaps for CAP-001–003, 006–007, 009–011, 013–014 — specific thresholds TBD in architecture | architect | create-architecture |
+| FU-003 | Missing error families: E-GEN (CAP-004), E-ETH (CAP-011), E-XR (CAP-014), and ~7 others not yet modeled in error-taxonomy | architect / Phase-1d adversary | create-architecture / Phase-1d |
+| FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers from ARCH-INDEX | architect | create-architecture |
+
 ## Session Resume Checkpoint
 
-**Date:** 2026-06-07
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Phase-0 gate PASSED (human approved REUSE/REPLACE/ADAPT plan; devops pipeline item D-009 accepted). pre-1 fully PASSED; D-006/D-007/D-008 human-ratified. L2 domain spec DONE (79a625c).
-**Next action:** Dispatch product-owner for L3 PRD + behavioral contracts (`/vsdd-factory:create-prd`).
-**Phase 1 remaining steps:** L3 PRD + BCs (product-owner) → architecture + DTU assessment (architect) → verification properties → MANDATORY DTU assessment (dtu-assessment.md) → CI/CD setup (.github/workflows/ + cicd-setup.md) → Phase-1d adversarial convergence (≥3 clean passes) → fresh-context consistency audit → Phase-1 spec-package human approval gate.
+**Date:** 2026-06-08
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–5 DONE. L3 PRD + 168 BCs committed (e05fd9d).
+**Next action:** Dispatch architect for create-architecture (`/vsdd-factory:create-architecture`) — sharded ADRs, subsystem decomposition, assign SS-NN to all 168 BCs, formalize four adapter protocols, DTU assessment, methodology layer.
+**Phase 1 remaining steps:** create-architecture (architect) → verification properties → MANDATORY DTU assessment (dtu-assessment.md) → CI/CD setup (.github/workflows/ + cicd-setup.md) → Phase-1d adversarial convergence (≥3 clean passes) → fresh-context consistency audit → Phase-1 spec-package human approval gate.
+**PRD/BC summary:** 168 BCs across 14 caps; nfr-catalog (19 NFRs); error-taxonomy (11 families). All BCs SS-TBD pending architect. 4 follow-up items (FU-001–004) logged above.
 **Key Phase-0 findings (for context):** ~70% conceptual / ~85% file-level neutral spine REUSE; quality model REPLACE; BC-VP/convergence-dims/dependency-model ADAPT; seam = 4 declarative swap interfaces. D-009: devops-engineer owns extracted-core release/cross-compile pipeline (Phase 1+).
-**L2 domain spec summary:** 18 entities, 14 capabilities (7 P0/5 P1/2 P2), 12 invariants, 6 processes, 42 glossary terms, 8 assumptions, 17 risks, 10 failure-modes, 7 differentiators. Optional follow-up shards (event-flow, genre-profiles) non-blocking.
-**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Planning corpus under `.factory/planning/`. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) outstanding — not current blockers.
+**Context:** .factory/ worktree on factory-artifacts is healthy. Reference clone at `.reference/vsdd-factory` @ `82163b7`. Pre-Phase-3 remediation items (LiteLLM proxy, API keys) outstanding — not current blockers.
