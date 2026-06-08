@@ -1,0 +1,180 @@
+---
+# security — dependency audit, static analysis, license policy
+#
+# Runs weekly on schedule and on PRs to main.  Security findings are posted
+# as PR comments (PR trigger) or GitHub Issues (schedule trigger).
+#
+# Toolchain: cargo-audit (RustSec), cargo-deny (license + ban policy),
+#            Semgrep (static analysis — Rust + generic rulesets).
+#
+# Note: This workflow does NOT block PRs by default (the required status checks
+# are ci.yml jobs).  On a mature repo, the orchestrator/human can elevate
+# "security / audit" or "security / deny" to required checks after the first
+# clean pass.
+
+name: security
+
+on:
+  schedule:
+    # Every Monday at 08:00 UTC
+    - cron: "0 8 * * 1"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # audit — cargo-audit (RustSec vulnerability database)
+  # ─────────────────────────────────────────────────────────────────────────────
+  audit:
+    name: security / audit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write       # create issue on scheduled failure
+      pull-requests: write  # post comment on PR failure
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@fcf085536bf67f4944bd6c4a87e63cb4c08eb5de  # stable
+        with:
+          toolchain: stable
+
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@7c0a0060d577e9d44cbddf0b5c2d4e16f80dc2e4  # v2.49.51
+        with:
+          tool: cargo-audit
+
+      - name: Run cargo-audit
+        id: audit
+        run: |
+          set -euo pipefail
+          cargo audit --json 2>&1 | tee audit-report.json || AUDIT_EXIT=$?
+          if [ "${AUDIT_EXIT:-0}" -ne 0 ]; then
+            echo "audit_failed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "audit_failed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post audit comment (PR)
+        if: github.event_name == 'pull_request' && steps.audit.outputs.audit_failed == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('audit-report.json', 'utf8'));
+            const vulns = report.vulnerabilities?.list || [];
+            const body = vulns.length > 0
+              ? `## cargo-audit: ${vulns.length} vulnerability/ies found\n\n` +
+                vulns.map(v => `- **${v.advisory.id}** (${v.advisory.cvss || 'no CVSS'}): ${v.advisory.title}\n  Affects: \`${v.package.name} ${v.package.version}\``).join('\n')
+              : '## cargo-audit: clean';
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+      - name: Create issue on scheduled failure
+        if: github.event_name == 'schedule' && steps.audit.outputs.audit_failed == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '[security] cargo-audit: vulnerabilities found (scheduled scan)',
+              labels: ['security'],
+              body: 'Weekly cargo-audit scan found vulnerabilities. Check the workflow run for details.'
+            });
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b  # v4.5.0
+        with:
+          name: cargo-audit-report
+          path: audit-report.json
+          retention-days: 14
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # deny — cargo-deny (license compliance + banned crates)
+  #
+  # Policy rationale: game-factory must be freely licensable (MIT/Apache-2.0).
+  # Any dependency that brings in a copyleft license (GPL) or a known-bad crate
+  # must be caught in CI.  cargo-deny also bans Suno/Udio client SDKs (DI-009).
+  # ─────────────────────────────────────────────────────────────────────────────
+  deny:
+    name: security / deny
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@7c0a0060d577e9d44cbddf0b5c2d4e16f80dc2e4  # v2.49.51
+        with:
+          tool: cargo-deny
+
+      - name: Run cargo-deny (check all)
+        run: |
+          set -euo pipefail
+          if [ -f deny.toml ]; then
+            cargo deny check all
+          else
+            echo "[deny] deny.toml not present yet — scaffold check only."
+            echo "  When Cargo.toml workspace exists, create deny.toml with:"
+            echo "  [licenses]"
+            echo "  allow = ['MIT', 'Apache-2.0', 'Apache-2.0 WITH LLVM-exception', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'Unicode-DFS-2016', 'CC0-1.0']"
+            echo "  [bans]"
+            echo "  deny = ['suno-sdk', 'udio-sdk']  # DI-009 blocklist"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # semgrep — static analysis
+  # ─────────────────────────────────────────────────────────────────────────────
+  semgrep:
+    name: security / semgrep
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write  # for SARIF upload if SEMGREP_APP_TOKEN is set
+
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@7174f8f4f07f0e1b87ef34be3a76be5b97c7faa5  # v1.1.0
+        with:
+          config: >-
+            p/rust
+            p/security-audit
+            p/secrets
+          # Fails on high-severity findings only; adjust in Phase-5 when
+          # the formal-verifier adds game-specific Semgrep rules.
+          generateSarif: "1"
+        continue-on-error: true  # non-blocking until rules are tuned
+
+      - name: Upload SARIF (if generated)
+        if: always()
+        uses: github/codeql-action/upload-sarif@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80a  # v3.28.10
+        with:
+          sarif_file: semgrep.sarif
+        continue-on-error: true   # SARIF upload requires Advanced Security on private repos

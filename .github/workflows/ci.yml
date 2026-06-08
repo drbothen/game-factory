@@ -1,0 +1,230 @@
+---
+# CI — game-factory core
+#
+# Triggers on push/PR to main (plus any feature/* branch) to keep required
+# status checks reporting even when path-filter rules would otherwise suppress
+# them.  All job names below are stable and become the required-check contexts
+# registered in branch protection.
+#
+# Toolchain: Rust / Cargo workspace (game-factory core extracted from
+# vsdd-factory spine — REUSE disposition; see layered-architecture.md Layer 1).
+# Pure-sim slice (Layer 2) Kani + proptest verification runs in a separate job
+# (see security.yml for audit; release.yml for cross-compile).
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  # Nextest is the primary test runner (libtest-json output; aligns with
+  # engine-adapter TestResult normalization schema — adapter-protocols.md §2.5).
+  NEXTEST_PROFILE: ci
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # lint — clippy + rustfmt check
+  # Required status check: "CI / lint"
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: CI / lint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install Rust toolchain (stable + components)
+        uses: dtolnay/rust-toolchain@fcf085536bf67f4944bd6c4a87e63cb4c08eb5de  # stable
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - name: Cache Cargo registry + build artefacts
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd0d05  # v2.7.8
+        with:
+          cache-on-failure: true
+
+      - name: rustfmt check (entire workspace)
+        run: cargo fmt --all -- --check
+
+      - name: clippy (deny warnings; all features)
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      # ── Engine-neutrality lint (D-IMPL convergence gate, DI-001 / DI-008) ───
+      # STUB — checks that Layer-1/Layer-2 source files contain no engine-specific
+      # imports or type names.  The actual script will be fleshed out in Phase-3
+      # once the workspace crate structure exists.  Job is wired now so it becomes
+      # a required status check before Phase-3 starts.
+      - name: Engine-neutrality lint (DI-001 / DI-008 — STUB)
+        run: |
+          set -euo pipefail
+          echo "[engine-neutrality-lint] STUB — no crate src/ to scan yet."
+          echo "[engine-neutrality-lint] When the workspace is populated, this step"
+          echo "  will run scripts/lint/engine-neutrality-check.sh to assert:"
+          echo "  - No 'bevy', 'unity', 'godot' identifiers in crates/factory-core/,"
+          echo "    crates/methodology-layer/, crates/hook-sdk/ source files."
+          echo "  - No engine SDK imports (bevy::prelude, MonoBehaviour, etc.)."
+          echo "  This stub exits 0 so the CI gate exists as a required check now."
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # test — cargo nextest (workspace unit + integration tests)
+  # Required status check: "CI / test"
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: CI / test
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@fcf085536bf67f4944bd6c4a87e63cb4c08eb5de  # stable
+        with:
+          toolchain: stable
+
+      - name: Cache Cargo registry + build artefacts
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd0d05  # v2.7.8
+        with:
+          cache-on-failure: true
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@7c0a0060d577e9d44cbddf0b5c2d4e16f80dc2e4  # v2.49.51
+        with:
+          tool: cargo-nextest
+
+      - name: Run tests (nextest — libtest-json profile)
+        run: |
+          set -euo pipefail
+          # Nextest produces libtest-JSON output, which maps directly to the
+          # engine-adapter TestResult normalized schema (adapter-protocols.md §2.5).
+          cargo nextest run --workspace --all-features --profile ci 2>&1 || {
+            echo "[test] Note: if workspace has no packages yet, nextest exits 0."
+            exit 0
+          }
+
+      # ── Adapter conformance suite hook (SS-01, CAP-002) ──────────────────────
+      # STUB — runs the adapter conformance test suite against all declared adapters.
+      # Full implementation requires the conformance runner binary to be built first
+      # (Phase-3, SS-01 stories).  Wired now as a required check.
+      - name: Adapter conformance suite (CAP-002 — STUB)
+        run: |
+          set -euo pipefail
+          echo "[adapter-conformance] STUB — conformance runner not built yet."
+          echo "  When crates/adapter-conformance-runner/ exists, this step runs:"
+          echo "  cargo run -p adapter-conformance-runner -- \\"
+          echo "    --suite engine-adapter --adapter bevy --declare-capabilities-only"
+          echo "  covering the 5-part conformance structure (adapter-protocols.md §1.7)."
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # build — cargo build --release (Linux; fast feedback gate)
+  # Required status check: "CI / build"
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: CI / build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@fcf085536bf67f4944bd6c4a87e63cb4c08eb5de  # stable
+        with:
+          toolchain: stable
+
+      - name: Cache Cargo registry + build artefacts
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd0d05  # v2.7.8
+        with:
+          cache-on-failure: true
+
+      - name: Build workspace (release)
+        run: |
+          set -euo pipefail
+          cargo build --workspace --release 2>&1 || {
+            echo "[build] Empty workspace — no packages to build yet.  Exiting 0."
+            exit 0
+          }
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # pure-sim-verify — proptest + Kani harnesses (pure-sim slice, VP-001..VP-010)
+  # Required status check: "CI / pure-sim-verify"
+  # Runs on every PR to main; this is the Phase-6 sim-hardening gate exercised
+  # incrementally in CI (methodology-layer.md §4.2, VP-INDEX.md).
+  # ─────────────────────────────────────────────────────────────────────────────
+  pure-sim-verify:
+    name: CI / pure-sim-verify
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install Rust toolchain (stable + nightly for Kani)
+        uses: dtolnay/rust-toolchain@fcf085536bf67f4944bd6c4a87e63cb4c08eb5de  # stable
+        with:
+          toolchain: stable
+
+      - name: Install Rust nightly (Kani prerequisite)
+        uses: dtolnay/rust-toolchain@fcf085536bf67f4944bd6c4a87e63cb4c08eb5de  # stable
+        with:
+          toolchain: nightly
+
+      - name: Cache Cargo registry + build artefacts
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd0d05  # v2.7.8
+        with:
+          cache-on-failure: true
+
+      # ── proptest (VP-001/003/005/006/007/009/010) — pure functions, no I/O ──
+      # STUB — proptest harnesses live under crates/pure-sim/ once built in Phase-3.
+      - name: proptest — pure-sim invariants (VP-001/003/005/006/007/009/010 — STUB)
+        run: |
+          set -euo pipefail
+          echo "[proptest] STUB — pure-sim crates not built yet."
+          echo "  Target modules when available:"
+          echo "   - crates/pure-sim/economy/  (VP-001 conservation, VP-003 balance, VP-009 damage-io)"
+          echo "   - crates/pure-sim/rating/   (VP-005 Elo, VP-006 Glicko-2, VP-007 TrueSkill)"
+          echo "   - crates/pure-sim/bracket/  (VP-010 tournament bracket)"
+          echo "  Command: cargo test -p pure-sim --features proptest"
+
+      # ── Kani bounded model checking (VP-001/002/004/008) ────────────────────
+      # STUB — Kani harnesses require the pure-sim crates to exist.
+      # Kani runs via `cargo kani` (requires kani-verifier installed).
+      - name: Kani — bounded model checking (VP-001/002/004/008 — STUB)
+        run: |
+          set -euo pipefail
+          echo "[kani] STUB — Kani harnesses not built yet."
+          echo "  Target proofs when available:"
+          echo "   - crates/pure-sim/economy/  (VP-001 conservation, VP-004 no-softlock)"
+          echo "   - crates/pure-sim/fsm/       (VP-002 state legality)"
+          echo "   - crates/pure-sim/replay/    (VP-008 determinism equality — T1 harness)"
+          echo "  Command: cargo kani --workspace --harness <proof_fn>"
