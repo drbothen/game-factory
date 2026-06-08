@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.12
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.13
 #
 # PURPOSE
 # -------
@@ -123,7 +123,8 @@
 #   (h) [NEW v1.4] studio-of-agents §3 per-SS appearance counts recomputed from
 #       §2 roster using the canonical counting rule (each role counted under every
 #       SS-NN listed in its row). Expected values: SS-03=16 SS-04=23 SS-05=6
-#       SS-06=3 SS-07=3 SS-08=12 SS-09=2 SS-10=5 SS-11=11 SS-12=1.
+#       SS-06=3 SS-07=3 SS-08=12 SS-09=2 SS-10=5 SS-11=10 SS-12=1 SS-13=1.
+#       (v1.13/Pass-13: SS-11 corrected 11→10; SS-13 added=1)
 #       §6 tier subtotals: Tier 1=53, Tier 2=13, sum=66.
 #   (i) [REWRITTEN v1.5] subsystem-decomposition §Subsystem Priority Summary:
 #       P0, P1, P2 subtotals stated in the doc are asserted to equal the counts
@@ -235,7 +236,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.12) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.13) ==="
 echo ""
 
 # ============================================================================
@@ -638,7 +639,9 @@ fi
 # derived from the §2 roster (counting rule: each role counted under every SS-NN
 # listed in its row). Expected totals (ADAPT+NEW):
 #   SS-03=16  SS-04=23  SS-05=6  SS-06=3  SS-07=3  SS-08=12
-#   SS-09=2   SS-10=5   SS-11=11 SS-12=1
+#   SS-09=2   SS-10=5   SS-11=10 SS-12=1  SS-13=1
+# v1.13 (Pass-13 C13-01): SS-11 corrected 11→10 (role 58 moved SS-11→SS-13);
+#   SS-13 added (online-services-adapter; backend-services-engineer role 58).
 # §6 tier subtotals: Tier 1=53, Tier 2=13, sum line "53 + 13 = 66".
 #
 # Strategy: parse the §3 table rows by looking for "| SS-NN |" lines and
@@ -660,8 +663,9 @@ else
     "SS-08:12"
     "SS-09:2"
     "SS-10:5"
-    "SS-11:11"
+    "SS-11:10"
     "SS-12:1"
+    "SS-13:1"
   )
 
   for entry in "${SS_EXPECTED[@]}"; do
