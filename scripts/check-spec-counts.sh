@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.5
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.6
 #
 # PURPOSE
 # -------
-# Prevent recurring count-drift across the spec layer. Ten classes of drift
+# Prevent recurring count-drift across the spec layer. Eleven classes of drift
 # are checked (extended in v1.2 to cover Pass-3 adversarial defect classes;
 # extended in v1.3 to cover Pass-4 VP catalog consistency;
 # extended in v1.4 to cover Pass-5 studio §3 appearance counts, subsystem
 # priority subtotals, and formal VP ↔ BC bidirectional anchor):
-# extended in v1.5 to fix false-green in check (i) (I6-01) and add check (k):
+# extended in v1.5 to fix false-green in check (i) (I6-01) and add check (k);
+# extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
+# (F8-01 recurrence prevention):
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
@@ -45,6 +47,16 @@
 #       error-taxonomy.md. Reports unregistered codes. Will FAIL until PO
 #       registers E-ETH codes for dark-pattern BCs (I6-02 class). Implemented
 #       now so it becomes green automatically after PO work.
+#   (l) [NEW v1.6] disclosure_class closed-enum consistency (F8-01 recurrence
+#       prevention): derives the canonical allowed-value set programmatically from
+#       the producer BC ss-04/BC-4.03.002.md (source of truth; authoritative closed
+#       enum: pre-generated, live-generated, procedural-exempt). Scans ALL BC files
+#       for disclosure_class value enumerations expressed as {set} notation or
+#       backtick-quoted pipe-separated value lists. For every value token found in
+#       any such enumeration, asserts it is a member of the canonical set. FAIL
+#       reports the offending BC filename and the non-canonical value token.
+#       Prevents the F8-01 defect class: consumer BCs adopting non-canonical
+#       disclosure_class vocabulary that producer-side CI could not detect.
 #
 # USAGE
 #   ./scripts/check-spec-counts.sh [--verbose]
@@ -826,6 +838,121 @@ fi
 echo ""
 
 # ============================================================================
+# (l) DISCLOSURE_CLASS CLOSED-ENUM CONSISTENCY  [NEW v1.6]
+# ============================================================================
+# Assert every disclosure_class value token found in any BC file's enum
+# enumeration is a member of the canonical closed set defined in BC-4.03.002.
+#
+# Source of canonical set: BC-4.03.002 §Behavior step 2 (schema validator line)
+# and Postconditions, which contain the only authoritative statement of the
+# three-value closed enum. The canonical values are extracted programmatically
+# from BC-4.03.002 — not hardcoded — so a future ADR-authorized enum extension
+# only requires updating BC-4.03.002 (this script auto-adapts). Comment below
+# names BC-4.03.002 as source of truth per the instruction.
+#
+# Scanning strategy (POSIX/BSD-grep compatible, no grep -P):
+#   Class A: Lines matching "disclosure_class.*{[a-z][a-z-]+"
+#            Extract content inside {...} braces; tokenize on [a-z][a-z-]+.
+#            Catches: "values are strictly {pre-generated, live-generated, ...}"
+#            and VP formal property lines like "disclosure_class ∈ {set}".
+#   Class B: Lines matching "disclosure_class.*`[a-z][a-z-]+ |"
+#            Extract backtick-quoted spans containing "|" pipe separators;
+#            tokenize on [a-z][a-z-]+.
+#            Catches: "`disclosure_class` (exactly `pre-generated | live-generated | ...`)"
+#
+# Any extracted token that is not in {canonical_val1, canonical_val2, canonical_val3}
+# is a vocabulary violation. The failure message names the offending BC + value.
+#
+# This check PASSES after PO completes F8-01 fix (replacing dev-tool-only in
+# BC-10.05.001); FAILS if that value is re-introduced or if any new BC adopts
+# a non-canonical disclosure_class value in an enumeration.
+echo "--- (l) disclosure_class closed-enum consistency (source of truth: BC-4.03.002) ---"
+
+BC_4_03_002="$BC_DIR/ss-04/BC-4.03.002.md"
+
+if [[ ! -f "$BC_4_03_002" ]]; then
+  echo "    SKIP: canonical source BC-4.03.002 not found at $BC_4_03_002"
+else
+  # Step 1: Extract canonical set from BC-4.03.002.
+  # Use the first line in BC-4.03.002 that contains a {set} with "pre-generated".
+  # This matches both the Behavior §2 line and the Postconditions line.
+  dc_canonical_line=$(grep -E '\{pre-generated' "$BC_4_03_002" 2>/dev/null | head -1 || true)
+
+  if [[ -z "$dc_canonical_line" ]]; then
+    echo "    SKIP: cannot parse canonical enum from BC-4.03.002 (no '{pre-generated' line found)"
+  else
+    # Extract the three canonical tokens by prefix-anchored grep on the token list
+    dc_canon1=$(printf '%s' "$dc_canonical_line" \
+      | grep -oE '[a-z][a-z-]+' | grep '^pre-' | head -1 || true)
+    dc_canon2=$(printf '%s' "$dc_canonical_line" \
+      | grep -oE '[a-z][a-z-]+' | grep '^live-' | head -1 || true)
+    dc_canon3=$(printf '%s' "$dc_canonical_line" \
+      | grep -oE '[a-z][a-z-]+' | grep '^procedural-' | head -1 || true)
+
+    echo "    Canonical set (from BC-4.03.002): {$dc_canon1, $dc_canon2, $dc_canon3}"
+
+    if [[ -z "$dc_canon1" || -z "$dc_canon2" || -z "$dc_canon3" ]]; then
+      echo "    SKIP: failed to parse all three canonical values from BC-4.03.002"
+    else
+      # Step 2: Scan all BC files for disclosure_class value enumerations.
+      dc_violations=0
+      dc_violation_msgs=()
+
+      while IFS= read -r -d $'\0' bc_file; do
+        bc_id=$(basename "$(dirname "$bc_file")")/$(basename "$bc_file" .md)
+
+        # Class A: {set} notation — lines with "disclosure_class.*{[a-z][a-z-]+"
+        # Extract tokens from inside the {...} brace span only (avoids prose tokens).
+        classA_toks=$(grep -hE 'disclosure_class.*\{[a-z][a-z-]+' "$bc_file" 2>/dev/null \
+          | grep -oE '\{[^}]+\}' \
+          | grep -oE '[a-z][a-z-]+' \
+          | sort -u || true)
+
+        # Class B: backtick-quoted pipe-separated value list
+        # Lines matching "disclosure_class.*`[a-z][a-z-]+ |"
+        # Extract the backtick-quoted spans that contain " | " (value-list spans).
+        classB_toks=$(grep -hE 'disclosure_class.*`[a-z][a-z-]+ \|' "$bc_file" 2>/dev/null \
+          | grep -oE '`[^`]+`' \
+          | grep ' | ' \
+          | sed 's/`//g' \
+          | grep -oE '[a-z][a-z-]+' \
+          | grep -E '^[a-z]+-[a-z]' \
+          | sort -u || true)
+
+        all_dc_toks=$(printf '%s\n%s\n' "$classA_toks" "$classB_toks" \
+          | sort -u | grep -v '^$' || true)
+
+        while IFS= read -r tok; do
+          [[ -z "$tok" ]] && continue
+          # Skip if this is one of the three canonical values
+          if [[ "$tok" == "$dc_canon1" || "$tok" == "$dc_canon2" || "$tok" == "$dc_canon3" ]]; then
+            continue
+          fi
+          # Non-canonical token found
+          dc_violations=$(( dc_violations + 1 ))
+          dc_violation_msgs+=("${bc_id}.md: non-canonical disclosure_class value '$tok' (allowed: {$dc_canon1, $dc_canon2, $dc_canon3}; source: BC-4.03.002)")
+        done <<< "$all_dc_toks"
+
+      done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+      echo "    BC files scanned: $computed_bc"
+      echo "    Non-canonical disclosure_class values found: $dc_violations"
+
+      if [[ $dc_violations -gt 0 ]]; then
+        echo ""
+        echo "    NON-CANONICAL DISCLOSURE_CLASS VALUES (must use {$dc_canon1, $dc_canon2, $dc_canon3}):"
+        for msg in "${dc_violation_msgs[@]}"; do
+          echo "      $msg"
+        done
+        errors+=("MISMATCH [disclosure_class closed-enum (l)]: $dc_violations non-canonical value(s) found in BC enum declarations — PO must replace with canonical values per BC-4.03.002 (see list above)")
+        fail=1
+      fi
+    fi
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -843,6 +970,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Subdecomp priority subtotals:      P0=${computed_frontmatter_p0:-?} P1=${computed_frontmatter_p1:-?} P2=${computed_frontmatter_p2:-?} sum=${computed_frontmatter_grand:-?} (computed from frontmatter)"
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
   echo "  Error-identifier resolution:       all BC E-codes registered in taxonomy"
+  echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
