@@ -69,7 +69,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Pass 1 DONE (5C/9I/4S all resolved; 170→179 BCs); Pass 2 DONE (3C/4I/3S all resolved; 179→178 count correction; CI count-gate added); Pass 3 DONE (1C/4I/3obs all resolved; +2 verification docs; CI gate v1.2; D-014); Pass 4 DONE (2C/4I/5obs all resolved; studio roster 57N+9A=66 reconciled; Kani 3→4; error-taxonomy single total; NFR Source restored; CI gate v1.3); Pass 5 DONE (3C/4I/1S all resolved; studio §3/§6 recompute; VP-TBD BC-local D-015; 11 VP↔BC back-refs; P0 subtotal 111; CI gate v1.4); Pass 6 DONE (0C/2I/1S+57-code completeness gap all resolved; priority 117/39/22; +5 E-ETH+57 codes; E-GEN retired; 196 total codes; CI gate v1.5/11 checks); clean passes: 0/3 | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Pass 1 DONE (5C/9I/4S all resolved; 170→179 BCs); Pass 2 DONE (3C/4I/3S all resolved; 179→178 count correction; CI count-gate added); Pass 3 DONE (1C/4I/3obs all resolved; +2 verification docs; CI gate v1.2; D-014); Pass 4 DONE (2C/4I/5obs all resolved; studio roster 57N+9A=66 reconciled; Kani 3→4; error-taxonomy single total; NFR Source restored; CI gate v1.3); Pass 5 DONE (3C/4I/1S all resolved; studio §3/§6 recompute; VP-TBD BC-local D-015; 11 VP↔BC back-refs; P0 subtotal 111; CI gate v1.4); Pass 6 DONE (0C/2I/1S+57-code completeness gap all resolved; priority 117/39/22; +5 E-ETH+57 codes; E-GEN retired; 196 total codes; CI gate v1.5/11 checks); Pass 7 CLEAN (0C/0I/1 LOW obs O7-01 deferred); clean passes: 1/3 | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,7 +78,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 7** (fresh-context re-review; first candidate clean pass after Pass-6 resolution). Need 3 consecutive clean passes. Pass 6 complete: 0C/2I/1S+57-code completeness gap ALL RESOLVED.
+**NEXT: `phase-1d-adversarial` — Pass 8** (consecutive clean pass 2 of 3). Pass 7 CLEAN: 0C/0I/1 LOW obs (O7-01 deferred). Clean-pass counter: 1/3. Need 2 more consecutive clean passes.
 **Spec state:** PRD v1.6; BC-INDEX v1.4; error-taxonomy v1.6 (196 codes / 30 families / 187 active; E-GEN retired); subsystem-decomposition v1.4 (P0=117/P1=39/P2=22); ARCH-INDEX v1.6; VP-INDEX v1.3 (VP-TBD BC-local D-015; I4 rationale); methodology-layer v1.2; studio-of-agents v1.2 (§3 recomputed; Tier1=53/Tier2=13); verification-architecture.md v1.0; verification-coverage-matrix.md v1.2 (11 VP back-refs; I4 note); nfr-catalog v1.2; prd-cap-011 v1.3. 178 BCs / 196 codes / 35 NFRs / 66 studio roles. CI count-gate v1.5 (11 checks a–k).
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented. lint job now includes Spec count consistency (S2-02) gate.
 
@@ -92,6 +92,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | 4 | 2026-06-08 | FINDINGS | 2C / 4I / 5 obs | ALL RESOLVED | 0/3 |
 | 5 | 2026-06-08 | FINDINGS | 3C / 4I / 1S | ALL RESOLVED | 0/3 |
 | 6 | 2026-06-08 | FINDINGS | 0C / 2I / 1S + 57-code completeness gap | ALL RESOLVED | 0/3 |
+| 7 | 2026-06-08 | CLEAN | 0C / 0I / 1 LOW obs (O7-01) | n/a — non-blocking deferred | **1/3** |
 
 ---
 
@@ -107,7 +108,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Pass 1 done (5C/9I/4S all resolved; 179 BCs); Pass 2 done (3C/4I/3S all resolved; 178 BCs; CI count-gate added); Pass 3 done (1C/4I/3obs all resolved; +2 verification docs; CI v1.2; D-014); Pass 4 done (2C/4I/5obs all resolved; studio 57N+9A=66; Kani 3→4; error-taxonomy single total; NFR Source; CI v1.3); Pass 5 done (3C/4I/1S all resolved; studio §3/§6 recompute; VP-TBD BC-local D-015; 11 VP↔BC back-refs; P0=111; CI v1.4); Pass 6 done (0C/2I/1S+57-code gap all resolved; priority 117/39/22; 196 error codes; E-GEN retired; CI v1.5/11 checks); Pass 7+ pending (0/3 clean passes) | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Pass 1 done (5C/9I/4S all resolved; 179 BCs); Pass 2 done (3C/4I/3S all resolved; 178 BCs; CI count-gate added); Pass 3 done (1C/4I/3obs all resolved; +2 verification docs; CI v1.2; D-014); Pass 4 done (2C/4I/5obs all resolved; studio 57N+9A=66; Kani 3→4; error-taxonomy single total; NFR Source; CI v1.3); Pass 5 done (3C/4I/1S all resolved; studio §3/§6 recompute; VP-TBD BC-local D-015; 11 VP↔BC back-refs; P0=111; CI v1.4); Pass 6 done (0C/2I/1S+57-code gap all resolved; priority 117/39/22; 196 error codes; E-GEN retired; CI v1.5/11 checks); Pass 7 CLEAN (0C/0I/1 LOW obs FU-007 deferred); Pass 8+ pending (1/3 clean passes) | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -180,17 +181,18 @@ _(none open)_
 | FU-004 | All 168 BCs carry `subsystem: SS-TBD` — architect must assign final SS-NN identifiers | — | CLOSED (c29f412) |
 | FU-005 | Adversarial spec pass must validate architect clarifications D-010..D-013 + BC-1.15.002 + BC-13.01.004. **Pass-1 status: ALL VALIDATED WITH CORRECTIONS** — D-010 confirmed; D-011 confirmed; D-012 DI-012 normalization applied (I4); D-013 creative-gate disambiguation applied (I5); BC-1.15.002 pattern list extended (I7); BC-13.01.004 cert path completed (I8). Pending: 3 clean passes from Pass 2 onward. | Phase-1d adversary | ONGOING |
 | FU-006 | **DTU framing divergence (human-gate awareness):** DTU clone enumeration DTU-01..10 (post-architecture) differs from product-brief §10 service list (pre-architecture framing). Both enumerate 10 services but names/groupings differ. DTU-01..10 is authoritative; brief §10 is pre-architecture intent. Human should confirm at Phase-1 gate that DTU-01..10 is the operative enumeration. Flagged by Pass-4 O3. | human (Phase-1 gate) | OPEN — awaiting human gate |
+| FU-007 | **E-GLG-001 changelog attribution (O7-01 from Pass 7):** error-taxonomy.md line ~596 Coverage Note under E-GLG-001 under-attributes the code — omits BC-13.02.002/004/005 and BC-13.03.001 as emitters. Section header (line ~516) is correct and CI check (k) is GREEN; this is a changelog-summary granularity nit only. Deferred optional cleanup — may fold into a later doc-cleanup pass. | product-owner | OPEN — non-blocking; deferred |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–6 DONE.
-**Phase-1d Pass 6 DONE:** 0 criticals; 2 important + 1 suggestion + 57-code completeness gap ALL RESOLVED. Severity decaying (5C/3C/1C/2C/3C/0C). Priority subtotals corrected P0=117/P1=39/P2=22 (8 SS-09 dark-pattern BCs confirmed P0); +5 E-ETH codes (E-ETH-010..014) for DP-003/004/005/006/008; +57 unregistered codes registered (10 families); E-GEN orphan family retired (9 codes struck through); new error total 196 codes / 30 families (187 active). CI gate v1.5 (11 checks a–k, check (i) now frontmatter-computed, check (k) new error-identifier resolution). ALL 11 CHECKS GREEN. Record: `cycles/v0.1.0-greenfield/adversarial/phase-1d-pass-6.md`.
-**Next action:** `phase-1d-adversarial` — **Pass 7** (fresh-context re-review). Clean-pass counter: 0/3. Need 3 consecutive clean passes to converge.
-**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v1.6. 178 BCs; 35 NFRs; 196 error codes / 30 families (187 active; E-GEN retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–7 DONE.
+**Phase-1d Pass 7 CLEAN:** 0 criticals; 0 important; 1 LOW non-blocking observation (O7-01 / FU-007: E-GLG-001 Coverage Note under-attribution — deferred optional cleanup; CI check (k) GREEN; no implementer impact). Spec stable — no changes this pass. Clean-pass counter: 1/3. Severity trajectory: 5C/3C/1C/2C/3C/0C/CLEAN.
+**Next action:** `phase-1d-adversarial` — **Pass 8** (consecutive clean pass 2 of 3). Need 2 more consecutive clean passes to converge.
+**Phase 1 remaining:** Phase-1d adversarial convergence (1/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
+**PRD status:** v1.6. 178 BCs; 35 NFRs; 196 error codes / 30 families (187 active; E-GEN retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred).
 **Architecture:** 12 subsystems; 4-layer stack; 4 adapter seams (8 contract schemas); methodology-layer v1.2 (11 convergence dims + predicates); 66-role studio (57N+9A; 53T1+13T2); DTU_REQUIRED=true, 10 clones pending. ADR-0004..0007 (ADR-0006 v1.1). 10 VPs (6 P0, 4 P1). Priority: 178 BCs / P0=117 / P1=39 / P2=22.
 **Verification docs:** verification-architecture.md v1.0, verification-coverage-matrix.md v1.2. All 11 formal VP↔BC back-refs present. Kani=4, proptest=7 (dual-count VP-001).
 **D-014:** DI-008 engine-neutrality scope = Layer-1/Layer-2 only; L3 adapter-behavior BCs may name engines illustratively. FLAG FOR HUMAN RATIFICATION at Phase-1 gate.
