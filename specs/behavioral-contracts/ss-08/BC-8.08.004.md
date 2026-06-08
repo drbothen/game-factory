@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -23,6 +23,8 @@ introduced: v0.1.0
 modified:
   - pass: "Pass-12"
     reason: "F-12-01 canonical status fix: replaced lowercase convergence-dimension status tokens with canonical UPPERCASE enum values per methodology-layer.md §3.1 {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}. Mapping: green→GREEN (SATISFIED/passed), red→BLOCKED (NOT_SATISFIED/hard-fail), amber→DEGRADED (CONDITIONAL with documented rationale, per BC-7.05.001 EC-002), pending→DEGRADED-PENDING (no sign-off yet / sessions not yet completed, per BC-7.05.001 Postcondition #2). Applied to Postconditions #2/#3/#4, Invariant #3, EC-003, EC-006, Canonical Test Vectors, and VP-2/VP-3. Lowercase tokens silently bypassed the D-PLAY release gate in BC-7.12.001 (which only recognizes canonical UPPERCASE values)."
+  - pass: "Pass-15"
+    reason: "F15-02: fix Related-BCs cross-reference mis-anchor — changed BC-7.07.001 (Perf-Budget) to BC-7.05.001 (Playtest-Satisfaction Convergence Dimension Evaluation). The description 'playtest-satisfaction is one of 11 dimensions' correctly identifies the playtest dimension owner; the cited ID was wrong. ID-citation fix only; no content change."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -134,7 +136,7 @@ always human-authored.
 - BC-8.08.001 — upstream (protocol scaffold is what this gate verifies compliance with)
 - BC-8.08.002 — upstream (evidence captured here is reviewed at sign-off)
 - BC-8.08.003 — depends on (convergence report is what the human reviews)
-- BC-7.07.001 — composes with (11-dimension convergence tracker; playtest-satisfaction is one of 11 dimensions) — cross-capability
+- BC-7.05.001 — composes with (11-dimension convergence tracker; playtest-satisfaction is one of 11 dimensions) — cross-capability
 
 ## Architecture Anchors
 

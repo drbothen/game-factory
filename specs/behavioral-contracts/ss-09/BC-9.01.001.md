@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -25,6 +25,10 @@ modified:
     date: 2026-06-08
     by: product-owner
     reason: "Pass-10 I-3: replace non-canonical AMBER with DEGRADED-PENDING for cert_preflight dimension status per methodology-layer.md §3.1 canonical enum {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}."
+  - version: "1.2"
+    date: 2026-06-08
+    by: product-owner
+    reason: "Pass-15 F15-01: fix Related-BCs cross-reference mis-anchor — changed BC-7.05.001 (Playtest-Satisfaction) to BC-7.06.001 (Cert-Preflight and Distribution-Readiness Convergence Dimension Evaluation). The description 'Cert Pre-Flight Convergence Dimension Evaluation' correctly identifies the cert dimension owner; the cited ID was wrong. ID-citation fix only; no content change."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -157,7 +161,7 @@ are explicitly flagged `requires-human-review` in the report.
 - BC-9.01.002 — Xbox GDK Submission Validator Integration (specializes this BC for Xbox)
 - BC-9.02.001 — Distribution-Adapter Capability Negotiation (declares `human-gated` fidelity)
 - BC-9.06.001 — Human-Gated Console Cert Sign-Off Task Surfacing (depends on: this BC's DEGRADED-PENDING state triggers it)
-- BC-7.05.001 — Cert Pre-Flight Convergence Dimension Evaluation (consumes this BC's output)
+- BC-7.06.001 — Cert Pre-Flight Convergence Dimension Evaluation (consumes this BC's output)
 
 ## Architecture Anchors
 
