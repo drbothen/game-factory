@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.6"
+version: "1.7"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -184,7 +184,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-006-007.md`
 
 ---
 
-## CAP-007 — 11-Dimension Convergence Tracking (P0) — 12 BCs
+## CAP-007 — 11-Dimension Convergence Tracking (P0) — 19 BCs
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-006-007.md`
 
@@ -346,7 +346,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 
 ---
 
-## CAP-015 — Online-Services Adapter (P1, Tier 1) — 11 BCs
+## CAP-015 — Online-Services Adapter (P1, Tier 1) — 12 BCs
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
 
@@ -387,3 +387,12 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
 | CAP-014 — XR Seam | P2 | SS-12 | 7 |
 | CAP-015 — Online-Services Adapter | P0/P1 | SS-13 | 12 (v1.5: all new; P0×9: BC-15.01.001/002, 15.02.001, 15.04.001, 15.06.001, 15.08.001, 15.09.001, 15.10.001, 15.11.001; P1×3: BC-15.03.001, 15.05.001, 15.07.001) |
 | **TOTAL** | | | **190** |
+
+---
+
+## Changelog
+
+| Version | Date | Change |
+|---------|------|--------|
+| v1.7 | 2026-06-08 | Fix (I-16-01): Corrected 2 stale per-capability section-header BC counts. CAP-007 header: "12 BCs" → "19 BCs" (section has 19 rows: BC-7.01.001..BC-7.12.001 incl. BC-7.11.002..008 server-authority invariant suite). CAP-015 header: "11 BCs" → "12 BCs" (section has 12 rows: BC-15.01.001..BC-15.11.001 incl. BC-15.01.002). Grand total (190), Summary table, prd.md, and subsystem-decomposition were correct and unchanged. All 15 capability section headers verified against section row counts. |
+| v1.6 | 2026-06-08 | (prior version — see git history) |
