@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.19
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.20
 #
 # PURPOSE
 # -------
@@ -62,6 +62,16 @@
 # allowed-value subsets in prose outside §3.1; reference §3.1 by name instead.
 # POSIX/BSD-grep/awk compatible (no grep -P). Positive-coverage log always
 # printed. Calibrated to be green after the F1 fix in methodology-layer.md v1.7.
+# extended in v1.20 to add check (r) — error-family reverse coverage (Pass-20
+# adversarial / orchestrator-sweep recurrence prevention): for every non-retired
+# error family registered in error-taxonomy.md, asserts that at least one
+# behavioral-contract file cites at least one code from that family.  Retired
+# families (currently only E-GEN, detected via strikethrough markup) are
+# explicitly excluded so they never trigger a false failure.  Any non-retired
+# family with ZERO BC citations is an orphan and causes a FAIL.  POSIX/BSD-grep
+# compatible. Positive-coverage log always printed. WILL FAIL until the PO
+# reconciles E-KB / E-PLAY / E-REPLAY (families registered but not yet cited by
+# any BC); becomes green automatically after PO work.
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -197,6 +207,12 @@
 #       Convention: avoid inline restatements; reference §3.1 instead.
 #       Positive-coverage log: "Check (q): N prose restatements validated." POSIX/BSD.
 #       (P19-01 recurrence prevention).
+#   (r) [NEW v1.20] Error-family reverse coverage: for every non-retired error
+#       family registered in error-taxonomy.md, assert >=1 BC file cites >=1
+#       code of that family. Retired families (E-GEN, detected via ~~strikethrough~~
+#       markup) are excluded. Orphan families (non-retired, zero BC citations)
+#       cause a FAIL. Positive-coverage log always printed.
+#       WILL FAIL until PO reconciles E-KB / E-PLAY / E-REPLAY.
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (a.ii) [NEW v1.16] BC-INDEX per-capability section-header count: for each H2
 #       "## CAP-NNN — <name> — N BCs" header, assert N equals the number of actual
@@ -397,6 +413,9 @@ errors=()
 # ensures the summary is valid even if a check is skipped (e.g. METHODOLOGY_LAYER not found).
 q_validated=0
 q_violations=0
+# (r) reverse-coverage counters: initialized here so SUMMARY is safe if check is skipped
+active_family_count=0
+r_orphans=()
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -417,7 +436,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.19) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.20) ==="
 echo ""
 
 # ============================================================================
@@ -3279,6 +3298,170 @@ fi
 echo ""
 
 # ============================================================================
+# (r) ERROR-FAMILY REVERSE COVERAGE  [NEW v1.20, Pass-20 adversarial sweep]
+# ============================================================================
+# For every non-retired error family registered in error-taxonomy.md, assert
+# that at least one BC file cites at least one code of that family.
+#
+# RETIRED-FAMILY EXCLUSION:
+#   E-GEN is the only family currently marked retired. It is marked in two
+#   complementary ways in error-taxonomy.md:
+#     (1) Family Registry row (line ~36):
+#           | ~~E-GEN~~ | ~~CAP-004~~ | ... |
+#         The family token appears as "~~E-GEN~~" — strikethrough via double-tilde.
+#     (2) Section heading (line ~245):
+#           ## ~~E-GEN — Asset Generation Pipeline ...~~ [RETIRED PRD rev 1.6]
+#         The H2 heading starts with "## ~~E-" (strikethrough section).
+#     (3) Per-family breakdown table row (line ~704):
+#           | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** ... |
+#         Same strikethrough pattern.
+#   Strategy: scan error-taxonomy.md for ALL lines containing "~~E-<FAMILY>~~"
+#   (two tildes before and after the family token). Extract the FAMILY name from
+#   any such match. This builds the retired-family set.  E-GEN will be found in
+#   all three locations (Family Registry, section heading prefix, breakdown table)
+#   — any single detection is sufficient; duplicates are harmless.
+#   Crucial: "~~" in the Family Registry row ONLY wraps the family token on
+#   retired rows — active families like E-GENRE are NOT wrapped in tildes.
+#
+# ACTIVE-FAMILY EXTRACTION:
+#   Parse the Family Registry table (lines starting with "| E-" that do NOT
+#   contain "~~E-") to get the set of active (non-retired) registered families.
+#   Match: lines of the form "| E-<FAMILY> |" in the Family Registry section.
+#   We scan ALL "| E-" lines in the file, then subtract retired families — this
+#   handles any family added to the registry in the future without script changes.
+#
+# BC-CITATION CHECK:
+#   For each active family, run:
+#     grep -rl 'E-<FAMILY>-[0-9]' behavioral-contracts/
+#   and assert the result is non-empty (at least one BC cites that family).
+#   POSIX/BSD-grep compatible (no -P; -E and -o only).
+#
+# POSITIVE-COVERAGE LOG:
+#   "Check (r): N non-retired error families, all cited by >=1 BC"
+#   OR list orphans on failure.
+#
+# EXPECTED: FAIL until PO reconciles E-KB / E-PLAY / E-REPLAY.
+#   These families are registered in error-taxonomy.md but the BCs they own
+#   currently emit unregistered symbolic tokens instead of citing E-KB/E-PLAY/
+#   E-REPLAY codes. This check becomes green automatically after PO reconciliation.
+#   E-GEN is NOT flagged because it is correctly excluded as retired.
+#
+# POSIX/BSD-grep compatible (no grep -P). (Pass-20 recurrence prevention).
+echo ""
+echo "--- (r) error-family reverse coverage: every non-retired family cited by >=1 BC ---"
+
+if [[ ! -f "$ERROR_TAX" ]]; then
+  echo "    SKIP: error-taxonomy.md not found at $ERROR_TAX"
+else
+  # ------------------------------------------------------------------
+  # Step 1: Build retired-family set.
+  # Detect any family token wrapped in ~~strikethrough~~ in the taxonomy.
+  # Match: "~~E-<FAMILY>~~" where FAMILY = all-uppercase letters only (no digits).
+  # This covers all three locations where E-GEN is retired:
+  #   (1) Family Registry row:  | ~~E-GEN~~ | ~~CAP-004~~ | ...
+  #   (2) Section heading:      ## ~~E-GEN — ...~~ [RETIRED PRD rev 1.6]
+  #   (3) Breakdown table row:  | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** ...
+  # The pattern ~~E-[A-Z]+~~ (no digits, no hyphen inside the family name)
+  # extracts "E-GEN" without matching "~~E-GEN-001~~" (individual codes that
+  # are also struck through in the retired code table).
+  # ------------------------------------------------------------------
+  retired_families=$(grep -oE '~~E-[A-Z]+~~' "$ERROR_TAX" 2>/dev/null \
+    | grep -oE 'E-[A-Z]+' \
+    | sort -u || true)
+
+  # ------------------------------------------------------------------
+  # Step 2: Extract all registered family names from the Family Registry table.
+  # The Family Registry table lives between "## Family Registry" and the next
+  # "## " heading. Its rows have the form:
+  #   "| E-FAMILY | ..."  (active)  or  "| ~~E-FAMILY~~ | ..."  (retired)
+  # We extract field 2 (after stripping spaces and tildes), then filter to
+  # tokens that match exactly ^E-[A-Z]+$ — all uppercase letters, no digits,
+  # no trailing hyphen. This cleanly captures family names like E-EAP, E-REPLAY,
+  # E-GENRE, etc., and excludes individual codes (E-EAP-001) and changelog rows.
+  # ------------------------------------------------------------------
+  all_families=$(awk '
+    /^## Family Registry/ { in_section=1; next }
+    /^## /                 { if (in_section) exit }
+    in_section && /^\| / {
+      # field 2: strip spaces and tildes, check it matches E-FAMILY exactly
+      gsub(/[[:space:]~]/, "", $2)
+      # $2 is the second space-delimited word; but we used FS=" " here.
+      # Re-parse with FS="|" using split.
+      n = split($0, f, "|")
+      for (i=1; i<=n; i++) {
+        gsub(/[[:space:]~]/, "", f[i])
+        if (f[i] ~ /^E-[A-Z]+$/) { print f[i]; break }
+      }
+    }
+  ' "$ERROR_TAX" 2>/dev/null | sort -u || true)
+
+  # Subtract retired families: keep only families NOT in the retired set.
+  # Build active_families as a newline-separated string.
+  active_families=$(
+    while IFS= read -r fam; do
+      [[ -z "$fam" ]] && continue
+      if ! printf '%s\n' "$retired_families" | grep -qxF "$fam" 2>/dev/null; then
+        printf '%s\n' "$fam"
+      fi
+    done <<< "$all_families"
+  )
+
+  all_family_count=$(printf '%s\n' "$all_families" | grep -c . 2>/dev/null || echo 0)
+  retired_family_count=$(printf '%s\n' "$retired_families" | grep -c . 2>/dev/null || echo 0)
+  active_family_count=$(printf '%s\n' "$active_families" | grep -c . 2>/dev/null || echo 0)
+
+  echo "    Registered families in taxonomy:   $all_family_count"
+  echo "    Retired families (excluded):        $retired_family_count"
+  echo "    Non-retired (active) families:      $active_family_count"
+
+  if [[ "$VERBOSE" == true ]] && [[ -n "$retired_families" ]]; then
+    echo "    Retired families detected (excluded from check):"
+    printf '%s\n' "$retired_families" | while IFS= read -r rf; do
+      echo "      $rf"
+    done
+  fi
+
+  # ------------------------------------------------------------------
+  # Step 3: For each active family, assert at least one BC file cites
+  # at least one code from that family (E-FAMILY-<digit>).
+  # Use grep -rl (recursive, list filenames only) for efficiency.
+  # BSD/GNU grep both support -r and -l — POSIX/BSD compatible.
+  # ------------------------------------------------------------------
+  r_orphans=()
+  r_cited=0
+
+  while IFS= read -r fam; do
+    [[ -z "$fam" ]] && continue
+    # Search for any "E-FAMILY-<digit>" token under the BC directory tree.
+    citing_bc=$(grep -rl "${fam}-[0-9]" "$BC_DIR" 2>/dev/null | head -1 || true)
+    if [[ -n "$citing_bc" ]]; then
+      r_cited=$(( r_cited + 1 ))
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [r ${fam}]: cited by >=1 BC"
+      fi
+    else
+      r_orphans+=("$fam")
+    fi
+  done <<< "$active_families"
+
+  r_orphan_count=${#r_orphans[@]}
+
+  if [[ $r_orphan_count -eq 0 ]]; then
+    echo "    Check (r): $active_family_count non-retired error families, all cited by >=1 BC."
+  else
+    echo "    Check (r): $active_family_count non-retired error families; $r_orphan_count orphan(s) found (0 BC citations)."
+    echo ""
+    echo "    ORPHANED ERROR FAMILIES (registered but not cited by any BC — PO reconciliation required):"
+    for orf in "${r_orphans[@]}"; do
+      echo "      $orf  (registered in error-taxonomy.md; no BC cites ${orf}-[0-9]* — PO must reconcile)"
+    done
+    errors+=("MISMATCH [error-family reverse coverage (r)]: $r_orphan_count non-retired error family/families registered in error-taxonomy.md but cited by ZERO behavioral contracts: ${r_orphans[*]} — EXPECTED: await PO reconciliation of E-KB/E-PLAY/E-REPLAY (becomes green after PO work)")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -3309,6 +3492,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Bare token scan (n.iii):           no bare non-canonical hyphenated tokens in dim-context"
   echo "  Cross-ref ID/desc consistency (p): $xref_validated SS-07 dim-owner citations validated, 0 ID/description mismatches"
   echo "  Prose restatement guard (q):       $q_validated prose restatements validated, 0 mismatches"
+  echo "  Error-family reverse coverage (r): $active_family_count non-retired families, all cited by >=1 BC"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
