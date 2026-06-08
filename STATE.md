@@ -37,6 +37,31 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 ---
 
+### ACTIVE SUB-LOOP (read this before doing anything)
+
+**Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
+
+**Current clean-pass counter: 0/3** (reset at Pass-32; 5th findings pass since last reset)
+
+**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 33 against the spec package.**
+
+Loop protocol:
+1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
+2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.26, checks a–w + o.ii, ~31 sub-assertions). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
+3. Commit via state-manager (main branch for script changes; factory-artifacts for .factory/ changes).
+4. If pass is CLEAN (0 critical, 0 important): increment counter. If FINDINGS: reset counter to 0.
+5. On reaching 3/3 consecutive clean passes: Phase-1d CONVERGED.
+
+**On Phase-1d CONVERGED:** proceed to:
+- Fresh-context consistency-validator audit (`/vsdd-factory:consistency-validation`) — T10
+- `/vsdd-factory:check-input-drift` — T11
+- Phase-1 spec-package HUMAN GATE — T12
+- Phase 2+ — T13
+
+**CI-gate contract:** `scripts/check-spec-counts.sh` v1.26 (checks a–w + o.ii, ~31 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate surfaces. MUST be green before any pass is credited.
+
+---
+
 ## Current Phase Steps
 
 | Step | Description | Status |
@@ -46,7 +71,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 31 FINDINGS (0C/1I) RESOLVED; **CLEAN-PASS COUNTER: 0/3** (4th near-convergence reset) | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 32 FINDINGS (0C/1I) RESOLVED; **CLEAN-PASS COUNTER: 0/3** (5th findings pass since last reset; reset at Pass-32) | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -55,9 +80,9 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 32** (candidate clean #1, counter restart). Pass 31 FINDINGS (0C/1I): Canon-KB seam-ordinal drift "fifth"→"sixth" in 5 files; check (o.ii) added; counter RESET 0/3. FU-007, FU-008, FU-010 remain open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 33** (candidate clean #1, counter restart pending). Pass 32 FINDINGS (0C/1I) RESOLVED: spurious DI-007 on cinematic creative-gate (4 BCs); check (w) added; counter stays 0/3. FU-007, FU-008, FU-010 remain open (non-blocking).
 
-**Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; BC-5.06.001 v1.2; BC-12.12.008 v1.2; BC-7.04.001 v1.1; BC-7.05.001 v1.2; prd-cap-005 v1.1; CI gate v1.25 (checks a–u + o.ii, ~30 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.3; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; BC-7.04.001 v1.2; BC-5.06.001 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; CI gate v1.26 (checks a–w + o.ii, ~31 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -66,20 +91,10 @@ The orchestrator auto-reads this file on startup. On resuming:
 | Pass | Date | Verdict | Findings | Resolved | Clean-pass counter |
 |------|------|---------|----------|----------|--------------------|
 | 1–17 | 2026-06-08 | FINDINGS×16 / CLEAN×1 | (see phase-1-log.md rows 9–25) | ALL RESOLVED | 1/3 after Pass-7; reset to 0/3 after Pass-8; 0/3 after Pass-17 |
-| 18 | 2026-06-08 | FINDINGS | 0C / 1I | RESOLVED (I-18-01 nfr-catalog 35→41; proactive: prd-cap-006-007 CAP-007 12→19, prd-cap-001 34→35; check a.iv; CI v1.18) | **0/3** |
-| 19 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs | RESOLVED (F1 methodology-layer D-PLAY prose omitted DEGRADED → corrected; check q added; O1 adapter-protocols wire/record naming note; CI v1.19) | **0/3** |
-| 20 | 2026-06-08 | FINDINGS | 0C / 2I / 3 obs | RESOLVED (F-20-01 E-KB orphan 4→22 codes ss-12 BCs v1.1; F-20-02 E-NAR-003 overload → E-NAR-005/006 BC-5.04.001/002 v1.2; proactive E-PLAY+E-REPLAY sweep +22 codes ss-08/ss-03 v1.1; check r reverse-coverage; OBS-20-A/B resolved; 213→255 codes; CI v1.20) | **0/3** |
-| 21 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty LOW. Pass-20 symbolic-token reconciliation spot-checked at BC-body level (E-KB +19, E-PLAY +10, E-REPLAY +11, E-NAR +2 — all crosswalk mappings match emitting BC conditions exactly). ADR-0001..0007 resolve. DI-001..012 all enforced. 11-dim model complete. Two defect classes confirmed closed. OBS-21-A/B non-blocking. | **CLEAN-PASS COUNTER: 1/3** |
-| 22 | 2026-06-08 | CLEAN | 0C / 0I / 1 LOW | Novelty LOW. Deep BC semantics (CAP-002/005/009/010/013/014). D-PLAY three-party chain + XR dual-routing confirmed intentional. 11-dim reachability + release-gate aggregation coherent. DI-001..012 enforced. Thesis intact. ADR-0007 OK. O-22 (LOW): methodology-layer.md ~2 prose sentences mis-label BC-7.* owner BCs as "SS-07" (correct: SS-06); all structured anchors correct; deferred FU-009 (fix before Phase-1 human gate, not mid-streak). No spec/script changes. | **CLEAN-PASS COUNTER: 2/3** |
-| 23 | 2026-06-08 | FINDINGS | 0C / 1I / 1 obs | Novelty MEDIUM-HIGH. I23-01: §3.1 Canonical Enum table (A) DEGRADED row "Applicable Dimensions" cell omitted D-PLAY — contradicted table (B), D-PLAY prose predicate, BC-7.05.001 EC-002, ADR-0006. Sibling of Pass-19 F1 class; intra-§3.1 gap not reached by checks (q)/(n.ii). RESOLVED: added D-PLAY to DEGRADED cell; full 4×11 cross-check confirmed ONLY discrepancy. Check (s) added — §3.1 cross-table consistency, 34 pairs verified, 0 mismatches. methodology-layer v1.8; CI gate v1.21. | **CLEAN-PASS COUNTER RESET: 0/3** |
-| 24 | 2026-06-08 | FINDINGS | 0C / 1I / 3 obs | Novelty MEDIUM. I24-01: methodology-layer prose + changelog + CI comment lines labeled BC-7.* dimension-owner family as "SS-07" — authoritative is SS-06. Root cause: ss-07/ directory name vs SS-06 subsystem alias. Also BC range ~616 included BC-7.12.001 (loop engine); corrected to BC-7.01.001..BC-7.11.001 (11 owners). 7 sites corrected. FU-009 CLOSED. Check (t) added — BC-7.* owner-attribution guard; 4,145 lines scanned, 0 violations. O24-01/02/03 non-blocking. methodology-layer v1.9; CI gate v1.22. | **CLEAN-PASS COUNTER: 0/3** (streak restart pending) |
-| 25 | 2026-06-08 | CLEAN | 0C / 0I / 1 cosmetic-resolved | Novelty VERY LOW. Pass-24 SS-06 owner-attribution fix confirmed correct (7 sites, check t 0 violations). Cross-doc mappings all agree (cap→ss, BC→cap, err→cap, DTU→ss, VP→BC). VP-INDEX + file-path anchors clean. DI-001..012 enforced. E-CONV-006/E-OSVC semantics clean. Count surfaces consistent. 11-dim model + release-gate coherent. Frontmatter-body coherent (12 BCs spot-checked). O-25 (LOW cosmetic): CI banner v1.22 already correct — pre-resolved in Pass-24; no file change. Spec STABLE. | **CLEAN-PASS COUNTER: 1/3** |
-| 26 | 2026-06-08 | CLEAN | 0C / 0I / 1 LOW | Novelty LOW. Independent fresh-context concurrence with Pass 25. Verified clean: 11-dim model e2e (§3.0/§3.1 + per-dim subsets + D-ETHICS binary + D-PLAY/D-PERF DEGRADED-PENDING); ADR-0006↔methodology §3 (owner-vs-producing-subsystem); ADR-0007 human-gated tier + D-013 creative-gate; DI-001..012 enforced; error-code meaning-vs-usage (6 DP→BC mappings, E-CIN, E-EAP-013); VP-INDEX coherence + back-refs + arithmetic + dir-alias; five-seam thesis/ADR-0004 propagated; determinism tiers; dir-vs-subsystem alias (ss-01/03/06/11/12/13). O26-01 (LOW): methodology §4.3 ~line 1066 uses release-gating verb "blocked" for DEGRADED-PENDING D-CERT; reconcilable (DEGRADED-PENDING blocks release); deferred FU-010 (polish before Phase-1 human gate, not mid-streak). Spec STABLE. | **CLEAN-PASS COUNTER: 2/3** |
-| 27 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | Novelty MEDIUM. I27-01: methodology-layer.md line ~714 "Resolved in Pass-12" note mislabeled BC-8.08.004 as "D-PLAY dimension owner, SS-07/SS-08 interface" — BC-8.08.004 is D-PLAY status PRODUCER (SS-07 sign-off gate); D-PLAY owner is BC-7.05.001 (SS-06); "SS-08" reference also erroneous. 3rd instance of dimension-owner mislabel class (same class as I24-01/FU-009/F15). Check (t) v1.22 narrow patterns evaded by line-714 phrasing. RESOLVED: line 714 corrected; check (t) broadened (v1.22→v1.23) — now triggers on ANY "dimension owner"/"dimension-owner" line; asserts named BCs are BC-7.0[1-9].001/BC-7.10.001/BC-7.11.001 AND SS-06 present if any SS-NN cited; 4,165 lines scanned, 0 violations. methodology-layer v1.10; CI gate v1.23. O27 (LOW): VP-006 proptest clause #1 comment-scoped — test-scoping choice, non-blocking. **CLEAN-PASS COUNTER RESET: 2/3 → 0/3** (streak restarts at Pass 28). | **RESET: 0/3** |
-| 28 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED + proactive 4-file class closure | Novelty MEDIUM. I28-01: `human-gated` vocabulary (+ DI-006/-32008) misapplied to internal cinematic-director creative gate (D-013/DI-007) in 4 BC files — contradicting methodology §2.8, ADR-0007, and Pass-1 I5 fix (E-CIN-003). Adversary flagged 2; orchestrator sweep found full class = 4. RESOLVED: BC-5.06.001 v1.2, BC-12.12.008 v1.2, BC-7.04.001 v1.1, BC-7.05.001 v1.2 — replaced human-gated/DI-006/-32008 with creative-gate/DI-007/E-CIN-003; legitimate SAG-AFTRA/cert/publish human-gated uses preserved. O28-01 (LOW): prd-cap-005.md E-CIN-003 row enriched per I5 canonical format — prd-cap-005 v1.1. check (u) added — human-gated/creative-gate term-misuse guard; 26,461 lines scanned, 5 creative-gate lines validated, 0 violations; CI gate v1.24. | **stays: 0/3** |
-| 29 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty ZERO. Verified clean (fresh territory): all 11 producing-subsystem headers correct (un-gated-but-correct); T1/T2/T3 ↔ canonical values; camelCase wire vs snake_case internal documented; DP-NNN→BC mappings; DEGRADED/DEGRADED-PENDING/BLOCKED + D-ETHICS binary + D-SEC offline-only; conditional-dimension vs "all 11 evaluated" (GREEN-by-inapplicability, no contradiction); D-013 creative-gate vs human-gated (now gated, no leak); studio roster 66; DI-001..012→BC enforcement; VP→BC back-refs; four now-gated recurring classes genuinely exhausted (checks a.ii/a.iii/a.iv/r/t/u all 0 violations). Spec STABLE. | **CLEAN-PASS COUNTER: 1/3** |
-| 30 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty ZERO. Independent concurrence with Pass 29. Verified clean (least-covered angles): VP-INDEX↔ARCH subsystem-vs-directory anchoring (SS-11/ss-13); ADR-0004/0005/0007 three orthogonal seam concepts (no conflation); DI-001..012 grounding + enforcement; 11-dim model (§3.0/§3.1 cross-table, owner-vs-producing-subsystem, D-ETHICS binary); error-code meaning-vs-usage (E-EAP-013, E-OSVC-009, E-CIN-003); "zero active codes" historical-changelog note (not stale); offline-project/D-SEC composition; determinism-tier partial-order (-32004); ADR-0007 human-gate semantics. All four gated classes exhausted (checks a.ii/a.iii/a.iv/r/t/u all 0 violations). Spec STABLE. | **CLEAN-PASS COUNTER: 2/3** |
-| 31 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | Novelty MODERATE-HIGH. I31-01: Canon-KB "load-bearing seam" ORDINAL drift — 5 operative files said "fifth load-bearing seam" but authoritative sources (ADR-0004, product-brief.md:111, prd.md:63, L2-INDEX) say SIXTH (5 adapter seams + Canon-KB = 6th); 2 files also falsely cited the brief as "fifth". Pass-14 O14-02 fifth→sixth fix didn't fully propagate. RESOLVED: corrected to "sixth" in layered-architecture.md:53 (v1.1), methodology-layer.md:506 (v1.11), subsystem-decomposition.md:283 (v1.7), capabilities.md:158 (v1.2), prd-cap-008-012.md:58/61 (v1.1); false brief-citations corrected with accurate file:line anchors. Check (o.ii) added — asserts any operative Canon-KB load-bearing-seam ordinal says "sixth"; 28 files scanned, 0 violations. CI gate v1.25. | **CLEAN-PASS COUNTER RESET: 2/3 → 0/3** (4th near-convergence reset). Next = Pass 32 (candidate clean #1, restart). |
+| 18–30 | 2026-06-08 | FINDINGS×3 / CLEAN×7 | (see phase-1-log.md rows 26–38) | ALL RESOLVED | 2/3 after Pass-26; reset 0/3 at Pass-23, Pass-27; reset 0/3 at Pass-31 |
+| 31 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | I31-01: Canon-KB ordinal fifth→sixth (5 files, check o.ii); CI gate v1.25 | **RESET: 0/3** |
+| 32 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs RESOLVED | I-PASS32-01: spurious DI-007 on cinematic creative gate (4 BCs); O-PASS32-01: prd §8.4 typo 34→30 families; O-PASS32-02: check (u) comment fix; check (w) added; CI gate v1.26 | **0/3** (stays; findings pass) |
+| 33 | — | PENDING | — | — | — |
 
 ---
 
@@ -93,9 +108,9 @@ The orchestrator auto-reads this file on startup. On resuming:
 | M4 | Phase-1 L2 domain spec (10 shards; 18 entities, 14 caps; 79a625c) | DONE |
 | M5 | Phase-1 L3 PRD + 168 BCs across 14 caps → 12 subsystems (e05fd9d) | DONE |
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
-| T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | DONE |
-| T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–31 all resolved/clean; Pass 31 FINDINGS (0C/1I) RESOLVED (Canon-KB ordinal fifth→sixth, 5 files, check o.ii); counter **0/3** (4th near-convergence reset); Pass 32 pending | **IN PROGRESS** |
+| T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
+| T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–32 all resolved/clean; Pass 32 FINDINGS (0C/1I) RESOLVED (spurious DI-007 cinematic gate, 4 BCs, check w); counter **0/3**; Pass 33 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -157,24 +172,24 @@ _(none open)_
 
 | ID | Item | Owner | When |
 |----|------|-------|------|
-| FU-005 | Adversarial spec pass must validate D-010..D-013 + BC-1.15.002 + BC-13.01.004. Pass-1: ALL VALIDATED WITH CORRECTIONS. Pending: 3 clean passes from Pass 21. | Phase-1d adversary | ONGOING |
+| FU-005 | Adversarial spec pass must validate D-010..D-013 + BC-1.15.002 + BC-13.01.004. Pass-1: ALL VALIDATED WITH CORRECTIONS. Pending: 3 clean passes from Pass 33. | Phase-1d adversary | ONGOING |
 | FU-006 | DTU framing divergence: DTU-01..10 authoritative vs brief §10 pre-architecture intent. Human confirm at Phase-1 gate. | human (Phase-1 gate) | OPEN |
 | FU-007 | E-GLG-001 Coverage Note under-attributes (O7-01). Deferred optional cleanup. | product-owner | OPEN — non-blocking |
 | FU-008 | methodology §3.0 "Subsystem" column dual-meaning. One-line clarifying note deferred. | product-owner | OPEN — non-blocking |
-| FU-009 | methodology-layer.md SS-07→SS-06 owner-attribution mislabel (7 sites) + BC range correction. Fixed Pass-24; methodology-layer v1.9; check t added. | architect | **CLOSED** (Pass-24) |
-| FU-010 | methodology-layer.md §4.3 ~line 1066: release-gating verb "blocked" used for DEGRADED-PENDING D-CERT state. Optional polish: make status-enum reference explicit ("D-CERT is DEGRADED-PENDING; release is blocked until acknowledgment"). Non-blocking (O26-01). Fix AFTER 3-clean streak / before Phase-1 human gate — NOT mid-streak. | product-owner | OPEN — non-blocking |
+| FU-009 | methodology-layer.md SS-07→SS-06 owner-attribution mislabel (7 sites). Fixed Pass-24; check t added. | architect | **CLOSED** (Pass-24) |
+| FU-010 | methodology-layer.md §4.3 ~line 1066: release-gating verb "blocked" for DEGRADED-PENDING D-CERT. Optional polish before Phase-1 human gate — NOT mid-streak. | product-owner | OPEN — non-blocking |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–31 DONE.
-**Phase-1d Pass 31:** FINDINGS (0C/1I) RESOLVED. I31-01: Canon-KB "load-bearing seam" ordinal drift — 5 files said "fifth" but authoritative sources say "sixth" (5 adapter seams + Canon-KB = 6th). Pass-14 O14-02 fix didn't fully propagate. Corrected in layered-architecture.md (v1.1), methodology-layer.md (v1.11), subsystem-decomposition.md (v1.7), capabilities.md (v1.2), prd-cap-008-012.md (v1.1). Check (o.ii) added; CI gate v1.25. **Clean-pass counter RESET: 2/3 → 0/3** (4th near-convergence reset).
-**Next action:** `phase-1d-adversarial` — **Pass 32** (candidate clean #1, counter restart). FU-007/FU-008/FU-010 remain open (non-blocking).
-**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v2.2. 190 BCs; 41 NFRs; 255 error codes / 31 families total (246 active; E-GEN 9 retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006/007/008/010 open (non-blocking). FU-009 CLOSED.
-**Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.11; 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: P0=126 / P1=42 / P2=22.
-**Version bumps Pass 31:** layered-architecture v1.1, methodology-layer v1.11, subsystem-decomposition v1.7, capabilities v1.2, prd-cap-008-012 v1.1, CI gate v1.25.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–32 DONE.
+**Phase-1d Pass 32:** FINDINGS (0C/1I/2 obs) RESOLVED. I-PASS32-01: spurious DI-007 grafted onto cinematic creative gate (4 BCs) from Pass-28 fix regression — removed from BC-7.04.001 (v1.2), BC-5.06.001 (v1.3), BC-7.05.001 (v1.3, playtest refs preserved), BC-12.12.008 (v1.3, DI-006 loremaster refs preserved). O-PASS32-01: prd.md §8.4 typo 34→30 active families (prd v2.3). O-PASS32-02: check (u) comment corrected. Check (w) added (DI-007/creative-gate mis-anchor guard). **Clean-pass counter stays 0/3** (findings pass; does not increment).
+**Next action:** `phase-1d-adversarial` — **Pass 33** (candidate clean #1, counter restart). FU-007/FU-008/FU-010 remain open (non-blocking).
+**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
+**Spec totals:** 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.26 (checks a–w + o.ii, ~31 sub-assertions).
+**Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking). FU-009 CLOSED (Pass-24).
+**Version bumps Pass 32:** BC-7.04.001 v1.2, BC-5.06.001 v1.3, BC-7.05.001 v1.3, BC-12.12.008 v1.3, prd.md v2.3, CI gate v1.26.
 **D-014/015/016:** see Decisions Log. D-014/D-015 flagged for human gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -22,6 +22,8 @@ introduced: v1.0.0
 modified:
   - pass: "Pass-28"
     reason: "I28-01 fix: replaced `human-gated` vocabulary on cinematic-director creative sign-off (postcondition 5, EC-004, Traceability DI-006) with D-013 creative-gate vocabulary (E-CIN-003, DI-007). The cinematic-director is an internal creative principal — not an external third-party — so ADR-0007 `human-gated` fidelity tier does not apply. Gating semantics preserved."
+  - pass: "Pass-32"
+    reason: "I-PASS32-01 fix: removed spurious DI-007 from Traceability L2 Domain Invariants row. The directed:true cinematic creative-gate is anchored to D-013 + E-CIN-003 and has no corresponding DI. DI-008 (engine-neutral spec layer) retained."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -126,7 +128,7 @@ validation report.
 |-------|-------|
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the sequence-graph is listed in RECONCILIATION §6.3 (cinematics-virtual-production.md additions) as the keystone cinematic artifact produced by the cinematic-director agent within CAP-005. |
-| L2 Domain Invariants | DI-008 (engine-neutral spec layer), DI-007 (creative gate — directed:true cinematic requires cinematic-director creative sign-off; this is a D-013 creative gate, not a DI-006 human-gated task) |
+| L2 Domain Invariants | DI-008 (engine-neutral spec layer) |
 | Architecture Module | SS-04 — sequence graph validator; Bevy sequence runtime (BUILD-new); Canon-KB entity query |
 | Stories | S-TBD (filled by story-writer) |
 

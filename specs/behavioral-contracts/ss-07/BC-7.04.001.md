@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -21,6 +21,8 @@ introduced: v0.1.0
 modified:
   - pass: "Pass-28"
     reason: "I28-01 fix: replaced `human-gated task (DI-006)` vocabulary for the directed:true cinematic creative sign-off (postcondition 3, test vector, Traceability) with D-013 creative-gate vocabulary (creative-gate checklist item, E-CIN-003, DI-007). The D-ASSET dimension remains DEGRADED while creative sign-off is pending — gating semantics preserved. ADR-0007 `human-gated` fidelity tier is reserved for external third-party acts only."
+  - pass: "Pass-32"
+    reason: "I-PASS32-01 fix: removed spurious DI-007 from cinematic creative-gate contexts. Postcondition 3 was `D-013/DI-007 creative gate` — corrected to `D-013 creative gate`. Traceability L2 Domain Invariants row removed DI-007 (cinematic creative gate is anchored to D-013 + E-CIN-003; it has no corresponding DI). DI-003 and DI-012 retained."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,7 +66,7 @@ assets with `directed: true` cinematics (adds human sign-off gate).
 3. **DEGRADED (directed: true):** Cinematic assets with `directed: true` flag
    require cinematic-director creative sign-off (D-013 creative gate). The dimension
    is DEGRADED until sign-off is recorded; a creative-gate checklist item is surfaced
-   (E-CIN-003 if absent at ship-build gate). This is a D-013/DI-007 creative gate —
+   (E-CIN-003 if absent at ship-build gate). This is a D-013 creative gate —
    NOT a `human-gated` fidelity tier task per ADR-0007/DI-006.
 4. **BLOCKED:** Any Tier-1 asset fails quality-gate without a declared fallback.
    Missing `disclosure_class` on any asset. Missing `ai-disclosure-manifest`.
@@ -109,7 +111,7 @@ assets with `directed: true` cinematics (adds human sign-off gate).
 |-------|-------|
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #4 (asset-completeness) |
-| L2 Domain Invariants | DI-003 (every generated asset has complete provenance sidecar), DI-007 (directed:true cinematic requires creative-gate sign-off — D-013 creative gate, not DI-006 human-gated task), DI-012 |
+| L2 Domain Invariants | DI-003 (every generated asset has complete provenance sidecar), DI-012 |
 | Architecture Module | convergence-tracker / asset-completeness-gate (SS-06) |
 | Stories | S-TBD |
 
