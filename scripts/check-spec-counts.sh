@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.11
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.12
 #
 # PURPOSE
 # -------
@@ -65,11 +65,31 @@
 #       CPU-bound, NDA-gated, etc.) are similarly excluded. Only UPPER-CASE-initiated
 #       hyphenated tokens in dimension context that are NOT spec identifiers or known
 #       compounds are flagged. POSIX/BSD-grep compatible; no grep -P.
-#   (n) [NEW v1.9, EXTENDED v1.11] Convergence-dimension status-value enum consistency:
-#       (n.i)  [v1.9] Parses the canonical status-value enum from §3.1 table. Scans all
-#              BC files for convergence-report dimension value assignments and asserts
-#              each value is in the canonical 4-value enum {GREEN, DEGRADED,
-#              DEGRADED-PENDING, BLOCKED}. Changelog reason: lines excluded.
+#   (n) [NEW v1.9, EXTENDED v1.11, EXTENDED v1.12] Convergence-dimension status-value
+#       enum consistency:
+#       (n.i)  [v1.9, case-insensitive in v1.12] Parses the canonical status-value enum
+#              from §3.1 table. Scans all BC files for convergence-report dimension value
+#              assignments and asserts each value is in the canonical 4-value enum
+#              {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}. Changelog reason: lines
+#              excluded. [v1.12] ALSO catches lowercase/mixed-case tokens (green/red/
+#              amber/pending etc.) in backtick form on dimension-context lines. Extraction
+#              is case-insensitive: backtick-quoted lowercase tokens are extracted from
+#              dim_context_lines, folded to uppercase, then tested — tokens folding to
+#              a canonical value are flagged as "wrong-case form"; tokens folding to a
+#              known non-canonical status word (AMBER/RED/PENDING/YELLOW) are flagged as
+#              "non-canonical + wrong case". False-positive avoidance: only tokens whose
+#              uppercased form is a known status-vocabulary word (canonical enum OR the
+#              known non-canonical set) are flagged; object/field names like
+#              `playtest-satisfaction` or `convergence-report` fold to
+#              PLAYTEST-SATISFACTION / CONVERGENCE-REPORT — not in either set — and are
+#              silently dropped. Anchoring to dim_context_lines (same dimension-context
+#              filter as v1.9) prevents false positives on the ~41 BCs that use lowercase
+#              green/red/amber for non-dimension things (severity colors, lint status,
+#              asset status, traffic-light UI) — those files have no matching
+#              dim_context_lines. Catches F-12-02-class: BC-8.08.004's D-PLAY values
+#              `green`/`red`/`amber`/`pending` which survived Passes 1-11. [v1.12] Also
+#              adds a POSITIVE-COVERAGE log line: "Check (n) passed: N dimension-status
+#              assignments validated across M BCs" to make a zero-scan run visible.
 #       (n.ii) [NEW v1.11] Per-dimension subset enforcement: parses §3.1
 #              "Per-Dimension Allowed Value Subsets" table; for each BC line that
 #              both names a specific dimension (by field name or D-XX ID) AND assigns
@@ -215,7 +235,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.11) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.12) ==="
 echo ""
 
 # ============================================================================
@@ -1313,6 +1333,11 @@ else
 
     dim_status_violations=0
     dim_status_violation_msgs=()
+    # Coverage counters for the positive-coverage log line (F-12-02 fix):
+    # dim_status_assignments_checked: total status-value assignments examined
+    # dim_status_bcs_with_context: number of BC files that had dimension context
+    dim_status_assignments_checked=0
+    dim_status_bcs_with_context=0
 
     while IFS= read -r -d $'\0' bc_file; do
       bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
@@ -1336,6 +1361,7 @@ else
         || true)
 
       [[ -z "$dim_context_lines" ]] && continue
+      dim_status_bcs_with_context=$(( dim_status_bcs_with_context + 1 ))
 
       # From those lines, extract backtick-quoted all-caps tokens: `VALUE`
       # These represent explicitly quoted status values in BC prose.
@@ -1401,12 +1427,60 @@ else
         [[ "$sv" == E-* ]] && continue
         # Skip if length < 3 (too short to be a meaningful status token)
         [[ "${#sv}" -lt 3 ]] && continue
+        # Count this assignment (coverage counter)
+        dim_status_assignments_checked=$(( dim_status_assignments_checked + 1 ))
         # Check against canonical enum
         if ! printf '%s\n' "$dim_status_enum" | grep -qF "$sv" 2>/dev/null; then
           dim_status_violations=$(( dim_status_violations + 1 ))
           dim_status_violation_msgs+=("${bc_rel}: non-canonical convergence-dimension status value '$sv' (canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
         fi
       done <<< "$all_status_vals"
+
+      # [NEW v1.12] CASE-INSENSITIVE EXTRACTION (F-12-02 fix): also catch
+      # lowercase/mixed-case status tokens in backtick form on dim_context_lines.
+      # Anchoring is the same dim_context_lines filter used above — this preserves
+      # the false-positive guarantee: BCs that use `green`/`red`/`amber`/`pending`
+      # for non-dimension things (severity colors, lint, asset status, traffic-light
+      # UI) have no matching dim_context_lines and are never reached here.
+      # Extraction: backtick-quoted lowercase tokens from dim_context_lines.
+      # Classification: fold to uppercase; test against canonical enum (wrong-case
+      # form of canonical value) OR known non-canonical status words (AMBER, RED,
+      # PENDING, YELLOW — non-canonical + wrong case). Object/field names like
+      # `playtest-satisfaction`, `convergence-report`, `session-evidence-record`
+      # fold to PLAYTEST-SATISFACTION etc. — not in either set — and are silently
+      # dropped. POSIX/BSD-grep compatible; no grep -P.
+      lc_btick_toks=$(printf '%s\n' "$dim_context_lines" \
+        | grep -oE '`[a-z][a-z-]+`' \
+        | sed 's/`//g' \
+        | grep -v '^$' \
+        | sort -u || true)
+
+      while IFS= read -r lctok; do
+        [[ -z "$lctok" ]] && continue
+        # Fold to uppercase for classification (tr is POSIX/BSD compatible)
+        uctok=$(printf '%s' "$lctok" | tr '[:lower:]' '[:upper:]')
+        # Test if folded form is in the canonical enum — use -x for exact-line match
+        # so that e.g. PENDING does not accidentally match DEGRADED-PENDING via substring.
+        if printf '%s\n' "$dim_status_enum" | grep -qxF "$uctok" 2>/dev/null; then
+          # Wrong-case form of a canonical value — always a violation
+          dim_status_assignments_checked=$(( dim_status_assignments_checked + 1 ))
+          dim_status_violations=$(( dim_status_violations + 1 ))
+          dim_status_violation_msgs+=("${bc_rel}: lowercase form of canonical status value '\`${lctok}\`' in dimension-context — must be uppercase '\`${uctok}\`' (F-12-02; canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
+        else
+          # Not in canonical enum — check against known non-canonical status words
+          case "$uctok" in
+            AMBER|RED|PENDING|YELLOW)
+              # Non-canonical value + wrong case — double violation
+              dim_status_assignments_checked=$(( dim_status_assignments_checked + 1 ))
+              dim_status_violations=$(( dim_status_violations + 1 ))
+              dim_status_violation_msgs+=("${bc_rel}: lowercase non-canonical status value '\`${lctok}\`' in dimension-context (folds to ${uctok}; F-12-02; canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
+              ;;
+            *)
+              # Not a status-vocabulary word — silently drop (object/field name)
+              ;;
+          esac
+        fi
+      done <<< "$lc_btick_toks"
 
     done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
 
@@ -1465,17 +1539,49 @@ else
           esac
           [[ "$sv" == E-* ]] && continue
           [[ "${#sv}" -lt 3 ]] && continue
+          dim_status_assignments_checked=$(( dim_status_assignments_checked + 1 ))
           if ! printf '%s\n' "$dim_status_enum" | grep -qF "$sv" 2>/dev/null; then
             dim_status_violations=$(( dim_status_violations + 1 ))
             dim_status_violation_msgs+=("${supp_rel}: non-canonical convergence-dimension status value '$sv' (canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
           fi
         done <<< "$all_status_vals"
 
+        # [NEW v1.12] Case-insensitive extraction for prd-supplements (same as BC loop)
+        lc_btick_toks=$(printf '%s\n' "$dim_context_lines" \
+          | grep -oE '`[a-z][a-z-]+`' \
+          | sed 's/`//g' \
+          | grep -v '^$' \
+          | sort -u || true)
+
+        while IFS= read -r lctok; do
+          [[ -z "$lctok" ]] && continue
+          uctok=$(printf '%s' "$lctok" | tr '[:lower:]' '[:upper:]')
+          # Use -x for exact-line match (prevents PENDING matching DEGRADED-PENDING)
+          if printf '%s\n' "$dim_status_enum" | grep -qxF "$uctok" 2>/dev/null; then
+            dim_status_assignments_checked=$(( dim_status_assignments_checked + 1 ))
+            dim_status_violations=$(( dim_status_violations + 1 ))
+            dim_status_violation_msgs+=("${supp_rel}: lowercase form of canonical status value '\`${lctok}\`' in dimension-context — must be uppercase '\`${uctok}\`' (F-12-02; canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
+          else
+            case "$uctok" in
+              AMBER|RED|PENDING|YELLOW)
+                dim_status_assignments_checked=$(( dim_status_assignments_checked + 1 ))
+                dim_status_violations=$(( dim_status_violations + 1 ))
+                dim_status_violation_msgs+=("${supp_rel}: lowercase non-canonical status value '\`${lctok}\`' in dimension-context (folds to ${uctok}; F-12-02; canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'; echo))")
+                ;;
+            esac
+          fi
+        done <<< "$lc_btick_toks"
+
       done < <(find "$PRD_SUPP_DIR" -maxdepth 1 -name "*.md" -print0)
     fi
 
     echo "    BC + prd-supplement files scanned: $computed_bc (BCs) + prd-supplements"
     echo "    Non-canonical dimension status values found: $dim_status_violations"
+    # [NEW v1.12] Positive-coverage log line: makes a zero-scan (inert) run visible.
+    # A silent zero means either there is genuinely nothing to check (no dimension
+    # context found anywhere) or the anchoring pattern has been broken. Either case
+    # is worth surfacing. This line is always printed regardless of pass/fail.
+    echo "    Check (n) coverage: $dim_status_assignments_checked dimension-status assignment(s) validated across $dim_status_bcs_with_context BC(s) with dimension context"
     if [[ "$dim_status_violations" -gt 0 ]]; then
       echo ""
       echo "    NON-CANONICAL CONVERGENCE-DIMENSION STATUS VALUES (PO must update per methodology-layer §3.1):"
@@ -1790,7 +1896,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
   echo "  Dimension field uniqueness:        §3.0 table has $DIM_FIELD_COUNT_EXPECTED unique field names"
   echo "  Dimension field usage-site:        all BC convergence-report dimension references use canonical field names"
-  echo "  Dimension status-value enum (n.i):  all BC convergence-dimension status values are canonical"
+  echo "  Dimension status-value enum (n.i):  all BC convergence-dimension status values are canonical ($dim_status_assignments_checked assignments validated across $dim_status_bcs_with_context BCs)"
   echo "  Per-dim subset enforcement (n.ii): all dimension-value assignments within allowed subsets"
   echo "  Bare token scan (n.iii):           no bare non-canonical hyphenated tokens in dim-context"
 else
