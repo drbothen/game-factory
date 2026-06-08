@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.4
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.5
 #
 # PURPOSE
 # -------
@@ -8,6 +8,7 @@
 # extended in v1.3 to cover Pass-4 VP catalog consistency;
 # extended in v1.4 to cover Pass-5 studio §3 appearance counts, subsystem
 # priority subtotals, and formal VP ↔ BC bidirectional anchor):
+# extended in v1.5 to fix false-green in check (i) (I6-01) and add check (k):
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
@@ -29,13 +30,21 @@
 #       SS-NN listed in its row). Expected values: SS-03=16 SS-04=23 SS-05=6
 #       SS-06=3 SS-07=3 SS-08=12 SS-09=2 SS-10=5 SS-11=11 SS-12=1.
 #       §6 tier subtotals: Tier 1=53, Tier 2=13, sum=66.
-#   (i) [NEW v1.4] subsystem-decomposition §Subsystem Priority Summary: P0, P1,
-#       P2 subtotals sum to the grand total (178 BCs). Expected P0=111, P1=45,
-#       P2=22. Guards against the double-counting error class (I3).
+#   (i) [REWRITTEN v1.5] subsystem-decomposition §Subsystem Priority Summary:
+#       P0, P1, P2 subtotals stated in the doc are asserted to equal the counts
+#       COMPUTED at runtime by counting `priority: P0/P1/P2` across BC frontmatter
+#       files. No hardcoded priority constants — the BC frontmatter is authoritative.
+#       Previously (v1.4) hardcoded P0=111/P1=45 which caused false-green when
+#       frontmatter and table diverged (I6-01 process-gap).
 #   (j) [NEW v1.4] VP ↔ BC bidirectional anchor: every formal VP (VP-001..010)
 #       guarded BC must cite its VP-00x back. Currently EXPECTED TO FAIL until
 #       PO completes back-reference additions (I2 fix). Implemented so the check
 #       becomes green after PO work without script changes.
+#   (k) [NEW v1.5] Error-identifier resolution: every E-[A-Z]+-[0-9]+ token
+#       referenced in any BC file must resolve to a registered code in
+#       error-taxonomy.md. Reports unregistered codes. Will FAIL until PO
+#       registers E-ETH codes for dark-pattern BCs (I6-02 class). Implemented
+#       now so it becomes green automatically after PO work.
 #
 # USAGE
 #   ./scripts/check-spec-counts.sh [--verbose]
@@ -581,28 +590,41 @@ fi
 echo ""
 
 # ============================================================================
-# (i) SUBSYSTEM-DECOMPOSITION PRIORITY SUBTOTALS  [NEW v1.4]
+# (i) SUBSYSTEM-DECOMPOSITION PRIORITY SUBTOTALS  [REWRITTEN v1.5]
 # ============================================================================
-# Assert P0, P1, P2 subtotals in §Subsystem Priority Summary sum to grand total
-# (178) AND match the expected per-priority BC counts:
-#   P0=111  P1=45  P2=22  Total=178
+# Assert P0, P1, P2 subtotals STATED in §Subsystem Priority Summary equal the
+# counts COMPUTED by scanning BC frontmatter files at runtime.
 #
-# Parse the Subsystem Priority Summary table rows by looking for "| P0 |",
-# "| P1 |", "| P2 |" rows. Extract the first standalone integer >= 10 in the
-# BC Count column (field 4). POSIX/BSD grep compatible.
-echo "--- (i) subsystem-decomposition priority subtotals ---"
+# The BC frontmatter is authoritative (source of truth). No hardcoded expected
+# values — this guards against false-greens that occur when frontmatter is
+# updated but the stated table is not (I6-01 process-gap).
+#
+# Computed counts: count lines matching `^priority: P0|P1|P2` across all BC
+# files under BC_DIR. This reuses the same find+grep pattern as check (c).
+# POSIX/BSD grep compatible (no -P; uses -E only).
+#
+# Stated counts: parsed from the Priority Summary table in subsystem-decomposition.md
+# rows: "| P0 ... | ... | NNN (...) |" — first integer in the BC Count column.
+echo "--- (i) subsystem-decomposition priority subtotals (computed vs stated) ---"
 
 if [[ ! -f "$SUBDECOMP" ]]; then
   echo "    SKIP: subsystem-decomposition.md not found at $SUBDECOMP"
 else
-  EXPECTED_P0=111
-  EXPECTED_P1=45
-  EXPECTED_P2=22
-  EXPECTED_GRAND=178
+  # --- Step 1: Compute P0/P1/P2 counts from BC frontmatter files ---
+  # Count lines matching `^priority: P0` etc. across all BC files.
+  # Using find+xargs+grep to stay POSIX/BSD compatible.
+  computed_frontmatter_p0=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+    -exec grep -lE '^priority:[[:space:]]*P0' {} \; 2>/dev/null | wc -l | tr -d '[:space:]')
+  computed_frontmatter_p1=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+    -exec grep -lE '^priority:[[:space:]]*P1' {} \; 2>/dev/null | wc -l | tr -d '[:space:]')
+  computed_frontmatter_p2=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+    -exec grep -lE '^priority:[[:space:]]*P2' {} \; 2>/dev/null | wc -l | tr -d '[:space:]')
+  computed_frontmatter_grand=$(( computed_frontmatter_p0 + computed_frontmatter_p1 + computed_frontmatter_p2 ))
 
+  # --- Step 2: Parse stated P0/P1/P2 counts from subsystem-decomposition.md ---
   # The Priority Summary table has rows like:
-  # "| P0 (must ship v1) | SS-01, ... | 111 (SS-01=41, ...) |"
-  # Extract the first integer >= 2 digits in field 4 (the BC count column).
+  # "| P0 (must ship v1) | SS-01, ... | 117 (SS-01=41, ...) |"
+  # Extract the first integer in field 4 (the BC Count column).
   subdecomp_p0=$(grep -E '^\| P0 ' "$SUBDECOMP" 2>/dev/null \
     | awk -F'|' '{match($4,/[0-9]+/); print substr($4,RSTART,RLENGTH)+0}' \
     | head -1 || true)
@@ -617,28 +639,36 @@ else
     | awk -F'|' '{match($4,/[0-9]+/); print substr($4,RSTART,RLENGTH)+0}' \
     | head -1 || true)
 
-  echo "    P0 stated: ${subdecomp_p0:-NOT_FOUND}  (expected: $EXPECTED_P0)"
-  echo "    P1 stated: ${subdecomp_p1:-NOT_FOUND}  (expected: $EXPECTED_P1)"
-  echo "    P2 stated: ${subdecomp_p2:-NOT_FOUND}  (expected: $EXPECTED_P2)"
-  echo "    Grand total stated: ${subdecomp_grand:-NOT_FOUND}  (expected: $EXPECTED_GRAND)"
+  echo "    Computed P0 (BC frontmatter): $computed_frontmatter_p0"
+  echo "    Computed P1 (BC frontmatter): $computed_frontmatter_p1"
+  echo "    Computed P2 (BC frontmatter): $computed_frontmatter_p2"
+  echo "    Computed P0+P1+P2 sum:        $computed_frontmatter_grand"
+  echo "    Stated P0 (subdecomp table):  ${subdecomp_p0:-NOT_FOUND}"
+  echo "    Stated P1 (subdecomp table):  ${subdecomp_p1:-NOT_FOUND}"
+  echo "    Stated P2 (subdecomp table):  ${subdecomp_p2:-NOT_FOUND}"
+  echo "    Stated grand total:           ${subdecomp_grand:-NOT_FOUND}"
 
-  # Also compute the sum of P0+P1+P2 and compare to grand total
+  # --- Step 3: Assert stated subtotals equal computed frontmatter counts ---
+  # The stated table must reflect the frontmatter. Any divergence is a drift defect.
   if [[ -n "$subdecomp_p0" ]] && [[ -n "$subdecomp_p1" ]] && [[ -n "$subdecomp_p2" ]]; then
-    computed_priority_sum=$(( subdecomp_p0 + subdecomp_p1 + subdecomp_p2 ))
-    echo "    P0+P1+P2 computed sum: $computed_priority_sum  (expected: $EXPECTED_GRAND)"
-    check "subdecomp P0+P1+P2 sum matches grand total" \
-      "$computed_priority_sum" "$EXPECTED_GRAND" "subsystem-decomposition.md"
+    stated_priority_sum=$(( subdecomp_p0 + subdecomp_p1 + subdecomp_p2 ))
+    echo "    Stated P0+P1+P2 sum:          $stated_priority_sum"
+    # The stated sum must equal the computed grand total
+    check "subdecomp stated P0+P1+P2 sum vs computed grand total" \
+      "$stated_priority_sum" "$computed_frontmatter_grand" "subsystem-decomposition.md"
   fi
   echo ""
 
-  [[ -n "$subdecomp_p0" ]] && check "subdecomp P0 subtotal" \
-    "$subdecomp_p0" "$EXPECTED_P0" "subsystem-decomposition.md"
-  [[ -n "$subdecomp_p1" ]] && check "subdecomp P1 subtotal" \
-    "$subdecomp_p1" "$EXPECTED_P1" "subsystem-decomposition.md"
-  [[ -n "$subdecomp_p2" ]] && check "subdecomp P2 subtotal" \
-    "$subdecomp_p2" "$EXPECTED_P2" "subsystem-decomposition.md"
-  [[ -n "$subdecomp_grand" ]] && check "subdecomp grand total" \
-    "$subdecomp_grand" "$EXPECTED_GRAND" "subsystem-decomposition.md"
+  # Assert each stated subtotal matches its computed counterpart
+  [[ -n "$subdecomp_p0" ]] && check "subdecomp P0 stated vs computed frontmatter" \
+    "$subdecomp_p0" "$computed_frontmatter_p0" "subsystem-decomposition.md"
+  [[ -n "$subdecomp_p1" ]] && check "subdecomp P1 stated vs computed frontmatter" \
+    "$subdecomp_p1" "$computed_frontmatter_p1" "subsystem-decomposition.md"
+  [[ -n "$subdecomp_p2" ]] && check "subdecomp P2 stated vs computed frontmatter" \
+    "$subdecomp_p2" "$computed_frontmatter_p2" "subsystem-decomposition.md"
+  # Also assert stated grand total equals BC file count (cross-check with check a)
+  [[ -n "$subdecomp_grand" ]] && check "subdecomp grand total vs computed BC count" \
+    "$subdecomp_grand" "$computed_bc" "subsystem-decomposition.md"
 fi
 echo ""
 
@@ -735,6 +765,67 @@ fi
 echo ""
 
 # ============================================================================
+# (k) ERROR-IDENTIFIER RESOLUTION  [NEW v1.5]
+# ============================================================================
+# Assert every E-[A-Z]+-[0-9]+ token referenced in any BC file resolves to a
+# registered code in error-taxonomy.md. Unregistered codes are reported.
+#
+# This guards the I6-02 class: BCs that reference error codes that have not yet
+# been registered in the taxonomy. The check WILL FAIL until PO registers E-ETH
+# codes for dark-pattern/ethics BCs in SS-09 (CAP-011). Implemented so it
+# becomes green automatically after PO work without script changes.
+#
+# Strategy:
+#   1. Build the set of registered codes from error-taxonomy.md (same grep used
+#      in check b, but here we keep the full list rather than just counting).
+#   2. Collect all E-[A-Z]+-[0-9]+ tokens across BC files.
+#   3. Report any token that is not in the registered set.
+# POSIX/BSD grep compatible (no -P; uses -E and -o only).
+echo "--- (k) error-identifier resolution (BC refs vs error-taxonomy.md) ---"
+
+if [[ ! -f "$ERROR_TAX" ]]; then
+  echo "    SKIP: error-taxonomy.md not found at $ERROR_TAX"
+else
+  # Build sorted unique list of registered error codes from taxonomy
+  registered_codes=$(grep -oE 'E-[A-Z]+-[0-9]+' "$ERROR_TAX" 2>/dev/null | sort -u || true)
+
+  # Collect all E-[A-Z]+-[0-9]+ tokens referenced across all BC files
+  bc_referenced_codes=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+    -exec grep -ohE 'E-[A-Z]+-[0-9]+' {} \; 2>/dev/null | sort -u || true)
+
+  echo "    Registered codes in error-taxonomy.md: $(printf '%s\n' "$registered_codes" | grep -c . 2>/dev/null || echo 0)"
+  echo "    Distinct E-codes referenced across BC files: $(printf '%s\n' "$bc_referenced_codes" | grep -c . 2>/dev/null || echo 0)"
+
+  # Find BC-referenced codes that are NOT in the registered set
+  unregistered_codes=()
+  if [[ -n "$bc_referenced_codes" ]]; then
+    while IFS= read -r code; do
+      [[ -z "$code" ]] && continue
+      if ! printf '%s\n' "$registered_codes" | grep -qF "$code" 2>/dev/null; then
+        unregistered_codes+=("$code")
+      fi
+    done <<< "$bc_referenced_codes"
+  fi
+
+  echo "    Unregistered codes found: ${#unregistered_codes[@]}"
+
+  if [[ ${#unregistered_codes[@]} -gt 0 ]]; then
+    echo ""
+    echo "    UNREGISTERED ERROR CODES (must be added to error-taxonomy.md):"
+    for code in "${unregistered_codes[@]}"; do
+      # Find which BC files reference this code
+      bc_files_with_code=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+        -exec grep -lE "${code}([^0-9]|$)" {} \; 2>/dev/null \
+        | awk -F'/' '{print $(NF-1)"/"$NF}' | tr '\n' ' ')
+      echo "      $code  (referenced in: $bc_files_with_code)"
+    done
+    errors+=("MISMATCH [error-identifier resolution (k)]: ${#unregistered_codes[@]} E-code(s) referenced in BCs are not registered in error-taxonomy.md — PO must register (see list above)")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -749,8 +840,9 @@ if [[ $fail -eq 0 ]]; then
   echo "  BC H1/INDEX title sync:            ${bc_title_checked} checked, 0 mismatches"
   echo "  BC frontmatter schema:             $computed_bc checked, 0 violations"
   echo "  Studio §3/§6 counts:               verified"
-  echo "  Subdecomp priority subtotals:      P0=111 P1=45 P2=22 sum=178"
+  echo "  Subdecomp priority subtotals:      P0=${computed_frontmatter_p0:-?} P1=${computed_frontmatter_p1:-?} P2=${computed_frontmatter_p2:-?} sum=${computed_frontmatter_grand:-?} (computed from frontmatter)"
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
+  echo "  Error-identifier resolution:       all BC E-codes registered in taxonomy"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
