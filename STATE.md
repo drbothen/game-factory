@@ -46,7 +46,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 28 FINDINGS (0C/1I RESOLVED + proactive 4-file class closure); counter stays **0/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 29 CLEAN (0C/0I/0S); **CLEAN-PASS COUNTER: 1/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -55,7 +55,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 29** (candidate clean #1, counter restart). Pass 28 FINDINGS (0C/1I): `human-gated` vocabulary misapplied to internal cinematic-director creative gate (D-013) — 4 BCs fixed (BC-5.06.001/BC-12.12.008/BC-7.04.001/BC-7.05.001); prd-cap-005 v1.1; check (u) added v1.24; counter stays **0/3**. FU-007, FU-008, FU-010 remain open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 30** (consecutive clean 2 of 3). Pass 29 CLEAN (0C/0I/0S): zero new defects; all four gated recurring classes confirmed exhausted; spec STABLE. Counter: **1/3**. FU-007, FU-008, FU-010 remain open (non-blocking). Keep spec unchanged through Pass 31 to prove 3 consecutive clean.
 
 **Spec state:** prd v2.2; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.10; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); BC-5.04.001/002 v1.2; ss-12 BCs v1.1 (9 files); BC-8.08.004 v1.4; BC-5.06.001 v1.2; BC-12.12.008 v1.2; BC-7.04.001 v1.1; BC-7.05.001 v1.2; prd-cap-005 v1.1; CI gate v1.24 (checks a–u, ~29 sub-assertions; human-gated/creative-gate class comprehensively gated). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
@@ -77,6 +77,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | 26 | 2026-06-08 | CLEAN | 0C / 0I / 1 LOW | Novelty LOW. Independent fresh-context concurrence with Pass 25. Verified clean: 11-dim model e2e (§3.0/§3.1 + per-dim subsets + D-ETHICS binary + D-PLAY/D-PERF DEGRADED-PENDING); ADR-0006↔methodology §3 (owner-vs-producing-subsystem); ADR-0007 human-gated tier + D-013 creative-gate; DI-001..012 enforced; error-code meaning-vs-usage (6 DP→BC mappings, E-CIN, E-EAP-013); VP-INDEX coherence + back-refs + arithmetic + dir-alias; five-seam thesis/ADR-0004 propagated; determinism tiers; dir-vs-subsystem alias (ss-01/03/06/11/12/13). O26-01 (LOW): methodology §4.3 ~line 1066 uses release-gating verb "blocked" for DEGRADED-PENDING D-CERT; reconcilable (DEGRADED-PENDING blocks release); deferred FU-010 (polish before Phase-1 human gate, not mid-streak). Spec STABLE. | **CLEAN-PASS COUNTER: 2/3** |
 | 27 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | Novelty MEDIUM. I27-01: methodology-layer.md line ~714 "Resolved in Pass-12" note mislabeled BC-8.08.004 as "D-PLAY dimension owner, SS-07/SS-08 interface" — BC-8.08.004 is D-PLAY status PRODUCER (SS-07 sign-off gate); D-PLAY owner is BC-7.05.001 (SS-06); "SS-08" reference also erroneous. 3rd instance of dimension-owner mislabel class (same class as I24-01/FU-009/F15). Check (t) v1.22 narrow patterns evaded by line-714 phrasing. RESOLVED: line 714 corrected; check (t) broadened (v1.22→v1.23) — now triggers on ANY "dimension owner"/"dimension-owner" line; asserts named BCs are BC-7.0[1-9].001/BC-7.10.001/BC-7.11.001 AND SS-06 present if any SS-NN cited; 4,165 lines scanned, 0 violations. methodology-layer v1.10; CI gate v1.23. O27 (LOW): VP-006 proptest clause #1 comment-scoped — test-scoping choice, non-blocking. **CLEAN-PASS COUNTER RESET: 2/3 → 0/3** (streak restarts at Pass 28). | **RESET: 0/3** |
 | 28 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED + proactive 4-file class closure | Novelty MEDIUM. I28-01: `human-gated` vocabulary (+ DI-006/-32008) misapplied to internal cinematic-director creative gate (D-013/DI-007) in 4 BC files — contradicting methodology §2.8, ADR-0007, and Pass-1 I5 fix (E-CIN-003). Adversary flagged 2; orchestrator sweep found full class = 4. RESOLVED: BC-5.06.001 v1.2, BC-12.12.008 v1.2, BC-7.04.001 v1.1, BC-7.05.001 v1.2 — replaced human-gated/DI-006/-32008 with creative-gate/DI-007/E-CIN-003; legitimate SAG-AFTRA/cert/publish human-gated uses preserved. O28-01 (LOW): prd-cap-005.md E-CIN-003 row enriched per I5 canonical format — prd-cap-005 v1.1. check (u) added — human-gated/creative-gate term-misuse guard; 26,461 lines scanned, 5 creative-gate lines validated, 0 violations; CI gate v1.24. | **stays: 0/3** |
+| 29 | 2026-06-08 | CLEAN | 0C / 0I / 0S | Novelty ZERO. Verified clean (fresh territory): all 11 producing-subsystem headers correct (un-gated-but-correct); T1/T2/T3 ↔ canonical values; camelCase wire vs snake_case internal documented; DP-NNN→BC mappings; DEGRADED/DEGRADED-PENDING/BLOCKED + D-ETHICS binary + D-SEC offline-only; conditional-dimension vs "all 11 evaluated" (GREEN-by-inapplicability, no contradiction); D-013 creative-gate vs human-gated (now gated, no leak); studio roster 66; DI-001..012→BC enforcement; VP→BC back-refs; four now-gated recurring classes genuinely exhausted (checks a.ii/a.iii/a.iv/r/t/u all 0 violations). Spec STABLE. | **CLEAN-PASS COUNTER: 1/3** |
 
 ---
 
@@ -92,7 +93,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–28 all resolved/clean; Pass 28 FINDINGS (0C/1I RESOLVED; human-gated/creative-gate misuse 4 BCs fixed; check u added v1.24); counter stays 0/3; Pass 29 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–29 all resolved/clean; Pass 29 CLEAN (0C/0I/0S; zero new defects; all 4 gated classes exhausted); counter **1/3**; Pass 30 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -166,12 +167,12 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–28 DONE.
-**Phase-1d Pass 28:** FINDINGS — 0C/1I RESOLVED + proactive 4-file class closure. I28-01: `human-gated` fidelity-tier vocabulary (+ DI-006 / -32008 error codes) misapplied to the INTERNAL cinematic-director creative gate (D-013 / DI-007) in 4 BC files — contradicting methodology §2.8, ADR-0007, and Pass-1 I5 fix. Adversary flagged 2; orchestrator sweep found full class = 4 files. RESOLVED: BC-5.06.001 v1.2, BC-12.12.008 v1.2, BC-7.04.001 v1.1, BC-7.05.001 v1.2 — replaced human-gated/DI-006/-32008 with creative-gate/DI-007/E-CIN-003; SAG-AFTRA/cert/publish uses preserved. O28-01 (LOW RESOLVED): prd-cap-005.md E-CIN-003 row enriched. Check (u) added v1.24 — human-gated/creative-gate term-misuse guard; 0 violations. **Clean-pass counter stays: 0/3** (findings resolved; restart at Pass 29).
-**Next action:** `phase-1d-adversarial` — **Pass 29** (candidate clean #1, counter restart). FU-007/FU-008/FU-010 remain open (non-blocking).
-**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit → drift check → Phase-1 human gate.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–29 DONE.
+**Phase-1d Pass 29:** CLEAN — 0C/0I/0S. Zero new defects found across all verified territory. All four now-gated recurring defect classes confirmed genuinely exhausted (checks a.ii/a.iii/a.iv/r/t/u, CI gate v1.24). Spec STABLE — no changes this pass. **Clean-pass counter: 1/3** (first consecutive clean; streak started at Pass 29).
+**Next action:** `phase-1d-adversarial` — **Pass 30** (consecutive clean 2 of 3). FU-007/FU-008/FU-010 remain open (non-blocking). Keep spec unchanged through Pass 31 to prove 3 consecutive clean.
+**Phase 1 remaining:** Phase-1d adversarial convergence (1/3 clean passes, need 3) → consistency audit → drift check → Phase-1 human gate.
 **PRD status:** v2.2. 190 BCs; 41 NFRs; 255 error codes / 31 families total (246 active; E-GEN 9 retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006/007/008/010 open (non-blocking). FU-009 CLOSED.
 **Architecture:** 13 subsystems; 4-layer stack; 5 adapter seams; methodology-layer v1.10; 66-role studio; DTU_REQUIRED=true, 11 clones pending. 10 VPs. Priority: P0=126 / P1=42 / P2=22.
-**Version bumps this pass:** BC-5.06.001 v1.2; BC-12.12.008 v1.2; BC-7.04.001 v1.1; BC-7.05.001 v1.2; prd-cap-005 v1.1; CI gate v1.23→v1.24.
+**Version bumps this pass:** none (spec STABLE).
 **D-014/015/016:** see Decisions Log. D-014/D-015 flagged for human gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
