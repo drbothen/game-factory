@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.23
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.24
 #
 # PURPOSE
 # -------
@@ -103,6 +103,68 @@
 # Would have caught pre-fix line 714 (BC-8.08.004 named as dimension owner with
 # SS-07 and no SS-06 on the line). POSIX/BSD-grep compatible.
 # Positive-coverage log always printed. Green after I24-01 + I27-01 fixes.
+# extended in v1.24 to add check (u) — human-gated / creative-gate term-misuse
+# guard (Pass-28 I28-01 recurrence prevention):
+# CANONICAL RULE (methodology §2.8 / ADR-0007): the `directed:true`
+# cinematic-director creative sign-off is an INTERNAL creative gate (E-CIN-003,
+# DI-007). It MUST NOT use `human-gated` fidelity-tier vocabulary, which is
+# reserved for EXTERNAL third-party acts (SAG-AFTRA consent, console cert sign-off,
+# store publish, legal review). The check scans all BC files.
+#
+# TRIGGER: an operative line that contains a human-gated vocabulary term AND a
+# creative-gate context keyword in proximity (same line).
+#
+#   Human-gated vocabulary (any of):
+#     "human-gated", "human-gate task", "HumanGatedTaskPending", "-32008", "DI-006"
+#
+#   Creative-gate context keywords (any of):
+#     "cinematic-director" (bare agent name next to a gating verb)
+#     "cinematic" + "sign-off" on the same line
+#     "creative sign-off" / "creative-gate" / "creative gate"
+#     "directed: true" / "directed:true"
+#
+# EXEMPTION: if the same line also contains an external-act keyword, it is a
+# LEGITIMATE human-gated line and PASSES even if creative-gate keywords also appear.
+#   External-act exemption keywords:
+#     "SAG-AFTRA", "consent", "likeness", "console cert", "store publish",
+#     "legal review", "legal-review"
+#
+# EXCLUSIONS (suppress the line from triggering):
+#   - Lines starting with ">" (blockquote / changelog annotation lines)
+#   - Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#
+# FALSE-POSITIVE AVOIDANCE:
+#   The external-act exemption is intentionally broad: any line naming
+#   "SAG-AFTRA", "consent", "likeness", "console cert", "store publish",
+#   or "legal review" is a legitimate external-act human-gated line and is
+#   skipped — even if it also mentions "cinematic-director" as context.
+#   Per-dimension "Subsystem:" headers and prose that mentions cinematic-director
+#   in a non-gating role (e.g., "produced by cinematic-director") do NOT contain
+#   human-gated vocabulary and therefore do NOT trigger this check.
+#   DI-006 citations in the Traceability table's "L2 Domain Invariants" row
+#   are excluded if the row also names an external act; if the row cites DI-006
+#   without any creative-gate keyword on that line it does not trigger either.
+#
+# POSITIVE-COVERAGE LOG:
+#   "Check (u): N BC lines scanned for human-gated/creative-gate term misuse,
+#    K creative-gate-context lines validated."
+#
+# KNOWN MISLABELS CAUGHT (before PO fix):
+#   BC-5.06.001 line 71:  "A `human-gated` sign-off task is surfaced"
+#     (cinematic-director + human-gated, no external-act exemption) → FAIL
+#   BC-7.04.001 line 64:  "sign-off is a `human-gated` task (DI-006)"
+#     (directed:true + cinematic-director + human-gated, no external-act) → FAIL
+#   BC-7.04.001 line 94:  "DEGRADED; human-gated task emitted for cinematic-director"
+#     (cinematic-director + human-gated, no external-act) → FAIL
+#   BC-7.05.001 line 92:  "Cinematic sign-off is a separate human-gated task (DI-006)"
+#     (directed:true + cinematic sign-off + human-gated, no external-act) → FAIL
+#   BC-12.12.008 line 90: "`human-gated` production artifact (e.g. cinematic script
+#     signed off by `cinematic-director`)" (cinematic-director + human-gated,
+#     no external-act) → FAIL
+#
+# WILL FAIL until PO completes fixes in BC-5.06.001, BC-12.12.008, BC-7.04.001,
+# BC-7.05.001. Becomes green automatically after PO work.
+# POSIX/BSD-grep/awk compatible (no grep -P).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -244,6 +306,21 @@
 #       markup) are excluded. Orphan families (non-retired, zero BC citations)
 #       cause a FAIL. Positive-coverage log always printed.
 #       WILL FAIL until PO reconciles E-KB / E-PLAY / E-REPLAY.
+#   (u) [NEW v1.24, I28-01] human-gated / creative-gate term-misuse guard: scans
+#       all BC files for OPERATIVE lines that contain a human-gated vocabulary term
+#       (human-gated / human-gate task / HumanGatedTaskPending / -32008 / DI-006) IN
+#       PROXIMITY to a creative-gate context keyword (cinematic-director; cinematic +
+#       sign-off; creative sign-off; creative-gate / creative gate; directed:true /
+#       directed: true). Two-tier exemption: (E1) PASSES if line also contains an
+#       external-act keyword (SAG-AFTRA / consent / likeness / console cert / store
+#       publish / legal review / legal-review); (E2) PASSES if "not" appears within
+#       60 chars before "human-gated" on the line (negation / contrast clause,
+#       e.g. "NOT the `human-gated` fidelity tier"). Blockquote lines (">") and
+#       "reason:" changelog lines excluded. Catches the I28-01 class: BC bodies
+#       applying `human-gated` fidelity-tier vocabulary to the cinematic-director
+#       internal creative gate (correct term: E-CIN-003, DI-007). Positive-coverage
+#       log always printed. WILL FAIL until PO fixes BC-5.06.001, BC-12.12.008,
+#       BC-7.04.001, BC-7.05.001. (I28-01 recurrence prevention). POSIX/BSD.
 #   (t) [NEW v1.22, BROADENED v1.23, I24-01/I27-01] BC-7.* owner-attribution guard:
 #       scans methodology-layer.md and architecture/*.md for operative lines that
 #       mis-attribute OWNERSHIP of the BC-7.* dimension-evaluator family to any
@@ -466,6 +543,10 @@ r_orphans=()
 s_dims_in_map=0
 s_comparisons=0
 s_violations=0
+# (u) human-gated/creative-gate term-misuse counters: initialized here so SUMMARY is safe if skipped
+u_lines_scanned=0
+u_creative_gate_lines=0
+u_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -486,7 +567,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.23) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.24) ==="
 echo ""
 
 # ============================================================================
@@ -3866,6 +3947,194 @@ fi
 echo ""
 
 # ============================================================================
+# (u) HUMAN-GATED / CREATIVE-GATE TERM-MISUSE GUARD  [NEW v1.24, I28-01]
+# ============================================================================
+# CANONICAL RULE (methodology §2.8 / ADR-0007):
+#   The `directed:true` cinematic-director creative sign-off is an INTERNAL creative
+#   gate (error code: E-CIN-003; invariant: DI-007). It MUST NOT use `human-gated`
+#   fidelity-tier vocabulary, which is reserved for EXTERNAL third-party acts
+#   (SAG-AFTRA consent, console cert sign-off, store publish, legal review).
+#
+# TRIGGER: any operative BC line containing both:
+#   (1) a human-gated vocabulary term:
+#         "human-gated", "human-gate task", "HumanGatedTaskPending", "-32008", "DI-006"
+#   (2) a creative-gate context keyword:
+#         "cinematic-director"
+#         "cinematic" + "sign-off" (both present on same line)
+#         "creative sign-off" / "creative-gate" / "creative gate"
+#         "directed: true" / "directed:true"
+#
+# EXEMPTIONS: a triggering line PASSES if any of the following apply:
+#   (E1) External-act exemption: line contains an external-act keyword —
+#        "SAG-AFTRA", "consent", "likeness", "console cert", "store publish",
+#        "legal review", "legal-review"
+#        (these are legitimate third-party human-gated acts)
+#   (E2) Negation exemption: "not" (case-insensitive) appears within the 60 chars
+#        immediately preceding "human-gated" on the lowercased line.
+#        Covers correctly-fixed contrast clauses:
+#          "NOT the `human-gated` fidelity tier per ADR-0007"
+#          "not a DI-006 human-gated task"
+#          "not a `human-gated` fidelity tier task"
+#        The 60-char window is narrow enough to avoid exempting bad lines where
+#        "not" appears unrelated to "human-gated" earlier in the line.
+#
+# EXCLUSIONS (suppress trigger entirely):
+#   Lines starting with ">" (blockquote / changelog annotation lines)
+#   Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#
+# SCANS: all BC-*.md files under BC_DIR ss-NN/ subdirectories (same corpus as check (a)).
+#
+# EXPECTED: FAIL until PO fixes BC-5.06.001, BC-12.12.008, BC-7.04.001, BC-7.05.001.
+# Green automatically after PO work.
+echo "--- (u) human-gated/creative-gate term-misuse guard (I28-01 recurrence prevention) ---"
+echo "    Convention: directed:true cinematic-director sign-off is an internal creative gate"
+echo "    (E-CIN-003 / DI-007). human-gated vocabulary is reserved for external acts"
+echo "    (SAG-AFTRA consent, console cert, store publish, legal review)."
+
+u_violations=0
+u_lines_scanned=0
+u_creative_gate_lines=0
+u_violation_msgs=()
+
+# Scan every BC file (depth-2 BC-*.md files, same set as check (a))
+while IFS= read -r bcfile; do
+  [[ ! -f "$bcfile" ]] && continue
+  while IFS= read -r uline; do
+    u_lines_scanned=$(( u_lines_scanned + 1 ))
+
+    # --- Exclusion rules ---
+    # (1) blockquote lines: start with ">"
+    case "$uline" in
+      ">"*) continue ;;
+    esac
+    # (2) reason: lines (YAML frontmatter changelog prose)
+    # Use case for POSIX compatibility
+    case "$uline" in
+      *"reason:"*) continue ;;
+    esac
+
+    # --- Test for human-gated vocabulary (condition 1) ---
+    # Lower-case the line once for all case-insensitive tests
+    uline_lc=$(printf '%s' "$uline" | tr '[:upper:]' '[:lower:]')
+
+    has_hg_vocab=0
+    case "$uline_lc" in
+      *"human-gated"* | *"human-gate task"* | *"humangatedtaskpending"* | *"-32008"* | *"di-006"*)
+        has_hg_vocab=1 ;;
+    esac
+    [[ $has_hg_vocab -eq 0 ]] && continue
+
+    # --- Test for creative-gate context keyword (condition 2) ---
+    # Keywords tested (case-insensitive via lowercased line):
+    #   "cinematic-director"
+    #   "cinematic" + "sign-off" (both must be present on same line)
+    #   "creative sign-off" / "creative-gate" / "creative gate"
+    #   "directed: true" / "directed:true"
+    has_creative_gate=0
+    case "$uline_lc" in
+      *"cinematic-director"*)      has_creative_gate=1 ;;
+      *"creative sign-off"*)       has_creative_gate=1 ;;
+      *"creative-gate"*)           has_creative_gate=1 ;;
+      *"creative gate"*)           has_creative_gate=1 ;;
+      *"directed: true"*)          has_creative_gate=1 ;;
+      *"directed:true"*)           has_creative_gate=1 ;;
+    esac
+    # "cinematic" + "sign-off" combination (both on same line)
+    if [[ $has_creative_gate -eq 0 ]]; then
+      case "$uline_lc" in
+        *"cinematic"*)
+          case "$uline_lc" in
+            *"sign-off"*) has_creative_gate=1 ;;
+          esac
+          ;;
+      esac
+    fi
+    [[ $has_creative_gate -eq 0 ]] && continue
+
+    # This line has both human-gated vocab AND creative-gate context.
+    u_creative_gate_lines=$(( u_creative_gate_lines + 1 ))
+
+    # --- Apply external-act exemption ---
+    # If the line contains an external-act keyword it is a legitimate
+    # human-gated external act and PASSES even if creative-gate keywords appear.
+    has_external_act=0
+    case "$uline_lc" in
+      *"sag-aftra"*)       has_external_act=1 ;;
+      *"consent"*)         has_external_act=1 ;;
+      *"likeness"*)        has_external_act=1 ;;
+      *"console cert"*)    has_external_act=1 ;;
+      *"store publish"*)   has_external_act=1 ;;
+      *"legal review"*)    has_external_act=1 ;;
+      *"legal-review"*)    has_external_act=1 ;;
+    esac
+    if [[ $has_external_act -eq 1 ]]; then
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [u exempt] $bcfile: external-act exemption applies — line: $(printf '%s' "$uline" | cut -c1-100)"
+      fi
+      continue
+    fi
+
+    # --- Apply negation exemption ---
+    # Lines that contain "human-gated" in a NEGATION / CONTRAST context
+    # (e.g., "NOT the `human-gated` fidelity tier", "not a DI-006 human-gated task",
+    # "not a `human-gated` fidelity tier task") are correctly-fixed lines that
+    # EXPLAIN the distinction. They should NOT be flagged.
+    # Detection: the word "not" (case-insensitive) appears BEFORE "human-gated"
+    # on the same lowercased line (within 60 characters preceding the match).
+    # This covers all five negation-clause forms seen in the corpus after the PO fix.
+    # False-positive risk: a malformed line like "NOT a problem; human-gated cinematic"
+    # would be wrongly exempted — but spec language is deliberate and this form does
+    # not occur in the corpus. Belt-and-suspenders: require "not" within 60 chars of
+    # "human-gated" in the lowercased line.
+    has_negation=0
+    # Use awk: find position of "human-gated"; check if "not" occurs within
+    # the 60 chars immediately preceding it on the same line.
+    has_negation=$(printf '%s' "$uline_lc" | awk '
+      {
+        hg_pos = index($0, "human-gated")
+        if (hg_pos == 0) { print 0; exit }
+        # Look in the 60-char window before human-gated
+        start = hg_pos - 60
+        if (start < 1) start = 1
+        window = substr($0, start, hg_pos - start)
+        # Does "not" appear in the window (as part of "not", "NOT", "not a", etc.)?
+        if (index(window, "not") > 0) { print 1; exit }
+        print 0
+      }
+    ' 2>/dev/null || printf '0')
+    if [[ "$has_negation" == "1" ]]; then
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [u negation] $bcfile: negation-clause exemption ('not...human-gated') — line: $(printf '%s' "$uline" | cut -c1-100)"
+      fi
+      continue
+    fi
+
+    # FAIL: human-gated vocabulary applied to cinematic-director creative gate
+    # without any external-act exemption or negation exemption.
+    u_violations=$(( u_violations + 1 ))
+    rel_bcfile="${bcfile#$BC_DIR/}"
+    u_violation_msgs+=("$rel_bcfile: human-gated vocabulary applied to creative-gate context (must use E-CIN-003/DI-007, not human-gated/DI-006) — line: $(printf '%s' "$uline" | cut -c1-120)")
+
+  done < "$bcfile"
+done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort)
+
+# Positive-coverage log (always printed — detects zero-scan / inert run)
+echo "    Check (u): $u_lines_scanned BC lines scanned for human-gated/creative-gate term misuse, $u_creative_gate_lines creative-gate-context lines validated."
+echo "    Human-gated/creative-gate term-misuse violations: $u_violations"
+
+if [[ $u_violations -gt 0 ]]; then
+  echo ""
+  echo "    HUMAN-GATED/CREATIVE-GATE TERM MISUSE (BC body uses human-gated vocabulary for cinematic-director creative gate):"
+  echo "    FIX: replace human-gated/DI-006 with E-CIN-003/DI-007; use 'creative gate checklist item' not 'human-gated task'."
+  for umsg in "${u_violation_msgs[@]}"; do
+    echo "      $umsg"
+  done
+  errors+=("MISMATCH [human-gated/creative-gate term misuse (u)]: $u_violations operative BC line(s) apply human-gated fidelity-tier vocabulary to the cinematic-director internal creative gate — fix per methodology §2.8 / ADR-0007: use E-CIN-003, DI-007, 'creative gate checklist item' (not 'human-gated task')")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -3899,6 +4168,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Error-family reverse coverage (r): $active_family_count non-retired families, all cited by >=1 BC"
   echo "  §3.1 cross-table consistency (s):  $s_dims_in_map dims × 4 values, 0 mismatches ($s_comparisons pairs verified)"
   echo "  BC-7.* owner-attribution (t):      $t_scanned_lines lines scanned, 0 mis-attribution violations"
+  echo "  human-gated/creative-gate (u):    $u_lines_scanned lines scanned, $u_creative_gate_lines creative-gate lines validated, 0 term-misuse violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
