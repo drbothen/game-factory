@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "2.0"
+version: "2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -357,11 +357,12 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | 1.6 | 2026-06-08 | product-owner | CI check (k) completeness fix: registered 57 E-codes referenced by ss-04 (BC-4.01.*–4.06.*) and ss-13 (BC-13.02.*–13.04.*) BCs that were unregistered. New families: E-AAG (7), E-SVC (6), E-QG (11), E-SHIP (3), E-ING (4), E-GLG (5), E-MOD (11), E-MKT (4). E-PRV extended (+5 codes: 001/002/003/020/030). E-XR extended (+1 code: 007). E-GEN retired — orphaned placeholder, never referenced by any BC (9 codes remain in retired table, still counted by CI). CI-computed total: 139 + 57 = **196 total registered codes** (187 active, 9 retired E-GEN). 29 active families. BC count unchanged at 178 |
 | 1.7 | 2026-06-08 | product-owner | Pass-9 adversarial fixes: E-COMP-011 registered (disclosure_class out-of-vocabulary at manifest aggregation — distinct from E-COMP-010 missing-field; BC-10.05.001 v1.2 uses E-COMP-011 for vocab fault); E-COMP-012 registered (NFT flag divergence seam guard — nft_blockchain/nft_mechanics inconsistency; BC-10.01.001 v1.1 emits on divergence; INV-2 fail-closed: PEGI-18 if EITHER NFT flag true). +2 codes: **198 total registered codes** (189 active, 9 retired E-GEN). BC count unchanged at 178. methodology-layer v1.3 §3.0 canonical dimension field table added; BC-9.04.001/9.06.001/9.06.002 dimension field renamed distribution_readiness→cert_preflight. |
 | 1.9 | 2026-06-08 | product-owner | CAP-015 Online-Services Adapter (fifth seam, SS-13, Tier 1): +12 BCs (BC-15.01.001..002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001); new E-OSVC error family (15 codes); CAP-015 added to domain-spec/capabilities.md; prd-cap-015.md created; NFR-036..041 added (identity/leaderboard/entitlement/save latency, graceful degradation, tampered-score rejection). Grand total: 178→190 BCs. Error codes: 198→213 total (189→204 active). Families: 29→30 active. |
+| 2.1 | 2026-06-08 | product-owner | Pass-17 adversarial fix F-17-01: corrected stale BC count 189→190 in §8.1 subsystem-assignment prose (was copied from the 189-active-error-codes figure; grand total is 190 per BC-INDEX, ARCH-INDEX, and per-subsystem distribution). BC count unchanged: 190. |
 | 2.0 | 2026-06-08 | product-owner | Pass-14 adversarial defect fixes: C14-01 — E-OSVC error-code mis-citations corrected in BC-15.02.001 (E-OSVC-003→013 UnsupportedAuthProvider) and BC-15.05.001 (E-OSVC-004→014 LobbyCapacityExceeded, E-OSVC-006→015 LobbyNotFound); I14-03 — orphan "(100-Token Active Cap)" fragment removed from BC-15.11.001 H1 and BC-INDEX row (title now accurately describes D-SEC routing contract); I14-01 — seam-count prose updated from "four adapter seams" to "five adapter seams (engine / asset / distribution / XR / online-services)" in prd.md, L2-INDEX.md, capabilities.md, invariants.md, prd-cap-002-003.md, and product-brief.md; canon-KB clarified as sixth load-bearing (non-adapter) seam. BC count unchanged: 190. Error code count unchanged: 213. |
 
 ### 8.1 Subsystem Assignment (Resolved)
 
-**All 189 behavioral contracts have been assigned to architecture subsystems (SS-01 through
+**All 190 behavioral contracts have been assigned to architecture subsystems (SS-01 through
 SS-13).** The `subsystem: SS-TBD` placeholder has been replaced in all BC frontmatter.
 The assignment was propagated from `.factory/specs/architecture/subsystem-decomposition.md`
 (see ARCH-INDEX.md Subsystem Registry). BC file paths (directory `ss-NN/`, filename) are

@@ -69,7 +69,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–15 resolved (see phase-1-log.md rows 9–23); Pass 16 FINDINGS (0C/1I; I-16-01 stale BC-INDEX CAP-007/CAP-015 section headers; check a.ii added; all resolved; CI v1.16; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) — Passes 1–16 resolved (see phase-1-log.md rows 9–24); Pass 17 FINDINGS (0C/1I; F-17-01 stale prd.md §8.1 BC count 189→190; check a.iii added; all resolved; CI v1.17; counter stays 0/3); clean passes: **0/3** | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,18 +78,18 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 17** (candidate clean #1 of 3). Pass 16 FINDINGS: 0C/1I — I-16-01 stale BC-INDEX section headers (CAP-007 "12 BCs"→19, CAP-015 "11 BCs"→12); check (a.ii) per-capability section-header count added; 15 headers validated, 0 mismatches. All resolved. Counter stays 0/3.
-**Spec state:** prd v2.0; BC-INDEX v1.7; error-taxonomy v1.9 (213 codes / 31 families total / 204 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.6; ADR-0004 v1.2 (five-seam; canon-KB=sixth); ADR-0006 v1.2; adapter-protocols.md v1.2; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); prd-cap-015.md; capabilities.md v1.1; invariants.md v1.1; L2-INDEX.md v1.1; prd-cap-002-003.md v1.1; BC-15.02.001 v1.1; BC-15.05.001 v1.1; BC-15.11.001 v1.1; BC-9.01.001 v1.2; BC-8.08.004 v1.3; product-brief.md v2.2. CI gate v1.16 (checks a–p incl. a.ii; 21 sub-assertions). Totals unchanged: 190 BCs / 213 codes / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22.
+**NEXT: `phase-1d-adversarial` — Pass 18** (candidate clean #1 of 3). Pass 17 FINDINGS: 0C/1I — F-17-01 stale prd.md §8.1 "All 189 behavioral contracts" → 190; check (a.iii) alternate-phrasing BC-count scan added; 1 statement validated, 0 violations after fix. All resolved. Counter stays 0/3.
+**Spec state:** prd v2.1; BC-INDEX v1.7; error-taxonomy v1.9 (213 codes / 31 families total / 204 active; E-GEN 9 retired); subsystem-decomposition v1.6 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.6; ADR-0004 v1.2 (five-seam; canon-KB=sixth); ADR-0006 v1.2; adapter-protocols.md v1.2; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); prd-cap-015.md; capabilities.md v1.1; invariants.md v1.1; L2-INDEX.md v1.1; prd-cap-002-003.md v1.1; BC-15.02.001 v1.1; BC-15.05.001 v1.1; BC-15.11.001 v1.1; BC-9.01.001 v1.2; BC-8.08.004 v1.3; product-brief.md v2.2. CI gate v1.17 (checks a–p incl. a.ii + a.iii; 22 sub-assertions). Totals unchanged: 190 BCs / 213 codes / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22.
 **cicd-setup COMPLETE** — 3 workflows (ci.yml, release.yml, security.yml) + cicd-setup.md on main @ de99845; D-009 implemented. lint job now includes Spec count consistency (S2-02) gate.
 
 ### Phase-1d Adversarial Convergence
 
 | Pass | Date | Verdict | Findings | Resolved | Clean-pass counter |
 |------|------|---------|----------|----------|--------------------|
-| 1–13 | 2026-06-08 | FINDINGS×12 / CLEAN×1 | (see phase-1-log.md rows 9–21) | ALL RESOLVED | 1/3 after Pass-7; reset to 0/3 after Pass-8; 0/3 after Pass-13 |
-| 14 | 2026-06-08 | FINDINGS | 2C / 3I / 2 obs | RESOLVED (E-OSVC re-citations, five-seam prose sweep, k.ii+o checks) | **0/3** |
+| 1–14 | 2026-06-08 | FINDINGS×13 / CLEAN×1 | (see phase-1-log.md rows 9–22) | ALL RESOLVED | 1/3 after Pass-7; reset to 0/3 after Pass-8; 0/3 after Pass-14 |
 | 15 | 2026-06-08 | FINDINGS | 1C / 1I / 1 process-gap | RESOLVED (cross-BC dim-owner mis-anchors fixed; check p added) | **0/3** |
 | 16 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs | RESOLVED (stale BC-INDEX section headers CAP-007/CAP-015; check a.ii added) | **0/3** |
+| 17 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs | RESOLVED (prd.md §8.1 "189"→"190" BCs; check a.iii alternate-phrasing scan added) | **0/3** |
 
 ---
 
@@ -105,7 +105,7 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true, 10 clones DTU-01..10) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes / 21 families | DONE |
 | T8 | **CI/CD setup** — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 (MANDATORY before Phase 3) | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–15 all findings resolved (see phase-1-log.md); Pass 16 FINDINGS (0C/1I; I-16-01 stale BC-INDEX section headers CAP-007/015; check a.ii added; CI v1.16; counter stays 0/3); Pass 17 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–16 all findings resolved (see phase-1-log.md); Pass 17 FINDINGS (0C/1I; F-17-01 stale prd.md §8.1 BC count 189→190; check a.iii added; CI v1.17; counter stays 0/3); Pass 18 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -184,13 +184,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–16 DONE.
-**Phase-1d Pass 16 FINDINGS resolved:** (I-16-01 IMPORTANT) BC-INDEX.md CAP-007 section header stated "12 BCs" above 19-row table — corrected to 19. CAP-015 section header stated "11 BCs" above 12-row table — corrected to 12. BC-INDEX v1.7. (process-gap) CI check (a) only validated grand-total — check (a.ii) added: parses each `## CAP-0NN — N BCs` header and asserts N == section row count == Summary-table cell; 15 headers validated, 0 mismatches. CI gate v1.16 (a–p incl. a.ii, 21 sub-assertions) ALL CHECKS PASSED exit 0. Corpus sweep: exactly 2 stale headers; defect class fully enumerated. Counter stays 0/3.
-**Next action:** `phase-1d-adversarial` — **Pass 17** (candidate clean #1 of 3). All known header drift resolved. Need 3 consecutive clean passes to converge.
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–17 DONE.
+**Phase-1d Pass 17 FINDINGS resolved:** (F-17-01 IMPORTANT) prd.md §8.1 "All 189 behavioral contracts have been assigned" — stale; integer 189 was the active-error-code count at pre-CAP-015 time; corrected to 190. prd.md v2.1. (process-gap) CI check (a) only matched "Grand total: N BCs" — check (a.iii) added: scans prd.md/subsystem-decomposition.md/ARCH-INDEX.md for four alternate BC-count phrasings with 7 false-positive exclusion rules; 1 statement validated, 0 violations after fix. CI gate v1.17 (a–p incl. a.ii + a.iii, 22 sub-assertions) ALL CHECKS PASSED exit 0. Corpus sweep: exactly 1 stale phrase; defect class fully enumerated. Counter stays 0/3.
+**Next action:** `phase-1d-adversarial` — **Pass 18** (candidate clean #1 of 3). All known count-phrasing drift resolved. Need 3 consecutive clean passes to converge.
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes) → consistency audit → drift check → Phase-1 human gate.
-**PRD status:** v2.0. 190 BCs; 41 NFRs; 213 error codes / 31 families total (204 active; E-GEN 9 codes retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred). FU-008 open (§3.0 Subsystem col dual-meaning, non-blocking deferred).
+**PRD status:** v2.1. 190 BCs; 41 NFRs; 213 error codes / 31 families total (204 active; E-GEN 9 codes retired). FU-001/002/003 CLOSED. FU-005 ongoing. FU-006 open (DTU framing, human gate). FU-007 open (E-GLG-001 Coverage Note, non-blocking deferred). FU-008 open (§3.0 Subsystem col dual-meaning, non-blocking deferred).
 **Architecture:** 13 subsystems (SS-01..SS-13); 4-layer stack; 5 adapter seams; methodology-layer v1.6 (11 convergence dims); 66-role studio (53T1+13T2); DTU_REQUIRED=true, 11 clones pending. ADR-0004 v1.2 (five-seam; canon-KB=sixth) / ADR-0006 v1.2. 10 VPs (6 P0, 4 P1). Priority: 190 BCs / P0=126 / P1=42 / P2=22.
-**Key versions changed Pass 16:** BC-INDEX v1.7 (CAP-007 header 12→19, CAP-015 header 11→12); CI gate v1.16 (check a.ii per-capability section-header count).
+**Key versions changed Pass 17:** prd.md v2.1 (§8.1 BC count 189→190); CI gate v1.17 (check a.iii alternate-phrasing BC-count scan, 22 sub-assertions).
 **D-014:** DI-008 engine-neutrality scope = Layer-1/Layer-2 only; L3 adapter-behavior BCs may name engines illustratively. FLAG FOR HUMAN RATIFICATION at Phase-1 gate.
 **D-015:** VP-TBD-NNN are BC-local placeholders; canonical form `<BC-ID>/VP-TBD-NNN`; Phase-6 promotes to VP-NNN. FLAG FOR HUMAN AWARENESS at Phase-1 gate.
 **D-016:** CAP-015 Online-Services Adapter = Tier-1 v1 capability per product brief; human-approved build 2026-06-08; five-seam model.
