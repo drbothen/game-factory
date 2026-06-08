@@ -1,4 +1,9 @@
 ---
+document_type: pipeline-state
+project: game-factory
+status: in_progress
+current_step: prd-revision
+current_cycle: v0.1.0-greenfield
 pipeline: IN-PROGRESS
 phase: 1
 product: game-factory
@@ -35,6 +40,39 @@ To resume in a fresh session: open this repo as cwd and say "resume".
 - `.mcp.json` = gitignored (contains local API keys)
 
 **Thesis (do not silently drop):** engine-agnostic / four-seam / no-lock-in — REAFFIRMED by human. Adapter seams (8 contract schemas) are mandatory architecture, not optional scaffolding.
+
+---
+
+## Project Metadata
+
+| Field | Value |
+|-------|-------|
+| project | game-factory |
+| mode | greenfield + Phase-0 extraction |
+| product type | software — engine-agnostic AAA game factory |
+| repo | drbothen/game-factory |
+| branch: main | product source |
+| branch: factory-artifacts | `.factory/` worktree |
+| reference | vsdd-factory @ 82163b7 |
+| current phase | 1 — Spec Crystallization |
+| current step | prd-revision |
+| current cycle | v0.1.0-greenfield |
+
+---
+
+## Current Phase Steps
+
+| Step | Description | Status |
+|------|-------------|--------|
+| create-domain-spec | L2 domain spec (10 shards; 18 entities, 14 caps) | DONE |
+| create-prd | PRD + 168 BCs across 14 caps → SS-01..SS-12 | DONE |
+| create-architecture | 12 subsystems, 4-layer stack, 10 VPs, DTU assessment | DONE |
+| prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | NEXT |
+| cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | PENDING |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes; FU-005) | PENDING |
+| consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
+| drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
+| human-gate | Phase-1 spec-package human gate | PENDING |
 
 ---
 
