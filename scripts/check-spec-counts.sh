@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.6
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.8
 #
 # PURPOSE
 # -------
-# Prevent recurring count-drift across the spec layer. Eleven classes of drift
+# Prevent recurring count-drift across the spec layer. Twelve classes of drift
 # are checked (extended in v1.2 to cover Pass-3 adversarial defect classes;
 # extended in v1.3 to cover Pass-4 VP catalog consistency;
 # extended in v1.4 to cover Pass-5 studio §3 appearance counts, subsystem
 # priority subtotals, and formal VP ↔ BC bidirectional anchor):
 # extended in v1.5 to fix false-green in check (i) (I6-01) and add check (k);
 # extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
-# (F8-01 recurrence prevention):
+# (F8-01 recurrence prevention);
+# extended in v1.7 to add check (m) — convergence-report dimension field name
+# uniqueness (O-2 recurrence prevention);
+# extended in v1.8 to extend check (m) with a second assertion: scan all BC
+# bodies for convergence-report dimension field references and reject any
+# field name not in the canonical 11-name set from methodology-layer §3.0
+# (O-2 usage-site recurrence prevention):
 #   (a) BC file count diverging from stated totals in BC-INDEX / subsystem-decomposition / ARCH-INDEX / PRD
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
@@ -57,6 +63,26 @@
 #       reports the offending BC filename and the non-canonical value token.
 #       Prevents the F8-01 defect class: consumer BCs adopting non-canonical
 #       disclosure_class vocabulary that producer-side CI could not detect.
+#   (m) [NEW v1.7, EXTENDED v1.8] Convergence-report dimension field name consistency
+#       (O-2 recurrence prevention):
+#       (m.i)  Parses the canonical dimension field name registry table from
+#              methodology-layer.md (§3.0), extracts all `dimensions.<field>` canonical
+#              names, and asserts (i) the count equals 11 (one per dimension, none missing
+#              or added) and (ii) all 11 field names are unique (no two dimensions share a
+#              name). Prevents: a new dimension added without a canonical field name, or
+#              two dimensions assigned the same field name. (present since v1.7)
+#       (m.ii) [NEW v1.8] Scans all BC body text for tokens of the form
+#              `convergence-report.dimensions.<field>`, `convergence_report.dimensions.<field>`,
+#              `` `dimensions.<field>` `` (backtick-quoted), and whitespace-prefixed
+#              `.dimensions.<field>` (line-wrap continuations). For every <field> token
+#              found, asserts it is a member of the canonical 11-name set parsed from
+#              §3.0. FAIL reports the offending BC filename and the non-canonical field
+#              name (e.g., "ss-09/BC-9.04.001.md: non-canonical convergence dimension
+#              field 'distribution_readiness'"). Prevents: BCs adopting field names
+#              outside the canonical registry (the O-2 usage-site class).
+#              False-positive avoidance: patterns are anchored to the convergence-report
+#              namespace or backtick-quoted, so `a.dimensions.width` (texture-asset
+#              geometry) does NOT trigger this check.
 #
 # USAGE
 #   ./scripts/check-spec-counts.sh [--verbose]
@@ -97,6 +123,7 @@ VP_INDEX="$REPO_ROOT/.factory/specs/verification-properties/VP-INDEX.md"
 VERIF_ARCH="$REPO_ROOT/.factory/specs/architecture/verification-architecture.md"
 VERIF_MATRIX="$REPO_ROOT/.factory/specs/architecture/verification-coverage-matrix.md"
 STUDIO_AGENTS="$REPO_ROOT/.factory/specs/architecture/studio-of-agents.md"
+METHODOLOGY_LAYER="$REPO_ROOT/.factory/specs/architecture/methodology-layer.md"
 
 # ---- Helpers ----------------------------------------------------------------
 fail=0
@@ -121,7 +148,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.8) ==="
 echo ""
 
 # ============================================================================
@@ -953,6 +980,161 @@ fi
 echo ""
 
 # ============================================================================
+# (m) CONVERGENCE-REPORT DIMENSION FIELD NAME UNIQUENESS  [NEW v1.7]
+# ============================================================================
+# Source of truth: methodology-layer.md §3.0 canonical dimension field name
+# registry table (introduced in methodology-layer.md v1.3).
+#
+# The §3.0 table has rows of the form:
+#   | D-SIM | ... | `sim_spec` | ... | ... |
+# Column 3 (0-based) is the canonical field name enclosed in backticks.
+# We extract all backtick-enclosed tokens from column 3 of §3.0 table rows.
+#
+# Strategy (POSIX/BSD grep compatible, no -P):
+#   1. Find the §3.0 table block between the "§3.0 Canonical" heading and the
+#      "Count invariant:" line. Extract pipe-delimited data rows starting with
+#      "| D-" (dimension rows, excluding the header row).
+#   2. From each such row, extract column 3 (awk field $4 because leading |
+#      makes field 1 empty: | D-ID | Title | `field` | Derivation | Owner BC |).
+#   3. Strip backticks; collect field names.
+#   4. Assert count = 11 and all names are unique.
+#
+# This check does NOT assert specific field name values — methodology-layer.md
+# is the authority. It asserts structural invariants: 11 entries, all distinct.
+# If a future spec change adds/removes a dimension, the count check will alert.
+echo "--- (m) convergence-report dimension field names — registry uniqueness + BC usage-site check (source: methodology-layer.md §3.0) ---"
+
+DIM_FIELD_COUNT_EXPECTED=11
+
+if [[ ! -f "$METHODOLOGY_LAYER" ]]; then
+  echo "    SKIP: methodology-layer.md not found at $METHODOLOGY_LAYER"
+else
+  # Extract backtick-wrapped field names from §3.0 table rows starting with "| D-"
+  # Column layout: | D-ID | Dimension Title | `field_name` | Derivation | Owner BC |
+  # awk field $4 is the third pipe-delimited column (leading | gives empty $1).
+  # Extract the content inside backticks from that field.
+  dim_fields=$(grep -E '^\| D-[A-Z]+ ' "$METHODOLOGY_LAYER" 2>/dev/null \
+    | awk -F'|' '{gsub(/[[:space:]]/,"",$4); gsub(/`/,"",$4); print $4}' \
+    | grep -v '^$' \
+    | sort || true)
+
+  dim_field_count=$(printf '%s\n' "$dim_fields" | grep -c . 2>/dev/null || echo 0)
+  dim_field_unique_count=$(printf '%s\n' "$dim_fields" | sort -u | grep -c . 2>/dev/null || echo 0)
+
+  echo "    Canonical dimension field names parsed from §3.0 table: $dim_field_count"
+  echo "    Unique field names: $dim_field_unique_count"
+  echo "    Expected: count=$DIM_FIELD_COUNT_EXPECTED, all unique"
+
+  if [[ "$VERBOSE" == true ]] && [[ -n "$dim_fields" ]]; then
+    echo ""
+    echo "    Field names found:"
+    printf '%s\n' "$dim_fields" | while IFS= read -r fn; do
+      echo "      $fn"
+    done
+  fi
+  echo ""
+
+  # Assert count = 11
+  check "dimension field name count (§3.0 table)" \
+    "$dim_field_count" "$DIM_FIELD_COUNT_EXPECTED" "methodology-layer.md §3.0"
+
+  # Assert all unique (duplicate detection: if unique count != total count, there's a dup)
+  if [[ "$dim_field_count" -gt 0 ]] && [[ "$dim_field_unique_count" != "$dim_field_count" ]]; then
+    dup_count=$(( dim_field_count - dim_field_unique_count ))
+    errors+=("MISMATCH [dimension field uniqueness (m)]: $dup_count duplicate dimension field name(s) found in methodology-layer.md §3.0 — each dimension must have a unique convergence-report field name")
+    fail=1
+    if [[ "$VERBOSE" == true ]]; then
+      echo "    DUPLICATES detected:"
+      printf '%s\n' "$dim_fields" | sort | uniq -d | while IFS= read -r dup; do
+        echo "      duplicate field name: $dup"
+      done
+    fi
+  fi
+
+  # ---- (m.ii) [NEW v1.8] BC usage-site scan — assert all field references are canonical ---
+  # Scan every BC body for tokens of the form:
+  #   Pattern A: convergence[-_]report.dimensions.<field>  (primary namespace form,
+  #              both hyphen and underscore variants of convergence-report/convergence_report)
+  #   Pattern B: `dimensions.<field>`  (backtick-quoted bare form used in precondition
+  #              lines like "writable `dimensions.sim_spec` field")
+  #   Pattern C: [[:space:]].dimensions.<field>  (line-wrap continuation of a
+  #              convergence-report.dimensions reference split across two lines;
+  #              anchored on leading whitespace to exclude `a.dimensions.width` etc.)
+  #
+  # False-positive avoidance:
+  #   - `a.dimensions.width` (texture-asset geometry in BC-4.04.003): NOT matched because
+  #     (A) requires "convergence" prefix, (B) requires opening backtick immediately before
+  #     "dimensions", and (C) requires whitespace before the dot — `a.dimensions` has a
+  #     letter before the dot, not whitespace.
+  #   - Other unrelated `.dimensions` uses (e.g. image width/height math) are similarly
+  #     excluded by the same anchors.
+  #
+  # Only runs if the canonical field set is non-empty (i.e. §3.0 table was parsed OK).
+  echo "--- (m.ii) BC usage-site: convergence-report dimension field references ---"
+
+  if [[ "$dim_field_count" -eq 0 ]]; then
+    echo "    SKIP: canonical field set is empty (§3.0 table parse failed above)"
+  else
+    dim_usage_violations=0
+    dim_usage_violation_msgs=()
+
+    while IFS= read -r -d $'\0' bc_file; do
+      bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
+
+      # Extract field-name tokens from Pattern A: convergence[-_]report.dimensions.<field>
+      # grep -oE extracts each full match; sed strips everything up to and including the
+      # last dot to leave just the field name. BSD/POSIX compatible (-E -o only).
+      patA=$(grep -ohE 'convergence[-_]report\.dimensions\.[a-z][a-z_]*' "$bc_file" 2>/dev/null \
+        | sed 's/.*\.//' \
+        | sort -u || true)
+
+      # Extract field-name tokens from Pattern B: `dimensions.<field>` (backtick-quoted)
+      # Opening and closing backtick anchor prevents matching `a.dimensions.width`.
+      patB=$(grep -ohE '`dimensions\.[a-z][a-z_]*`' "$bc_file" 2>/dev/null \
+        | sed 's/`dimensions\.//' \
+        | sed 's/`//' \
+        | sort -u || true)
+
+      # Extract field-name tokens from Pattern C: whitespace + .dimensions.<field>
+      # Matches line-wrap continuations like "     .dimensions.cert_preflight`".
+      # The leading [[:space:]] means `a.dimensions.cert_preflight` (no space before dot)
+      # does NOT match — only genuine line-wrap fragments match.
+      patC=$(grep -ohE '[[:space:]]\.dimensions\.[a-z][a-z_]*' "$bc_file" 2>/dev/null \
+        | sed 's/.*\.//' \
+        | sort -u || true)
+
+      # Union all extracted field names for this BC file (deduplicate)
+      all_fields=$(printf '%s\n%s\n%s\n' "$patA" "$patB" "$patC" \
+        | sort -u | grep -v '^$' || true)
+
+      # Check each field name against the canonical set
+      while IFS= read -r field; do
+        [[ -z "$field" ]] && continue
+        if ! printf '%s\n' "$dim_fields" | grep -qF "$field" 2>/dev/null; then
+          dim_usage_violations=$(( dim_usage_violations + 1 ))
+          dim_usage_violation_msgs+=("${bc_rel}: non-canonical convergence dimension field '$field' (allowed: $(printf '%s\n' "$dim_fields" | sort -u | tr '\n' ',' | sed 's/,$//'))")
+        fi
+      done <<< "$all_fields"
+
+    done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+    echo "    BC files scanned for dimension field references: $computed_bc"
+    echo "    Non-canonical dimension field references found: $dim_usage_violations"
+
+    if [[ $dim_usage_violations -gt 0 ]]; then
+      echo ""
+      echo "    NON-CANONICAL CONVERGENCE DIMENSION FIELDS (PO must rename to canonical field from methodology-layer §3.0):"
+      for msg in "${dim_usage_violation_msgs[@]}"; do
+        echo "      $msg"
+      done
+      errors+=("MISMATCH [convergence dimension field usage-site (m.ii)]: $dim_usage_violations BC file(s) reference non-canonical convergence-report dimension field names — PO must rename to canonical fields per methodology-layer.md §3.0 (see list above)")
+      fail=1
+    fi
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -971,6 +1153,8 @@ if [[ $fail -eq 0 ]]; then
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
   echo "  Error-identifier resolution:       all BC E-codes registered in taxonomy"
   echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
+  echo "  Dimension field uniqueness:        §3.0 table has $DIM_FIELD_COUNT_EXPECTED unique field names"
+  echo "  Dimension field usage-site:        all BC convergence-report dimension references use canonical field names"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
