@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.17
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.18
 #
 # PURPOSE
 # -------
@@ -48,6 +48,40 @@
 # backfill notes containing "backfilled". Positive-coverage log: "Check (a.iii):
 # N alternate-phrasing BC-count statements validated." (P17-01 recurrence
 # prevention). POSIX/BSD compatible.
+# extended in v1.18 to add check (a.iv) — per-capability PRD BC totals + NFR
+# total consistency: closes the recurring class of stale count-summary lines in
+# prd-supplements that check (a) / (a.ii) / (a.iii) do not cover.
+#
+# SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
+#   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
+#     "Total CAP-NNN BCs: N"   (primary form)
+#     "Total CAP-NNN BCs ...: N"  (with annotation suffix)
+#   Extracts the CAP-NNN identifier and the stated count N. Sources the
+#   authoritative per-cap count by parsing BC-INDEX.md "## CAP-NNN — <name> — N BCs"
+#   headers (which check (a.ii) already validates against actual row counts, so
+#   they are trustworthy). FAIL lists any supplement line whose stated per-cap
+#   total ≠ the BC-INDEX authoritative count.
+#   NOTE: "Total BCs in this batch: N" is treated as an obsolete phrasing; any
+#   such line is flagged as unresolvable (ambiguous capability mapping) and
+#   reported as an advisory, not a hard failure — PO should migrate to the
+#   canonical "Total CAP-NNN BCs: N" form.
+#   False-positive exclusion: skip lines starting with "|" (changelog version
+#   table rows), ">" (blockquote), or containing "reason:"; require literal
+#   words "BCs" so error-code / NFR counts do not match.
+#
+# SUB-CHECK 2 — NFR TRIPLE CONSISTENCY:
+#   (i)  Parse nfr-catalog.md "Total NFRs in this catalog: N" summary line.
+#   (ii) Count actual "^| NFR-NNN" rows in nfr-catalog.md (the table rows).
+#   (iii) Parse prd.md's inline NFR count statement of the form
+#         "(N NFRs, NFR-001 through NFR-NNN)" (the parenthetical in §4 prose).
+#   Asserts all three agree: rows == catalog summary == prd.md statement.
+#   False-positive exclusion: prd.md parse anchors to "NFRs, NFR-001 through"
+#   so changelog rows ("19 NFRs" in version table, "+16 NFRs" delta notes)
+#   do not match.
+#
+# POSITIVE-COVERAGE LOG: "Check (a.iv): N per-cap PRD BC totals + NFR total
+# validated." always printed.
+# POSIX/BSD-grep/awk compatible (no grep -P). (P18-01 recurrence prevention).
 # extended in v1.6 to add check (l) — disclosure_class closed-enum consistency
 # (F8-01 recurrence prevention);
 # extended in v1.7 to add check (m) — convergence-report dimension field name
@@ -177,6 +211,22 @@
 #       statements validated." POSIX/BSD-awk/grep compatible (no grep -P).
 #       WILL FAIL until PO fixes prd.md line with "All 189 behavioral contracts";
 #       becomes green automatically after PO work. (P17-01 recurrence prevention).
+#   (a.iv) [NEW v1.18] Per-capability PRD BC totals + NFR total consistency:
+#       SUB-CHECK 1 (per-cap): scans all prd-cap-*.md for "Total CAP-NNN BCs: N"
+#       lines; sources authoritative count from BC-INDEX.md CAP-NNN header N
+#       (already validated by check a.ii); FAIL if stated N ≠ authoritative N.
+#       Also detects obsolete "Total BCs in this batch: N" phrasing and reports
+#       it as an advisory (ambiguous cap mapping — migrate to canonical form).
+#       SUB-CHECK 2 (NFR triple): (i) counts actual "| NFR-NNN" rows in
+#       nfr-catalog.md; (ii) parses "Total NFRs in this catalog: N" summary
+#       line; (iii) parses "(N NFRs, NFR-001 through NFR-NNN)" in prd.md §4.
+#       Asserts all three agree. Catches "35 vs 41" class: summary line not
+#       updated when NFR-036..041 rows were added.
+#       False-positive exclusions: skip "|" / ">" / "reason:" lines; pattern
+#       anchors to "NFRs, NFR-001 through" so changelog delta notes
+#       ("+16 NFRs", "19 NFRs") do not match.
+#       Positive-coverage log: "Check (a.iv): N per-cap PRD BC totals + NFR
+#       total validated." POSIX/BSD compatible. (P18-01 recurrence prevention).
 #   (b) Error code count diverging from stated total in error-taxonomy.md
 #   (c) BC files without a `priority:` frontmatter field (coverage gap)
 #   (d) [NEW v1.2] VP P0/P1 counts: parse VP-INDEX table, assert P0+P1 match
@@ -317,6 +367,8 @@ VERIF_ARCH="$REPO_ROOT/.factory/specs/architecture/verification-architecture.md"
 VERIF_MATRIX="$REPO_ROOT/.factory/specs/architecture/verification-coverage-matrix.md"
 STUDIO_AGENTS="$REPO_ROOT/.factory/specs/architecture/studio-of-agents.md"
 METHODOLOGY_LAYER="$REPO_ROOT/.factory/specs/architecture/methodology-layer.md"
+NFR_CATALOG="$REPO_ROOT/.factory/specs/prd-supplements/nfr-catalog.md"
+PRD_SUPPLEMENTS_DIR="$REPO_ROOT/.factory/specs/prd-supplements"
 
 # ---- Helpers ----------------------------------------------------------------
 fail=0
@@ -341,7 +393,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.17) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.18) ==="
 echo ""
 
 # ============================================================================
@@ -2749,6 +2801,294 @@ fi
 echo ""
 
 # ============================================================================
+# (a.iv) PER-CAPABILITY PRD BC TOTALS + NFR TOTAL CONSISTENCY  [NEW v1.18]
+# ============================================================================
+# SUB-CHECK 1: Scan every prd-cap-*.md supplement for lines of the form
+#   "Total CAP-NNN BCs: N"   (primary canonical form)
+#   "Total CAP-NNN BCs ...: N"  (with annotation, e.g., parenthetical suffix)
+# For each matched line, extract the CAP-NNN identifier and the stated count N.
+# Source the authoritative per-cap count from the BC-INDEX.md H2 capability
+# header "## CAP-NNN — <name> — N BCs" (already validated by check a.ii, so
+# this N is trustworthy). FAIL if stated supplement N ≠ BC-INDEX N.
+#
+# Also detect the obsolete phrasing "Total BCs in this batch: N" (previously
+# used in prd-cap-001.md before it was migrated to the canonical form). Any
+# such line is reported as an advisory note — PO should migrate to canonical
+# "Total CAP-NNN BCs: N" form. Not a hard failure because the capability cannot
+# be determined unambiguously from the line alone.
+#
+# SUB-CHECK 2: NFR triple-consistency check.
+#   (i)  Count actual "| NFR-NNN" table rows in nfr-catalog.md.
+#   (ii) Parse "Total NFRs in this catalog: N" summary line in nfr-catalog.md.
+#   (iii) Parse prd.md's inline NFR count statement of the form
+#         "(N NFRs, NFR-001 through NFR-NNN)" in the §4 catalog reference line.
+#   Assert all three values agree. Catches the class where rows were added
+#   (e.g., NFR-036..041 for CAP-015) but the summary line was not updated.
+#
+# FALSE-POSITIVE AVOIDANCE:
+#   - Skip lines starting with "|" (changelog version table rows, table body rows).
+#   - Skip lines starting with ">" (blockquote constraint/annotation blocks).
+#   - Skip lines containing "reason:" (YAML lifecycle prose in frontmatter).
+#   - Per-cap pattern requires literal "BCs" (not "NFRs" or bare numbers).
+#   - NFR prd.md pattern anchors to "NFRs, NFR-001 through" so changelog delta
+#     lines ("+16 NFRs", "19 NFRs" in version table) do not match.
+#
+# POSITIVE-COVERAGE LOG: "Check (a.iv): N per-cap PRD BC totals + NFR total
+# validated." always printed — detects zero-scan / inert run.
+# POSIX/BSD-grep/awk compatible (no grep -P). (P18-01 recurrence prevention).
+echo "--- (a.iv) Per-capability PRD BC totals + NFR total consistency ---"
+
+aiv_violations=0
+aiv_checked=0
+aiv_violation_msgs=()
+aiv_advisory_msgs=()
+
+# ---------------------------------------------------------------------------
+# Step A: Build authoritative per-cap count map from BC-INDEX.md headers.
+# Source: "## CAP-NNN — <name> — N BCs" headers (already validated by a.ii).
+# Output: associative array BCIDX_CAP_COUNT[CAP-NNN] = N
+# ---------------------------------------------------------------------------
+declare -A BCIDX_CAP_COUNT
+
+if [[ -f "$BC_INDEX" ]]; then
+  while IFS= read -r idx_line; do
+    # Match: "## CAP-NNN" line containing "N BCs" at end
+    cap_id_raw=$(printf '%s' "$idx_line" \
+      | awk '{for(i=1;i<=NF;i++) if($i~/^CAP-[0-9]+/) {print $i; exit}}')
+    cap_n_raw=$(printf '%s' "$idx_line" \
+      | awk '{if(match($0,/[0-9]+ BCs$/)) {tok=substr($0,RSTART,RLENGTH); split(tok,a," "); print a[1]}}')
+    if [[ -n "$cap_id_raw" ]] && [[ -n "$cap_n_raw" ]]; then
+      BCIDX_CAP_COUNT["$cap_id_raw"]="$cap_n_raw"
+    fi
+  done < <(grep -E '^## CAP-[0-9]' "$BC_INDEX" 2>/dev/null || true)
+fi
+
+# ---------------------------------------------------------------------------
+# Step B: Scan all prd-cap-*.md supplement files for per-cap total lines.
+# ---------------------------------------------------------------------------
+for supp_file in "$PRD_SUPPLEMENTS_DIR"/prd-cap-*.md; do
+  [[ -f "$supp_file" ]] || continue
+  supp_label=$(basename "$supp_file")
+
+  # Use awk to scan each line in the supplement.
+  # For each line, apply exclusion rules, then test per-cap patterns.
+  # Output format: "TYPE|CAP_ID|STATED_N|line_snippet"
+  #   TYPE = "CANONICAL"  for "Total CAP-NNN BCs: N" form
+  #          "OBSOLETE"   for "Total BCs in this batch: N" form
+  supp_matches=$(awk '
+    {
+      line = $0
+      lc   = tolower(line)
+
+      # --- Exclusion rules ---
+      # (1) starts with "|"
+      if (substr(line,1,1) == "|") next
+      # (2) starts with ">"
+      if (substr(line,1,1) == ">") next
+      # (3) contains "reason:"
+      if (index(lc,"reason:") > 0) next
+
+      # --- Pattern 1: canonical "Total CAP-NNN BCs: N" or "Total CAP-NNN BCs ...: N"
+      # Case-insensitive search; require "bcs" after "CAP-NNN"
+      if (match(lc, /total cap-[0-9]+ bcs[^:]*: *[0-9]+/)) {
+        tok = substr(line, RSTART, RLENGTH)
+        # Extract CAP-NNN (case from original line, but match done on lc)
+        # Re-do on original line for correct case
+        orig_tok = substr(line, RSTART, RLENGTH)
+        # Extract CAP-NNN from tok (find "CAP-" prefix, 3+ digits)
+        cap_id = ""
+        n_val  = ""
+        split(tok, parts, " ")
+        for (p in parts) {
+          up = toupper(parts[p])
+          if (up ~ /^CAP-[0-9]+/) { cap_id = up; break }
+        }
+        # Extract N: the integer after the final ":"
+        if (match(tok, /:[[:space:]]*[0-9]+/)) {
+          n_tok = substr(tok, RSTART+1, RLENGTH-1)
+          gsub(/[^0-9]/, "", n_tok)
+          n_val = n_tok + 0
+        }
+        if (cap_id != "" && n_val != "") {
+          disp = substr(line, 1, 80)
+          print "CANONICAL|" cap_id "|" n_val "|" disp
+        }
+        next
+      }
+
+      # --- Pattern 2: obsolete "Total BCs in this batch: N"
+      if (match(lc, /total bcs in this batch:[[:space:]]*[0-9]+/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        n_val = ""
+        if (match(tok, /:[[:space:]]*[0-9]+/)) {
+          n_tok = substr(tok, RSTART+1, RLENGTH-1)
+          gsub(/[^0-9]/, "", n_tok)
+          n_val = n_tok + 0
+        }
+        disp = substr(line, 1, 80)
+        print "OBSOLETE||" n_val "|" disp
+        next
+      }
+    }
+  ' "$supp_file" 2>/dev/null || true)
+
+  # Process each match record
+  while IFS='|' read -r match_type cap_id stated_n line_disp; do
+    [[ -z "$match_type" ]] && continue
+
+    if [[ "$match_type" == "OBSOLETE" ]]; then
+      # Advisory: obsolete phrasing — capability cannot be determined unambiguously
+      aiv_advisory_msgs+=("${supp_label}: obsolete phrasing 'Total BCs in this batch: ${stated_n}' — migrate to 'Total CAP-NNN BCs: N' form (cannot validate against BC-INDEX without explicit CAP-ID)")
+      continue
+    fi
+
+    # CANONICAL form: validate against BC-INDEX authoritative count
+    aiv_checked=$(( aiv_checked + 1 ))
+
+    auth_count="${BCIDX_CAP_COUNT[$cap_id]:-}"
+
+    if [[ -z "$auth_count" ]]; then
+      # CAP-NNN not found in BC-INDEX — report as a violation
+      aiv_violations=$(( aiv_violations + 1 ))
+      aiv_violation_msgs+=("${supp_label}: 'Total ${cap_id} BCs: ${stated_n}' — ${cap_id} not found in BC-INDEX.md header map (cannot validate)")
+    elif [[ "$stated_n" != "$auth_count" ]]; then
+      aiv_violations=$(( aiv_violations + 1 ))
+      aiv_violation_msgs+=("${supp_label}: 'Total ${cap_id} BCs: ${stated_n}' — BC-INDEX authoritative count for ${cap_id} is ${auth_count} (mismatch: supplement says ${stated_n}, BC-INDEX says ${auth_count})")
+    else
+      if [[ "$VERBOSE" == true ]]; then
+        echo "    OK [a.iv per-cap ${cap_id}]: supplement=${stated_n} bcindex=${auth_count} in ${supp_label}"
+      fi
+    fi
+
+  done <<< "$supp_matches"
+
+done
+
+# ---------------------------------------------------------------------------
+# Step C: NFR triple-consistency check.
+# ---------------------------------------------------------------------------
+aiv_nfr_violations=0
+aiv_nfr_violation_msgs=()
+aiv_nfr_checked=0
+
+if [[ ! -f "$NFR_CATALOG" ]]; then
+  echo "    SKIP [NFR triple-check]: nfr-catalog.md not found at $NFR_CATALOG"
+else
+  # (i) Count actual "| NFR-NNN" table rows (lines starting "| NFR-" followed by digit)
+  computed_nfr_rows=$(grep -cE '^\| NFR-[0-9]' "$NFR_CATALOG" 2>/dev/null || true)
+  computed_nfr_rows="${computed_nfr_rows:-0}"
+
+  # (ii) Parse "Total NFRs in this catalog: N" summary line.
+  # Exclude lines starting with "|" or ">" or containing "reason:".
+  catalog_nfr_stated=$(awk '
+    {
+      lc = tolower($0)
+      if (substr($0,1,1) == "|") next
+      if (substr($0,1,1) == ">") next
+      if (index(lc,"reason:") > 0) next
+      if (match(lc, /total nfrs in this catalog:[[:space:]]*[0-9]+/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        if (match(tok, /:[[:space:]]*[0-9]+/)) {
+          n = substr(tok, RSTART+1, RLENGTH-1)
+          gsub(/[^0-9]/, "", n)
+          print n+0
+          exit
+        }
+      }
+    }
+  ' "$NFR_CATALOG" 2>/dev/null || true)
+
+  # (iii) Parse prd.md inline NFR count: "(N NFRs, NFR-001 through NFR-NNN)"
+  # Anchor: "NFRs, NFR-001 through" to avoid changelog delta lines.
+  # Exclude lines starting with "|" or ">" or containing "reason:".
+  prd_nfr_stated=$(awk '
+    {
+      lc = tolower($0)
+      if (substr($0,1,1) == "|") next
+      if (substr($0,1,1) == ">") next
+      if (index(lc,"reason:") > 0) next
+      # Look for pattern: "(N NFRs, NFR-001 through" — case-insensitive
+      if (match(lc, /\([0-9]+ nfrs, nfr-001 through/)) {
+        tok = substr(lc, RSTART, RLENGTH)
+        # Extract leading number: after "(" before " NFRs"
+        gsub(/^\(/, "", tok)
+        split(tok, a, " ")
+        n = a[1] + 0
+        if (n > 0) { print n; exit }
+      }
+    }
+  ' "$PRD" 2>/dev/null || true)
+
+  echo "    NFR rows computed (nfr-catalog.md):   ${computed_nfr_rows}"
+  echo "    NFR total stated (catalog summary):   ${catalog_nfr_stated:-NOT_FOUND}"
+  echo "    NFR count stated (prd.md §4 prose):   ${prd_nfr_stated:-NOT_FOUND}"
+
+  # Assert: rows == catalog summary
+  if [[ -n "$catalog_nfr_stated" ]]; then
+    aiv_nfr_checked=$(( aiv_nfr_checked + 1 ))
+    if [[ "$computed_nfr_rows" != "$catalog_nfr_stated" ]]; then
+      aiv_nfr_violations=$(( aiv_nfr_violations + 1 ))
+      aiv_nfr_violation_msgs+=("nfr-catalog.md: 'Total NFRs in this catalog: ${catalog_nfr_stated}' but ${computed_nfr_rows} actual '| NFR-NNN' rows counted — summary line must be corrected")
+    else
+      [[ "$VERBOSE" == true ]] && echo "    OK [a.iv NFR catalog]: stated=${catalog_nfr_stated} rows=${computed_nfr_rows}"
+    fi
+  fi
+
+  # Assert: rows == prd.md stated
+  if [[ -n "$prd_nfr_stated" ]]; then
+    aiv_nfr_checked=$(( aiv_nfr_checked + 1 ))
+    if [[ "$computed_nfr_rows" != "$prd_nfr_stated" ]]; then
+      aiv_nfr_violations=$(( aiv_nfr_violations + 1 ))
+      aiv_nfr_violation_msgs+=("prd.md: inline NFR count states ${prd_nfr_stated} but nfr-catalog.md has ${computed_nfr_rows} actual rows — prd.md §4 reference line must be corrected")
+    else
+      [[ "$VERBOSE" == true ]] && echo "    OK [a.iv NFR prd.md]: prd_stated=${prd_nfr_stated} rows=${computed_nfr_rows}"
+    fi
+  fi
+
+  # Assert: catalog summary == prd.md stated (belt-and-suspenders cross-check)
+  if [[ -n "$catalog_nfr_stated" ]] && [[ -n "$prd_nfr_stated" ]]; then
+    if [[ "$catalog_nfr_stated" != "$prd_nfr_stated" ]]; then
+      aiv_nfr_violations=$(( aiv_nfr_violations + 1 ))
+      aiv_nfr_violation_msgs+=("NFR count divergence: nfr-catalog.md summary says ${catalog_nfr_stated} but prd.md §4 says ${prd_nfr_stated} — both must equal computed row count ${computed_nfr_rows}")
+    fi
+  fi
+
+  if [[ $aiv_nfr_violations -gt 0 ]]; then
+    echo ""
+    echo "    NFR TRIPLE-CONSISTENCY VIOLATIONS:"
+    for msg in "${aiv_nfr_violation_msgs[@]}"; do
+      echo "      $msg"
+    done
+    errors+=("MISMATCH [NFR triple-consistency (a.iv)]: $aiv_nfr_violations NFR count mismatch(es) among nfr-catalog.md rows, catalog summary line, and prd.md §4 prose (see list above)")
+    fail=1
+  fi
+fi
+
+# Positive-coverage log (always printed — detects zero-scan / inert run)
+aiv_total_checked=$(( aiv_checked + aiv_nfr_checked ))
+echo "    Check (a.iv): ${aiv_checked} per-cap PRD BC totals + ${aiv_nfr_checked} NFR total check(s) validated (${aiv_total_checked} total)."
+echo "    Per-cap BC total violations: ${aiv_violations}   NFR violations: ${aiv_nfr_violations}"
+
+if [[ ${#aiv_advisory_msgs[@]} -gt 0 ]]; then
+  echo ""
+  echo "    ADVISORIES (obsolete per-cap total phrasing — PO should migrate to canonical form):"
+  for msg in "${aiv_advisory_msgs[@]}"; do
+    echo "      ADVISORY: $msg"
+  done
+fi
+
+if [[ $aiv_violations -gt 0 ]]; then
+  echo ""
+  echo "    PER-CAP BC TOTAL MISMATCHES (supplement per-cap count ≠ BC-INDEX authoritative count):"
+  for msg in "${aiv_violation_msgs[@]}"; do
+    echo "      $msg"
+  done
+  errors+=("MISMATCH [per-cap PRD BC totals (a.iv)]: $aiv_violations supplement per-cap BC total line(s) do not match the BC-INDEX authoritative count (see list above) — PO must correct supplement total lines")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -2764,6 +3104,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  BC frontmatter schema:             $computed_bc checked, 0 violations"
   echo "  Cap section-header counts (a.ii):  ${cap_header_check_count:-0} headers validated, 0 mismatches"
   echo "  Alt-phrasing BC counts (a.iii):   ${aiii_checked:-0} statements validated, 0 violations"
+  echo "  Per-cap PRD BC totals+NFR (a.iv): ${aiv_checked:-0} per-cap + ${aiv_nfr_checked:-0} NFR checks, 0 violations"
   echo "  Studio §3/§6 counts:               verified"
   echo "  Subdecomp priority subtotals:      P0=${computed_frontmatter_p0:-?} P1=${computed_frontmatter_p1:-?} P2=${computed_frontmatter_p2:-?} sum=${computed_frontmatter_grand:-?} (computed from frontmatter)"
   echo "  VP↔BC bidirectional anchor:        all formal VPs back-referenced"
