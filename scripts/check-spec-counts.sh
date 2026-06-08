@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.10
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.11
 #
 # PURPOSE
 # -------
@@ -34,17 +34,53 @@
 # content (behavior steps, postconditions, invariants, test vectors) is scanned.
 # The check still catches a genuine non-canonical value (e.g. `AMBER`) written
 # in operative spec content. (I-3 false-positive fix)
-#   (n) [NEW v1.9] Convergence-dimension status-value enum consistency (I-3 recurrence
-#       prevention): parses the canonical status-value enum table from methodology-layer.md
-#       §3.1 (the "Canonical Status-Value Enum" table) to get the allowed set of values.
-#       Then scans all BC files for lines that assign a value to a convergence-report
-#       dimension field (patterns: `= \`VALUE\``, `set to \`VALUE\``, `= VALUE (`,
-#       `is VALUE`, `remains VALUE`, `stays VALUE`, `transitions.*to VALUE`, etc.).
-#       For each VALUE token found in a dimension-assignment context, asserts it is a
-#       member of the canonical enum. FAIL lists the offending BC + non-canonical value.
-#       Will FAIL until PO propagates AMBER → DEGRADED-PENDING / BLOCKED in
-#       SS-09/10/11/13 BCs and prd-cap-009-010.md per methodology-layer §3.1 PO change
-#       list. Implements now so it becomes green automatically after PO work.
+# extended in v1.11 to add two sub-checks to check (n) (Pass-11 F-11-01/F-11-02
+# recurrence prevention):
+#   (n.ii) PER-DIMENSION SUBSET ENFORCEMENT: parses the §3.1 "Per-Dimension Allowed
+#       Value Subsets" table from methodology-layer.md, builds a map of dimension →
+#       allowed value set. For each line in any BC that assigns a status value to a
+#       specific named dimension field (e.g. "perf_budget = DEGRADED" or lines that
+#       reference "D-SIM" near a status token), asserts the value is in that dimension's
+#       allowed subset (not just the flat enum). Catches F-11-01-class regressions: a
+#       value that is enum-valid but illegal for the specific dimension (e.g.
+#       DEGRADED-PENDING written for D-IMPL, which only allows GREEN/BLOCKED).
+#       False-positive avoidance: dimension identity must be explicit on the same line
+#       (field name match OR dimension ID); generic lines without a dimension anchor
+#       are checked against the flat enum only (existing check (n)).
+#   (n.iii) BARE TABLE-CELL TOKEN SCAN: widens the BC scan to catch hyphenated
+#       non-canonical status tokens that appear as bare text in markdown table cells
+#       (without backtick quoting or verb-phrase anchors) in convergence-dimension
+#       context. Specifically targets the class of tokens seen in F-11-02:
+#       BLOCKED-PENDING, DEGRADED-ACCEPTED, DEGRADED-advisory (and similar
+#       UPPER-mixed or ALL-CAPS-hyphenated tokens in the pattern [A-Z]+-[A-Za-z]+).
+#       Extraction: in dim_context_lines, grep for tokens matching
+#       [A-Z][A-Z]+-[A-Z][A-Za-z]+ (hyphenated, starts uppercase, at least 2
+#       uppercase letters before the hyphen) that are NOT in the canonical enum.
+#       Changelog reason: lines remain excluded (same as v1.10 fix).
+#       False-positive avoidance: the pattern requires at least 2 uppercase letters
+#       before the hyphen, so prose hyphenations like "non-canonical" or
+#       "machine-checkable" do NOT match (they start with lowercase). Spec identifier
+#       prefixes (VP-*, BC-*, ADR-*, DI-*, CAP-*, EC-*, SS-*, DP-*) are excluded by
+#       case-statement allowlist. Known legitimate compounds (SAG-AFTRA, AI-generated,
+#       CPU-bound, NDA-gated, etc.) are similarly excluded. Only UPPER-CASE-initiated
+#       hyphenated tokens in dimension context that are NOT spec identifiers or known
+#       compounds are flagged. POSIX/BSD-grep compatible; no grep -P.
+#   (n) [NEW v1.9, EXTENDED v1.11] Convergence-dimension status-value enum consistency:
+#       (n.i)  [v1.9] Parses the canonical status-value enum from §3.1 table. Scans all
+#              BC files for convergence-report dimension value assignments and asserts
+#              each value is in the canonical 4-value enum {GREEN, DEGRADED,
+#              DEGRADED-PENDING, BLOCKED}. Changelog reason: lines excluded.
+#       (n.ii) [NEW v1.11] Per-dimension subset enforcement: parses §3.1
+#              "Per-Dimension Allowed Value Subsets" table; for each BC line that
+#              both names a specific dimension (by field name or D-XX ID) AND assigns
+#              a status value, asserts the value is in THAT dimension's allowed subset.
+#              Catches F-11-01-class: enum-valid but dimension-illegal values.
+#       (n.iii)[NEW v1.11] Bare table-cell token scan: widens extraction to catch
+#              hyphenated non-canonical tokens (BLOCKED-PENDING, DEGRADED-ACCEPTED,
+#              DEGRADED-advisory) in dimension context that appear as bare table cell
+#              text without backtick/verb anchors. Pattern: [A-Z][A-Z]+-[A-Z][A-Za-z]+
+#              in dimension-context lines, excluding canonical values and the known
+#              allowlist. Catches F-11-02-class tokens. Changelog reason: excluded.
 #       False-positive avoidance: patterns are anchored to convergence-report dimension
 #       context (lines that contain `convergence[-_]report` or `dimensions.` near a
 #       status keyword); standalone AMBER in non-dimension prose does NOT trigger.
@@ -179,7 +215,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.10) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.11) ==="
 echo ""
 
 # ============================================================================
@@ -1449,6 +1485,286 @@ else
       errors+=("MISMATCH [convergence-dimension status-value enum (n)]: $dim_status_violations non-canonical status value(s) found in dimension-context lines — PO must update to canonical enum per methodology-layer.md §3.1 (EXPECTED: await PO propagation of AMBER changes)")
       fail=1
     fi
+
+    # ---- (n.ii) [NEW v1.11] Per-dimension subset enforcement -------------------
+    # Parse the §3.1 "Per-Dimension Allowed Value Subsets" table from
+    # methodology-layer.md. The table has rows starting with "| D-" under the
+    # "Per-Dimension Allowed Value Subsets" heading. Column layout:
+    #   | Dim | Allowed Values | Rationale |
+    # We map each dimension ID (D-SIM etc.) AND its canonical field name
+    # (sim_spec etc.) to the set of allowed status values.
+    #
+    # Then scan every BC file for lines that BOTH reference a specific dimension
+    # (by field name or D-XX ID on the same line) AND contain a status value.
+    # Assert the value is in that dimension's allowed subset.
+    #
+    # False-positive avoidance:
+    #   - Only lines where a specific dimension can be identified on the SAME line
+    #     are checked for subset compliance. Lines with only a generic convergence
+    #     reference (no specific dimension) are covered by (n.i) only.
+    #   - Changelog reason: lines remain excluded.
+    #   - Known allowlist exclusions same as (n.i).
+    echo ""
+    echo "--- (n.ii) per-dimension allowed-value subset enforcement ---"
+
+    # Build dimension→allowed-values map from §3.1 per-dimension table.
+    # Row format in §3.1: | D-DIM | GREEN, DEGRADED, ... | Rationale |
+    # awk: field $2 is D-XX id (strip spaces), field $3 is allowed values list.
+    # Extract only rows starting with "| D-" from methodology-layer.md.
+    # Map each extracted pair to "DIM_ID:VALUE1 VALUE2 VALUE3"
+    declare -A DIM_ALLOWED_MAP
+    declare -A FIELD_TO_DIM_MAP
+
+    # Build field→dimension mapping from §3.0 table for subset lookup
+    # Row format: | D-ID | Dimension Title | `field_name` | Derivation | Owner BC |
+    while IFS= read -r row; do
+      dim_id=$(printf '%s' "$row" | awk -F'|' '{gsub(/[[:space:]]/,"",$2); print $2}')
+      field_name=$(printf '%s' "$row" | awk -F'|' '{gsub(/[[:space:]`]/,"",$4); print $4}')
+      # Only store if field_name looks like a snake_case identifier
+      if printf '%s' "$field_name" | grep -qE '^[a-z][a-z_]+$' 2>/dev/null; then
+        FIELD_TO_DIM_MAP["$field_name"]="$dim_id"
+      fi
+    done < <(grep -E '^\| D-[A-Z]+ ' "$METHODOLOGY_LAYER" 2>/dev/null \
+      | grep -v 'Allowed Values' || true)
+
+    # Build dimension→allowed-values mapping from §3.1 per-dimension table rows.
+    # The §3.1 per-dimension table rows look like:
+    #   | D-SIM | GREEN, DEGRADED, BLOCKED | ... |
+    # field $3 (awk, 1-based with leading |) is the allowed values column.
+    # We extract only dimension rows from the §3.1 table section.
+    # Strategy: extract lines matching "^\| D-" that contain "GREEN" (dimension rows)
+    # from the §3.1 section (after the "Per-Dimension Allowed Value Subsets" heading).
+    while IFS= read -r row; do
+      dim_id=$(printf '%s' "$row" | awk -F'|' '{gsub(/[[:space:]]/,"",$2); print $2}')
+      allowed_raw=$(printf '%s' "$row" | awk -F'|' '{print $3}')
+      # Extract canonical status value tokens from the allowed column
+      # (all-uppercase tokens possibly with hyphens: GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED)
+      allowed_vals=$(printf '%s' "$allowed_raw" \
+        | grep -oE '[A-Z][A-Z-]+-?[A-Z]*' \
+        | grep -E '^[A-Z][A-Z-]+$' \
+        | tr '\n' ' ')
+      if [[ -n "$dim_id" ]] && printf '%s' "$dim_id" | grep -qE '^D-[A-Z]+$'; then
+        DIM_ALLOWED_MAP["$dim_id"]="$allowed_vals"
+      fi
+    done < <(grep -E '^\| D-[A-Z]+ ' "$METHODOLOGY_LAYER" 2>/dev/null \
+      | grep 'GREEN' || true)
+
+    ndii_violations=0
+    ndii_violation_msgs=()
+
+    # For each BC file, find lines that both name a specific dimension AND contain
+    # a canonical status value. Check subset compliance.
+    while IFS= read -r -d $'\0' bc_file; do
+      bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
+
+      # Get dimension-context lines (same filter as (n.i)), excluding reason: lines
+      dim_ctx=$(grep -hE \
+        'convergence[-_]report|`dimensions\.|dim-[0-9]+|D-ETHICS|D-CERT|D-PROV|D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-PERF|D-DOCS|D-SEC|'"${dim_field_pattern}" \
+        "$bc_file" 2>/dev/null \
+        | grep -v 'reason:' \
+        || true)
+      [[ -z "$dim_ctx" ]] && continue
+
+      # For each canonical field name, check lines that reference that field
+      for field in "${!FIELD_TO_DIM_MAP[@]}"; do
+        dim_id="${FIELD_TO_DIM_MAP[$field]}"
+        [[ -z "$dim_id" ]] && continue
+        allowed="${DIM_ALLOWED_MAP[$dim_id]:-}"
+        [[ -z "$allowed" ]] && continue
+
+        # Find lines that reference this specific field name
+        field_lines=$(printf '%s\n' "$dim_ctx" \
+          | grep -F "$field" \
+          | grep -v 'reason:' \
+          || true)
+        [[ -z "$field_lines" ]] && continue
+
+        # Extract status value tokens from these field-specific lines
+        # (backtick-quoted and verb-phrase patterns, same as (n.i))
+        btick=$(printf '%s\n' "$field_lines" \
+          | grep -oE '`[A-Z][A-Z-]+-?[A-Z]*`' \
+          | sed 's/`//g' \
+          | grep -E '^[A-Z][A-Z-]+$' \
+          | sort -u || true)
+        verb=$(printf '%s\n' "$field_lines" \
+          | grep -oE '(= |: |to |remains |is set to |is |stays |transitions to |set to )[A-Z][A-Z-]+-?[A-Z]*[^a-z]' \
+          | grep -oE '[A-Z][A-Z-]+-?[A-Z]*' \
+          | grep -E '^[A-Z][A-Z-]+$' \
+          | sort -u || true)
+        cand_vals=$(printf '%s\n%s\n' "$btick" "$verb" \
+          | sort -u | grep -v '^$' || true)
+
+        while IFS= read -r sv; do
+          [[ -z "$sv" ]] && continue
+          # Apply same exclusion list as (n.i)
+          case "$sv" in
+            AND|OR|NOT|ANY|ALL|YES|NO|NA|API|CLI|CI|ID|BC|SS|VP|PRD|PO|TBD|DI|ADR|EC|EP) continue ;;
+            CWE|PASS|FAIL|PARTIAL|PENDING|NONE|NDA|EU|JP|CN|US|IAP|LTV|AI|F2P|EOMM) continue ;;
+            IARC|PEGI|ESRB|SAG|AFTRA|NFT|XR|VR|AR|OK|URL|JSON|SDK|UI|UX|ML|TLS|TDD) continue ;;
+            P0|P1|P2|L1|L2|L3|L4|T1|T2|T3|CAP|WIP|TBD|NULL|TRUE|FALSE|VALID|INVALID) continue ;;
+            COMPLETE|ACTIVE|DRAFT|REQUIRED|OPTIONAL|DEPRECATED|YELLOW|RED) continue ;;
+            D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-CERT|D-PERF|D-PROV|D-DOCS|D-ETHICS|D-SEC) continue ;;
+          esac
+          [[ "$sv" == E-* ]] && continue
+          [[ "${#sv}" -lt 3 ]] && continue
+          # Skip if not in the flat canonical enum (already caught by n.i)
+          if ! printf '%s\n' "$dim_status_enum" | grep -qF "$sv" 2>/dev/null; then
+            continue
+          fi
+          # Now check subset: is sv allowed for this specific dimension?
+          if ! printf '%s\n' "$allowed" | tr ' ' '\n' | grep -qF "$sv" 2>/dev/null; then
+            ndii_violations=$(( ndii_violations + 1 ))
+            ndii_violation_msgs+=("${bc_rel}: value '$sv' is enum-valid but NOT in allowed subset for dimension ${dim_id} (${field}); allowed: {$(printf '%s' "$allowed" | tr ' ' ',')}")
+          fi
+        done <<< "$cand_vals"
+      done
+
+      # Also check by D-XX dimension ID references on lines
+      for dim_id in "${!DIM_ALLOWED_MAP[@]}"; do
+        allowed="${DIM_ALLOWED_MAP[$dim_id]}"
+        [[ -z "$allowed" ]] && continue
+        # Find lines that explicitly name this dimension ID
+        id_lines=$(printf '%s\n' "$dim_ctx" \
+          | grep -F "$dim_id" \
+          | grep -v 'reason:' \
+          || true)
+        [[ -z "$id_lines" ]] && continue
+
+        btick=$(printf '%s\n' "$id_lines" \
+          | grep -oE '`[A-Z][A-Z-]+-?[A-Z]*`' \
+          | sed 's/`//g' \
+          | grep -E '^[A-Z][A-Z-]+$' \
+          | sort -u || true)
+        verb=$(printf '%s\n' "$id_lines" \
+          | grep -oE '(= |: |to |remains |is set to |is |stays |transitions to |set to )[A-Z][A-Z-]+-?[A-Z]*[^a-z]' \
+          | grep -oE '[A-Z][A-Z-]+-?[A-Z]*' \
+          | grep -E '^[A-Z][A-Z-]+$' \
+          | sort -u || true)
+        cand_vals=$(printf '%s\n%s\n' "$btick" "$verb" \
+          | sort -u | grep -v '^$' || true)
+
+        while IFS= read -r sv; do
+          [[ -z "$sv" ]] && continue
+          case "$sv" in
+            AND|OR|NOT|ANY|ALL|YES|NO|NA|API|CLI|CI|ID|BC|SS|VP|PRD|PO|TBD|DI|ADR|EC|EP) continue ;;
+            CWE|PASS|FAIL|PARTIAL|PENDING|NONE|NDA|EU|JP|CN|US|IAP|LTV|AI|F2P|EOMM) continue ;;
+            IARC|PEGI|ESRB|SAG|AFTRA|NFT|XR|VR|AR|OK|URL|JSON|SDK|UI|UX|ML|TLS|TDD) continue ;;
+            P0|P1|P2|L1|L2|L3|L4|T1|T2|T3|CAP|WIP|TBD|NULL|TRUE|FALSE|VALID|INVALID) continue ;;
+            COMPLETE|ACTIVE|DRAFT|REQUIRED|OPTIONAL|DEPRECATED|YELLOW|RED) continue ;;
+            D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-CERT|D-PERF|D-PROV|D-DOCS|D-ETHICS|D-SEC) continue ;;
+          esac
+          [[ "$sv" == E-* ]] && continue
+          [[ "${#sv}" -lt 3 ]] && continue
+          if ! printf '%s\n' "$dim_status_enum" | grep -qF "$sv" 2>/dev/null; then
+            continue
+          fi
+          if ! printf '%s\n' "$allowed" | tr ' ' '\n' | grep -qF "$sv" 2>/dev/null; then
+            # Deduplicate: skip if same violation already recorded for this bc_rel/dim_id/sv
+            already=0
+            for existing in "${ndii_violation_msgs[@]}"; do
+              if printf '%s' "$existing" | grep -qF "${bc_rel}" && \
+                 printf '%s' "$existing" | grep -qF "$sv" && \
+                 printf '%s' "$existing" | grep -qF "$dim_id"; then
+                already=1; break
+              fi
+            done
+            if [[ $already -eq 0 ]]; then
+              ndii_violations=$(( ndii_violations + 1 ))
+              ndii_violation_msgs+=("${bc_rel}: value '$sv' is enum-valid but NOT in allowed subset for dimension ${dim_id}; allowed: {$(printf '%s' "$allowed" | tr ' ' ',')}")
+            fi
+          fi
+        done <<< "$cand_vals"
+      done
+
+    done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+    echo "    Per-dimension subset violations found: $ndii_violations"
+    if [[ $ndii_violations -gt 0 ]]; then
+      echo ""
+      echo "    PER-DIMENSION SUBSET VIOLATIONS (value is enum-valid but illegal for that dimension):"
+      for msg in "${ndii_violation_msgs[@]}"; do
+        echo "      $msg"
+      done
+      errors+=("MISMATCH [per-dimension status-value subset (n.ii)]: $ndii_violations violation(s) — enum-valid values used outside their allowed dimension subset per methodology-layer.md §3.1")
+      fail=1
+    fi
+
+    # ---- (n.iii) [NEW v1.11] Bare table-cell token scan -----------------------
+    # Catches hyphenated non-canonical tokens (BLOCKED-PENDING, DEGRADED-ACCEPTED,
+    # DEGRADED-advisory, etc.) that appear as bare text in markdown table cells
+    # in convergence-dimension context. These tokens evade (n.i)'s backtick and
+    # verb-phrase anchors because they are written without backticks in table cells.
+    #
+    # Pattern: [A-Z][A-Z]+-[A-Z][A-Za-z]+ — requires at least 2 uppercase letters
+    # before the hyphen, then an uppercase-initial word after. This matches
+    # BLOCKED-PENDING, DEGRADED-ACCEPTED but NOT "non-canonical", "machine-checkable",
+    # "pre-generated", "on-device" (all start with lowercase before/after hyphen).
+    # Also matches DEGRADED-advisory (mixed case after hyphen — intentional: we want
+    # to catch these).
+    #
+    # Exclusions: canonical 4-value enum tokens (they may appear hyphenated in prose),
+    # known all-caps acronyms that happen to be hyphenated.
+    echo ""
+    echo "--- (n.iii) bare table-cell hyphenated non-canonical status token scan ---"
+
+    ndiii_violations=0
+    ndiii_violation_msgs=()
+
+    while IFS= read -r -d $'\0' bc_file; do
+      bc_rel="$(basename "$(dirname "$bc_file")")/$(basename "$bc_file")"
+
+      # Get dimension-context lines (same filter), excluding reason: lines
+      dim_ctx_bare=$(grep -hE \
+        'convergence[-_]report|`dimensions\.|dim-[0-9]+|D-ETHICS|D-CERT|D-PROV|D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-PERF|D-DOCS|D-SEC|'"${dim_field_pattern}" \
+        "$bc_file" 2>/dev/null \
+        | grep -v 'reason:' \
+        || true)
+      [[ -z "$dim_ctx_bare" ]] && continue
+
+      # Extract hyphenated tokens matching [A-Z][A-Z]+-[A-Z][A-Za-z]+
+      # (2+ uppercase before hyphen, uppercase-or-mixed after hyphen)
+      hyph_toks=$(printf '%s\n' "$dim_ctx_bare" \
+        | grep -oE '[A-Z][A-Z]+-[A-Z][A-Za-z]+' \
+        | sort -u || true)
+
+      while IFS= read -r tok; do
+        [[ -z "$tok" ]] && continue
+        # Skip canonical enum members (DEGRADED-PENDING is canonical)
+        if printf '%s\n' "$dim_status_enum" | grep -qF "$tok" 2>/dev/null; then
+          continue
+        fi
+        # Skip known hyphenated non-status tokens that appear in BC prose.
+        # These are identifier prefixes (VP-COMP, BC-7, ADR-0006 etc.) or known
+        # acronym compounds (SAG-AFTRA, AI-generated, CPU-bound etc.) that are
+        # never status values.
+        case "$tok" in
+          # Spec identifier prefixes (VP-COMP-NNN, BC-NNN, ADR-NNN, etc.)
+          # Note: most of these patterns have digits after hyphen and won't match
+          # [a-zA-Z][a-zA-Z]+ — but VP-COMP would match as VP- + COMP.
+          # Exclude by prefix:
+          VP-*|BC-*|ADR-*|CAP-*|DI-*|EC-*|SS-*|DP-*|SBC-*|RRC-*|DIC-*|MEC-*|CDC-*) continue ;;
+          # Known legitimate hyphenated tokens in BC prose that are not status values
+          SAG-AFTRA|AI-generated|CPU-bound|GPU-bound|NDA-gated|EOMM-style|CI-gated|NON-COMPETITIVE|GAME-DESIGN|AOI-filtered|AAA-RECONCILIATION|BC-linked|BC-INDEX) continue ;;
+        esac
+        [[ "$tok" == E-* ]] && continue
+        # This is a hyphenated token in dimension-context that is NOT in the canonical enum
+        ndiii_violations=$(( ndiii_violations + 1 ))
+        ndiii_violation_msgs+=("${bc_rel}: bare non-canonical status token '$tok' in dimension-context (canonical enum: $(printf '%s\n' "$dim_status_enum" | sort -u | tr '\n' '/' | sed 's/\/$//'); add to enum in §3.1 or map to canonical value)")
+      done <<< "$hyph_toks"
+
+    done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" -print0)
+
+    echo "    Bare non-canonical hyphenated tokens in dimension-context: $ndiii_violations"
+    if [[ $ndiii_violations -gt 0 ]]; then
+      echo ""
+      echo "    NON-CANONICAL BARE HYPHENATED STATUS TOKENS (must map to canonical enum or be registered in §3.1):"
+      for msg in "${ndiii_violation_msgs[@]}"; do
+        echo "      $msg"
+      done
+      errors+=("MISMATCH [bare non-canonical status token (n.iii)]: $ndiii_violations non-canonical hyphenated status token(s) found in dimension-context — map to canonical enum per methodology-layer.md §3.1")
+      fail=1
+    fi
+
   fi
 fi
 echo ""
@@ -1474,7 +1790,9 @@ if [[ $fail -eq 0 ]]; then
   echo "  disclosure_class closed-enum:      all BC enum declarations use canonical values"
   echo "  Dimension field uniqueness:        §3.0 table has $DIM_FIELD_COUNT_EXPECTED unique field names"
   echo "  Dimension field usage-site:        all BC convergence-report dimension references use canonical field names"
-  echo "  Dimension status-value enum:       all BC convergence-dimension status values are canonical"
+  echo "  Dimension status-value enum (n.i):  all BC convergence-dimension status values are canonical"
+  echo "  Per-dim subset enforcement (n.ii): all dimension-value assignments within allowed subsets"
+  echo "  Bare token scan (n.iii):           no bare non-canonical hyphenated tokens in dim-context"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
