@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,32 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.9 changes (Pass-24 I24-01 fix — SS-06 owner-attribution for BC-7.* dimension-evaluator family):**
+> - **I24-01 fixed (subsystem-label mis-anchor):** Several §3.1 operative passages and v1.4/v1.5
+>   changelog notes incorrectly attributed OWNERSHIP of the BC-7.* dimension-evaluator family to
+>   "SS-07". The correct owner is SS-06 (Convergence Tracking Engine), per ARCH-INDEX Subsystem
+>   Registry (SS-06=CAP-007=BC-7.*), subsystem-decomposition (BC-7.* → SS-06), ADR-0006 §SS-06,
+>   and every BC-7.* frontmatter declaring `subsystem: SS-06`. Root cause: BC-7.11.002..008
+>   physically reside in the ss-07/ directory while their subsystem is SS-06 (documented
+>   dir-vs-subsystem alias); the erroneous passages read the directory name as the owner.
+>   CRITICAL DISTINCTION preserved: the per-dimension `Subsystem:` headers in §3 (e.g., D-PLAY
+>   → SS-07, D-ETHICS → SS-09, D-SIM → SS-05) denote the EVALUATED/PRODUCING subsystem — a
+>   legitimately different semantic from the OWNER of the evaluation BC. Those headers are
+>   unchanged. Only the BC-7.* family OWNERSHIP attribution is corrected (lines ~105, ~130,
+>   ~611, ~616). Also corrected: the BC-7.12.001 erroneous inclusion in the dimension-owner
+>   range; BC-7.12.001 is the Convergence Loop Engine / release-gating rule, not a
+>   dimension-owner. Range corrected to BC-7.01.001 through BC-7.11.001 (11 owners).
+> - **CI guard added (t):** `scripts/check-spec-counts.sh` bumped to v1.22. Check (t) added:
+>   BC-7.* owner-attribution guard — scans methodology-layer.md (and other architecture docs)
+>   for any operative line containing the literal patterns `dimension-owner (SS-0` or
+>   `owner BCs (SS-0` where the subsystem code is anything other than SS-06. Fails on
+>   e.g. "SS-07 dimension-owner" or "owner BCs (SS-07)". The check is deliberately narrow
+>   (matching only these two exact multi-word compound patterns) to avoid false positives on
+>   the legitimate per-dimension `Subsystem: SS-07` producing-subsystem headers, which do not
+>   contain "dimension-owner" or "owner BCs (SS-" phrasing. Changelog lines (starting `>`)
+>   and blockquote lines are excluded. Positive-coverage log always printed.
+>   Closes I24-01 recurrence risk. POSIX/BSD compatible.
 
 > **v1.8 changes (Pass-23 I23-01 fix — §3.1 table (A) DEGRADED row missing D-PLAY):**
 > - **I23-01 fixed (intra-§3.1 cross-table contradiction):** Table (A) "Canonical Status-Value Enum"
@@ -102,7 +128,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 >   to "DEGRADED-PENDING: playtest scheduled, not yet completed." ADR-0006 D-PERF column
 >   updated to name DEGRADED-PENDING explicitly for GPU/XR gate pending.
 > - **F-11-02 fixed (non-canonical token elimination):** Three non-canonical tokens eliminated
->   from SS-07 owner BCs: BC-7.05.001 EC-001 `BLOCKED-PENDING` → `BLOCKED` (report not produced
+>   from SS-06 owner BCs: BC-7.05.001 EC-001 `BLOCKED-PENDING` → `BLOCKED` (report not produced
 >   is a hard precondition gap); BC-7.05.001 EC-002 `DEGRADED-ACCEPTED` → `DEGRADED` (human
 >   override with documented rationale is the definition of DEGRADED); BC-7.08.001 EC-001
 >   `DEGRADED-advisory` → `DEGRADED` (pre-deadline advisory is a partial-met DEGRADED state).
@@ -127,7 +153,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 >   Status-Value Enum" — the closed set of values that a
 >   `convergence-report.dimensions.<field>` entry may hold, with per-value meanings and
 >   per-dimension allowed subsets. Owner BCs (BC-7.06.001, BC-7.08.001, BC-7.10.001
->   and all other SS-07 dimension BCs) are the canonical authority; their vocabulary
+>   and all other SS-06 dimension BCs) are the canonical authority; their vocabulary
 >   (GREEN / DEGRADED / DEGRADED-PENDING / BLOCKED) is codified here. Producer BCs
 >   in SS-09/10/11/13 that write `AMBER` for the intermediate state are non-canonical
 >   and MUST be updated by PO (change list in §3.1). Added CI check (n) to
@@ -608,12 +634,12 @@ field name. The check-spec-counts.sh check (m) asserts this invariant at CI time
 
 **This section is the single source of truth for every value a
 `convergence-report.dimensions.<field>` entry may hold.** The canonical vocabulary
-is the closed set used by the SS-07 dimension-owner BCs (BC-7.01.001 through
-BC-7.12.001). Any producer BC in any other subsystem that writes a value outside
+is the closed set used by the SS-06 dimension-owner BCs (BC-7.01.001 through
+BC-7.11.001). Any producer BC in any other subsystem that writes a value outside
 this enum is non-canonical and must be corrected.
 
 **Authority:** This enum supersedes any divergent value in producer BCs. The owner
-BCs (SS-07) are canonical authority; consumer/producer BCs in SS-09/10/11/13 are
+BCs (SS-06) are canonical authority; consumer/producer BCs in SS-09/10/11/13 are
 subordinate consumers and must adopt this vocabulary.
 
 #### Canonical Status-Value Enum
