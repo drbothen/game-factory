@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.7"
+version: "1.8"
 status: draft
 producer: product-owner
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1a
 traces_to: prd.md
 inputs:
@@ -34,7 +34,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
 > architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
-**Grand total: 190 behavioral contracts** across 15 capabilities. (178 from CAP-001..014 + 12 added in v1.5 for CAP-015 online-services adapter: BC-15.01.001, BC-15.01.002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001. v1.5: CAP-015/SS-13 online-services seam BCs (12 BCs); new E-OSVC error family (15 codes) registered.)
+**Grand total: 190 behavioral contracts** across 15 capabilities. (178 from CAP-001..014 + 12 added in v1.5 for CAP-015 online-services adapter: BC-15.01.001, BC-15.01.002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001. v1.5: CAP-015/SS-13 online-services seam BCs (12 BCs); new E-OSVC error family (15 codes) registered. v1.8: Pass-39 F39-01/F39-02 error-code semantic-fit fixes — E-OSVC-016, E-ENG-003/004, E-CIN-005/006 registered; total error codes 255→260. BC count unchanged: 190.)
 
 ---
 

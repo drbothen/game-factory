@@ -1,10 +1,10 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1a
 traces_to: "CAP-015"
 inputs:
@@ -16,6 +16,8 @@ inputs:
   - .factory/specs/architecture/adrs/ADR-0006-11-dimension-convergence-model.md
   - .factory/specs/architecture/adrs/ADR-0007-human-gated-fidelity-tier.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - v1.1: F39-01 fix — E-OSVC-016 (SaveSizeLimitExceeded) added to §5 E-OSVC table; closes BC-15.03.001 EC-006 semantic mismatch (was incorrectly using E-OSVC-005 SaveConflictUnresolvable for a size-limit rejection).
 supplements:
   - behavioral-contracts/ss-15/
 ---
@@ -228,6 +230,7 @@ Message format uses `<placeholder>` syntax.
 | E-OSVC-013 | Unsupported auth provider | broken | 1 | `online-services: identity.create/authenticate: authProvider '<provider>' not in adapter's declared authProviders list` | BC-15.02.001 |
 | E-OSVC-014 | Lobby capacity exceeded | broken | 1 | `online-services: matchmaking.joinLobby: lobby '<lobbyId>' is at max capacity (<maxPlayers>) — join rejected` | BC-15.05.001 |
 | E-OSVC-015 | Lobby not found | broken | 1 | `online-services: matchmaking.joinLobby: joinCode '<code>' does not resolve to an active lobby — code may be expired or invalid` | BC-15.05.001 |
+| E-OSVC-016 | Save size limit exceeded | broken | 1 | `online-services: save.write: payload for playerId '<id>' key '<key>' exceeds backend size limit '<limit>'` | BC-15.03.001 |
 
 **Note on E-EAP-012 (MalformedManifest):** When `serverAuthoritative: false` is declared
 on leaderboards or entitlements with non-none fidelity, the error is `E-EAP-012`

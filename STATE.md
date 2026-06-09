@@ -41,13 +41,13 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-38 was 11th findings pass since last reset)
+**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-39 was 12th findings pass since last reset)
 
-**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 39 against the spec package.**
+**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 40 against the spec package.**
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
-2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.30, checks a–z + aa + o.ii, ~35 sub-assertions). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
+2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.31, checks a–z + aa, bb + o.ii, ~36 sub-assertions). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
 3. Commit via state-manager (main branch for script changes; factory-artifacts for .factory/ changes).
 4. If pass is CLEAN (0 critical, 0 important): increment counter. If FINDINGS: reset counter to 0.
 5. On reaching 3/3 consecutive clean passes: Phase-1d CONVERGED.
@@ -58,7 +58,7 @@ Loop protocol:
 - Phase-1 spec-package HUMAN GATE — T12
 - Phase 2+ — T13
 
-**CI-gate contract:** `scripts/check-spec-counts.sh` v1.30 (checks a–z + aa + o.ii, ~35 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate surfaces. MUST be green before any pass is credited.
+**CI-gate contract:** `scripts/check-spec-counts.sh` v1.31 (checks a–z + aa, bb + o.ii, ~36 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate/no-variant-code surfaces. MUST be green before any pass is credited.
 
 ---
 
@@ -71,7 +71,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 38 FINDINGS (0C/1I/3obs) RESOLVED (F38-04 deferred FU-012); **CLEAN-PASS COUNTER: 0/3**; Pass 39 pending | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 39 FINDINGS (0C/2I/3obs) RESOLVED (error-code-fit cluster +5 codes, no-variant gate v1.31); **CLEAN-PASS COUNTER: 0/3**; Pass 40 pending | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -80,9 +80,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 39** (candidate clean #1). Pass-38: 1 important + 3 obs RESOLVED, 1 obs DEFERRED (FU-012). F38-01(I): BC-5.06.002 mis-cited E-CIN-003 (directed creative gate) for SAG-AFTRA likeness-consent ship block → E-PRV-030 (v1.2; sibling-propagation miss from Pass-28/32); F38-02(obs): BC-15.02.001 E-OSVC-002 reason disambiguator added (v1.2); F38-03(obs): BC-15.06.001 E-EAP-013 postcondition added (v1.1); F38-04(obs)[process-gap]: DEFERRED → FU-012 (VP-TBD ID collisions, resolve at Phase-6 VP promotion). Severity decaying (Pass-37=4I → Pass-38=1I). FU-007/FU-008/FU-010/FU-011/FU-012 open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 40** (candidate clean #1). Pass-39: 2 important + 3 obs RESOLVED. F39-01(I): BC-15.03.001 EC-006 E-OSVC-005 mis-cited for save-size limit → new E-OSVC-016 SaveSizeLimit; F39-02(I): "E-code variant" for unregistered conditions in E-ENG/E-CIN → registered E-ENG-003/004, E-CIN-005/006 + re-pointed (F-20-02 sibling-propagation fix, was E-NAR-only; now closed across E-ENG/E-CIN/E-OSVC + machine-gated by check (bb)); F39-03(obs): BC-13.04.002 E-MKT-003→E-MKT-002 screenshot-count; F39-04(obs): BC-15.06.001 spurious "variant" word removed; F39-05(obs)[process-gap]: CI check (bb) no-variant/registered-code guard added (gate v1.31). Error-codes 255→260. FU-007/FU-008/FU-010/FU-011/FU-012 open (non-blocking).
 
-**Spec state:** prd v2.5; BC-INDEX v1.7; error-taxonomy v2.1 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.4; VP-008 v1.2; VP-004 v1.1; methodology-layer v1.11; ADR-0004 v1.3; ADR-0006 v1.2; adapter-protocols.md v1.4; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.06.001 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; BC-10.01.001 v1.2; BC-13.01.004 v1.3; BC-11.02.001 v1.2; BC-4.03.003 v1.1; BC-3.03.001 v1.2; BC-3.03.002 (bumped); BC-5.06.002 v1.2; BC-15.02.001 v1.2; BC-15.06.001 v1.1; CI gate v1.30 (checks a–z + aa + o.ii, ~35 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.6; BC-INDEX v1.8; error-taxonomy v2.2 (260 codes / 31 families total / 251 active; E-GEN 9 retired); prd-cap-005 v1.2; prd-cap-015 v1.1; subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.4; VP-008 v1.2; VP-004 v1.1; methodology-layer v1.11; ADR-0004 v1.3; ADR-0006 v1.2; adapter-protocols.md v1.4; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.05.001 v1.2; BC-5.05.002 v1.2; BC-5.06.001 v1.4; BC-5.06.002 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; BC-10.01.001 v1.2; BC-13.01.004 v1.3; BC-13.04.002 v1.2; BC-11.02.001 v1.2; BC-4.03.003 v1.1; BC-3.03.001 v1.2; BC-3.03.002 (bumped); BC-15.02.001 v1.2; BC-15.03.001 v1.1; BC-15.06.001 v1.2; CI gate v1.31 (checks a–z + aa, bb + o.ii, ~36 sub-assertions). Totals: 190 BCs / 260 error codes (251 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -100,7 +100,8 @@ Loop protocol:
 | 36 | 2026-06-08 | FINDINGS | 0C / 1I / 2obs RESOLVED | F36-01(I): VP-008.md frontmatter traces_to/inputs referenced ss-02/BC-3.03.001/BC-3.03.002 (live in ss-03/) → fixed (v1.1); dir-vs-subsystem alias mis-anchor; O36-01[process-gap]: no path-existence gate → CI check (aa) added (982 paths/0 unresolved, gate v1.30); O36-02: prd.md §8.4 duplicate changelog line removed (v2.5) | **0/3** (stays; findings pass) |
 | 37 | 2026-06-08 | FINDINGS | 0C / 4I / 2obs RESOLVED | F37-01(I): BC-10.01.001 DI-011 seam guard extended to 3 NFT signals (content-descriptor tag) + E-COMP-012 scope (v1.2); F37-02(I): BC-13.01.004 PC§1 guarded + PC§1b explicit-true reject path E-GENRE-004 (v1.3); F37-03(I): VP-008 retitled to intra-process referential transparency, cross-platform T1=conformance suite, BC-3.03.001/002 back-refs + VP-INDEX corrected (v1.2/v1.4); F37-04(I): BC-11.02.001 PC§4 stale-ref FAIL→E-ETH-003 + test vector (v1.2); F37-05(obs): BC-4.03.003 two-phase precedence note (v1.1); F37-06(obs): VP-004 reachability-soundness note (v1.1); error-codes held 255 | **0/3** (stays; findings pass) |
 | 38 | 2026-06-08 | FINDINGS | 0C / 1I / 3obs | F38-01(I) RESOLVED: BC-5.06.002 mis-cited E-CIN-003 (directed creative gate) for SAG-AFTRA likeness-consent ship block → E-PRV-030 (v1.2; sibling-propagation miss from Pass-28/32); F38-02(obs) RESOLVED: BC-15.02.001 E-OSVC-002 reason disambiguator (v1.2); F38-03(obs) RESOLVED: BC-15.06.001 E-EAP-013 postcondition added (v1.1); F38-04(obs)[process-gap] DEFERRED → FU-012 (VP-TBD ID collisions, resolve at Phase-6 VP promotion). error-codes 255 | **0/3** (stays; findings pass) |
-| 39 | — | PENDING | — | — | — |
+| 39 | 2026-06-09 | FINDINGS | 0C / 2I / 3obs | F39-01(I): BC-15.03.001 EC-006 E-OSVC-005(conflict)→new E-OSVC-016(SaveSizeLimit); F39-02(I): "E-code variant" for unregistered conditions in E-ENG/E-CIN → registered E-ENG-003/004, E-CIN-005/006 + re-pointed (F-20-02 sibling-propagation fix); F39-03(obs): E-MKT-003→E-MKT-002 screenshot-count; F39-04(obs): removed spurious "variant" word; F39-05(obs)[process-gap]: CI check (bb) no-variant guard added (gate v1.31). error-codes 255→260 | **0/3** (stays; findings pass) |
+| 40 | — | PENDING | — | — | — |
 
 ---
 
@@ -116,7 +117,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–38 resolved; Pass 38 FINDINGS (1I/3obs) — 3 resolved, F38-04 deferred FU-012; counter **0/3**; Pass 39 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–39 resolved; Pass 39 FINDINGS (2I/3obs) RESOLVED (error-code-fit cluster, +5 codes, no-variant gate); counter **0/3**; Pass 40 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -130,7 +131,7 @@ Loop protocol:
 |-------|------|--------|-------|
 | pre-1 | Brief + Validation | PASSED | brief v2.0 human-approved; preflight READY-WITH-WARNINGS; market-intel PASSED |
 | 0 | Brownfield Extraction | PASSED | VERIFIED-WITH-CORRECTIONS; ~70% conceptual/~85% file-level REUSE; human-approved |
-| 1 | Spec Crystallization | IN PROGRESS | Steps 1–8 DONE; 13 subsystems / 15 caps / 41 NFRs / 255 error codes; see phase-1-log.md |
+| 1 | Spec Crystallization | IN PROGRESS | Steps 1–8 DONE; 13 subsystems / 15 caps / 41 NFRs / 260 error codes; see phase-1-log.md |
 | 2–7 | Story Decomp → Convergence | PENDING | — |
 
 ---
@@ -192,14 +193,14 @@ _(none open)_
 
 ## Session Resume Checkpoint
 
-**Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–38 DONE.
-**Phase-1d Pass 38:** FINDINGS (0C/1I/3obs) — 3 RESOLVED, F38-04 DEFERRED (FU-012). F38-01(I): BC-5.06.002 mis-cited E-CIN-003 (directed creative gate) for SAG-AFTRA likeness-consent ship block → corrected to E-PRV-030 (v1.2); sibling-propagation miss from Pass-28/32. F38-02(obs): BC-15.02.001 PC4/PC5 E-OSVC-002 error.data.reason field disambiguator added (INVALID_CREDENTIALS/SESSION_EXPIRED) (v1.2). F38-03(obs): BC-15.06.001 new PC6/EC-008/test-vector emitting E-EAP-013 on human-gated boundary bypass added (v1.1). F38-04(obs)[process-gap]: VP-TBD placeholder ID collisions (VP-TBD-043..046 reused across ss-01/ss-03/ss-14 BCs with different properties) — harmless until Phase-6 VP promotion; deferred to FU-012. Error-code total held at 255. **Clean-pass counter stays 0/3** (findings pass; does not increment). Severity decaying (Pass-37=4I → Pass-38=1I).
-**Next action:** `phase-1d-adversarial` — **Pass 39** (candidate clean #1). FU-007/FU-008/FU-010/FU-011/FU-012 remain open (non-blocking).
+**Date:** 2026-06-09
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–39 DONE.
+**Phase-1d Pass 39:** FINDINGS (0C/2I/3obs) — ALL 5 RESOLVED. F39-01(I): BC-15.03.001 EC-006 mis-cited E-OSVC-005 (session-expired) for save-size limit → new E-OSVC-016 SaveSizeLimit (conflict→registered). F39-02(I): "E-code variant" pattern in E-ENG/E-CIN BCs for unregistered conditions → registered E-ENG-003/004 (BC-5.05.001/002), E-CIN-005/006 (BC-5.06.001/002); F-20-02 was E-NAR-only, now propagated to E-ENG/E-CIN/E-OSVC families + machine-gated by new CI check (bb). F39-03(obs): BC-13.04.002 E-MKT-003→E-MKT-002 screenshot-count corrected. F39-04(obs): BC-15.06.001 spurious "variant" word removed. F39-05(obs)[process-gap]: CI check (bb) no-variant/registered-code guard added (gate v1.31). Error-codes 255→260 (+5: E-OSVC-016, E-ENG-003/004, E-CIN-005/006). Clean-pass counter stays **0/3** (findings pass).
+**Next action:** `phase-1d-adversarial` — **Pass 40** (candidate clean #1). FU-007/FU-008/FU-010/FU-011/FU-012 remain open (non-blocking).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.30 (checks a–z + aa + o.ii, ~35 sub-assertions).
+**Spec totals:** 190 BCs / 260 error codes (251 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.31 (checks a–z + aa, bb + o.ii, ~36 sub-assertions).
 **Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking), FU-011 (non-blocking), FU-012 (non-blocking; target Phase-6). FU-009 CLOSED (Pass-24).
-**Version bumps Pass 38:** BC-5.06.002 v1.2; BC-15.02.001 v1.2; BC-15.06.001 v1.1. CI gate stays v1.30; error-taxonomy stays v2.1.
+**Version bumps Pass 39:** error-taxonomy v2.2; prd v2.6; BC-INDEX v1.8; prd-cap-005 v1.2; prd-cap-015 v1.1; BC-15.03.001 v1.1; BC-5.05.001 v1.2; BC-5.05.002 v1.2; BC-5.06.001 v1.4; BC-5.06.002 v1.3; BC-13.04.002 v1.2; BC-15.06.001 v1.2; CI gate v1.31.
 **D-014/015/016/017:** see Decisions Log. D-014/D-015 flagged for human gate.
-**Unpushed main commits:** v1.27 (e3fb80b) + v1.28 (960d2c2) + v1.29 (7a1498f) + v1.30 (17ef610) — 4 commits ahead of origin/main; awaiting user push authorization.
+**main branch:** IN SYNC with origin/main at v1.31 (v1.27–v1.31 all pushed).
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,8 @@ capability: CAP-005
 priority: P0
 lifecycle_status: active
 introduced: v1.0.0
-modified: []
+modified:
+  - v1.2: F39-02 fix — EC-001 and test vector re-pointed from "E-ENG-001 variant" (logic-presentation coupling — inapplicable when no imports present) to E-ENG-003 (UnclassifiedModule, dedicated registered code).
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -81,7 +82,7 @@ regression (CAP-003). The separation is checked by import lint on every CI run.
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | A module type is not declared in the factory manifest | Module type defaults to "unclassified"; E-ENG-001 variant raised: module requires classification before lint |
+| EC-001 | A module type is not declared in the factory manifest | Module type defaults to "unclassified"; E-ENG-003 raised: module requires classification before lint |
 | EC-002 | Pure-sim module conditionally imports a presentation symbol under a feature flag | Lint detects the import even if feature flag is off; the import is present in the AST; E-ENG-001 raised |
 | EC-003 | New engine adapter onboarded; presentation_symbols_blocklist not updated yet | Lint cannot run for that engine's modules; modules flagged as "lint-blocked pending blocklist update"; build blocked for pure-sim modules of that engine |
 | EC-004 | Pure-sim module imports another pure-sim module that happens to re-export a presentation symbol | Indirect coupling; lint at depth-2 detects the re-export; E-ENG-001 raised on the re-exporting module |
@@ -95,7 +96,7 @@ regression (CAP-003). The separation is checked by import lint on every CI run.
 | Pure-sim Rust module with only `use std::collections::HashMap` and game-internal pure-sim crates | module-separation-report: pass; build proceeds | happy-path |
 | Pure-sim module with `use bevy_render::prelude::*` (Bevy engine) | E-ENG-001: presentation symbol bevy_render found in pure-sim module | error |
 | Engine-bound module with `use bevy_render::prelude::*` | No lint run; engine-bound excluded; module accepted | edge-case |
-| Module with no type declared in manifest | E-ENG-001 variant: module unclassified; classification required | error |
+| Module with no type declared in manifest | E-ENG-003: module unclassified; classification required | error |
 | Pure-sim module importing another pure-sim module that re-exports bevy_audio | E-ENG-001: indirect coupling detected at depth-2 | edge-case |
 
 ## Verification Properties

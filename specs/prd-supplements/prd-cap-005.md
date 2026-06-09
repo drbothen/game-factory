@@ -2,13 +2,15 @@
 document_type: prd-supplement
 level: L3
 section: cap-005
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
 modified:
   - pass: "Pass-28"
     reason: "O28-01 fix: enriched E-CIN-003 row to match error-taxonomy.md I5 wording — changed category name from 'Directed flag missing gate' to 'Directed flag missing creative gate' and expanded message format to include '(creative gate, not human-gated fidelity tier — see D-013 distinction in methodology-layer.md §2.8)' so the canonical source and rollup agree."
+  - pass: "Pass-39"
+    reason: "F39-02 fix: registered E-ENG-003 (UnclassifiedModule) and E-ENG-004 (TestScopedToWrongModule) — closes 'E-ENG-001/002 variant' language in BC-5.05.001 EC-001 and BC-5.05.002 EC-005. Registered E-CIN-005 (TimestampOutOfRange) and E-CIN-006 (BlendshapeTrackSetIncomplete) — closes 'E-CIN-001/004 variant' language in BC-5.06.001 PC1/EC-003 and BC-5.06.002 PC1/EC-001. All four codes added to this supplement table."
 phase: 1a
 traces_to: CAP-005
 inputs:
@@ -432,10 +434,14 @@ See also: `.factory/specs/prd-supplements/error-taxonomy.md` (cross-CAP catalog)
 | E-NAR-004 | Timeline inconsistency | broken | 1 | `Canon-KB timeline event '<event_id>' at t=<t1> conflicts with event '<event_id2>' at t=<t2>: <conflict>` |
 | E-ENG-001 | Logic-presentation coupling | broken | 1 | `code module '<module>' imports presentation-layer symbol '<sym>' — violates pure-sim separation` |
 | E-ENG-002 | Red Gate violation | broken | 1 | `production code commit exists without a prior failing test for story '<story_id>'` |
+| E-ENG-003 | Module unclassified | broken | 1 | `code module '<module>' has no declared module_type in factory manifest — classification required before lint` |
+| E-ENG-004 | Test scoped to wrong module | broken | 1 | `test file '<file>' does not reference the story's assigned module '<module>' — test-writer must correct scope` |
 | E-CIN-001 | Sequence asset ref | broken | 1 | `sequence-graph '<seq_id>' asset ref '<ref>' does not resolve` |
 | E-CIN-002 | Subtitle coverage | broken | 1 | `sequence-graph '<seq_id>' audio event '<event_id>' has no subtitle track` |
 | E-CIN-003 | Directed flag missing creative gate | broken | 1 | `sequence-graph '<seq_id>' has directed=true but no cinematic-director creative sign-off record found (creative gate, not human-gated fidelity tier — see D-013 distinction in methodology-layer.md §2.8)` |
 | E-CIN-004 | Blendshape range | broken | 1 | `lip-sync '<clip_id>' blendshape '<shape>' value <v> outside [0, 1]` |
+| E-CIN-005 | Sequence timestamp out of range | broken | 1 | `sequence-graph '<seq_id>' track event at timestamp <t>s is outside valid range [0, <duration>s]` |
+| E-CIN-006 | Blendshape track set incomplete | broken | 1 | `lip-sync '<clip_id>' blendshape track set does not match ARKit-52; missing or extra tracks: <track_list>` |
 | E-PROD-001 | Missing dependency contract | broken | 1 | `wave '<wave_id>' starts discipline '<consumer>' but cross-discipline-dependency-contract from '<producer>' not found` |
 | E-PROD-002 | Dependency acceptance fail | broken | 1 | `cross-discipline-dependency-contract '<contract_id>' acceptance criterion '<crit_id>' failed: <assertion>` |
 | E-PROD-003 | Wave ordering violation | broken | 1 | `wave '<wave_id>' started but dependency '<dep_wave_id>' not yet green in discipline DAG` |

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -22,6 +22,7 @@ lifecycle_status: active
 introduced: v1.0.0
 modified:
   - v1.2: F38-01 fix — E-CIN-003 mis-citation corrected to E-PRV-030 at all sites for SAG-AFTRA likeness-consent ship-build gate (PC4c, test vector, Error Codes, Related-BC rows)
+  - v1.3: F39-02 fix — PC1 re-pointed from "E-CIN-004 variant" (blendshape range — value outside [0,1]) to E-CIN-006 (BlendshapeTrackSetIncomplete, dedicated registered code for missing/extra track names); EC-001 and test vector updated accordingly.
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +63,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 1. **ARKit-52 completeness check**: the blendshape animation file contains exactly 52
    named blendshape tracks corresponding to the ARKit face blendshape set (e.g.,
    `jawOpen`, `mouthClose`, `eyeBlinkLeft`, etc.). Missing or extra track names →
-   E-CIN-004 variant.
+   E-CIN-006 (BlendshapeTrackSetIncomplete).
 2. **Range check**: for every blendshape value at every keyframe, the value is within
    [0.0, 1.0] inclusive. Value outside range → E-CIN-004 per violation.
 3. **Audio alignment tolerance**: the blendshape animation duration must match the source
@@ -93,7 +94,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Method is "custom" but output file only has 48 blendshapes (custom subset) | E-CIN-004: ARKit-52 requires exactly 52 tracks; custom method must produce all 52 or map missing shapes to 0.0 explicitly |
+| EC-001 | Method is "custom" but output file only has 48 blendshapes (custom subset) | E-CIN-006: ARKit-52 requires exactly 52 tracks; custom method must produce all 52 or map missing shapes to 0.0 explicitly |
 | EC-002 | Blendshape value of -0.001 (floating point rounding artifact) | E-CIN-004: value outside [0.0, 1.0]; clamp to 0.0 is permitted as an automatic correction with a warning |
 | EC-003 | Character has no voice lines (instrumental/non-verbal) | No lip-sync contract required; sequence-graph has no `facial_lipsync` tracks for this character; this BC does not apply |
 | EC-004 | `likeness_consent_ref` is null (synthetic voice, no real performer) | Consent check skipped; lip-sync output accepted (assuming all other checks pass) |
@@ -106,7 +107,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 |-------|----------------|----------|
 | Audio2Face-3D output, 52 ARKit blendshape tracks, all values [0.0, 1.0], audio-aligned within 50ms, likeness_consent_ref=null | lip-sync-validation-report: pass; accepted for ship build | happy-path |
 | Blendshape track `jawOpen` has value 1.15 at keyframe 42 | E-CIN-004: blendshape 'jawOpen' value 1.15 at frame 42 outside [0.0, 1.0] | error |
-| Only 48 blendshape tracks present (missing 4 ARKit shapes) | E-CIN-004: missing blendshape tracks [list of 4] | error |
+| Only 48 blendshape tracks present (missing 4 ARKit shapes) | E-CIN-006: missing blendshape tracks [list of 4] | error |
 | likeness_consent_ref points to unsigned consent record | lip-sync-validation report: other checks pass; SAG-AFTRA task surfaced; dev-build: accepted; ship-build: blocked (E-PRV-030 at ship-gate evaluation) | edge-case |
 | Audio 3.2s, blendshapes 3.5s, tolerance=100ms | Warning: alignment diff=300ms > 100ms; accepted with warning | edge-case |
 
@@ -125,7 +126,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the `lip-sync-pipeline-contract` is listed in RECONCILIATION §6.3 (cinematics additions) as a primary cinematic artifact produced by the lipsync-animator agent within CAP-005. |
 | L2 Domain Invariants | DI-006 (human-gated tasks surfaced — SAG-AFTRA consent) |
 | Architecture Module | SS-04 — lip-sync pipeline; ARKit-52 blendshape validator; voice-consent-registry |
-| Error Codes | E-CIN-001 (broken blendshapes_ref), E-CIN-004 (blendshape range/completeness violation), E-PRV-030 (SAG-AFTRA likeness consent outstanding at ship gate — PC4c) |
+| Error Codes | E-CIN-001 (broken blendshapes_ref), E-CIN-004 (blendshape value outside [0,1]), E-CIN-006 (blendshape track set incomplete — missing/extra ARKit-52 track names), E-PRV-030 (SAG-AFTRA likeness consent outstanding at ship gate — PC4c) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs

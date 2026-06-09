@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,8 @@ capability: CAP-005
 priority: P0
 lifecycle_status: active
 introduced: v1.0.0
-modified: []
+modified:
+  - v1.2: F39-02 fix — EC-005 re-pointed from "E-ENG-002 variant" (RedGate violation — production-before-test, different condition) to E-ENG-004 (TestScopedToWrongModule, dedicated registered code).
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -88,7 +89,7 @@ for the pure-sim slice.
 | EC-002 | Test writer commits test that fails due to compile error (not semantic failure) | Compile error counts as a RED gate evidence if the compile error is due to missing implementation (module not yet defined). If compile error is a test author bug, test-writer must fix it first |
 | EC-003 | Implementer writes production code in the same commit as the test file | Pre-commit hook detects: production code + test in same commit; E-ENG-002: Red Gate requires a separate test commit before production code |
 | EC-004 | Story is reclassified from pure-sim to engine-bound after Red Gate was recorded | Reclassification workflow required; existing Red Gate evidence is retained but marked "n/a" for the new classification |
-| EC-005 | Test writer produces test for module A but story is scoped to module B | E-ENG-002 variant: test file does not reference the story's assigned module; test-writer must correct |
+| EC-005 | Test writer produces test for module A but story is scoped to module B | E-ENG-004: test file does not reference the story's assigned module; test-writer must correct |
 | EC-006 | All failing tests pass after first production code commit, but new requirements added to BC mid-story | New failing tests must be committed for new requirements before new production code; Red Gate applies per requirement, not per story lifetime |
 
 ## Canonical Test Vectors

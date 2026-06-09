@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -24,6 +24,8 @@ modified:
     reason: "I28-01 fix: replaced `human-gated` vocabulary on cinematic-director creative sign-off (postcondition 5, EC-004, Traceability DI-006) with D-013 creative-gate vocabulary (E-CIN-003, DI-007). The cinematic-director is an internal creative principal — not an external third-party — so ADR-0007 `human-gated` fidelity tier does not apply. Gating semantics preserved."
   - pass: "Pass-32"
     reason: "I-PASS32-01 fix: removed spurious DI-007 from Traceability L2 Domain Invariants row. The directed:true cinematic creative-gate is anchored to D-013 + E-CIN-003 and has no corresponding DI. DI-008 (engine-neutral spec layer) retained."
+  - pass: "Pass-39"
+    reason: "F39-02 fix: PC1 and EC-003 re-pointed from E-CIN-001 variant (unresolved asset ref — semantically wrong for temporal range) to E-CIN-005 (TimestampOutOfRange, dedicated registered code)."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -61,7 +63,7 @@ validation report.
 ## Postconditions
 
 1. **Schema validation**: all required track fields are present; timestamps are numbers ≥ 0
-   and ≤ `duration_seconds`. Out-of-range timestamp → E-CIN-001 variant.
+   and ≤ `duration_seconds`. Out-of-range timestamp → E-CIN-005 (TimestampOutOfRange).
 2. **Asset ref resolution**: every ref in `asset_refs` and in track entries resolves to
    an existing asset in the asset store. Unresolved ref → E-CIN-001.
 3. **Subtitle coverage**: for every audio event in `tracks.audio[]` that is tagged
@@ -100,7 +102,7 @@ validation report.
 |----|-------------|-------------------|
 | EC-001 | Sequence has no subtitle track at all (game is narration-free) | If no `dialog: true` audio events, subtitle coverage check trivially passes; report notes "no dialogue" |
 | EC-002 | Bevy is the only target engine and no `bevy-sequence-runtime` is declared | Validation report: bevy_sequencer_gap=true, required_build=bevy-sequence-runtime; report is a warning; architect notified; not a spec-phase block |
-| EC-003 | Audio event at timestamp 95s in a 90s sequence | E-CIN-001 variant: timestamp out of range [0, 90]; schema check |
+| EC-003 | Audio event at timestamp 95s in a 90s sequence | E-CIN-005: timestamp 95s out of range [0, 90s]; schema check |
 | EC-004 | directed=true, sign-off record exists from cinematic-director but is marked "pending" | Ship-build gate: sign-off must be in status "signed"; "pending" does not pass the gate; creative-gate checklist item remains open (E-CIN-003) |
 | EC-005 | Animation track references actor_id "hero_1" not in Canon-KB | E-CIN-001: actor_ref 'hero_1' not in Canon-KB |
 | EC-006 | Audio event tagged `dialog: true` has a subtitle but the subtitle time window misses the first 0.5 s of the audio | Warning (not block): subtitle coverage gap of 0.5 s noted in report |

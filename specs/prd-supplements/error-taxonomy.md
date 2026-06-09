@@ -2,10 +2,10 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "2.1"
+version: "2.2"
 status: draft
 producer: product-owner
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1d
 traces_to: prd.md
 inputs:
@@ -145,6 +145,8 @@ resolves to a registered code).
 |-----------|----------|----------|-----------|----------------|
 | E-ENG-001 | Logic-presentation coupling | broken | 1 | `code module '<module>' imports presentation-layer symbol '<sym>' — violates pure-sim separation` |
 | E-ENG-002 | Red Gate violation | broken | 1 | `production code commit exists without a prior failing test for story '<story_id>'` |
+| E-ENG-003 | Module unclassified | broken | 1 | `code module '<module>' has no declared module_type in factory manifest — classification required before lint` |
+| E-ENG-004 | Test scoped to wrong module | broken | 1 | `test file '<file>' does not reference the story's assigned module '<module>' — test-writer must correct scope` |
 
 ---
 
@@ -156,6 +158,8 @@ resolves to a registered code).
 | E-CIN-002 | Subtitle coverage | broken | 1 | `sequence-graph '<seq_id>' audio event '<event_id>' has no subtitle track` |
 | E-CIN-003 | Directed flag missing creative gate | broken | 1 | `sequence-graph '<seq_id>' has directed=true but no cinematic-director creative sign-off record found (creative gate, not human-gated fidelity tier — see D-013 distinction in methodology-layer.md §2.8)` |
 | E-CIN-004 | Blendshape range | broken | 1 | `lip-sync '<clip_id>' blendshape '<shape>' value <v> outside [0, 1]` |
+| E-CIN-005 | Sequence timestamp out of range | broken | 1 | `sequence-graph '<seq_id>' track event at timestamp <t>s is outside valid range [0, <duration>s]` |
+| E-CIN-006 | Blendshape track set incomplete | broken | 1 | `lip-sync '<clip_id>' blendshape track set does not match ARKit-52; missing or extra tracks: <track_list>` |
 
 ---
 
@@ -738,6 +742,7 @@ Message format uses `<placeholder>` syntax.
 | E-OSVC-013 | Unsupported auth provider | broken | 1 | `online-services: identity: authProvider '<provider>' not in adapter's declared authProviders list` | BC-15.02.001 |
 | E-OSVC-014 | Lobby capacity exceeded | broken | 1 | `online-services: matchmaking.joinLobby: lobby '<lobbyId>' is at max capacity (<maxPlayers>) — join rejected` | BC-15.05.001 |
 | E-OSVC-015 | Lobby not found | broken | 1 | `online-services: matchmaking.joinLobby: joinCode '<code>' does not resolve to an active lobby — code may be expired or invalid` | BC-15.05.001 |
+| E-OSVC-016 | Save size limit exceeded | broken | 1 | `online-services: save.write: payload for playerId '<id>' key '<key>' exceeds backend size limit '<limit>'` | BC-15.03.001 |
 
 ---
 
@@ -754,6 +759,21 @@ Message format uses `<placeholder>` syntax.
 | OBS-20-A (BC-12.12.004 Invariant 2) | **FIXED:** Invariant 2 reworded from "Ordinals within an era are unique and form a contiguous sequence" to "Ordinals within an era are unique (unless both events are explicitly concurrent: true) and form a contiguous sequence starting from 1." Contradiction between Invariant 2 and EC-005 resolved. |
 | OBS-20-B (CAP-012 / CAP-005 timeline authority) | **FIXED:** Cross-reference note added to BC-12.12.004 and BC-5.04.002 identifying CAP-012 Canon-KB as the authoritative timeline store; CAP-005 (BC-5.04.002) is the narrative-integrity consumer view. |
 | Total codes 213 → 255 | E-KB: 7→26 (+19), E-PLAY: 5→15 (+10), E-REPLAY: 7→18 (+11), E-NAR: 4→6 (+2). Net: **+42 new codes**. Active codes: 204 → **246**. Total registered (incl. retired E-GEN): 213 → **255**. Active families unchanged: **30**. Total families: **31** (unchanged). |
+
+---
+
+### PRD Revision 2.2 Changes (F39-01, F39-02, F39-03, F39-04 — Pass-39 error-code semantic-fit fixes)
+
+| Change | Detail |
+|--------|--------|
+| E-OSVC-016 registered (F39-01) | **CRITICAL:** New code `E-OSVC-016` (SaveSizeLimitExceeded) registered for save.write payload exceeding backend size limit. Fixes BC-15.03.001 EC-006 which incorrectly reused E-OSVC-005 (SaveConflictUnresolvable — conflict-specific, requires winner_version/winner_data payload) for a size-limit rejection. Size-limit is a genuinely distinct failure with no competing writer. E-OSVC-016 re-points BC-15.03.001 EC-006. E-OSVC: 15 → **16 codes**. |
+| E-ENG-003 registered (F39-02) | **CRITICAL:** New code `E-ENG-003` (UnclassifiedModule) for BC-5.05.001 EC-001 (module has no declared module_type). E-ENG-001 (logic-presentation coupling) is semantically wrong for this condition — no import violation is present. E-ENG: 2 → **3 codes**. |
+| E-ENG-004 registered (F39-02) | **CRITICAL:** New code `E-ENG-004` (TestScopedToWrongModule) for BC-5.05.002 EC-005 (test file does not reference story's assigned module). E-ENG-002 (RedGate violation — production code without prior failing test) is a different condition. E-ENG: 3 → **4 codes**. |
+| E-CIN-005 registered (F39-02) | **CRITICAL:** New code `E-CIN-005` (TimestampOutOfRange) for BC-5.06.001 PC1 and EC-003 (timestamp outside [0, duration_seconds]). E-CIN-001 (unresolved asset ref) is semantically wrong for this condition — no ref resolution failure is present. E-CIN: 4 → **5 codes**. |
+| E-CIN-006 registered (F39-02) | **CRITICAL:** New code `E-CIN-006` (BlendshapeTrackSetIncomplete) for BC-5.06.002 PC1 (missing or extra ARKit-52 blendshape track names). E-CIN-004 covers range violations (value outside [0,1]); track-set completeness is a distinct structural condition. E-CIN: 5 → **6 codes**. |
+| E-MKT-002/003 screenshot-count alignment (F39-03) | **IMPORTANT:** BC-13.04.002 EC-001 and test vector re-pointed from E-MKT-003 (MissingRequiredAssetType) to E-MKT-002 (InsufficientScreenshots) for screenshot count shortfall. E-MKT-002 is the dedicated count code; E-MKT-003 remains correct for the general case of a wholly absent asset type. No new code. |
+| E-OSVC-004 "variant" removed (F39-04) | **COSMETIC:** BC-15.06.001 PC4 removed the word "variant" from "E-OSVC-004 variant EntitlementNotFound". The code was already correct; only the non-standard word was removed. |
+| Total codes 255 → 260 | E-ENG: 2→4 (+2), E-CIN: 4→6 (+2), E-OSVC: 15→16 (+1). Net: **+5 new codes**. Active codes: 246 → **251**. Total registered (incl. retired E-GEN): 255 → **260**. Active families unchanged: **30**. Total families: **31** (unchanged). |
 
 ---
 
@@ -813,7 +833,7 @@ Message format uses `<placeholder>` syntax.
 | Total 139 → 196 (CI-computed) | **Net:** +57 new codes (E-AAG×7 + E-SVC×6 + E-PRV×5 + E-QG×11 + E-SHIP×3 + E-ING×4 + E-GLG×5 + E-MOD×11 + E-MKT×4 + E-XR×1) = 139 + 57 = **196 total registered codes** (CI computes all distinct E-xxx-NNN tokens including retired E-GEN). E-GEN (9 codes) retired but its codes remain in the taxonomy as a retired table, so CI still counts them. Active families: 22 − 1 (E-GEN retired) + 8 new = **29 active families**. Active codes only (excl. E-GEN): **187**. |
 | Total 196 → 198 (PRD rev 1.7) | **+E-COMP-011** (out-of-vocabulary `disclosure_class` at manifest aggregation; I-1 fix) and **+E-COMP-012** (`nft_blockchain`/`nft_mechanics` inconsistency seam guard; I-2 fix). E-COMP family: 2 → 4. Total all registered (incl. retired E-GEN): **198**. Active codes only (excl. E-GEN): **189**. |
 
-**Total defined error codes: 255** across 31 families (30 active + 1 retired E-GEN). Per-family breakdown (active codes: 246; retired codes: 9 E-GEN):
+**Total defined error codes: 260** across 31 families (30 active + 1 retired E-GEN). Per-family breakdown (active codes: 251; retired codes: 9 E-GEN):
 
 | Family | Code Count | Notes |
 |--------|-----------|-------|
@@ -830,8 +850,8 @@ Message format uses `<placeholder>` syntax.
 | E-ART | 3 | |
 | E-AUD | 4 | |
 | E-NAR | 6 | v2.0: +E-NAR-005 (undeclared variable, BC-5.04.001), +E-NAR-006 (invalid naming-registry regex, BC-5.04.002) — F-20-02 fix |
-| E-ENG | 2 | |
-| E-CIN | 4 | |
+| E-ENG | 4 | v2.2: +E-ENG-003 (UnclassifiedModule), +E-ENG-004 (TestScopedToWrongModule) — F39-02 fix |
+| E-CIN | 6 | v2.2: +E-CIN-005 (TimestampOutOfRange), +E-CIN-006 (BlendshapeTrackSetIncomplete) — F39-02 fix |
 | E-PROD | 3 | |
 | E-CERT | 3 | |
 | E-DIST | 19 | |
@@ -847,9 +867,9 @@ Message format uses `<placeholder>` syntax.
 | E-MKT | 4 | v1.6 addition: marketing lane (BC-13.04.*) |
 | E-XR | 7 | v1.1: 6 codes; v1.6: +E-XR-007 (visionOS/OpenXR namespace error) |
 | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** — orphaned placeholder; no BC ever referenced these codes |
-| E-OSVC | 15 | v1.9 addition: online-services adapter (CAP-015) — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity |
-| **TOTAL (all registered incl. retired E-GEN)** | **255** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 255 |
-| *(active only, excl. E-GEN retired)* | *246* | Active codes only (30 active families) |
+| E-OSVC | 16 | v1.9 addition: online-services adapter (CAP-015) — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity; v2.2: +E-OSVC-016 (SaveSizeLimitExceeded) — F39-01 fix |
+| **TOTAL (all registered incl. retired E-GEN)** | **260** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 260 |
+| *(active only, excl. E-GEN retired)* | *251* | Active codes only (30 active families) |
 
 ---
 
