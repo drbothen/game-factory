@@ -41,9 +41,9 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-40 was 13th findings pass since last reset)
+**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-41 was 14th findings pass since last reset)
 
-**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 41 against the spec package.**
+**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 42 against the spec package.**
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
@@ -71,7 +71,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 40 FINDINGS (1C/4I/2obs) RESOLVED (producer/consumer contract seam: T2 determinism, sidecar shape, design-intent, VP claims); **CLEAN-PASS COUNTER: 0/3**; Pass 41 pending | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 41 FINDINGS (1I/3obs) RESOLVED (NFR measurability + concurrency/lifecycle dimension: save-conflict trigger, leaderboard idempotency, NFR measurability, asset-lane smoke-test gate); **CLEAN-PASS COUNTER: 0/3**; Pass 42 pending | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -80,9 +80,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 41** (candidate clean #1). Pass-40 pivoted to producer/consumer contract consistency — found 1 CRITICAL (T2 hash-vs-structured-diff) + 4 important (sidecar shape, design-intent field, VP-006/007 claims) ALL RESOLVED. New defect seam identified: cross-BC field handoffs (producer/consumer contracts). FU-007/FU-008/FU-010/FU-011/FU-012 open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 42** (candidate clean #1). Pass-41 swept NFR-traceability/measurability + lifecycle/idempotency dimensions — 1 important (F41-01: save-conflict trigger precision) + 3 obs (F41-03 leaderboard idempotency, F41-02 NFR-014 measurability, F41-04 asset-lane smoke-test gate) ALL RESOLVED. Severity continuing to decay (Pass-40: 1C/4I → Pass-41: 1I). FU-007/FU-008/FU-010/FU-011/FU-012 open (non-blocking).
 
-**Spec state:** prd v2.6; BC-INDEX v1.8; error-taxonomy v2.2 (260 codes / 31 families total / 251 active; E-GEN 9 retired); prd-cap-005 v1.2; prd-cap-015 v1.1; subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.5; VP-006 v1.1; VP-007 v1.1; VP-008 v1.2; VP-009 v1.1; VP-004 v1.1; methodology-layer v1.12; ADR-0004 v1.3; ADR-0006 v1.2; adapter-protocols.md v1.4; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.05.001 v1.2; BC-5.05.002 v1.2; BC-5.06.001 v1.4; BC-5.06.002 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; BC-10.01.001 v1.2; BC-13.01.004 v1.3; BC-13.04.002 v1.2; BC-11.02.001 v1.2; BC-4.03.003 v1.1; BC-3.03.001 v1.2; BC-3.03.002 (bumped); BC-15.02.001 v1.2; BC-15.03.001 v1.1; BC-15.06.001 v1.2; BC-1.12.002 v1.2; BC-1.12.003 v1.2; BC-10.05.001 v1.3; BC-15.01.001 v1.1; CI gate v1.31 (checks a–z + aa, bb + o.ii, ~36 sub-assertions). Totals: 190 BCs / 260 error codes (251 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.6; BC-INDEX v1.8; error-taxonomy v2.2 (260 codes / 31 families total / 251 active; E-GEN 9 retired); prd-cap-005 v1.2; prd-cap-015 v1.1; subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.5; VP-006 v1.1; VP-007 v1.1; VP-008 v1.2; VP-009 v1.1; VP-004 v1.1; methodology-layer v1.12; ADR-0004 v1.3; ADR-0006 v1.2; adapter-protocols.md v1.4; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.4 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.2; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.05.001 v1.2; BC-5.05.002 v1.2; BC-5.06.001 v1.4; BC-5.06.002 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; BC-10.01.001 v1.2; BC-13.01.004 v1.3; BC-13.04.002 v1.2; BC-11.02.001 v1.2; BC-4.03.003 v1.1; BC-3.03.001 v1.2; BC-3.03.002 (bumped); BC-15.02.001 v1.2; BC-15.03.001 v1.2; BC-15.04.001 v1.1; BC-15.06.001 v1.2; BC-1.12.002 v1.2; BC-1.12.003 v1.2; BC-10.05.001 v1.3; BC-15.01.001 v1.1; cicd-setup v1.1; CI gate v1.31 (checks a–z + aa, bb + o.ii, ~36 sub-assertions). Totals: 190 BCs / 260 error codes (251 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -102,7 +102,8 @@ Loop protocol:
 | 38 | 2026-06-08 | FINDINGS | 0C / 1I / 3obs | F38-01(I) RESOLVED: BC-5.06.002 mis-cited E-CIN-003 (directed creative gate) for SAG-AFTRA likeness-consent ship block → E-PRV-030 (v1.2; sibling-propagation miss from Pass-28/32); F38-02(obs) RESOLVED: BC-15.02.001 E-OSVC-002 reason disambiguator (v1.2); F38-03(obs) RESOLVED: BC-15.06.001 E-EAP-013 postcondition added (v1.1); F38-04(obs)[process-gap] DEFERRED → FU-012 (VP-TBD ID collisions, resolve at Phase-6 VP promotion). error-codes 255 | **0/3** (stays; findings pass) |
 | 39 | 2026-06-09 | FINDINGS | 0C / 2I / 3obs | F39-01(I): BC-15.03.001 EC-006 E-OSVC-005(conflict)→new E-OSVC-016(SaveSizeLimit); F39-02(I): "E-code variant" for unregistered conditions in E-ENG/E-CIN → registered E-ENG-003/004, E-CIN-005/006 + re-pointed (F-20-02 sibling-propagation fix); F39-03(obs): E-MKT-003→E-MKT-002 screenshot-count; F39-04(obs): removed spurious "variant" word; F39-05(obs)[process-gap]: CI check (bb) no-variant guard added (gate v1.31). error-codes 255→260 | **0/3** (stays; findings pass) |
 | 40 | 2026-06-09 | FINDINGS | 1C / 4I / 2obs RESOLVED | F40-01(C): T2 comparison method 3-way contradiction (BC-1.12.002/methodology said snapshot-hash-diff; BC-3.03.004 structured-diff) → enum +snapshot-structured-diff, T2=structured-diff, BC-1.12.002/003 fixed (methodology v1.12); F40-02(I): provenance sidecar consumer BC-10.05.001 field-shape aligned to entities.md/BC-4.03.001 (generated_by_tool nested, backend-opaque not unknown) v1.3; F40-03(I): design-intent delegation → canonical structured playtest_delegation (D-012 refinement; methodology v1.12); F40-04(I): VP-007 over-claim corrected (v1.1); F40-05(I): VP-006 baseline RD_old strict (v1.1); F40-06(obs): VP-009 retitle (v1.1); F40-07(obs): BC-15.01.001 variantsSupported (v1.1). error-codes 260 | **0/3** (stays; findings pass) |
-| 41 | — | PENDING | — | — | — |
+| 41 | 2026-06-09 | FINDINGS | 0C / 1I / 3obs RESOLVED | F41-01(I): BC-15.03.001 PC3 save-conflict trigger "different version"→"same base version" (matches EC-003/004 + Invariant 1) v1.2; F41-03(obs): BC-15.04.001 leaderboard declared max/replace idempotent (PC6/INV4/EC-008) v1.1; F41-02(obs): NFR-014 dual-statistic → p99 sole criterion (nfr-catalog v1.4, prd-cap-008-012 v1.2); F41-04(obs)[process-gap]: NFR-002/003 asset-lane smoke-test gate now defined in cicd-setup v1.1 (Phase-3 instantiated). NFR 41 / error-codes 260 | **0/3** (stays; findings pass) |
+| 42 | — | PENDING | — | — | — |
 
 ---
 
@@ -118,7 +119,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–40 resolved; Pass 40 FINDINGS (1C/4I/2obs) RESOLVED (producer/consumer contract seam: T2 determinism, sidecar shape, design-intent, VP claims); counter **0/3**; Pass 41 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–41 resolved; Pass 41 FINDINGS (1I/3obs) RESOLVED (NFR measurability + concurrency dimension: save-conflict trigger, leaderboard idempotency, NFR-014 p99, asset-lane smoke-test gate); counter **0/3**; Pass 42 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -196,13 +197,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-09
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–40 DONE.
-**Phase-1d Pass 40:** FINDINGS (1C/4I/2obs) — ALL RESOLVED. F40-01(C): T2 comparison method 3-way contradiction (BC-1.12.002/methodology said snapshot-hash-diff; BC-3.03.004 said structured-diff) → enum +snapshot-structured-diff, T2=structured-diff; BC-1.12.002 v1.2, BC-1.12.003 v1.2, methodology-layer v1.12. F40-02(I): provenance sidecar consumer BC-10.05.001 field-shape aligned to entities.md/BC-4.03.001 (generated_by_tool nested, backend-opaque not unknown) → v1.3. F40-03(I): design-intent delegation field → canonical structured playtest_delegation with delegated_claims[] (D-012 refinement; D-018 added; methodology v1.12). F40-04(I): VP-007 over-claim corrected → v1.1. F40-05(I): VP-006 baseline RD_old strict → v1.1. F40-06(obs): VP-009 retitle → v1.1. F40-07(obs): BC-15.01.001 variantsSupported → v1.1. Error-codes stay 260. CI gate main stays v1.31 (NO main change this pass). Clean-pass counter stays **0/3** (findings pass).
-**Next action:** `phase-1d-adversarial` — **Pass 41** (candidate clean #1). FU-007/FU-008/FU-010/FU-011/FU-012 remain open (non-blocking).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–41 DONE.
+**Phase-1d Pass 41:** FINDINGS (1I/3obs) — ALL RESOLVED. F41-01(I): BC-15.03.001 PC3 save-conflict trigger condition tightened from "different version" → "same base version" to precisely match EC-003/EC-004 + Invariant 1 (v1.2). F41-03(obs): BC-15.04.001 leaderboard write declared idempotent for max/replace modes — added PC6 idempotency postcondition, INV4 invariant, EC-008 duplicate-rank error code (v1.1). F41-02(obs): NFR-014 dual-statistic (p95+p99) → p99 sole measurability criterion (nfr-catalog v1.4, prd-cap-008-012 v1.2). F41-04(obs)[process-gap]: NFR-002/003 asset-lane smoke-test gate definition added to cicd-setup.md (v1.1; Phase-3 instantiated, not deferred). Error-codes stay 260. NO main branch change. CI gate stays v1.31. Clean-pass counter stays **0/3** (findings pass; severity decay: Pass-40 1C/4I → Pass-41 1I).
+**Next action:** `phase-1d-adversarial` — **Pass 42** (candidate clean #1). FU-007/FU-008/FU-010/FU-011/FU-012 remain open (non-blocking).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
 **Spec totals:** 190 BCs / 260 error codes (251 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.31 (checks a–z + aa, bb + o.ii, ~36 sub-assertions).
 **Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking), FU-011 (non-blocking), FU-012 (non-blocking; target Phase-6). FU-009 CLOSED (Pass-24).
-**Decisions:** D-018 ADDED (Pass-40 F40-03: D-012 refinement, playtest_delegation structured shape). D-014/D-015/D-016/D-017: see Decisions Log. D-014/D-015 flagged for human gate.
-**Version bumps Pass 40:** methodology-layer v1.12; VP-INDEX v1.5; VP-006 v1.1; VP-007 v1.1; VP-009 v1.1; BC-1.12.002 v1.2; BC-1.12.003 v1.2; BC-10.05.001 v1.3; BC-15.01.001 v1.1.
+**Decisions:** D-018 in effect (Pass-40 F40-03). D-014/D-015/D-016/D-017: see Decisions Log. D-014/D-015 flagged for human gate.
+**Version bumps Pass 41:** BC-15.03.001 v1.2; BC-15.04.001 v1.1; nfr-catalog v1.4; prd-cap-008-012 v1.2; cicd-setup v1.1.
 **main branch:** IN SYNC with origin/main at a9a2619 (v1.31; NO change this pass).
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

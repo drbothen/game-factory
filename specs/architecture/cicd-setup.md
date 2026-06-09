@@ -1,6 +1,6 @@
 ---
 document_type: cicd-setup
-version: "1.0"
+version: "1.1"
 status: active
 producer: devops-engineer
 timestamp: 2026-06-08T00:00:00Z
@@ -259,6 +259,94 @@ engine-portable by construction) at the CI level.
 
 ---
 
+## Asset-Lane Smoke-Test Gate
+
+> **Phase-3-instantiated.** The gate specification is defined here and wired into CI
+> when SS-03 (asset generation subsystem) lands. Until SS-03 is merged, the gate
+> step exits 0 as a stub (same pattern as other Phase-3 stubs in §Stub / Scaffold Jobs).
+> NFR-002 and NFR-003 in nfr-catalog.md trace to this section.
+
+### Purpose
+
+Enforce NFR-002 (generation latency) and NFR-003 (quality-gate first-attempt pass-rate)
+at the CI level for the asset-generation lane (SS-03: `crates/asset-lane/`).
+
+### Corpus Composition — 100-Asset Smoke Corpus
+
+The corpus consists of 100 representative asset requests drawn from the three
+primary cloud-api generation classes:
+
+| Asset class | Count | Discipline |
+|-------------|-------|-----------|
+| 3D props (GLB — PBR material, no skeleton) | 30 | Art |
+| 3D props (GLB — skinned / animated) | 20 | Art |
+| Textures (2K diffuse + normal + roughness, PNG) | 20 | Art |
+| Audio SFX (mono WAV < 5 s) | 20 | Audio |
+| Audio ambience (stereo WAV 15–60 s) | 10 | Audio |
+
+The corpus fixture file is checked in at `test-fixtures/asset-smoke-corpus.json`.
+Each entry specifies: `asset_class`, `target_backend`, `reference_quality_tier`
+(Tier-1 or Tier-2), and `expected_disclosure_class`. The corpus MUST include at
+least one asset of each Tier-1 class (prop/texture) for NFR-003 pass-rate to be
+meaningful.
+
+### Measurement Protocol
+
+**Latency (NFR-002):**
+
+- Each asset request is dispatched sequentially (not batched) to avoid
+  saturating the cloud-api backend rate limiter.
+- Wall-clock time is measured from request-dispatch timestamp to
+  raw-asset-file-available timestamp (sidecar written, quality gate not yet run).
+- p50 and p99 are computed over all 100 measurements.
+- Units: seconds.
+
+**First-attempt pass-rate (NFR-003):**
+
+- After raw-asset availability, the quality gate (`factory-quality-gate`) runs
+  on each asset exactly once.
+- An asset "passes on first attempt" if the quality gate returns `PASS` without
+  re-triggering generation.
+- Pass-rate = (count of Tier-1 assets passing quality gate on first attempt) /
+  (total Tier-1 assets in corpus).
+- Result is logged to `quality-gate-report.json` alongside the run timestamp,
+  corpus version, and per-asset verdict.
+
+### Pass Thresholds
+
+| Metric | Pass condition | Fail condition | Source NFR |
+|--------|---------------|----------------|-----------|
+| Latency p50 | < 120 s | ≥ 120 s | NFR-002 |
+| Latency p99 | < 600 s | ≥ 600 s | NFR-002 |
+| First-attempt pass-rate (Tier-1) | ≥ 80% | < 80% | NFR-003 |
+
+All three must pass for the gate to exit 0. Any single failure fails the gate.
+
+### CI Job
+
+Added to `ci.yml` as a stub job in Phase-1; fleshed out in Phase-3 (SS-03):
+
+| Job name (stable) | Runner | Timeout | Description |
+|-------------------|--------|---------|-------------|
+| `CI / asset-lane-smoke` | ubuntu-22.04 | 20 min (stub: immediate exit 0) | Run 100-asset smoke corpus; assert latency p50 < 120 s, p99 < 600 s, and first-attempt pass-rate ≥ 80%; upload quality-gate-report.json as artifact |
+
+**Trigger:** Same as `ci.yml` — every push to `main`, `feature/**`, `fix/**`, and
+every PR targeting `main`.
+
+**Note on cloud-api credentials in CI:** The smoke corpus uses a sandboxed
+generation-api key (asset-adapter mock mode) in PR CI so it does not incur live
+cloud-api costs. The real cloud-api key is used in the scheduled weekly smoke run
+and on merge to `main` (controlled via `ASSET_LANE_SMOKE_MODE` environment variable:
+`mock` for PR CI, `live` for merge/scheduled runs).
+
+### Stub / Scaffold Entry
+
+| Job | Step stub | Flesh-out phase | What replaces the stub |
+|-----|-----------|-----------------|------------------------|
+| `CI / asset-lane-smoke` | `echo "asset-lane smoke: stub (Phase-3-instantiated)" && exit 0` | Phase-3, SS-03 | `cargo run -p asset-lane-smoke-runner -- --corpus test-fixtures/asset-smoke-corpus.json --mode $ASSET_LANE_SMOKE_MODE` |
+
+---
+
 ## Secrets Reference
 
 | Secret name | Required by | When to provision |
@@ -294,3 +382,14 @@ This table maps CI jobs to the convergence dimensions they gate
 | `security / audit` | D-SEC (dependency vulnerabilities) | Advisory (promote to required in Phase-5) |
 | `security / deny` | D-PROV (license compliance) + D-SEC (banned crates DI-009) | Advisory (promote in Phase-5) |
 | `release / build (*)` | D-IMPL (cross-platform build pass) | Hard gate on release tag |
+| `CI / asset-lane-smoke` | D-PROV (provenance sidecar completeness) + SS-03 (asset quality) | Hard gate (Phase-3-instantiated; stub exits 0 until SS-03 lands) |
+
+---
+
+## Changelog
+
+### v1.1 (2026-06-09)
+
+| Change | Detail |
+|--------|--------|
+| F41-04: Asset-Lane Smoke-Test Gate section added | Added `§Asset-Lane Smoke-Test Gate` specifying the 100-asset corpus composition (5 asset classes: 3D props, textures, audio SFX, audio ambience), latency measurement protocol (p50/p99 per-asset wall-clock), first-attempt pass-rate measurement, concrete pass thresholds (NFR-002: p50 < 120 s, p99 < 600 s; NFR-003: ≥ 80%), and the `CI / asset-lane-smoke` stub job. Gate is Phase-3-instantiated; stub exits 0 until SS-03 asset-generation subsystem lands. NFR-002 and NFR-003 in nfr-catalog.md now cite this section as a resolvable reference. |

@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: nfr-catalog
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -31,8 +31,8 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | NFR-ID | Category | Capability | Requirement | Numerical Target | Validation Method | Source |
 |--------|----------|-----------|-------------|-----------------|-------------------|--------|
 | NFR-001 | Provenance completeness | CAP-004 | 100% of generated assets have a complete sidecar at ingestion time | 0 missing `disclosure_class` | Quality-gate hook on every ingest; CI blocks on any sidecar schema error | NFR-4-01 |
-| NFR-002 | Generation latency | CAP-004 | Asset generation request dispatch to raw-asset available | p50 < 120 s per asset; p99 < 600 s (cloud-api class) | Measured in CI asset-lane smoke test with representative 3D and audio requests | NFR-4-02 |
-| NFR-003 | Quality gate pass rate | CAP-004 | Tier-1 prop/texture assets pass quality gate without re-generation on first attempt | ≥ 80% first-attempt pass rate | Measured over 100-asset smoke corpus; logged in quality-gate-report | NFR-4-03 |
+| NFR-002 | Generation latency | CAP-004 | Asset generation request dispatch to raw-asset available | p50 < 120 s per asset; p99 < 600 s (cloud-api class) | CI asset-lane smoke-test gate (cicd-setup.md §Asset-Lane Smoke-Test Gate): 100-asset corpus, latency measured per asset, gate blocks if p50 ≥ 120 s or p99 ≥ 600 s; wired in Phase-3 (SS-03) | NFR-4-02 |
+| NFR-003 | Quality gate pass rate | CAP-004 | Tier-1 prop/texture assets pass quality gate without re-generation on first attempt | ≥ 80% first-attempt pass rate | CI asset-lane smoke-test gate (cicd-setup.md §Asset-Lane Smoke-Test Gate): first-attempt pass-rate logged per 100-asset corpus run; gate blocks if pass-rate < 80%; wired in Phase-3 (SS-03) | NFR-4-03 |
 | NFR-004 | Blocked-backend enforcement | CAP-004 | 0 generation requests routed to ToS-excluded or litigation-exposed backends in any CI run | 0 exceptions permitted | Integration test: attempt to dispatch to Suno, Udio, OpenArt, Rosebud; assert all four refused | NFR-4-04 |
 | NFR-005 | License-gate latency | CAP-004 | Ship-gate license check completes for a 1,000-asset build | < 30 s wall-clock | Benchmarked in ship-gate integration test | NFR-4-05 |
 | NFR-006 | Design artifact generation time | CAP-005 | Full design-spec bundle (all sub-artifacts) generation time | < 30 s on reference hardware | Timed CI step | NFR-5.01 |
@@ -43,7 +43,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | NFR-011 | Engine-neutrality (spec layer) | CAP-005 | Design artifact stack must contain zero engine-specific identifiers | 0 occurrences of engine-specific terms | Lint rule on all spec artifacts | NFR-5.06 |
 | NFR-012 | Audio loudness conformance | CAP-005 | Audio build loudness within target band | LUFS within ±2 dB of target for all banks | loudnorm / libebur128 CI check | NFR-5.07 |
 | NFR-013 | Playtest protocol completeness | CAP-008 | Protocol scaffold must populate ALL mandatory fields without requiring human completion | 100% mandatory fields populated in generated protocol | Schema validation on every generated protocol | NFR-008-001 |
-| NFR-014 | Fun-score hook latency | CAP-008 | Fun-score detection hook must not add > 50 ms to artifact write path on average | p99 ≤ 100 ms added latency | CI performance gate on hook execution | NFR-008-002 |
+| NFR-014 | Fun-score hook latency | CAP-008 | Fun-score detection hook must not add > 100 ms (p99) to artifact write path | p99 ≤ 100 ms added latency (sole authoritative statistic; pass/fail predicate: p99 > 100 ms fails the gate) | CI performance gate on hook execution: measure p99 added latency over 1,000 consecutive hook invocations; fail if p99 exceeds 100 ms | NFR-008-002 |
 | NFR-015 | Playtest sign-off auditability | CAP-008 | Every sign-off record must be traceable to a named human reviewer in the project's human-reviewer allowlist | 100% of sign-off records have a valid `reviewer_id` | Schema + registry validation | NFR-008-003 |
 | NFR-016 | Canon-KB query performance | CAP-012 | Entity lookup by `entity_id` must complete | p99 ≤ 20 ms for KB with ≤ 10,000 entities | CI performance gate | NFR-012-001 |
 | NFR-017 | Continuity check throughput | CAP-012 | 7-check continuity battery for an artifact up to 10,000 words | p95 ≤ 30 s | CI performance gate | NFR-012-002 |
@@ -94,6 +94,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 ## Changelog
+
+### v1.4 (2026-06-09)
+
+| Change | Detail |
+|--------|--------|
+| F41-02: NFR-014 dual-statistic ambiguity resolved | Dropped the "on average" clause from the Requirement column. p99 ≤ 100 ms is now the SOLE authoritative pass/fail statistic. The Validation Method now specifies measurement over 1,000 hook invocations so the predicate is unambiguous. Origin file prd-cap-008-012.md NFR-008-002 row aligned in the same pass. |
+| F41-04: NFR-002/003 Validation Method now resolvable | Updated Validation Method for NFR-002 and NFR-003 to cite `cicd-setup.md §Asset-Lane Smoke-Test Gate` — a concrete section added to that document in this same pass — replacing the dangling "CI asset-lane smoke test" / "100-asset smoke corpus" references with a real artifact reference. Thresholds unchanged. |
 
 ### v1.3 (2026-06-08)
 
