@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.28
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.29
 #
 # PURPOSE
 # -------
@@ -226,9 +226,22 @@
 #       engine=1, asset=2, distribution=3, XR=4, online-services=5. Green after
 #       PO's prd-cap-009-010.md v1.1 fix ("third of the five adapter seams").
 #       POSIX/BSD compatible. (F34-03 recurrence prevention).
+# extended in v1.29 to add check (z) — §1.3 base manifest seam-enum completeness
+#   (F35-01 recurrence prevention): parses the `seam` field enum literal in the §1.3
+#   base Capability Manifest fenced schema block of adapter-protocols.md, then parses
+#   the seam-key set from the §8 Compatibility Matrix fenced schema block (the
+#   authoritative per-seam "seams": { … } keys). ASSERTS the two token sets are EQUAL
+#   (both must be exactly: engine-adapter, asset-adapter, distribution-adapter,
+#   xr-adapter, online-services-adapter — 5 tokens). Reports tokens present in the
+#   compatibility matrix seams but missing from the §1.3 base enum, and vice versa.
+#   Anchoring: §1.3 enum is parsed from the first fenced block that contains a
+#   `"seam":` line with `<…>` angle-bracket syntax; seam keys are parsed from the
+#   "seams": { … } object in the last fenced block of the file (which is §8).
+#   Positive-coverage log always printed. Green after F35-01 fix.
+#   POSIX/BSD-grep/awk compatible (no grep -P). (F35-01 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y + o.ii.
-#   Positive-coverage log always printed. (F33-01 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z + o.ii.
+#   Positive-coverage log always printed. (F35-01 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -648,6 +661,10 @@ x_prd_count=0
 # (y) seam-ordinal collision counters: initialized here so SUMMARY is safe if check is skipped
 y_violations=0
 y_files_scanned=0
+# (z) base-manifest seam-enum completeness counters: initialized here so SUMMARY is safe if skipped
+z_violations=0
+z_enum_count=0
+z_matrix_count=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -668,7 +685,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.28) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.29) ==="
 echo ""
 
 # ============================================================================
@@ -4859,6 +4876,153 @@ fi
 echo ""
 
 # ============================================================================
+# (z) BASE MANIFEST SEAM-ENUM COMPLETENESS  [NEW v1.29, F35-01]
+# ============================================================================
+# Asserts that the `seam` field enum in the §1.3 base Capability Manifest
+# fenced schema block (adapter-protocols.md) contains exactly the same set of
+# seam tokens as the top-level seam keys in the §8 Compatibility Matrix fenced
+# schema block.
+#
+# Anchoring strategy (POSIX/BSD-awk, no grep -P):
+#   §1.3 base enum — locate the FIRST fenced block (``` ... ```) that contains
+#     a line matching `"seam":` followed by `<...>` angle-bracket content.
+#     Extract the tokens from the pipe-separated `<tok1|tok2|...>` value.
+#   §8 matrix seam keys — locate the LAST fenced block and extract lines of the
+#     form `"<seam-key>": {` — these are the top-level keys of the "seams": {...}
+#     object. The canonical five keys are the five adapter seam identifiers.
+#
+# EXPECTED: 5 tokens in each set, set equality → 0 violations after F35-01 fix.
+# POSIX/BSD-grep/awk compatible (no grep -P). (F35-01 recurrence prevention).
+echo "--- (z) §1.3 base manifest seam-enum completeness (F35-01 recurrence prevention) ---"
+echo "    Assert: 'seam' enum in §1.3 base schema == seam keys in §8 compatibility matrix."
+echo "    Expected 5 tokens: engine-adapter asset-adapter distribution-adapter xr-adapter online-services-adapter"
+
+z_violations=0
+z_violation_msgs=()
+z_enum_count=0
+z_matrix_count=0
+
+ADAPTER_PROTOCOLS="$REPO_ROOT/.factory/specs/architecture/adapter-protocols.md"
+
+if [[ ! -f "$ADAPTER_PROTOCOLS" ]]; then
+  echo "    SKIP: adapter-protocols.md not found at $ADAPTER_PROTOCOLS"
+else
+  # --- Extract §1.3 base enum tokens ---
+  # Strategy: awk over the whole file; track fenced-block state (toggle on ```).
+  # Inside the FIRST fenced block that contains a line matching `"seam":` with `<`,
+  # extract the angle-bracket token list. Stop after the first matching block.
+  #
+  # Output: one token per line (e.g., engine-adapter, asset-adapter, …)
+  z_enum_raw=$(awk '
+    /^```/ {
+      in_fence = !in_fence
+      if (!in_fence && found_seam_in_block) {
+        # Closing the block that had the seam line — we are done
+        exit
+      }
+      if (!in_fence) {
+        found_seam_in_block = 0
+      }
+      next
+    }
+    in_fence && /\"seam\"/ && /<[a-z]/ {
+      found_seam_in_block = 1
+      # Extract the angle-bracket content: everything between < and >
+      match($0, /<[^>]+>/)
+      if (RSTART > 0) {
+        tokens = substr($0, RSTART+1, RLENGTH-2)
+        n = split(tokens, arr, "|")
+        for (i=1; i<=n; i++) {
+          gsub(/^[[:space:]]+|[[:space:]]+$/, "", arr[i])
+          if (arr[i] != "") print arr[i]
+        }
+      }
+    }
+  ' "$ADAPTER_PROTOCOLS" 2>/dev/null || true)
+
+  # --- Extract §8 matrix seam keys ---
+  # Strategy: awk over the whole file; track fenced-block state.
+  # In ANY fenced block, collect lines matching `"<word>": {` or `"<word>": {`
+  # where the word looks like a seam identifier (contains "-adapter").
+  # We only want the top-level seam keys (not nested keys inside the seam objects).
+  # Heuristic: lines that contain "-adapter": { (with adapter identifier pattern).
+  z_matrix_raw=$(awk '
+    /^```/ {
+      in_fence = !in_fence
+      next
+    }
+    in_fence && /"[a-z][a-z-]+-adapter"[[:space:]]*:/ {
+      # Extract the quoted key: e.g. "engine-adapter", "online-services-adapter"
+      match($0, /"[a-z][a-z-]+-adapter"/)
+      if (RSTART > 0) {
+        key = substr($0, RSTART+1, RLENGTH-2)
+        print key
+      }
+    }
+  ' "$ADAPTER_PROTOCOLS" 2>/dev/null | sort -u || true)
+
+  # Count tokens
+  if [[ -n "$z_enum_raw" ]]; then
+    z_enum_count=$(printf '%s\n' "$z_enum_raw" | grep -c '[a-z]' || true)
+  fi
+  if [[ -n "$z_matrix_raw" ]]; then
+    z_matrix_count=$(printf '%s\n' "$z_matrix_raw" | grep -c '[a-z]' || true)
+  fi
+
+  echo "    §1.3 base enum tokens ($z_enum_count): $(printf '%s\n' "$z_enum_raw" | tr '\n' ' ')"
+  echo "    §8 matrix seam keys ($z_matrix_count):   $(printf '%s\n' "$z_matrix_raw" | tr '\n' ' ')"
+
+  # --- Assert set equality ---
+  # Tokens in matrix but missing from enum
+  if [[ -n "$z_matrix_raw" ]]; then
+    while IFS= read -r z_tok; do
+      [[ -z "$z_tok" ]] && continue
+      if ! printf '%s\n' "$z_enum_raw" | grep -qxF "$z_tok" 2>/dev/null; then
+        z_violations=$(( z_violations + 1 ))
+        z_violation_msgs+=("seam token '$z_tok' present in §8 matrix keys but MISSING from §1.3 base enum")
+      fi
+    done <<< "$z_matrix_raw"
+  fi
+
+  # Tokens in enum but missing from matrix
+  if [[ -n "$z_enum_raw" ]]; then
+    while IFS= read -r z_tok; do
+      [[ -z "$z_tok" ]] && continue
+      if ! printf '%s\n' "$z_matrix_raw" | grep -qxF "$z_tok" 2>/dev/null; then
+        z_violations=$(( z_violations + 1 ))
+        z_violation_msgs+=("seam token '$z_tok' present in §1.3 base enum but MISSING from §8 matrix keys")
+      fi
+    done <<< "$z_enum_raw"
+  fi
+
+  # Assert count == 5 for each set (belt-and-suspenders: catches truncated parse)
+  if [[ "$z_enum_count" -ne 5 ]]; then
+    z_violations=$(( z_violations + 1 ))
+    z_violation_msgs+=("§1.3 base enum has $z_enum_count tokens (expected 5: engine-adapter asset-adapter distribution-adapter xr-adapter online-services-adapter)")
+  fi
+  if [[ "$z_matrix_count" -ne 5 ]]; then
+    z_violations=$(( z_violations + 1 ))
+    z_violation_msgs+=("§8 matrix seam keys has $z_matrix_count keys (expected 5)")
+  fi
+fi
+
+# Positive-coverage log (always printed)
+echo "    Check (z): §1.3 enum=$z_enum_count tokens, §8 matrix=$z_matrix_count seam keys; $z_violations violation(s) found."
+
+if [[ $z_violations -gt 0 ]]; then
+  echo ""
+  echo "    BASE-MANIFEST SEAM-ENUM VIOLATIONS (F35-01 recurrence prevention):"
+  echo "    §1.3 base enum must list all five canonical seams (engine-adapter, asset-adapter,"
+  echo "    distribution-adapter, xr-adapter, online-services-adapter) and must equal the §8 matrix keys."
+  for zmsg in "${z_violation_msgs[@]}"; do
+    echo "      $zmsg"
+  done
+  errors+=("MISMATCH [base-manifest seam-enum (z)]: $z_violations violation(s) — §1.3 base enum and §8 matrix seam keys are not equal (F35-01 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -4897,6 +5061,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  DI-007-on-creative-gate (w):      $w_lines_scanned lines scanned, $w_creative_gate_lines DI-007+creative-gate lines evaluated, 0 mis-anchor violations"
   echo "  NFR §4 ID-set parity (x):         $x_catalog_count catalog IDs == $x_prd_count prd.md §4 IDs, 0 membership violations"
   echo "  Seam-ordinal collision (y):        $y_files_scanned files scanned, 0 collision violations (distribution=3rd, online-services=5th)"
+  echo "  Base-manifest seam-enum (z):      §1.3 enum=$z_enum_count tokens == §8 matrix=$z_matrix_count seam keys, 0 set-equality violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
