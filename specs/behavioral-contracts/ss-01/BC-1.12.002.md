@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -17,7 +17,10 @@ capability: CAP-001
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-09
+    reason: "F40-01 fix: T2 (same-machine/pinned-runner) dispatch corrected from snapshot-hash-diff to snapshot-structured-diff; PC2 updated, invariant 2 updated, test vector added. Consistent with methodology-layer.md v1.12 §D-REPLAY and BC-3.03.004."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,13 +50,16 @@ a stricter comparison request than it supports.
    `comparison.method: "snapshot-hash-diff"` — bitwise hash equality across any
    runner.
 2. If `determinismTier` is `"same-machine"` (T2): the core requests
-   `comparison.method: "snapshot-hash-diff"` BUT only on a pinned runner image;
-   the core enforces that T2 replay requests are only dispatched to the matching
-   pinned runner.
+   `comparison.method: "snapshot-structured-diff"` — a field-by-field structured
+   diff on a pinned runner image. Bitwise hash equality is NOT guaranteed for T2
+   across platforms; structured diff is used instead. The core enforces that T2
+   replay requests are only dispatched to the matching pinned runner.
 3. If `determinismTier` is `"tolerance-only"` (T3): the core requests
    `comparison.method: "tolerance-window"` — metric-based comparison with declared
    tolerance bands.
 4. The core NEVER sends `snapshot-hash-diff` to a `"tolerance-only"` adapter.
+   The core NEVER sends `snapshot-hash-diff` to a `"same-machine"` (T2) adapter;
+   T2 uses `snapshot-structured-diff` exclusively.
 5. The comparison method used is recorded in the replay regression report.
 
 ## Invariants
@@ -61,8 +67,9 @@ a stricter comparison request than it supports.
 1. The comparison method is always a deterministic function of the declared tier;
    no run-time override is possible by the pipeline planner without changing the
    manifest.
-2. Downgrading from `snapshot-hash-diff` to `tolerance-window` (T1→T3) is only
-   valid if the tier was explicitly downgraded; the core never silently falls back.
+2. Downgrading from `snapshot-hash-diff` (T1) or `snapshot-structured-diff` (T2)
+   to `tolerance-window` (T3) is only valid if the tier was explicitly downgraded;
+   the core never silently falls back.
 
 ## Edge Cases
 
@@ -76,6 +83,7 @@ a stricter comparison request than it supports.
 | Input | Expected Output | Category |
 |-------|----------------|----------|
 | T1 adapter, replay/play invoked | `comparison.method: "snapshot-hash-diff"` in ReplayResult | happy-path |
+| T2 adapter, pinned runner available, replay/play invoked | `comparison.method: "snapshot-structured-diff"` in ReplayResult | happy-path |
 | T3 adapter, replay/play invoked | `comparison.method: "tolerance-window"` in ReplayResult | happy-path |
 | T2 adapter with no pinned runner | Core records T2→T3 degradation in convergence report | edge-case |
 

@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.11"
+version: "1.12"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -33,6 +33,10 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Game Methodology Layer (Layer 2)
+
+> **v1.12 changes (Pass-40 F40-01 fix — T2 comparison method corrected to snapshot-structured-diff; F40-03 fix — playtest_delegation schema updated to structured form with delegated_claims[]):**
+> - **F40-01 fixed:** `comparison_method` enum extended from 2 values to 3: `snapshot-hash-diff | snapshot-structured-diff | tolerance-window`. T1 = snapshot-hash-diff (same-platform bitwise); T2 = snapshot-structured-diff (pinned-runner, field-by-field — bitwise hash equality not guaranteed cross-platform); T3 = tolerance-window (unchanged). D-REPLAY pass predicate at §D-REPLAY corrected to state T2 = snapshot-structured-diff. BC-1.12.002 PC2 must be updated by PO to emit `comparison.method: "snapshot-structured-diff"` for T2.
+> - **F40-03 fixed:** §2.2 design-intent-contract schema updated: scalar `playtest_delegation_note` field replaced by structured `playtest_delegation` section with required `delegated_claims[]` (matching BC-6.02.005 shape). The DI-012 / D-DOCS pass predicate at §D-DOCS updated to gate on the structured form being non-empty. This REFINES D-012's field name (playtest_delegation_note scalar → playtest_delegation structured section) while preserving D-012's intent.
 
 > **v1.11 changes (Pass-31 I31-01 fix — Canon-KB seam ordinal fifth→sixth in §2.7 Purpose):**
 > - **I31-01 fixed:** §2.7 canon-kb schema "Purpose" sentence corrected "fifth load-bearing seam"
@@ -317,7 +321,8 @@ formal-hardening targets in the corpus: pure functions, zero I/O).
 **Purpose.** Captures the verifiable subset of design intent as typed assertions.
 The remainder of design intent (feel, pacing, aesthetic direction) is explicitly
 delegated to the playtest-protocol. Every design-intent-contract must include a
-`playtest_delegation_note` that names what it does NOT cover.
+`playtest_delegation` section that explicitly names what it does NOT cover, with
+structured per-claim entries (F40-03 — refined from scalar `playtest_delegation_note`).
 
 **Required fields:**
 
@@ -338,21 +343,31 @@ balance_band:
   max: <numeric>
 no_softlock_invariant: "<predicate | null if N/A>"
 
-# Explicit scope boundary
-playtest_delegation_note: >
-  "<What this contract does NOT assert — explicitly delegated to playtest-protocol
-   because it requires human judgment: e.g., 'feel of progression curve', 'fun
-   of combat feedback', 'aesthetic coherence of level pacing'>"
+# Explicit scope boundary — structured delegation section (DI-012 / BC-6.02.005)
+playtest_delegation:
+  delegated_claims:
+    - claim: "<natural-language design intent assertion not machine-verifiable>"
+      reason_not_machine_verifiable: "<one sentence explaining why this cannot be a sim-BC>"
+      instrument: "<playtest instrument: GEQ | PENS | SUS | think-aloud | observation | null>"
 
 # Validation
 validation_method: "property-based | formal-kani | headless-test-runner"
 traces_to: "<PRD section or capability ID>"
 ```
 
-**Invariant.** A design-intent-contract without a `playtest_delegation_note` is
-structurally invalid (DI-012). The delegation note is not optional boilerplate —
-it is the explicit statement of what the factory cannot verify and what requires
-human judgment.
+**Invariant.** A design-intent-contract without a non-empty `playtest_delegation`
+section (≥1 entry in `delegated_claims[]`) is structurally invalid (DI-012).
+The delegation section is not optional boilerplate — it is the explicit structured
+declaration of what the factory cannot verify and what requires human judgment.
+Each delegated claim carries `claim`, `reason_not_machine_verifiable`, and
+(recommended) `instrument` fields per BC-6.02.005 postcondition #2.
+
+**D-012 refinement note (F40-03).** The original D-012 decision named the field
+`playtest_delegation_note` (scalar string). This schema now adopts the STRUCTURED
+form `playtest_delegation.delegated_claims[]` from BC-6.02.005, which is richer and
+operationally necessary: each delegated claim requires claim/reason/instrument that
+a scalar note cannot carry. The intent of D-012 (explicit delegation boundary) is
+fully preserved; only the field name and shape are refined.
 
 ---
 
@@ -380,7 +395,10 @@ tolerance_spec:
   tolerance_window: { "<metric-name>": <epsilon-value> }
 
 # Comparison method (dictated by determinism_tier)
-comparison_method: "snapshot-hash-diff | tolerance-window"
+# T1 (bitwise-cross-platform) → snapshot-hash-diff
+# T2 (same-machine / pinned-runner) → snapshot-structured-diff (field-by-field; cross-platform hash equality not guaranteed)
+# T3 (tolerance-only) → tolerance-window
+comparison_method: "snapshot-hash-diff | snapshot-structured-diff | tolerance-window"
 
 # Invalidation protocol
 invalidation_triggers:
@@ -781,7 +799,9 @@ any design-intent reachability assertion fails; or `determinismTier` undeclared
 
 **Pass predicate:** All `replay-regression-contract` scenarios pass their declared
 comparison method; comparison method matches adapter's `determinismTier`
-(T1 = snapshot-hash-diff, T2 = pinned-runner snapshot-hash-diff, T3 = tolerance-window).
+(T1 = snapshot-hash-diff, T2 = pinned-runner snapshot-structured-diff, T3 = tolerance-window).
+T2 uses structured field-by-field diff, not a bitwise hash, because cross-platform hash
+equality is not guaranteed for pinned-runner adapters (F40-01).
 
 **Degraded predicate:** Adapter declares `replay: none` → D-REPLAY degrades to
 "playtest evidence required"; structured playtest provides regression evidence per
@@ -946,8 +966,10 @@ suppressed (DI-006 violation); PEGI 2026 minimum-rating rule triggered by
 
 **Pass predicate:** All agent-produced contract artifacts have required frontmatter
 fields (`id`, `traces_to`, `validation_method`, `status`); all
-`design-intent-contract` instances have non-empty `playtest_delegation_note`
-(DI-012); `monetization-ethics-contract` adversarial review evidence present (when
+`design-intent-contract` instances have a non-empty `playtest_delegation` section
+containing ≥1 entry in `delegated_claims[]` (DI-012 / BC-6.02.005; F40-03 —
+structured form replaces former scalar `playtest_delegation_note`);
+`monetization-ethics-contract` adversarial review evidence present (when
 monetization is declared).
 
 **Degraded predicate:** Supplementary/non-contract documentation missing; doc

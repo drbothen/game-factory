@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -17,7 +17,10 @@ capability: CAP-001
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-09
+    reason: "F40-01 propagation: updated Preconditions PC2 and EC-002 to reflect T2 now uses snapshot-structured-diff (not snapshot-hash-diff). snapshot-hash-diff sent to a same-machine adapter is now a DeterminismTierViolation. Consistent with BC-1.12.002 v1.2 and methodology-layer.md v1.12."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,10 +43,11 @@ but the adapter enforces it as a last line of defense.
 ## Preconditions
 
 1. A `replay/play` request has been received with a `comparison.method` parameter.
-2. The comparison method is stricter than the adapter's declared tier allows:
+2. The comparison method is incompatible with the adapter's declared tier:
    - `"snapshot-hash-diff"` requested from a `"tolerance-only"` adapter
-   - `"snapshot-hash-diff"` requested from a `"same-machine"` adapter on a
-     cross-machine run (optional enforcement — adapter MAY detect this)
+   - `"snapshot-hash-diff"` requested from a `"same-machine"` (T2) adapter — T2
+     uses `snapshot-structured-diff`; `snapshot-hash-diff` is a tier mismatch
+     (cross-platform hash equality is not guaranteed for T2)
 
 ## Postconditions
 
@@ -59,6 +63,8 @@ but the adapter enforces it as a last line of defense.
 ## Invariants
 
 1. A `"tolerance-only"` adapter NEVER executes `"snapshot-hash-diff"` comparisons.
+   A `"same-machine"` (T2) adapter NEVER executes `"snapshot-hash-diff"` comparisons —
+   T2's method is `"snapshot-structured-diff"` exclusively.
 2. `DeterminismTierViolation` always includes `declaredTier` so the caller can
    diagnose the mismatch.
 
@@ -67,7 +73,7 @@ but the adapter enforces it as a last line of defense.
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | `"tolerance-window"` requested from T1 adapter | Valid; T1 adapter accepts requests for any method ≤ its tier; returns `tolerance-window` result |
-| EC-002 | `"snapshot-hash-diff"` requested from T2 adapter (same-machine) | T2 adapter accepts `snapshot-hash-diff` but notes it only holds for pinned runner; this is NOT a violation |
+| EC-002 | `"snapshot-hash-diff"` requested from T2 adapter (same-machine) | DeterminismTierViolation: T2 adapter uses `snapshot-structured-diff`; `snapshot-hash-diff` is a tier mismatch and IS a violation (F40-01 fix — methodology-layer.md v1.12) |
 
 ## Canonical Test Vectors
 

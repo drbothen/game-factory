@@ -1,11 +1,11 @@
 ---
 document_type: verification-property
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
-phase: 1b
+phase: 1d
 vp_id: VP-009
 formal_method: proptest
 priority: P0
@@ -18,7 +18,14 @@ inputs:
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
-# VP-009: Damage I/O Matrix Row-Sum Correctness
+# VP-009: Damage I/O Matrix Range Containment and Split-Damage Sum
+
+<!-- F40-06: retitled. Prior title "Row-Sum Correctness" mis-described the dominant
+     property, which is range containment (min_dmg ≤ D ≤ max_dmg). The split-damage
+     sum (Σ_i D_i = D_total ± ε) is a secondary property. Exact equality to the
+     matrix value (the core PC in BC-6.01.002) is validated by BC-6.01.002 test
+     vectors, not by this VP (parallel to VP-008 disambiguation). Title corrected
+     to "Range Containment and Split-Damage Sum" to accurately reflect VP-009 body. -->
 
 ## Property Statement
 
@@ -71,7 +78,13 @@ floating-point arithmetic.
 
 ## BC Traceability
 
-- BC-6.01.002 (Damage I/O Matrix Correctness) — direct counterpart.
+- BC-6.01.002 (Damage I/O Matrix Correctness) — direct counterpart. VP-009 covers
+  range containment (`min_dmg ≤ D ≤ max_dmg`) and split-damage sum preservation.
+  **Exact-equality to the declared matrix value** (BC-6.01.002 PC1) is validated by
+  BC-6.01.002 test vectors, not by this VP. This is intentional: exact equality is
+  a discrete lookup assertion validated by deterministic test cases; range containment
+  over the continuous modifier space is what proptest property-based testing adds.
+  (F40-06 disambiguation — parallel to VP-008 vs. conformance suite split.)
 
 ## Purity Classification
 

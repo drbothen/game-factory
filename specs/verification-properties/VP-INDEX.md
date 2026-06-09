@@ -1,7 +1,7 @@
 ---
 document_type: verification-property-index
 level: L3
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -16,6 +16,9 @@ inputs:
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 modified:
+  - version: "1.5"
+    date: 2026-06-09
+    reason: "F40-04 fix — corrected VP-007 summary row to reflect actual covered invariants (INV-TS-02 conservative-rating ordering + INV-TS-03 permutation equivariance); corrected VP-006 summary row description to reflect correct baseline (RD' < RD_old, not RD' <= RD_inactive); corrected VP-009 title to reflect primary property (range-containment + split-damage-sum)."
   - version: "1.4"
     date: 2026-06-08
     reason: "F37-03 fix — retitled VP-008 row from 'T1 bitwise snapshot hash invariant' to 'pure-sim step referential transparency (intra-process purity)'; updated Per-Module Coverage and I2 PO action text to accurately reflect what VP-008 proves and to distinguish it from the cross-platform T1 guarantee validated by the conformance suite."
@@ -49,10 +52,10 @@ modified:
 | VP-003 | Balance band containment (metric within declared bounds) | proptest | P0 | SS-05 | BC-6.02.003 |
 | VP-004 | No-softlock reachability (goal state reachable from any valid state) | Kani (bounded) | P0 | SS-05 | BC-6.02.004 |
 | VP-005 | Elo zero-sum conservation | proptest + algebraic | P1 | SS-11 | BC-13.02.001 |
-| VP-006 | Glicko-2 RD monotone decay (RD strictly decreasing across rating periods) | proptest | P1 | SS-11 | BC-13.02.001 |
-| VP-007 | TrueSkill μ−3σ partial-order monotonicity | proptest | P1 | SS-11 | BC-13.02.001 |
+| VP-006 | Glicko-2 RD monotone decay (RD_new < RD_old strict, against pre-inactivity baseline; INV-GL2-02 — F40-05) | proptest | P1 | SS-11 | BC-13.02.001 |
+| VP-007 | TrueSkill INV-TS-02 conservative-rating ordering + INV-TS-03 permutation equivariance (F40-04) | proptest | P1 | SS-11 | BC-13.02.001 |
 | VP-008 | Pure-sim step referential transparency (intra-process purity; cross-platform T1 bitwise equality validated by conformance suite, not this VP) | Kani (harness) | P0 | SS-02 | BC-3.03.001, BC-3.03.002 |
-| VP-009 | Damage I/O matrix row-sum correctness | proptest | P0 | SS-05 | BC-6.01.002 |
+| VP-009 | Damage I/O matrix range containment + split-damage sum (exact-equality validated by BC-6.01.002 test vectors — F40-06) | proptest | P0 | SS-05 | BC-6.01.002 |
 | VP-010 | Tournament bracket progression correctness (every participant advances exactly once per round per format rules) | proptest | P1 | SS-11 | BC-13.02.005 |
 
 **Total: 10 VPs — 6 P0, 4 P1. 6 pure-sim (SS-05/SS-02), 4 genre-gated esports (SS-11).**
@@ -212,10 +215,10 @@ modified:
 | VP-003 | Balance band containment | BC-6.02.003 | `ss-06/BC-6.02.003.md` | Add back-ref: "Formally verified by VP-003 (Balance band containment — metric within declared bounds)" |
 | VP-004 | No-softlock reachability | BC-6.02.004 | `ss-06/BC-6.02.004.md` | Add back-ref: "Formally verified by VP-004 (No-softlock reachability — goal state reachable from any valid state)" |
 | VP-005 | Elo zero-sum conservation | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-005 (Elo zero-sum conservation)" |
-| VP-006 | Glicko-2 RD monotone decay | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-006 (Glicko-2 RD monotone decay)" |
-| VP-007 | TrueSkill μ−3σ partial-order monotonicity | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-007 (TrueSkill μ−3σ partial-order monotonicity)" |
+| VP-006 | Glicko-2 RD monotone decay (RD_new < RD_old strict — INV-GL2-02) | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-006 (Glicko-2 RD monotone decay — RD_new strictly less than pre-inactivity RD_old, INV-GL2-02, F40-05 corrected)" |
+| VP-007 | TrueSkill INV-TS-02 conservative-rating ordering + INV-TS-03 permutation equivariance | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-007 (TrueSkill INV-TS-02 conservative-rating ordering and INV-TS-03 permutation equivariance — F40-04 corrected)" |
 | VP-008 | Pure-sim step referential transparency (intra-process purity) | BC-3.03.001, BC-3.03.002 | `ss-03/BC-3.03.001.md`, `ss-03/BC-3.03.002.md` | Add back-ref: "Formally verified by VP-008 (Pure-sim step referential transparency — intra-process purity). Note: the T1 bitwise CROSS-PLATFORM equality guarantee is validated by the conformance suite (BC-3.03.003), NOT by VP-008." |
-| VP-009 | Damage I/O matrix row-sum correctness | BC-6.01.002 | `ss-06/BC-6.01.002.md` | Add back-ref: "Formally verified by VP-009 (Damage I/O matrix row-sum correctness)" |
+| VP-009 | Damage I/O matrix range containment + split-damage sum | BC-6.01.002 | `ss-06/BC-6.01.002.md` | Add back-ref: "Formally verified by VP-009 (Damage I/O matrix range containment and split-damage sum). Note: exact-equality to declared matrix value (PC1) is validated by BC-6.01.002 test vectors, not VP-009 (F40-06 disambiguation)." |
 | VP-010 | Tournament bracket progression correctness | BC-13.02.005 | `ss-13/BC-13.02.005.md` | Add back-ref: "Formally verified by VP-010 (Tournament bracket progression correctness)" |
 
 > Note: BC-13.02.001 receives three back-references (VP-005, VP-006, VP-007) because all
