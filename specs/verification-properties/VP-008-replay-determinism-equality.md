@@ -1,7 +1,7 @@
 ---
 document_type: verification-property
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -11,15 +11,19 @@ formal_method: Kani (harness)
 priority: P0
 owning_subsystem: SS-02
 traces_to:
-  - .factory/specs/behavioral-contracts/ss-02/BC-3.03.001.md
-  - .factory/specs/behavioral-contracts/ss-02/BC-3.03.002.md
+  - .factory/specs/behavioral-contracts/ss-03/BC-3.03.001.md
+  - .factory/specs/behavioral-contracts/ss-03/BC-3.03.002.md
   - .factory/specs/domain-spec/invariants.md#DI-004
   - .factory/specs/domain-spec/invariants.md#DI-012
 inputs:
-  - .factory/specs/behavioral-contracts/ss-02/BC-3.03.001.md
+  - .factory/specs/behavioral-contracts/ss-03/BC-3.03.001.md
   - .factory/specs/architecture/dtu-assessment.md
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md#§3
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    reason: "F36-01 fix — corrected ss-02/ → ss-03/ in traces_to (lines 14, 15) and inputs (line 19); BC-3.03.* files reside in ss-03/ (CAP-003 directory), not ss-02/ (CAP-002 directory). Aligns with VP-INDEX.md authoritative citation."
 ---
 
 # VP-008: Replay Determinism Equality (T1 Bitwise)
