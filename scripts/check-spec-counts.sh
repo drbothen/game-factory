@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.26
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.27
 #
 # PURPOSE
 # -------
@@ -198,6 +198,19 @@
 #       printed. WILL FAIL until PO removes 4 DI-007 cinematic grafts; becomes green
 #       automatically after PO work. POSIX/BSD compatible. (I-PASS32-01 recurrence
 #       prevention).
+# extended in v1.27 to add check (x) — prd.md §4 NFR-table ID-set parity
+#   (F33-01 recurrence prevention): parses the set of NFR IDs that appear as rows in
+#   the prd.md §4 NFR summary table ("| NFR-NNN …" lines) and the set of NFR IDs
+#   registered in nfr-catalog.md (the authoritative catalog; "| NFR-NNN …" rows).
+#   ASSERTS the two ID sets are EQUAL (same membership). Reports IDs present in the
+#   catalog but missing from the prd.md §4 table (dropped NFRs), and IDs present in
+#   the prd.md table but not in the catalog (phantom NFRs). This is stronger than
+#   check (a.iv) SUB-CHECK 2 which only checks the *count* (41); check (x) asserts
+#   *set membership parity* so a future CAP's NFRs cannot be silently dropped from
+#   the prd.md summary view even if the count prose is separately (in)correct.
+#   Currently both sets are {NFR-001 .. NFR-041} (41 members) — PASSES after F33-01
+#   fix (prd.md v2.4). POSIX/BSD-grep/awk compatible (no grep -P).
+#   Positive-coverage log always printed. (F33-01 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -368,6 +381,15 @@
 #       Positive-coverage log always printed.
 #       WILL FAIL until PO removes 4 DI-007 cinematic grafts; green after PO fix.
 #       (I-PASS32-01 recurrence prevention). POSIX/BSD compatible.
+#   (x) [NEW v1.27, F33-01] prd.md §4 NFR-table ID-set parity: parses the set of
+#       NFR IDs that appear as rows in the prd.md §4 NFR summary table and the set
+#       registered in nfr-catalog.md (authoritative catalog). ASSERTS both sets are
+#       EQUAL (same membership). Reports IDs in catalog but missing from prd.md §4
+#       (dropped NFRs) and IDs in prd.md §4 but not in catalog (phantom NFRs).
+#       Stronger than check (a.iv) SUB-CHECK 2 (count-only): catches silent membership
+#       drift even when the row count stays correct. Green after F33-01 fix.
+#       Positive-coverage log always printed. POSIX/BSD compatible. (F33-01
+#       recurrence prevention).
 #   (t) [NEW v1.22, BROADENED v1.23, I24-01/I27-01] BC-7.* owner-attribution guard:
 #       scans methodology-layer.md and architecture/*.md for operative lines that
 #       mis-attribute OWNERSHIP of the BC-7.* dimension-evaluator family to any
@@ -601,6 +623,10 @@ w_violations=0
 # (o.ii) Canon-KB ordinal counters: initialized here so SUMMARY is safe if check is skipped
 ordinal_files_scanned=0
 ordinal_violations=0
+# (x) NFR-table ID-set parity counters: initialized here so SUMMARY is safe if check is skipped
+x_violations=0
+x_catalog_count=0
+x_prd_count=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -621,7 +647,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.26) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.27) ==="
 echo ""
 
 # ============================================================================
@@ -4467,6 +4493,136 @@ fi
 echo ""
 
 # ============================================================================
+# (x) PRD.MD §4 NFR-TABLE ID-SET PARITY  [NEW v1.27, F33-01]
+# ============================================================================
+# CANONICAL RULE: The prd.md §4 NFR summary table must contain exactly the same
+# set of NFR IDs as the authoritative nfr-catalog.md.  A count match alone (check
+# (a.iv) SUB-CHECK 2) does not detect membership drift: if NFR-036 is dropped and
+# an NFR-042 is added the count remains 41 but the set is wrong. This check asserts
+# set identity.
+#
+# METHOD:
+#   (1) Parse the set of NFR IDs from nfr-catalog.md: every line matching
+#       "^\| NFR-[0-9]" — extract the NFR-NNN token from field 2 (first pipe-delimited
+#       field). These form the CATALOG set.
+#   (2) Parse the set of NFR IDs from prd.md §4: every line matching
+#       "^\| NFR-[0-9]" — extract the NFR-NNN token from field 2.
+#       The prd.md §4 rows have the form "| NFR-NNN * |" or "| NFR-NNN **** |" etc.
+#       Only the NFR-NNN prefix is extracted (strip trailing ` *` / ` ****`).
+#       These form the PRD_TABLE set.
+#   (3) ASSERT catalog set == prd table set (same members, order-independent).
+#       Report: IDs in catalog but NOT in prd table (dropped NFRs — FAIL).
+#               IDs in prd table but NOT in catalog (phantom NFRs — FAIL).
+#
+# FALSE-POSITIVE AVOIDANCE:
+#   Only lines starting with "| NFR-" are parsed — changelog/reason lines,
+#   header rows (NFR-ID), separator rows (|---|) do not match the pattern.
+#   NFR IDs elsewhere in the file (prose, footnotes) are not in the §4 table
+#   and are not extracted (those lines do not start with "| NFR-[0-9]").
+#
+# POSITIVE-COVERAGE: "Check (x): N catalog IDs × M prd.md §4 table IDs compared"
+#   always printed. Should always read 41 × 41 after F33-01 fix.
+#
+# EXPECTED: GREEN now that F33-01 is fixed (prd.md v2.4). Any future CAP whose
+# NFRs are added to the catalog but not to the prd.md §4 table will cause a FAIL.
+# POSIX/BSD-grep/awk compatible (no grep -P). (F33-01 recurrence prevention).
+echo "--- (x) prd.md §4 NFR-table ID-set parity (F33-01 recurrence prevention) ---"
+echo "    Convention: prd.md §4 NFR summary table must enumerate exactly the same NFR IDs"
+echo "    as nfr-catalog.md. A count match alone does not catch membership drift."
+
+x_violations=0
+x_violation_msgs=()
+
+if [[ ! -f "$NFR_CATALOG" ]]; then
+  echo "    SKIP: nfr-catalog.md not found at $NFR_CATALOG"
+elif [[ ! -f "$PRD" ]]; then
+  echo "    SKIP: prd.md not found at $PRD"
+else
+  # Step 1: collect catalog NFR ID set from nfr-catalog.md.
+  # Lines matching "^| NFR-<digits>" — extract the NFR-NNN token (strip trailing text).
+  # awk: field 2 after splitting on "|"; strip leading/trailing spaces; extract NFR-NNN prefix.
+  catalog_nfr_ids=$(grep -E '^\| NFR-[0-9]' "$NFR_CATALOG" 2>/dev/null \
+    | awk -F'|' '{
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2)
+        # Extract only the NFR-NNN part: match NFR- followed by digits at start of field
+        if (match($2, /NFR-[0-9]+/)) {
+          print substr($2, RSTART, RLENGTH)
+        }
+      }' \
+    | sort -u || true)
+
+  x_catalog_count=$(printf '%s\n' "$catalog_nfr_ids" | grep -c . 2>/dev/null || true)
+  x_catalog_count="${x_catalog_count:-0}"
+
+  # Step 2: collect prd.md §4 NFR ID set.
+  # Lines matching "^| NFR-<digits>" in prd.md — same extraction logic.
+  prd_nfr_ids=$(grep -E '^\| NFR-[0-9]' "$PRD" 2>/dev/null \
+    | awk -F'|' '{
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2)
+        # Field 2 may be "NFR-001", "NFR-020 *", "NFR-036 ****" etc.
+        # Extract only the NFR-NNN part.
+        if (match($2, /NFR-[0-9]+/)) {
+          print substr($2, RSTART, RLENGTH)
+        }
+      }' \
+    | sort -u || true)
+
+  x_prd_count=$(printf '%s\n' "$prd_nfr_ids" | grep -c . 2>/dev/null || true)
+  x_prd_count="${x_prd_count:-0}"
+
+  echo "    NFR IDs in catalog (nfr-catalog.md): $x_catalog_count"
+  echo "    NFR IDs in prd.md §4 table:          $x_prd_count"
+
+  # Step 3: set difference — IDs in catalog but NOT in prd table (dropped NFRs).
+  if [[ -n "$catalog_nfr_ids" ]] && [[ -n "$prd_nfr_ids" ]]; then
+    dropped_nfrs=$(comm -23 \
+      <(printf '%s\n' "$catalog_nfr_ids") \
+      <(printf '%s\n' "$prd_nfr_ids") \
+      2>/dev/null || true)
+    phantom_nfrs=$(comm -13 \
+      <(printf '%s\n' "$catalog_nfr_ids") \
+      <(printf '%s\n' "$prd_nfr_ids") \
+      2>/dev/null || true)
+  else
+    dropped_nfrs=""
+    phantom_nfrs=""
+  fi
+
+  # Report dropped NFRs (in catalog, absent from prd.md §4 table)
+  if [[ -n "$dropped_nfrs" ]]; then
+    while IFS= read -r nfr_id; do
+      [[ -z "$nfr_id" ]] && continue
+      x_violations=$(( x_violations + 1 ))
+      x_violation_msgs+=("DROPPED: $nfr_id is registered in nfr-catalog.md but MISSING from prd.md §4 NFR summary table — add the row to §4")
+    done <<< "$dropped_nfrs"
+  fi
+
+  # Report phantom NFRs (in prd.md §4 table, absent from catalog)
+  if [[ -n "$phantom_nfrs" ]]; then
+    while IFS= read -r nfr_id; do
+      [[ -z "$nfr_id" ]] && continue
+      x_violations=$(( x_violations + 1 ))
+      x_violation_msgs+=("PHANTOM: $nfr_id appears in prd.md §4 table but is NOT registered in nfr-catalog.md — remove the row or register the NFR in the catalog")
+    done <<< "$phantom_nfrs"
+  fi
+
+  # Positive-coverage log (always printed — detects zero-scan / inert run)
+  echo "    Check (x): $x_catalog_count catalog IDs x $x_prd_count prd.md §4 table IDs compared; ID-set parity violations: $x_violations"
+
+  if [[ $x_violations -gt 0 ]]; then
+    echo ""
+    echo "    PRD.MD §4 NFR TABLE ID-SET PARITY VIOLATIONS (F33-01 recurrence prevention):"
+    echo "    DROPPED = in catalog but missing from §4 table; PHANTOM = in §4 table but not in catalog."
+    for xmsg in "${x_violation_msgs[@]}"; do
+      echo "      $xmsg"
+    done
+    errors+=("MISMATCH [prd.md §4 NFR-table ID-set parity (x)]: $x_violations NFR ID membership violation(s) between nfr-catalog.md and prd.md §4 summary table — prd.md §4 table must enumerate exactly the same NFR IDs as nfr-catalog.md (F33-01 recurrence prevention)")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -4503,6 +4659,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  BC-7.* owner-attribution (t):      $t_scanned_lines lines scanned, 0 mis-attribution violations"
   echo "  human-gated/creative-gate (u):    $u_lines_scanned lines scanned, $u_creative_gate_lines creative-gate lines validated, 0 term-misuse violations"
   echo "  DI-007-on-creative-gate (w):      $w_lines_scanned lines scanned, $w_creative_gate_lines DI-007+creative-gate lines evaluated, 0 mis-anchor violations"
+  echo "  NFR §4 ID-set parity (x):         $x_catalog_count catalog IDs == $x_prd_count prd.md §4 IDs, 0 membership violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
