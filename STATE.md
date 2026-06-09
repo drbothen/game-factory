@@ -33,7 +33,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Branch model:** `main` = product source; `factory-artifacts` = orphan branch (`.factory/` worktree); `.reference/vsdd-factory` @ develop `82163b7` (gitignored).
 
-**Thesis (do not silently drop):** engine-agnostic / five-seam / no-lock-in — REAFFIRMED by human. Five seams: engine, asset, compliance, analytics, online-services (CAP-015/SS-13).
+**Thesis (do not silently drop):** engine-agnostic / five-seam / no-lock-in — REAFFIRMED by human. Five ADAPTER seams: engine, asset, distribution, XR, online-services (CAP-015/SS-13 = online-services). Canon-KB (SS-10) is the SIXTH load-bearing (non-adapter) seam. (D-017: thesis wording corrected from prior 'compliance/analytics' restatement; spec is canonical.)
 
 ---
 
@@ -41,13 +41,13 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (reset at Pass-32; 5th findings pass since last reset)
+**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-33 was 6th findings pass since last reset)
 
-**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 33 against the spec package.**
+**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 34 against the spec package.**
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
-2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.26, checks a–w + o.ii, ~31 sub-assertions). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
+2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.27, checks a–x + o.ii, ~32 sub-assertions). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
 3. Commit via state-manager (main branch for script changes; factory-artifacts for .factory/ changes).
 4. If pass is CLEAN (0 critical, 0 important): increment counter. If FINDINGS: reset counter to 0.
 5. On reaching 3/3 consecutive clean passes: Phase-1d CONVERGED.
@@ -58,7 +58,7 @@ Loop protocol:
 - Phase-1 spec-package HUMAN GATE — T12
 - Phase 2+ — T13
 
-**CI-gate contract:** `scripts/check-spec-counts.sh` v1.26 (checks a–w + o.ii, ~31 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate surfaces. MUST be green before any pass is credited.
+**CI-gate contract:** `scripts/check-spec-counts.sh` v1.27 (checks a–x + o.ii, ~32 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate surfaces. MUST be green before any pass is credited.
 
 ---
 
@@ -71,7 +71,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 32 FINDINGS (0C/1I) RESOLVED; **CLEAN-PASS COUNTER: 0/3** (5th findings pass since last reset; reset at Pass-32) | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 33 FINDINGS (0C/1I/2obs) RESOLVED; **CLEAN-PASS COUNTER: 0/3**; Pass 34 pending | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -80,9 +80,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 33** (candidate clean #1, counter restart pending). Pass 32 FINDINGS (0C/1I) RESOLVED: spurious DI-007 on cinematic creative-gate (4 BCs); check (w) added; counter stays 0/3. FU-007, FU-008, FU-010 remain open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 34** (candidate clean #1). Pass-33 FINDINGS (0C/1I/2obs) all RESOLVED: F33-01 prd §4 NFR summary table missing NFR-036..041 (prd v2.4 + CI check (x)/gate v1.27); F33-02 seam thesis human-adjudicated → D-017, STATE.md corrected; F33-03 BC-10.06.001 "compliance seam"→"compliance pipeline" (v1.2). FU-007, FU-008, FU-010 remain open (non-blocking).
 
-**Spec state:** prd v2.3; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; BC-7.04.001 v1.2; BC-5.06.001 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; CI gate v1.26 (checks a–w + o.ii, ~31 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.4; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.2; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.3; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; BC-7.04.001 v1.2; BC-5.06.001 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; CI gate v1.27 (checks a–x + o.ii, ~32 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -94,7 +94,8 @@ Loop protocol:
 | 18–30 | 2026-06-08 | FINDINGS×3 / CLEAN×7 | (see phase-1-log.md rows 26–38) | ALL RESOLVED | 2/3 after Pass-26; reset 0/3 at Pass-23, Pass-27; reset 0/3 at Pass-31 |
 | 31 | 2026-06-08 | FINDINGS | 0C / 1I RESOLVED | I31-01: Canon-KB ordinal fifth→sixth (5 files, check o.ii); CI gate v1.25 | **RESET: 0/3** |
 | 32 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs RESOLVED | I-PASS32-01: spurious DI-007 on cinematic creative gate (4 BCs); O-PASS32-01: prd §8.4 typo 34→30 families; O-PASS32-02: check (u) comment fix; check (w) added; CI gate v1.26 | **0/3** (stays; findings pass) |
-| 33 | — | PENDING | — | — | — |
+| 33 | 2026-06-08 | FINDINGS | 0C / 1I / 2obs RESOLVED | F33-01: prd §4 NFR summary table missing NFR-036..041 → added (prd v2.4) + CI check (x)/gate v1.27; F33-03: BC-10.06.001 "compliance seam"→"compliance pipeline" (v1.2); F33-02: seam thesis human-adjudicated → D-017, STATE.md corrected | **0/3** (stays; findings pass) |
+| 34 | — | PENDING | — | — | — |
 
 ---
 
@@ -110,7 +111,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–32 all resolved/clean; Pass 32 FINDINGS (0C/1I) RESOLVED (spurious DI-007 cinematic gate, 4 BCs, check w); counter **0/3**; Pass 33 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–33 all resolved/clean; Pass 33 FINDINGS (0C/1I/2obs) RESOLVED (F33-01 NFR table, F33-02 thesis→D-017, F33-03 BC-10.06.001 wording); counter **0/3**; Pass 34 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -149,6 +150,7 @@ Loop protocol:
 | D-014 | DI-008 engine-neutrality scope = Layer-1/2 only; L3 adapter BCs may name engines | ACCEPTED — FLAG FOR HUMAN RATIFICATION at Phase-1 gate |
 | D-015 | VP-TBD-NNN are BC-local placeholders; canonical `<BC-ID>/VP-TBD-NNN`; Phase-6 promotes | ACCEPTED — FLAG FOR HUMAN AWARENESS at Phase-1 gate |
 | D-016 | CAP-015 Online-Services Adapter = Tier-1 v1; five-seam model | ACCEPTED (human, 2026-06-08) |
+| D-017 | Canonical five ADAPTER seams = engine/asset/distribution/XR/online-services; Canon-KB (SS-10) sixth load-bearing seam. STATE.md thesis wording corrected (prior 'compliance/analytics' was a misremembered restatement; converged spec is canonical). | RATIFIED (human, 2026-06-08) |
 
 ---
 
@@ -184,12 +186,12 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–32 DONE.
-**Phase-1d Pass 32:** FINDINGS (0C/1I/2 obs) RESOLVED. I-PASS32-01: spurious DI-007 grafted onto cinematic creative gate (4 BCs) from Pass-28 fix regression — removed from BC-7.04.001 (v1.2), BC-5.06.001 (v1.3), BC-7.05.001 (v1.3, playtest refs preserved), BC-12.12.008 (v1.3, DI-006 loremaster refs preserved). O-PASS32-01: prd.md §8.4 typo 34→30 active families (prd v2.3). O-PASS32-02: check (u) comment corrected. Check (w) added (DI-007/creative-gate mis-anchor guard). **Clean-pass counter stays 0/3** (findings pass; does not increment).
-**Next action:** `phase-1d-adversarial` — **Pass 33** (candidate clean #1, counter restart). FU-007/FU-008/FU-010 remain open (non-blocking).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–33 DONE.
+**Phase-1d Pass 33:** FINDINGS (0C/1I/2obs) RESOLVED. F33-01: prd §4 NFR summary table missing NFR-036..041 rows — added (prd v2.4); CI check (x) added to gate v1.27 (NFR-table ID-set parity). F33-02: seam thesis wording human-adjudicated — five ADAPTER seams are engine/asset/distribution/XR/online-services; Canon-KB (SS-10) is sixth load-bearing seam; STATE.md thesis corrected; recorded as D-017 (RATIFIED human, 2026-06-08). F33-03: BC-10.06.001 "compliance seam" → "compliance pipeline" (2 sites; v1.2). **Clean-pass counter stays 0/3** (findings pass; does not increment).
+**Next action:** `phase-1d-adversarial` — **Pass 34** (candidate clean #1). FU-007/FU-008/FU-010 remain open (non-blocking).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.26 (checks a–w + o.ii, ~31 sub-assertions).
+**Spec totals:** 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.27 (checks a–x + o.ii, ~32 sub-assertions).
 **Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking). FU-009 CLOSED (Pass-24).
-**Version bumps Pass 32:** BC-7.04.001 v1.2, BC-5.06.001 v1.3, BC-7.05.001 v1.3, BC-12.12.008 v1.3, prd.md v2.3, CI gate v1.26.
-**D-014/015/016:** see Decisions Log. D-014/D-015 flagged for human gate.
+**Version bumps Pass 33:** prd.md v2.4, BC-10.06.001 v1.2, CI gate v1.27.
+**D-014/015/016/017:** see Decisions Log. D-014/D-015 flagged for human gate.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
