@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.30
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.31
 #
 # PURPOSE
 # -------
@@ -252,9 +252,28 @@
 #   coverage log always printed. Paths NOT starting with ".factory/" (bare filenames,
 #   external URLs, symbolic references) are silently skipped (not workspace-relative).
 #   POSIX/BSD-awk compatible (no grep -P). (O36-01 recurrence prevention).
+# extended in v1.31 to add check (bb) — no-variant / every condition resolves to a
+#   registered error code guard (F39-05 recurrence prevention): scans OPERATIVE content
+#   of all .factory/specs/behavioral-contracts/**/*.md files for the pattern
+#   "E-[A-Z]+-[0-9]+ variant" — an error-code token immediately followed by the word
+#   "variant". Taxonomy principle F-20-02 (error-taxonomy.md) bans this idiom: every
+#   failure condition must resolve to a REGISTERED error code, not "E-XXX-NNN variant".
+#   EXCLUSIONS (suppress trigger entirely):
+#     — Lines inside YAML frontmatter (between "---" delimiters) — catches modified:/
+#       changelog version notes that quote prior defective text (e.g., "- v1.2: fix —
+#       re-pointed from E-ENG-001 variant …").
+#     — Lines starting with ">" (blockquote / changelog annotation lines).
+#     — Lines containing "reason:" (YAML frontmatter lifecycle prose).
+#   Only OPERATIVE content (postconditions, edge-case tables, error-codes rows,
+#   descriptions outside frontmatter) is checked — mirrors check (u) / check (w)
+#   exclusion strategy. ASSERT zero operative "E-XXX-NNN variant" occurrences.
+#   Reports each violation as (file:line, token). Green after F39-02/F39-04/F39-05 PO
+#   cleanup (all operative occurrences already resolved to registered codes).
+#   POSIX/BSD-awk compatible (no grep -P). Positive-coverage log always printed.
+#   (F39-05 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa + o.ii.
-#   Positive-coverage log always printed. (O36-01 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb + o.ii.
+#   Positive-coverage log always printed. (F39-05 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -678,6 +697,9 @@ y_files_scanned=0
 z_violations=0
 z_enum_count=0
 z_matrix_count=0
+# (bb) no-variant / every-condition-resolves-to-registered-code counters: initialized here so SUMMARY is safe if skipped
+bb_violations=0
+bb_lines_scanned=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -698,7 +720,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.30) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.31) ==="
 echo ""
 
 # ============================================================================
@@ -5130,6 +5152,132 @@ fi
 echo ""
 
 # ============================================================================
+# (bb) NO-VARIANT / EVERY CONDITION RESOLVES TO A REGISTERED CODE  [NEW v1.31, F39-05]
+# ============================================================================
+# CANONICAL RULE (error-taxonomy.md F-20-02): every failure condition must resolve
+# to a REGISTERED error code. The idiom "E-XXX-NNN variant" — an error-code token
+# immediately followed by the word "variant" — is banned. Each condition must name
+# the precise registered code for that failure mode.
+#
+# TRIGGER: any operative line in a BC file containing the pattern
+#   E-[A-Z]+-[0-9]+ variant
+# (an E-code identifier immediately followed by a space and the word "variant").
+#
+# EXCLUSIONS (suppress trigger entirely):
+#   Lines inside YAML frontmatter (between "---" delimiters): catches modified:/
+#   changelog version notes that quote prior defective text ("- v1.2: … from
+#   E-ENG-001 variant …"). Frontmatter is tracked with a toggle on bare "---" lines.
+#   Lines starting with ">" (blockquote / changelog annotation lines).
+#   Lines containing "reason:" (YAML frontmatter lifecycle prose).
+#
+# FALSE-POSITIVE AVOIDANCE:
+#   Frontmatter exclusion covers the modified: changelog list items that document
+#   fixes by quoting the old "E-XXX-NNN variant" text. These are legitimate
+#   historical records of the fix, not operative spec content.
+#   "variant" elsewhere (e.g., "EC-003 | Query with variant not in manifest"
+#   where "variant" is a game-domain noun, not an error code suffix) does NOT
+#   match because the pattern requires E-[A-Z]+-[0-9]+ IMMEDIATELY before
+#   " variant" — the game-domain usage never has an E-code immediately before it.
+#
+# SCOPE: all BC-*.md files under BC_DIR ss-NN/ subdirectories.
+#
+# POSITIVE-COVERAGE LOG: "Check (bb): N lines scanned, M violations found."
+#   Always printed. After F39-05 PO cleanup, M must be 0.
+# POSIX/BSD-awk compatible (no grep -P). (F39-05 recurrence prevention).
+echo "--- (bb) no-variant / every-condition-resolves-to-registered-code guard (F39-05 recurrence prevention) ---"
+echo "    Convention: every failure condition must resolve to a REGISTERED error code."
+echo "    FAIL: any operative BC line contains an E-code token immediately followed by ' variant'."
+
+bb_violations=0
+bb_lines_scanned=0
+bb_violation_msgs=()
+
+while IFS= read -r bbfile; do
+  [[ ! -f "$bbfile" ]] && continue
+  bb_rel_label="${bbfile#$BC_DIR/}"
+
+  # Use awk to scan the file:
+  #   - Track YAML frontmatter state (toggle on bare "---" lines; skip lines inside).
+  #   - Skip blockquote lines (starting with ">").
+  #   - Skip reason: lines (YAML changelog prose).
+  #   - For remaining operative lines, detect pattern: E-[A-Z]+-[0-9]+ variant
+  #     (the word "variant" following an E-code token with a single space separator).
+  #   Output format: lineno|matched_token
+  bb_hits=$(awk '
+    BEGIN { in_front = 0; front_count = 0 }
+    /^---[[:space:]]*$/ {
+      front_count++
+      # Toggle frontmatter: first "---" opens it, second closes it.
+      # Only the first two bare "---" lines delimit frontmatter.
+      if (front_count <= 2) {
+        in_front = !in_front
+        next
+      }
+    }
+    # Skip all lines inside frontmatter (modified: changelog, reason: etc.)
+    in_front { next }
+    # Skip blockquote lines
+    /^>/ { next }
+    # Skip reason: lines (belt-and-suspenders; these are rare outside frontmatter)
+    /reason:/ { next }
+    # Scan operative line for E-[A-Z]+-[0-9]+ variant pattern.
+    # Use a loop over the line splitting on space to find matching tokens.
+    {
+      line = $0
+      # awk index/substr scan: look for " variant" after an E-code pattern.
+      # Strategy: split on spaces, check each word for E-[A-Z]+-[0-9]+ form,
+      # then check if the NEXT word is "variant".
+      n = split(line, words, /[[:space:]]+/)
+      for (i = 1; i <= n; i++) {
+        w = words[i]
+        # Match E-[A-Z]+-[0-9]+ (E- prefix, uppercase letters, hyphen, digits)
+        if (w ~ /^E-[A-Z]+-[0-9]+$/) {
+          # Check next word
+          if (i < n) {
+            # Strip any leading/trailing punctuation from next word for comparison
+            nw = words[i+1]
+            # Remove trailing punctuation (comma, period, semicolon, colon, paren, quote)
+            gsub(/[,.:;)"'"'"']$/, "", nw)
+            if (nw == "variant") {
+              print NR "|" w " variant"
+            }
+          }
+        }
+      }
+    }
+  ' "$bbfile" 2>/dev/null || true)
+
+  if [[ -n "$bb_hits" ]]; then
+    while IFS='|' read -r bb_lineno bb_token; do
+      [[ -z "$bb_lineno" ]] && continue
+      bb_violations=$(( bb_violations + 1 ))
+      bb_violation_msgs+=("$bb_rel_label:${bb_lineno}: operative 'E-code variant' found — token: '$bb_token' (must resolve to a registered code, not a variant)")
+    done <<< "$bb_hits"
+  fi
+done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort)
+
+# Count scanned lines (awk pass for the positive-coverage log)
+bb_lines_scanned=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" 2>/dev/null | \
+  xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || printf '0')
+bb_lines_scanned="${bb_lines_scanned:-0}"
+
+# Positive-coverage log (always printed)
+echo "    Check (bb): $bb_lines_scanned BC lines scanned for operative 'E-code variant' tokens; $bb_violations violation(s) found."
+
+if [[ $bb_violations -gt 0 ]]; then
+  echo ""
+  echo "    NO-VARIANT VIOLATIONS (F39-05 recurrence prevention):"
+  echo "    Every failure condition must name a REGISTERED error code — not 'E-XXX-NNN variant'."
+  echo "    FIX: register a new error code for the specific failure mode, or re-point to an existing registered code."
+  for bbmsg in "${bb_violation_msgs[@]}"; do
+    echo "      $bbmsg"
+  done
+  errors+=("MISMATCH [no-variant/registered-code (bb)]: $bb_violations operative BC line(s) use 'E-XXX-NNN variant' idiom — each failure condition must resolve to a registered error code (F39-05 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5170,6 +5318,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Seam-ordinal collision (y):        $y_files_scanned files scanned, 0 collision violations (distribution=3rd, online-services=5th)"
   echo "  Base-manifest seam-enum (z):      §1.3 enum=$z_enum_count tokens == §8 matrix=$z_matrix_count seam keys, 0 set-equality violations"
   echo "  Frontmatter path-existence (aa):  $aa_total_paths .factory/ paths verified across $aa_source_files source files, 0 unresolved paths"
+  echo "  No-variant/registered-code (bb):  $bb_lines_scanned BC lines scanned, 0 operative 'E-code variant' tokens found"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
