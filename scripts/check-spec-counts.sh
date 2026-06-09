@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.29
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.30
 #
 # PURPOSE
 # -------
@@ -239,9 +239,22 @@
 #   "seams": { … } object in the last fenced block of the file (which is §8).
 #   Positive-coverage log always printed. Green after F35-01 fix.
 #   POSIX/BSD-grep/awk compatible (no grep -P). (F35-01 recurrence prevention).
+# extended in v1.30 to add check (aa) — frontmatter traceability path existence
+#   guard (O36-01 recurrence prevention): scans ALL .factory/specs files that carry
+#   frontmatter `inputs:` and/or `traces_to:` YAML list keys (VP files, BC files,
+#   ADRs, and any other spec file using these keys). For each path value listed
+#   under these keys that starts with ".factory/" (workspace-relative), strips any
+#   "#fragment" suffix and parenthetical annotations, then asserts the path resolves
+#   to an existing filesystem entry (file OR directory; directory paths with trailing
+#   "/" are valid inputs: entries). Reports each unresolved (path, source-file) pair.
+#   Generalizes F36-01: catches ANY frontmatter traceability path pointing at a
+#   non-existent artifact — the subsystem dir-vs-alias hazard and typos. Positive-
+#   coverage log always printed. Paths NOT starting with ".factory/" (bare filenames,
+#   external URLs, symbolic references) are silently skipped (not workspace-relative).
+#   POSIX/BSD-awk compatible (no grep -P). (O36-01 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z + o.ii.
-#   Positive-coverage log always printed. (F35-01 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa + o.ii.
+#   Positive-coverage log always printed. (O36-01 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -685,7 +698,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.29) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.30) ==="
 echo ""
 
 # ============================================================================
@@ -5023,6 +5036,100 @@ fi
 echo ""
 
 # ============================================================================
+# (aa) FRONTMATTER TRACEABILITY PATH EXISTENCE  [NEW v1.30, O36-01]
+# ============================================================================
+# Scans ALL .factory/specs files that carry frontmatter `inputs:` and/or
+# `traces_to:` YAML list keys. For each path value starting with ".factory/",
+# strips any "#fragment" suffix and parenthetical annotations "(§…)" before
+# resolving against the filesystem (REPO_ROOT-relative). Asserts every such
+# path resolves to an existing filesystem entry (file OR directory — directory
+# paths with trailing "/" are valid inputs: entries). Reports unresolved
+# (path, source-file) pairs. Paths NOT starting with ".factory/" are skipped
+# (not workspace-relative).
+#
+# SCOPE: all .md files under .factory/specs/ (recursive).
+# POSITIVE-COVERAGE LOG: "Check (aa): N .factory/ paths verified across M
+#   source files; K unresolved path(s) found."
+# POSIX/BSD-awk compatible (no grep -P). (O36-01 recurrence prevention).
+echo "--- (aa) frontmatter traceability path-existence guard (O36-01 recurrence prevention) ---"
+echo "    Assert: every .factory/-prefixed path in traces_to:/inputs: frontmatter resolves to an existing file."
+
+aa_violations=0
+aa_violation_msgs=()
+aa_total_paths=0
+aa_source_files=0
+
+# Use awk to extract all .factory/ paths from traces_to/inputs frontmatter,
+# then check existence in bash. Output format: filepath|lineno|path_value
+aa_extracted_paths=""
+aa_extracted_paths=$(find "$REPO_ROOT/.factory/specs" -name "*.md" 2>/dev/null | sort | while IFS= read -r specfile; do
+  awk -v fname="$specfile" '
+    /^---/ {
+      in_front = !in_front
+      next
+    }
+    in_front && /^(traces_to|inputs)[[:space:]]*:/ {
+      in_list = 1
+      next
+    }
+    in_front && in_list && /^  - / {
+      path_val = substr($0, 5)
+      # Strip leading whitespace
+      gsub(/^[[:space:]]+/, "", path_val)
+      # Strip trailing whitespace
+      gsub(/[[:space:]]+$/, "", path_val)
+      # Strip #fragment suffix
+      sub(/#[^[:space:]]*$/, "", path_val)
+      # Strip trailing whitespace again after fragment strip
+      gsub(/[[:space:]]+$/, "", path_val)
+      # Strip parenthetical annotation at end: e.g. " (§5A)" or " (§3)"
+      sub(/[[:space:]]+\([^)]*\)$/, "", path_val)
+      # Strip trailing whitespace one more time
+      gsub(/[[:space:]]+$/, "", path_val)
+      if (path_val ~ /^\.factory\//) {
+        print fname "|" NR "|" path_val
+      }
+      next
+    }
+    in_front && in_list && /^[^[:space:]]/ { in_list = 0 }
+    !in_front { in_list = 0 }
+  ' "$specfile" 2>/dev/null || true
+done)
+
+if [[ -n "$aa_extracted_paths" ]]; then
+  # Count unique source files and total paths
+  aa_total_paths=$(printf '%s\n' "$aa_extracted_paths" | grep -c '|' || true)
+  aa_source_files=$(printf '%s\n' "$aa_extracted_paths" | cut -d'|' -f1 | sort -u | grep -c '.' || true)
+
+  # Check each path for existence
+  while IFS='|' read -r aa_src aa_line aa_path; do
+    [[ -z "$aa_path" ]] && continue
+    aa_full_path="$REPO_ROOT/$aa_path"
+    if [[ ! -e "$aa_full_path" ]]; then
+      aa_violations=$(( aa_violations + 1 ))
+      aa_rel_src="${aa_src#$REPO_ROOT/}"
+      aa_violation_msgs+=("${aa_rel_src}:${aa_line}: references non-existent path '$aa_path'")
+    fi
+  done <<< "$aa_extracted_paths"
+fi
+
+# Positive-coverage log (always printed)
+echo "    Check (aa): $aa_total_paths .factory/ paths verified across $aa_source_files source files; $aa_violations unresolved path(s) found."
+
+if [[ $aa_violations -gt 0 ]]; then
+  echo ""
+  echo "    FRONTMATTER PATH-EXISTENCE VIOLATIONS (O36-01 recurrence prevention):"
+  echo "    Every .factory/-prefixed path in traces_to:/inputs: frontmatter must exist on disk (file or directory)."
+  echo "    Tip: subsystem directory alias (e.g., ss-02 vs ss-03) and typos are common causes."
+  for aamsg in "${aa_violation_msgs[@]}"; do
+    echo "      $aamsg"
+  done
+  errors+=("MISMATCH [frontmatter path-existence (aa)]: $aa_violations unresolved .factory/ path(s) in traces_to:/inputs: frontmatter (O36-01 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5062,6 +5169,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  NFR §4 ID-set parity (x):         $x_catalog_count catalog IDs == $x_prd_count prd.md §4 IDs, 0 membership violations"
   echo "  Seam-ordinal collision (y):        $y_files_scanned files scanned, 0 collision violations (distribution=3rd, online-services=5th)"
   echo "  Base-manifest seam-enum (z):      §1.3 enum=$z_enum_count tokens == §8 matrix=$z_matrix_count seam keys, 0 set-equality violations"
+  echo "  Frontmatter path-existence (aa):  $aa_total_paths .factory/ paths verified across $aa_source_files source files, 0 unresolved paths"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
