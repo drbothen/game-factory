@@ -41,9 +41,9 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-34 was 7th findings pass since last reset)
+**Current clean-pass counter: 0/3** (reset at Pass-32; Pass-35 was 8th findings pass since last reset)
 
-**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 35 against the spec package.**
+**Next action: dispatch a FRESH-CONTEXT adversary (subagent `vsdd-factory:adversarial-review`) for Pass 36 against the spec package.**
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
@@ -58,7 +58,7 @@ Loop protocol:
 - Phase-1 spec-package HUMAN GATE — T12
 - Phase 2+ — T13
 
-**CI-gate contract:** `scripts/check-spec-counts.sh` v1.28 (checks a–y + o.ii, ~33 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate surfaces. MUST be green before any pass is credited.
+**CI-gate contract:** `scripts/check-spec-counts.sh` v1.29 (checks a–z + o.ii, ~34 sub-assertions) on `main`. Purpose: prevent count-drift, vocabulary regression, and fix-induced cross-spec inconsistency across BC/NFR/error-taxonomy/priority/VP/studio/seam/dimension/creative-gate surfaces. MUST be green before any pass is credited.
 
 ---
 
@@ -71,7 +71,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 34 FINDINGS (1C/2I/3obs) RESOLVED; **CLEAN-PASS COUNTER: 0/3**; Pass 35 pending | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 35 FINDINGS (0C/1I) RESOLVED; **CLEAN-PASS COUNTER: 0/3**; Pass 36 pending | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -80,9 +80,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 35** (candidate clean #1). Pass-34 FINDINGS (1C/2I/3obs) all RESOLVED: F34-01(C) studio-of-agents.md directed:true mislabeled human-gated → D-013 creative gate (surviving I28-01 in arch roster; fresh-context catch value); F34-02(I) lipsync-animator SS-03→SS-04 + §3 counts corrected; F34-03(I) distribution "fifth seam"→"third of five adapter seams"; F34-04/05(obs) ADR-0004 seam narrative + studio SS-01/SS-02 rows; F34-06(obs) DEFERRED → FU-011. check (u) coverage gap closed (arch docs added). FU-007/FU-008/FU-010/FU-011 open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 36** (candidate clean #1). Pass-35 FINDINGS (0C/1I) RESOLVED: F35-01(I) adapter-protocols.md §1.3 base manifest `seam` enum omitted `online-services-adapter` (5th seam) → added (v1.4); cross-surface propagation gap (JSONC enum in code fence, gate blind spot); CI check (z) added (gate v1.29) closes the JSONC-enum blind spot. FU-007/FU-008/FU-010/FU-011 open (non-blocking).
 
-**Spec state:** prd v2.4; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.3; ADR-0006 v1.2; adapter-protocols.md v1.3; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.06.001 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; CI gate v1.28 (checks a–y + o.ii, ~33 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
+**Spec state:** prd v2.4; BC-INDEX v1.7; error-taxonomy v2.0 (255 codes / 31 families total / 246 active; E-GEN 9 retired); subsystem-decomposition v1.7 (P0=126/P1=42/P2=22); ARCH-INDEX v1.9 (13 subsystems); VP-INDEX v1.3; methodology-layer v1.11; ADR-0004 v1.3; ADR-0006 v1.2; adapter-protocols.md v1.4; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.3 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.1; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.06.001 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; CI gate v1.29 (checks a–z + o.ii, ~34 sub-assertions). Totals: 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority 126/42/22.
 
 ---
 
@@ -96,7 +96,8 @@ Loop protocol:
 | 32 | 2026-06-08 | FINDINGS | 0C / 1I / 2 obs RESOLVED | I-PASS32-01: spurious DI-007 on cinematic creative gate (4 BCs); O-PASS32-01: prd §8.4 typo 34→30 families; O-PASS32-02: check (u) comment fix; check (w) added; CI gate v1.26 | **0/3** (stays; findings pass) |
 | 33 | 2026-06-08 | FINDINGS | 0C / 1I / 2obs RESOLVED | F33-01: prd §4 NFR summary table missing NFR-036..041 → added (prd v2.4) + CI check (x)/gate v1.27; F33-03: BC-10.06.001 "compliance seam"→"compliance pipeline" (v1.2); F33-02: seam thesis human-adjudicated → D-017, STATE.md corrected | **0/3** (stays; findings pass) |
 | 34 | 2026-06-08 | FINDINGS | 1C / 2I / 3obs RESOLVED | F34-01(C): studio-of-agents.md directed:true mislabeled human-gated → D-013 creative gate (E-CIN-003) [surviving I28-01 in arch roster] (studio v1.4) + check (u) broadened to arch docs; F34-02(I): lipsync-animator SS-03→SS-04 + §3 counts (studio v1.4) + check (h) updated; F34-03(I): distribution "fifth seam"→"third of five" (prd-cap-009-010 v1.1) + check (y) added; F34-04(obs): ADR-0004 §Context/§Alt 4-seam→5-seam (v1.3); F34-05(obs): studio §3 SS-01/SS-02 rows; F34-06(obs): DEFERRED → FU-011. CI gate v1.28 | **0/3** (stays; findings pass) |
-| 35 | — | PENDING | — | — | — |
+| 35 | 2026-06-08 | FINDINGS | 0C / 1I / 0obs RESOLVED | F35-01(I): adapter-protocols.md §1.3 base manifest seam enum omitted online-services-adapter (5th seam) → added (v1.4); cross-surface propagation gap (JSONC enum in code fence, gate blind spot); CI check (z) added (gate v1.29) | **0/3** (stays; findings pass) |
+| 36 | — | PENDING | — | — | — |
 
 ---
 
@@ -112,7 +113,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–34 all resolved/clean; Pass 34 FINDINGS (1c/2i/3obs) RESOLVED (studio D-013 catch [F34-01], lipsync SS-04 [F34-02], seam ordinal [F34-03/04], SS-01/02 rows [F34-05]); counter **0/3**; Pass 35 pending | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–35 all resolved/clean; Pass 35 FINDINGS (0c/1i) RESOLVED (adapter-protocols seam-enum [F35-01]: §1.3 base manifest omitted online-services-adapter; gate check (z) added); counter **0/3**; Pass 36 pending | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -188,13 +189,13 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-08
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–34 DONE.
-**Phase-1d Pass 34:** FINDINGS (1C/2I/3obs) RESOLVED. F34-01(C): studio-of-agents.md role-52 `directed:true` cell mislabeled as human-gated — corrected to D-013 creative gate (E-CIN-003); surviving I28-01 in arch roster; check (u) broadened to arch docs (studio v1.4). F34-02(I): lipsync-animator (role-54) subsystem SS-03→SS-04; §3 counts SS-03 16→15, SS-04 23→24 (studio v1.4); check (h) expected values updated. F34-03(I): distribution adapter ordinal "fifth seam"→"third of five adapter seams" (prd-cap-009-010 v1.1); check (y) added (seam-ordinal collision guard). F34-04(obs): ADR-0004 §Context/§Alternatives updated from 3-axes/4-frameworks to 4-axes/5-frameworks (v1.3). F34-05(obs): studio §3 SS-01/SS-02 explicit rows added (0 by design). F34-06(obs): DEFERRED → FU-011 (NFR parity gap). **Clean-pass counter stays 0/3** (findings pass; does not increment).
-**Next action:** `phase-1d-adversarial` — **Pass 35** (candidate clean #1). FU-007/FU-008/FU-010/FU-011 remain open (non-blocking).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–35 DONE.
+**Phase-1d Pass 35:** FINDINGS (0C/1I) RESOLVED. F35-01(I): adapter-protocols.md §1.3 base Capability Manifest `seam` field enum listed only 4 seam tokens (engine, asset, distribution, XR) — omitting `online-services-adapter` (the 5th seam). §6/§7 already had it; §1.3 JSONC code-fence was the gap. Fix: added `online-services-adapter` to §1.3 enum (adapter-protocols.md v1.4). Root cause: cross-surface propagation gap — JSONC enum inside code fence was not covered by any prior CI check. CI gate v1.29 adds check (z): asserts §1.3 enum token-set equals §8 compatibility-matrix seam-key set (both must be exactly 5 tokens). **Clean-pass counter stays 0/3** (findings pass; does not increment).
+**Next action:** `phase-1d-adversarial` — **Pass 36** (candidate clean #1). FU-007/FU-008/FU-010/FU-011 remain open (non-blocking).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.28 (checks a–y + o.ii, ~33 sub-assertions).
+**Spec totals:** 190 BCs / 255 error codes (246 active) / 41 NFRs / 15 caps / 13 subsystems / priority P0=126/P1=42/P2=22 / CI gate v1.29 (checks a–z + o.ii, ~34 sub-assertions).
 **Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking), FU-011 (non-blocking). FU-009 CLOSED (Pass-24).
-**Version bumps Pass 34:** studio-of-agents v1.4, prd-cap-009-010 v1.1, ADR-0004 v1.3, CI gate v1.28.
+**Version bumps Pass 35:** adapter-protocols.md v1.4, CI gate v1.29.
 **D-014/015/016/017:** see Decisions Log. D-014/D-015 flagged for human gate.
-**Unpushed main commits:** v1.27 (e3fb80b) + v1.28 (pending commit) — 2 commits ahead of origin/main; awaiting user push authorization.
+**Unpushed main commits:** v1.27 (e3fb80b) + v1.28 (960d2c2) + v1.29 (7a1498f) — 3 commits ahead of origin/main; awaiting user push authorization.
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`

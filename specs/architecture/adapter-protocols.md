@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -39,6 +39,14 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Adapter Protocol Family
+
+> **v1.4 changes (Pass-35 F35-01 — §1.3 base manifest seam enum completeness):**
+> - §1.3 Capability Manifest Schema: added `online-services-adapter` to the `seam` field
+>   enum so all five seam values are present. The enum previously listed only four seams
+>   (engine, asset, distribution, XR), omitting the fifth (online-services). This was
+>   inconsistent with the §1.3 prose ("All five seams use a variant of this top-level
+>   shape"), §6.2's `"seam": "online-services-adapter"` field, and the §8 compatibility
+>   matrix which correctly includes the `online-services-adapter` row. (F35-01)
 
 > **v1.3 changes (Pass-19 O1 — determinism tier wire-vs-record naming convention note):**
 > - §2.3 Determinism Tier: added explicit convention note documenting that the JSON-RPC
@@ -143,7 +151,7 @@ of this top-level shape:
 
 ```jsonc
 {
-  "seam":            "<engine-adapter|asset-adapter|distribution-adapter|xr-adapter>",
+  "seam":            "<engine-adapter|asset-adapter|distribution-adapter|xr-adapter|online-services-adapter>",
   "targetId":        "<engine-name | backend-name | platform-name>",
   "targetVersion":   "<pinned version string>",          // mandatory; see §1.6
   "adapterVersion":  "<semver>",
