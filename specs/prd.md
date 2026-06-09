@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "2.4"
+version: "2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -363,6 +363,7 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | 1.6 | 2026-06-08 | product-owner | CI check (k) completeness fix: registered 57 E-codes referenced by ss-04 (BC-4.01.*–4.06.*) and ss-13 (BC-13.02.*–13.04.*) BCs that were unregistered. New families: E-AAG (7), E-SVC (6), E-QG (11), E-SHIP (3), E-ING (4), E-GLG (5), E-MOD (11), E-MKT (4). E-PRV extended (+5 codes: 001/002/003/020/030). E-XR extended (+1 code: 007). E-GEN retired — orphaned placeholder, never referenced by any BC (9 codes remain in retired table, still counted by CI). CI-computed total: 139 + 57 = **196 total registered codes** (187 active, 9 retired E-GEN). 29 active families. BC count unchanged at 178 |
 | 1.7 | 2026-06-08 | product-owner | Pass-9 adversarial fixes: E-COMP-011 registered (disclosure_class out-of-vocabulary at manifest aggregation — distinct from E-COMP-010 missing-field; BC-10.05.001 v1.2 uses E-COMP-011 for vocab fault); E-COMP-012 registered (NFT flag divergence seam guard — nft_blockchain/nft_mechanics inconsistency; BC-10.01.001 v1.1 emits on divergence; INV-2 fail-closed: PEGI-18 if EITHER NFT flag true). +2 codes: **198 total registered codes** (189 active, 9 retired E-GEN). BC count unchanged at 178. methodology-layer v1.3 §3.0 canonical dimension field table added; BC-9.04.001/9.06.001/9.06.002 dimension field renamed distribution_readiness→cert_preflight. |
 | 1.9 | 2026-06-08 | product-owner | CAP-015 Online-Services Adapter (fifth seam, SS-13, Tier 1): +12 BCs (BC-15.01.001..002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001); new E-OSVC error family (15 codes); CAP-015 added to domain-spec/capabilities.md; prd-cap-015.md created; NFR-036..041 added (identity/leaderboard/entitlement/save latency, graceful degradation, tampered-score rejection). Grand total: 178→190 BCs. Error codes: 198→213 total (189→204 active). Families: 29→30 active. |
+| 2.5 | 2026-06-08 | product-owner | Pass-36 O36-02 fix: removed duplicate changelog line in §8.4 — "*v1.1: All 14 capability families had defined error families. 10 new families added." appeared twice consecutively; one redundant occurrence removed. No counts, BCs, NFRs, or error codes changed. |
 | 2.4 | 2026-06-08 | product-owner | Pass-33 F33-01 fix: added NFR-036..041 (CAP-015 online-services) rows to §4 NFR summary table; table now enumerates all 41 NFRs consistent with §4 prose claim. NFR count unchanged at 41. No BC or error-code changes. |
 | 2.3 | 2026-06-08 | product-owner | Pass-32 O-PASS32-01 fix: §8.4 v2.0 ledger entry family-count typo corrected 34→30 active families (authoritative: 30 active + 1 retired E-GEN = 31 total; prd.md:233/270 and error-taxonomy.md:806 are canonical). No code/BC/NFR count changes. |
 | 2.2 | 2026-06-08 | product-owner | Pass-20 symbolic token reconciliation: E-KB extended 7→26 (+19 codes E-KB-008..026); E-PLAY extended 5→15 (+10 codes E-PLAY-006..015); E-REPLAY extended 7→18 (+11 codes E-REPLAY-008..018); E-NAR extended 4→6 (+2 codes E-NAR-005/006 — F-20-02 fix: "E-NAR-003 variant" language removed). OBS-20-A: BC-12.12.004 Invariant 2 reworded to permit shared ordinals for concurrent:true events. OBS-20-B: CAP-012 Canon-KB declared authoritative timeline store; CAP-005 BC-5.04.002 declared consumer view. Total error codes: 213→255 (204→246 active). BC count unchanged: 190. |
@@ -424,8 +425,6 @@ Total (v1.5): 139 error codes across 22 families. See `error-taxonomy.md §Cover
 E-ETH-009 added for DP-007 enforcement. E-GEN-004 vocabulary corrected to canonical three
 values `[pre-generated, live-generated, procedural-exempt]`. E-ETH-005 "(DP-007 equivalent)"
 mislabel removed. E-SIM-009 identifier corrected from `(D-012)` to `(DI-012)`.
-
-*v1.1:* All 14 capability families had defined error families. 10 new families added.
 
 *v1.1:* All 14 capability families had defined error families. 10 new families added.
 E-EAP extended with E-EAP-011. 137 codes across 21 families. **FU-003 closed.**
