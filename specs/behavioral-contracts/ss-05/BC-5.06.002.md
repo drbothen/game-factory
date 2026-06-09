@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -20,7 +20,8 @@ capability: CAP-005
 priority: P0
 lifecycle_status: active
 introduced: v1.0.0
-modified: []
+modified:
+  - v1.2: F38-01 fix — E-CIN-003 mis-citation corrected to E-PRV-030 at all sites for SAG-AFTRA likeness-consent ship-build gate (PC4c, test vector, Error Codes, Related-BC rows)
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -72,7 +73,8 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
    b. If status is `"signed"`: the lip-sync output is accepted for use in the ship build.
    c. If status is `"pending"` or `"unsigned"`: a `human-gated` SAG-AFTRA signature task
       is surfaced; the character's lip-sync output may be used in dev builds but is
-      blocked from ship build until signed. E-CIN-003 is raised for the ship-build gate.
+      blocked from ship build until signed. E-PRV-030 is raised for the ship-build gate
+      ("ship build contains asset with outstanding SAG-AFTRA likeness consent task").
 5. A `lip-sync-validation-report` is emitted with: method used, blendshape range pass/fail,
    alignment tolerance pass/fail, consent status.
 
@@ -105,7 +107,7 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 | Audio2Face-3D output, 52 ARKit blendshape tracks, all values [0.0, 1.0], audio-aligned within 50ms, likeness_consent_ref=null | lip-sync-validation-report: pass; accepted for ship build | happy-path |
 | Blendshape track `jawOpen` has value 1.15 at keyframe 42 | E-CIN-004: blendshape 'jawOpen' value 1.15 at frame 42 outside [0.0, 1.0] | error |
 | Only 48 blendshape tracks present (missing 4 ARKit shapes) | E-CIN-004: missing blendshape tracks [list of 4] | error |
-| likeness_consent_ref points to unsigned consent record | lip-sync-validation report: other checks pass; SAG-AFTRA task surfaced; dev-build: accepted; ship-build: blocked | edge-case |
+| likeness_consent_ref points to unsigned consent record | lip-sync-validation report: other checks pass; SAG-AFTRA task surfaced; dev-build: accepted; ship-build: blocked (E-PRV-030 at ship-gate evaluation) | edge-case |
 | Audio 3.2s, blendshapes 3.5s, tolerance=100ms | Warning: alignment diff=300ms > 100ms; accepted with warning | edge-case |
 
 ## Verification Properties
@@ -123,11 +125,13 @@ likeness (`likeness_consent_ref != null`), a SAG-AFTRA signature flow is trigger
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the `lip-sync-pipeline-contract` is listed in RECONCILIATION §6.3 (cinematics additions) as a primary cinematic artifact produced by the lipsync-animator agent within CAP-005. |
 | L2 Domain Invariants | DI-006 (human-gated tasks surfaced — SAG-AFTRA consent) |
 | Architecture Module | SS-04 — lip-sync pipeline; ARKit-52 blendshape validator; voice-consent-registry |
+| Error Codes | E-CIN-001 (broken blendshapes_ref), E-CIN-004 (blendshape range/completeness violation), E-PRV-030 (SAG-AFTRA likeness consent outstanding at ship gate — PC4c) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
 
 - BC-5.06.001 — composes with (blendshapes_ref is a track in the sequence-graph)
+- BC-4.03.004 — depends on (authoritative SAG-AFTRA ship-block mechanism; E-PRV-030 is defined and enforced there; this BC surfaces the same gate for lip-sync assets with `likeness_consent_ref != null`)
 
 ## Architecture Anchors
 
