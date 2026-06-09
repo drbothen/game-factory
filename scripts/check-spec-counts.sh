@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.27
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.28
 #
 # PURPOSE
 # -------
@@ -210,6 +210,24 @@
 #   the prd.md summary view even if the count prose is separately (in)correct.
 #   Currently both sets are {NFR-001 .. NFR-041} (41 members) — PASSES after F33-01
 #   fix (prd.md v2.4). POSIX/BSD-grep/awk compatible (no grep -P).
+# extended in v1.28 to:
+#   (1) Broaden check (u) — human-gated/creative-gate term-misuse guard (F34-01
+#       recurrence prevention): BROADENED scan corpus from BC-files-only to
+#       BC files + ALL architecture/*.md files (flat + adrs/ subdir, incl.
+#       studio-of-agents.md). The F34-01 process-gap showed the prior BC-only scan
+#       missed studio-of-agents.md:157's "`directed:true` = human-gated" roster
+#       table-cell because that file is an architecture doc, not a BC file.
+#       After the F34-01 content fix, this must report 0 violations.
+#       Updated check (h) expected values: SS-03 16→15, SS-04 23→24 (F34-02).
+#   (2) Add check (y) — seam-ordinal collision guard (F34-03 recurrence
+#       prevention): asserts NO operative line labels the distribution adapter
+#       as the "fifth" seam (it is the third), and asserts "fifth seam" co-occurs
+#       ONLY with online-services context. Canonical ordering (ADR-0004/D-017):
+#       engine=1, asset=2, distribution=3, XR=4, online-services=5. Green after
+#       PO's prd-cap-009-010.md v1.1 fix ("third of the five adapter seams").
+#       POSIX/BSD compatible. (F34-03 recurrence prevention).
+# Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y + o.ii.
 #   Positive-coverage log always printed. (F33-01 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
@@ -627,6 +645,9 @@ ordinal_violations=0
 x_violations=0
 x_catalog_count=0
 x_prd_count=0
+# (y) seam-ordinal collision counters: initialized here so SUMMARY is safe if check is skipped
+y_violations=0
+y_files_scanned=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -647,7 +668,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.27) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.28) ==="
 echo ""
 
 # ============================================================================
@@ -1369,8 +1390,10 @@ fi
 # Assert the §3 table totals in studio-of-agents.md match the canonical values
 # derived from the §2 roster (counting rule: each role counted under every SS-NN
 # listed in its row). Expected totals (ADAPT+NEW):
-#   SS-03=16  SS-04=23  SS-05=6  SS-06=3  SS-07=3  SS-08=12
+#   SS-03=15  SS-04=24  SS-05=6  SS-06=3  SS-07=3  SS-08=12
 #   SS-09=2   SS-10=5   SS-11=10 SS-12=1  SS-13=1
+# v1.28 (F34-02): lipsync-animator role 54 moved SS-03→SS-04;
+#   SS-03 corrected 16→15; SS-04 corrected 23→24.
 # v1.13 (Pass-13 C13-01): SS-11 corrected 11→10 (role 58 moved SS-11→SS-13);
 #   SS-13 added (online-services-adapter; backend-services-engineer role 58).
 # §6 tier subtotals: Tier 1=53, Tier 2=13, sum line "53 + 13 = 66".
@@ -1385,9 +1408,10 @@ if [[ ! -f "$STUDIO_AGENTS" ]]; then
 else
   # Expected per-SS total appearances (ADAPT + NEW combined)
   # Format: "SS-NN:expected"
+  # v1.28 (F34-02): lipsync-animator moved SS-03→SS-04; SS-03 16→15, SS-04 23→24.
   declare -a SS_EXPECTED=(
-    "SS-03:16"
-    "SS-04:23"
+    "SS-03:15"
+    "SS-04:24"
     "SS-05:6"
     "SS-06:3"
     "SS-07:3"
@@ -4183,24 +4207,43 @@ echo ""
 #   Lines starting with ">" (blockquote / changelog annotation lines)
 #   Lines containing "reason:" (YAML frontmatter lifecycle prose)
 #
-# SCANS: all BC-*.md files under BC_DIR ss-NN/ subdirectories (same corpus as check (a)).
+# SCANS: all BC-*.md files under BC_DIR ss-NN/ subdirectories AND all *.md files
+#   under .factory/specs/architecture/ (flat + adrs/ subdir). The F34-01 process-gap
+#   showed that studio-of-agents.md roster table cells (non-BC format) were not
+#   caught by the BC-only scan. The broadened scope closes that class.
+#   [BROADENED v1.28, F34-01]: architecture docs added to scan corpus.
 #
 # EXPECTED: FAIL until PO fixes BC-5.06.001, BC-12.12.008, BC-7.04.001, BC-7.05.001.
-# Green automatically after PO work.
-echo "--- (u) human-gated/creative-gate term-misuse guard (I28-01 recurrence prevention) ---"
+# Green automatically after PO work. Architecture files must be clean after F34-01 fix.
+echo "--- (u) human-gated/creative-gate term-misuse guard (I28-01/F34-01 recurrence prevention) ---"
 echo "    Convention: directed:true cinematic-director sign-off is an internal creative gate"
 echo "    (E-CIN-003 / D-013). human-gated vocabulary is reserved for external acts"
 echo "    (SAG-AFTRA consent, console cert, store publish, legal review)."
 echo "    NOTE: DI-007 is the PLAYTEST gate, not the cinematic creative gate."
+echo "    Scope (v1.28): BC files AND architecture/*.md files (incl. studio-of-agents.md)."
 
 u_violations=0
 u_lines_scanned=0
 u_creative_gate_lines=0
 u_violation_msgs=()
 
-# Scan every BC file (depth-2 BC-*.md files, same set as check (a))
-while IFS= read -r bcfile; do
-  [[ ! -f "$bcfile" ]] && continue
+# Build the combined file list: BC files + architecture *.md files.
+# BC files: depth-2 BC-*.md under BC_DIR (same as check (a)).
+# Architecture files: all *.md under .factory/specs/architecture/ (flat + subdirs).
+# We use a temporary file list to avoid nested process substitutions.
+u_scan_bc_files=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort 2>/dev/null || true)
+u_scan_arch_files=$(find "$REPO_ROOT/.factory/specs/architecture" -name "*.md" | sort 2>/dev/null || true)
+u_all_scan_files=$(printf '%s\n%s\n' "$u_scan_bc_files" "$u_scan_arch_files" | grep -v '^$' | sort -u || true)
+
+while IFS= read -r ufile; do
+  [[ ! -f "$ufile" ]] && continue
+  # Compute a short relative label for the violation message
+  u_rel_label="${ufile#$REPO_ROOT/.factory/specs/}"
+  # Fall back: if prefix strip didn't work (e.g. BC_DIR path), strip BC_DIR prefix
+  if [[ "$u_rel_label" == "$ufile" ]]; then
+    u_rel_label="${ufile#$BC_DIR/}"
+  fi
+
   while IFS= read -r uline; do
     u_lines_scanned=$(( u_lines_scanned + 1 ))
 
@@ -4271,7 +4314,7 @@ while IFS= read -r bcfile; do
     esac
     if [[ $has_external_act -eq 1 ]]; then
       if [[ "$VERBOSE" == true ]]; then
-        echo "    OK [u exempt] $bcfile: external-act exemption applies — line: $(printf '%s' "$uline" | cut -c1-100)"
+        echo "    OK [u exempt] $ufile: external-act exemption applies — line: $(printf '%s' "$uline" | cut -c1-100)"
       fi
       continue
     fi
@@ -4306,7 +4349,7 @@ while IFS= read -r bcfile; do
     ' 2>/dev/null || printf '0')
     if [[ "$has_negation" == "1" ]]; then
       if [[ "$VERBOSE" == true ]]; then
-        echo "    OK [u negation] $bcfile: negation-clause exemption ('not...human-gated') — line: $(printf '%s' "$uline" | cut -c1-100)"
+        echo "    OK [u negation] $ufile: negation-clause exemption ('not...human-gated') — line: $(printf '%s' "$uline" | cut -c1-100)"
       fi
       continue
     fi
@@ -4314,14 +4357,13 @@ while IFS= read -r bcfile; do
     # FAIL: human-gated vocabulary applied to cinematic-director creative gate
     # without any external-act exemption or negation exemption.
     u_violations=$(( u_violations + 1 ))
-    rel_bcfile="${bcfile#$BC_DIR/}"
-    u_violation_msgs+=("$rel_bcfile: human-gated vocabulary applied to creative-gate context (must use E-CIN-003/D-013, not human-gated/DI-006; DI-007 is the playtest gate) — line: $(printf '%s' "$uline" | cut -c1-120)")
+    u_violation_msgs+=("$u_rel_label: human-gated vocabulary applied to creative-gate context (must use E-CIN-003/D-013, not human-gated/DI-006; DI-007 is the playtest gate) — line: $(printf '%s' "$uline" | cut -c1-120)")
 
-  done < "$bcfile"
-done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort)
+  done < "$ufile"
+done <<< "$u_all_scan_files"
 
 # Positive-coverage log (always printed — detects zero-scan / inert run)
-echo "    Check (u): $u_lines_scanned BC lines scanned for human-gated/creative-gate term misuse, $u_creative_gate_lines creative-gate-context lines validated."
+echo "    Check (u): $u_lines_scanned lines scanned (BC + architecture docs) for human-gated/creative-gate term misuse, $u_creative_gate_lines creative-gate-context lines validated."
 echo "    Human-gated/creative-gate term-misuse violations: $u_violations"
 
 if [[ $u_violations -gt 0 ]]; then
@@ -4623,6 +4665,200 @@ fi
 echo ""
 
 # ============================================================================
+# (y) SEAM-ORDINAL COLLISION GUARD  [NEW v1.28, F34-03]
+# ============================================================================
+# CANONICAL ORDERING (ADR-0004 / D-017 / subsystem-decomposition.md):
+#   Seam 1 = engine-adapter (SS-01)
+#   Seam 2 = asset-adapter (SS-03)
+#   Seam 3 = distribution-adapter (SS-08)
+#   Seam 4 = XR-adapter (SS-12)
+#   Seam 5 = online-services-adapter (SS-13)
+#
+# F34-03 defect class: operative prose labeled the distribution adapter as "the
+# fifth seam" when it is the THIRD. The product owner fixed prd-cap-009-010.md
+# v1.1 to say "third of the five adapter seams." This guard prevents recurrence.
+#
+# ASSERTION 1: No operative line labels the distribution adapter as the "fifth"
+#   seam. Pattern: any line containing BOTH a distribution-adapter context keyword
+#   (distribution-adapter, distribution adapter, SS-08, "distribution seam",
+#   "steamcmd", "butler", "fastlane", "store/distribution", "cert/dist") AND the
+#   ordinal "fifth" (case-insensitive) is a FAIL (distribution = third, not fifth).
+#
+# ASSERTION 2: Any operative line that uses "fifth adapter seam" or "fifth seam"
+#   (case-insensitive) in a seam-ordinal context MUST co-occur with an
+#   online-services context keyword (online-services, online-services-adapter,
+#   SS-13, "fifth seam" + "online", "BaaS", "nakama", "matchmaking",
+#   "leaderboard", "identity/saves"). If "fifth seam" appears without an
+#   online-services context keyword, it is a FAIL.
+#
+# EXCLUSIONS:
+#   Lines starting with ">" (blockquote / changelog annotation lines)
+#   Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#
+# SCOPE: all .factory/specs/ *.md files (BC files + architecture docs +
+#   domain-spec + prd.md + prd-supplements) — same broad scope as (o.ii).
+#
+# POSITIVE-COVERAGE LOG: "Check (y): N files scanned for seam-ordinal collision;
+#   K violations found." always printed.
+#
+# EXPECTED: GREEN after PO's prd-cap-009-010.md v1.1 fix (distribution → "third").
+# POSIX/BSD compatible (no grep -P). (F34-03 recurrence prevention).
+echo "--- (y) seam-ordinal collision guard (F34-03 recurrence prevention) ---"
+echo "    Canonical: engine=1, asset=2, distribution=3, XR=4, online-services=5."
+echo "    Assert: distribution-adapter NOT labeled 'fifth'; 'fifth seam' ONLY with online-services context."
+
+y_violations=0
+y_violation_msgs=()
+y_files_scanned=0
+
+# Build file list: all *.md under .factory/specs/ (recursive).
+y_scan_files=$(find "$REPO_ROOT/.factory/specs" -name "*.md" 2>/dev/null | sort || true)
+
+while IFS= read -r yfile; do
+  [[ ! -f "$yfile" ]] && continue
+  y_files_scanned=$(( y_files_scanned + 1 ))
+  y_rel="${yfile#$REPO_ROOT/}"
+
+  # Read all non-excluded operative lines from this file once.
+  # Exclusion: lines starting with ">" and lines containing "reason:".
+  operative_lines=$(grep -v '^>' "$yfile" 2>/dev/null | grep -v 'reason:' || true)
+  [[ -z "$operative_lines" ]] && continue
+
+  # --- ASSERTION 1: distribution-adapter NOT labeled "fifth" ---
+  # Trigger: line contains distribution-adapter context keyword AND the word "fifth".
+  # Distribution-adapter context keywords (case-insensitive):
+  #   distribution-adapter, distribution adapter, SS-08, distribution seam,
+  #   steamcmd, butler, fastlane, store/distribution, cert/dist
+  # We check case-insensitively by lowercasing the line.
+  while IFS= read -r yline; do
+    yline_lc=$(printf '%s' "$yline" | tr '[:upper:]' '[:lower:]')
+
+    # Must contain "fifth"
+    case "$yline_lc" in
+      *"fifth"*) ;;
+      *) continue ;;
+    esac
+
+    # Must contain a distribution-adapter context keyword
+    has_dist_ctx=0
+    case "$yline_lc" in
+      *"distribution-adapter"*)  has_dist_ctx=1 ;;
+      *"distribution adapter"*)  has_dist_ctx=1 ;;
+      *"ss-08"*)                 has_dist_ctx=1 ;;
+      *"distribution seam"*)     has_dist_ctx=1 ;;
+      *"steamcmd"*)              has_dist_ctx=1 ;;
+      *"fastlane"*)              has_dist_ctx=1 ;;
+      *"store/distribution"*)    has_dist_ctx=1 ;;
+      *"cert/dist"*)             has_dist_ctx=1 ;;
+    esac
+    # "butler" alone too common in prose; require "butler" + "distribution" or "butler" + "seam"
+    if [[ $has_dist_ctx -eq 0 ]]; then
+      case "$yline_lc" in
+        *"butler"*)
+          case "$yline_lc" in
+            *"distribution"*|*"seam"*|*"release"*) has_dist_ctx=1 ;;
+          esac
+          ;;
+      esac
+    fi
+    [[ $has_dist_ctx -eq 0 ]] && continue
+
+    # Distribution-adapter context + "fifth" = violation
+    y_violations=$(( y_violations + 1 ))
+    y_violation_msgs+=("${y_rel}: distribution-adapter labeled 'fifth' (must be 'third'); canonical: engine=1 asset=2 distribution=3 XR=4 online-services=5 — line: $(printf '%s' "$yline" | cut -c1-120)")
+  done <<< "$operative_lines"
+
+  # --- ASSERTION 2: "fifth seam" / "fifth adapter seam" with a NON-online-services adapter context ---
+  # Pattern: line contains "fifth" + "seam" AND a WRONG adapter context keyword (engine,
+  # asset/generative, distribution, or XR — NOT online-services) → FAIL.
+  # Rationale: lines that say "fifth seam" without any adapter context are ambiguous prose
+  # (e.g., a line that says "This is the fifth adapter seam" in a paragraph that is clearly
+  # about online-services but whose context keywords span multiple lines) and should PASS.
+  # Only flag when "fifth seam" is ALSO anchored to a non-online-services adapter by a
+  # context keyword ON THE SAME LINE.
+  while IFS= read -r yline; do
+    yline_lc=$(printf '%s' "$yline" | tr '[:upper:]' '[:lower:]')
+
+    # Must contain "fifth" and "seam" on the same line
+    case "$yline_lc" in
+      *"fifth"*) ;;
+      *) continue ;;
+    esac
+    case "$yline_lc" in
+      *"seam"*) ;;
+      *) continue ;;
+    esac
+
+    # Must NOT be a load-bearing-seam ordinal line (those are caught by o.ii, not here)
+    # Exclude "fifth load-bearing seam" from this check to avoid double-counting with o.ii.
+    case "$yline_lc" in
+      *"load-bearing seam"*) continue ;;
+    esac
+
+    # Check for online-services context keyword (PASS if present — this seam IS the fifth)
+    has_online_ctx=0
+    case "$yline_lc" in
+      *"online-services"*)   has_online_ctx=1 ;;
+      *"online services"*)   has_online_ctx=1 ;;
+      *"ss-13"*)             has_online_ctx=1 ;;
+      *"baas"*)              has_online_ctx=1 ;;
+      *"nakama"*)            has_online_ctx=1 ;;
+      *"matchmaking"*)       has_online_ctx=1 ;;
+      *"leaderboard"*)       has_online_ctx=1 ;;
+      *"identity/saves"*)    has_online_ctx=1 ;;
+    esac
+    [[ $has_online_ctx -eq 1 ]] && continue
+
+    # Check for a WRONG adapter context: engine, asset, distribution, or XR on the same line.
+    # If none of these wrong-adapter context keywords are present, the line is ambiguous
+    # (e.g., "This is the fifth adapter seam" in isolation) and passes.
+    has_wrong_adapter_ctx=0
+    case "$yline_lc" in
+      *"engine-adapter"*)         has_wrong_adapter_ctx=1 ;;
+      *"engine adapter"*)         has_wrong_adapter_ctx=1 ;;
+      *"ss-01"*)                  has_wrong_adapter_ctx=1 ;;
+      *"asset-adapter"*)          has_wrong_adapter_ctx=1 ;;
+      *"asset adapter"*)          has_wrong_adapter_ctx=1 ;;
+      *"generative asset"*)       has_wrong_adapter_ctx=1 ;;
+      *"ss-03"*)                  has_wrong_adapter_ctx=1 ;;
+      *"distribution-adapter"*)   has_wrong_adapter_ctx=1 ;;
+      *"distribution adapter"*)   has_wrong_adapter_ctx=1 ;;
+      *"distribution seam"*)      has_wrong_adapter_ctx=1 ;;
+      *"ss-08"*)                  has_wrong_adapter_ctx=1 ;;
+      *"steamcmd"*)               has_wrong_adapter_ctx=1 ;;
+      *"fastlane"*)               has_wrong_adapter_ctx=1 ;;
+      *"store/distribution"*)     has_wrong_adapter_ctx=1 ;;
+      *"xr-adapter"*)             has_wrong_adapter_ctx=1 ;;
+      *"xr adapter"*)             has_wrong_adapter_ctx=1 ;;
+      *"xr seam"*)                has_wrong_adapter_ctx=1 ;;
+      *"ss-12"*)                  has_wrong_adapter_ctx=1 ;;
+      *"openxr"*)                 has_wrong_adapter_ctx=1 ;;
+    esac
+    [[ $has_wrong_adapter_ctx -eq 0 ]] && continue
+
+    # "fifth seam" + non-online-services adapter context = wrong ordinal → FAIL
+    y_violations=$(( y_violations + 1 ))
+    y_violation_msgs+=("${y_rel}: 'fifth seam' co-occurs with non-online-services adapter context (canonical fifth seam = online-services-adapter/SS-13; engine=1, asset=2, distribution=3, XR=4) — line: $(printf '%s' "$yline" | cut -c1-120)")
+  done <<< "$operative_lines"
+
+done <<< "$y_scan_files"
+
+# Positive-coverage log (always printed)
+echo "    Check (y): $y_files_scanned files scanned for seam-ordinal collision; $y_violations violation(s) found."
+
+if [[ $y_violations -gt 0 ]]; then
+  echo ""
+  echo "    SEAM-ORDINAL COLLISION VIOLATIONS (F34-03 recurrence prevention):"
+  echo "    Canonical: engine=1, asset=2, distribution=3 (SS-08), XR=4 (SS-12), online-services=5 (SS-13)."
+  for ymsg in "${y_violation_msgs[@]}"; do
+    echo "      $ymsg"
+  done
+  errors+=("MISMATCH [seam-ordinal collision (y)]: $y_violations operative line(s) apply wrong ordinal to a seam — distribution-adapter must be 'third'; 'fifth seam' must co-occur with online-services context (F34-03 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -4660,6 +4896,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  human-gated/creative-gate (u):    $u_lines_scanned lines scanned, $u_creative_gate_lines creative-gate lines validated, 0 term-misuse violations"
   echo "  DI-007-on-creative-gate (w):      $w_lines_scanned lines scanned, $w_creative_gate_lines DI-007+creative-gate lines evaluated, 0 mis-anchor violations"
   echo "  NFR §4 ID-set parity (x):         $x_catalog_count catalog IDs == $x_prd_count prd.md §4 IDs, 0 membership violations"
+  echo "  Seam-ordinal collision (y):        $y_files_scanned files scanned, 0 collision violations (distribution=3rd, online-services=5th)"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
