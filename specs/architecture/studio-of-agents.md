@@ -2,7 +2,7 @@
 document_type: architecture
 level: L3
 section: studio-of-agents
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -23,6 +23,21 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Studio-of-Agents
 
+> **v1.4 — Pass-34 adversarial defect fixes F34-01, F34-02, F34-05.**
+> - **F34-01:** Role 52 (`cinematic-director`) artifact cell corrected: removed
+>   `` `directed:true` = human-gated `` mislabel. `directed:true` is the D-013
+>   creative gate enforced by E-CIN-003, NOT the ADR-0007 `human-gated` fidelity
+>   tier (reserved exclusively for external third-party acts). Cell now reads:
+>   `` `directed:true` = D-013 creative gate (E-CIN-003) ``.
+> - **F34-02:** Role 54 (`lipsync-animator`) subsystem corrected SS-03 → SS-04
+>   (its artifact `lip-sync-pipeline-contract` = BC-5.06.002, owned by CAP-005
+>   under SS-04). §3 per-SS counts adjusted: SS-03 16→15, SS-04 23→24. Wave 2
+>   tree listing unchanged (lipsync-animator was already in Wave 2 Engineering
+>   Integration, which is correct). The §6 tier subtotals are UNCHANGED (53+13=66).
+> - **F34-05:** §3 Disposition Breakdown table now includes explicit SS-01 and
+>   SS-02 rows (0 game-discipline roles each; staffed by REUSE infra agents by
+>   design) to distinguish "0 by design" from "accidentally omitted."
+>
 > **v1.3 — Pass-13 adversarial defect C13-01 / I13-01 (online-services seam).**
 > - **I13-01:** Role 58 (`backend-services-engineer`) owning subsystem corrected
 >   SS-11 → SS-13 (Online-Services Adapter). Online-services is Tier-1 always-on;
@@ -154,9 +169,9 @@ in v1.0/v1.5/v2.0 research integration.
 | 49 | `community-manager` | Marketing | SS-08, SS-11 | NEW | C | `campaign-beat-plan`; live engagement = human-gated |
 | 50 | `compliance-officer` | Compliance | SS-08 | NEW | C | `compliance-checklist`, `ratings-submission-manifest`, `privacy-config-contract` |
 | 51 | `ratings-submitter` | Compliance | SS-08 | NEW | S | `ai-disclosure-manifest`, `ratings-submission-manifest` |
-| 52 | `cinematic-director` | Cinematics | SS-04 | NEW | C | `cinematic-spec`, `sequence-graph`; `directed:true` = human-gated |
+| 52 | `cinematic-director` | Cinematics | SS-04 | NEW | C | `cinematic-spec`, `sequence-graph`; `directed:true` = D-013 creative gate (E-CIN-003) |
 | 53 | `camera-cinematography` | Cinematics | SS-04 | NEW | S | `camera-rules-profile` |
-| 54 | `lipsync-animator` | Cinematics | SS-03 | NEW | S | `lip-sync-pipeline-contract` (ARKit-52 blendshapes) |
+| 54 | `lipsync-animator` | Cinematics | SS-04 | NEW | S | `lip-sync-pipeline-contract` (ARKit-52 blendshapes) |
 | 55 | `security-engineer` | Security | SS-06 | NEW | S | `security-requirements-contract`, `server-authority-invariant-suite` |
 | 56 | `anti-cheat-integrator` | Security | SS-11 | NEW | S | `anti-cheat-integration-adapter` (EAC/EOS wrap-only) |
 | 57 | `moderation-ops` | Security / Trust | SS-11 | NEW | C | `moderation-pipeline-contract`; judgment = human-gated |
@@ -182,8 +197,10 @@ in v1.0/v1.5/v2.0 research integration.
 
 | SS | Name | ADAPT | NEW | Total appearances |
 |----|------|-------|-----|-------------------|
-| SS-03 | Asset Generation Pipeline | 0 | 16 | 16 (cross-listed) |
-| SS-04 | Multi-Discipline Production | 3 | 20 | 23 (cross-listed) |
+| SS-01 | Engine-Adapter Protocol | 0 | 0 | 0 (staffed by REUSE infra agents; no game-discipline studio roles by design) |
+| SS-02 | Deterministic Replay Harness | 0 | 0 | 0 (staffed by REUSE infra agents; no game-discipline studio roles by design) |
+| SS-03 | Asset Generation Pipeline | 0 | 15 | 15 (cross-listed) |
+| SS-04 | Multi-Discipline Production | 3 | 21 | 24 (cross-listed) |
 | SS-05 | Simulation Quality Verification | 3 | 3 | 6 (cross-listed) |
 | SS-06 | Convergence Tracking | 1 | 2 | 3 (cross-listed) |
 | SS-07 | Playtest Protocol | 3 | 0 | 3 |

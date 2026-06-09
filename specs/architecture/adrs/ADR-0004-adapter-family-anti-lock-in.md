@@ -2,7 +2,7 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0004"
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,16 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # ADR-0004 — Five-Seam Adapter Family as Primary Anti-Lock-In Mechanism
 
+> **v1.3 — Pass-34 adversarial finding F34-04 (stale four-seam world in §Context and §Alternatives).**
+> - **§Context:** Added online-services to the enumerated axes so the narrative
+>   now matches the §Decision five-seam table. Previously said "three additional
+>   orthogonal axes: generative asset backends, store/distribution platforms, and
+>   XR runtimes" — omitting online-services. Now says "four additional orthogonal
+>   axes: generative asset backends, store/distribution platforms, XR runtimes,
+>   and online-services."
+> - **§Alternatives Rejected:** "four separate conformance frameworks" corrected
+>   to "five separate conformance frameworks" to match the five-seam model.
+>
 > **v1.2 — Pass-14 adversarial defect O14-02 (Canon-KB seam ordinal fix).**
 > §Context incorrectly called Canon-KB "a fifth load-bearing seam" when there are five
 > adapter seams (engine, asset, distribution, xr, online-services) making Canon-KB the
@@ -41,11 +51,12 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ## Context
 
 ADR-0001 and ADR-0002 established the engine adapter protocol (one seam). Research
-across 22 AAA vectors confirmed the same lock-in problem exists on three additional
-orthogonal axes: generative asset backends, store/distribution platforms, and XR
-runtimes. Additionally, the Canon Knowledge-Base emerged as a sixth load-bearing seam
-(shared lore/entity/timeline RAG anchor). The question is whether each seam requires
-a separate design or whether the same adapter pattern applies uniformly.
+across 22 AAA vectors confirmed the same lock-in problem exists on four additional
+orthogonal axes: generative asset backends, store/distribution platforms, XR runtimes,
+and online-services (BaaS capability surface: identity/saves/leaderboards/matchmaking/
+entitlements). Additionally, the Canon Knowledge-Base emerged as a sixth load-bearing
+seam (shared lore/entity/timeline RAG anchor). The question is whether each seam
+requires a separate design or whether the same adapter pattern applies uniformly.
 
 ## Decision
 
@@ -113,9 +124,9 @@ seams:
 ## Alternatives Rejected
 
 - **Per-seam custom pattern.** Each seam is genuinely different (engine capabilities
-  vs asset modalities vs platform CLI tools vs XR runtimes) but the lock-in structure
-  is isomorphic; custom patterns would require four separate conformance frameworks
-  rather than one parameterized by capability surface.
+  vs asset modalities vs platform CLI tools vs XR runtimes vs online-services BaaS)
+  but the lock-in structure is isomorphic; custom patterns would require five separate
+  conformance frameworks rather than one parameterized by capability surface.
 - **Seam-per-protocol.** gRPC for engine, REST for asset, CLI wrapper for distribution.
   This is implementation detail, not architecture. The seam contract is the protocol-
   independent capability surface; transport is an adapter concern.
