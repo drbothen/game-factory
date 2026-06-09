@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-4.03.003
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -20,7 +20,11 @@ capability: CAP-004
 priority: P1
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    by: product-owner
+    reason: "F37-05: add explicit two-phase evaluation note under rule table clarifying that backend-opaque downgrade is a MODIFIER applied AFTER base assignment (not a parallel assignment row); precedence is now explicit prose, no behavior change"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -60,6 +64,17 @@ studio that they should engage counsel for Tier-2/3 assets where ownership matte
    | `human_modifications_log` is non-empty (at least one human transformation logged) AND modifications are described as "minor cleanup" or "fix" | `"partial"` |
    | `human_modifications_log` is non-empty AND modifications are described as "substantial creative direction" or "significant sculpt/repaint" | `"likely"` |
    | `generated_by_tool.model_version = "backend-opaque"` (adapter does not expose version) | Downgrade by one level (e.g., `partial` → `unlikely`; `likely` → `partial`) |
+
+   > **Two-phase evaluation (F37-05):** The rule table is evaluated in two phases.
+   > **Phase 1 (base assignment):** Apply the first five rows (human_modifications_log and
+   > disclosure_class conditions) to determine the base `copyrightability_assessment` value.
+   > **Phase 2 (modifier):** If `generated_by_tool.model_version = "backend-opaque"`, apply
+   > the downgrade as a post-assignment modifier — subtract one level from the base value.
+   > The backend-opaque row is NOT a parallel assignment row; it cannot produce a final value
+   > on its own. When an asset matches both a Phase 1 row and the backend-opaque modifier,
+   > the modifier applies after the base assignment (EC-006: `"substantial creative direction"` →
+   > base `"likely"` → downgraded to `"partial"`). An asset already at `"unlikely"` receives no
+   > further downgrade (EC-002: floor is `"unlikely"`).
 
 2. The schema validator checks that `copyrightability_assessment` is one of
    `{likely, partial, unlikely}`.

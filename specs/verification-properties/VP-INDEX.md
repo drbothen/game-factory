@@ -1,7 +1,7 @@
 ---
 document_type: verification-property-index
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -15,6 +15,10 @@ inputs:
   - .factory/specs/domain-spec/invariants.md
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.4"
+    date: 2026-06-08
+    reason: "F37-03 fix — retitled VP-008 row from 'T1 bitwise snapshot hash invariant' to 'pure-sim step referential transparency (intra-process purity)'; updated Per-Module Coverage and I2 PO action text to accurately reflect what VP-008 proves and to distinguish it from the cross-platform T1 guarantee validated by the conformance suite."
 ---
 
 # Verification Properties Index
@@ -47,7 +51,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | VP-005 | Elo zero-sum conservation | proptest + algebraic | P1 | SS-11 | BC-13.02.001 |
 | VP-006 | Glicko-2 RD monotone decay (RD strictly decreasing across rating periods) | proptest | P1 | SS-11 | BC-13.02.001 |
 | VP-007 | TrueSkill μ−3σ partial-order monotonicity | proptest | P1 | SS-11 | BC-13.02.001 |
-| VP-008 | Replay determinism equality (T1 bitwise snapshot hash invariant) | Kani (harness) | P0 | SS-02 | BC-3.03.001, BC-3.03.002 |
+| VP-008 | Pure-sim step referential transparency (intra-process purity; cross-platform T1 bitwise equality validated by conformance suite, not this VP) | Kani (harness) | P0 | SS-02 | BC-3.03.001, BC-3.03.002 |
 | VP-009 | Damage I/O matrix row-sum correctness | proptest | P0 | SS-05 | BC-6.01.002 |
 | VP-010 | Tournament bracket progression correctness (every participant advances exactly once per round per format rules) | proptest | P1 | SS-11 | BC-13.02.005 |
 
@@ -77,7 +81,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | Economy simulation core (pure-sim) | VP-001, VP-003, VP-009 | Kani + proptest |
 | FSM runtime (pure-sim) | VP-002 | Kani |
 | Reachability / solvability engine | VP-004 | Kani (bounded) |
-| Replay harness golden-state comparison | VP-008 | Kani harness |
+| Pure-sim step function (intra-process purity) | VP-008 | Kani harness |
 | Rating-math library (Elo/Glicko-2/TrueSkill) | VP-005, VP-006, VP-007 | proptest + algebraic |
 | Tournament bracket engine | VP-010 | proptest |
 
@@ -210,7 +214,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | VP-005 | Elo zero-sum conservation | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-005 (Elo zero-sum conservation)" |
 | VP-006 | Glicko-2 RD monotone decay | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-006 (Glicko-2 RD monotone decay)" |
 | VP-007 | TrueSkill μ−3σ partial-order monotonicity | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-007 (TrueSkill μ−3σ partial-order monotonicity)" |
-| VP-008 | Replay determinism equality | BC-3.03.001, BC-3.03.002 | `ss-03/BC-3.03.001.md`, `ss-03/BC-3.03.002.md` | Add back-ref: "Formally verified by VP-008 (Replay determinism equality — T1 bitwise snapshot hash)" |
+| VP-008 | Pure-sim step referential transparency (intra-process purity) | BC-3.03.001, BC-3.03.002 | `ss-03/BC-3.03.001.md`, `ss-03/BC-3.03.002.md` | Add back-ref: "Formally verified by VP-008 (Pure-sim step referential transparency — intra-process purity). Note: the T1 bitwise CROSS-PLATFORM equality guarantee is validated by the conformance suite (BC-3.03.003), NOT by VP-008." |
 | VP-009 | Damage I/O matrix row-sum correctness | BC-6.01.002 | `ss-06/BC-6.01.002.md` | Add back-ref: "Formally verified by VP-009 (Damage I/O matrix row-sum correctness)" |
 | VP-010 | Tournament bracket progression correctness | BC-13.02.005 | `ss-13/BC-13.02.005.md` | Add back-ref: "Formally verified by VP-010 (Tournament bracket progression correctness)" |
 

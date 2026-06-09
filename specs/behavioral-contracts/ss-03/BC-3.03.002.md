@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,10 @@ capability: CAP-003
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-08
+    reason: "F37-03 fix — corrected VP-008 back-reference to accurately describe what VP-008 proves (intra-process purity of pure-sim step function), distinguishing it from the T1 bitwise cross-platform guarantee which is validated by the conformance suite (BC-3.03.003)."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -155,4 +158,4 @@ the adapter's determinism tier (BC-3.03.003 through BC-3.03.005).
 - VP-TBD-022 — replay input fidelity
 - VP-TBD-023 — exact tick count
 - VP-TBD-024 — T1 bitwise identical snapshots (same commit)
-- Formally verified by VP-008 (Replay determinism equality — T1 bitwise snapshot hash) — see verification-properties/VP-008-replay-determinism-equality.md
+- Formally verified by VP-008 (Pure-sim step referential transparency — intra-process purity of the pure-sim step function) — see verification-properties/VP-008-replay-determinism-equality.md. Note: VP-008 does NOT verify the T1 bitwise CROSS-PLATFORM equality guarantee; that guarantee is validated by the conformance suite (BC-3.03.003 EC-004).

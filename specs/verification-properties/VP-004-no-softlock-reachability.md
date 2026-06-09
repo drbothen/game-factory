@@ -1,7 +1,7 @@
 ---
 document_type: verification-property
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,10 @@ inputs:
   - .factory/specs/behavioral-contracts/ss-06/BC-6.02.004.md
   - .factory/specs/behavioral-contracts/ss-06/BC-6.02.002.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    reason: "F37-06 fix — added explicit soundness conditionality note in the harness section: the proof result is conditional on the fidelity of is_reachable_valid_state() as a characterization of true reachability, with the proptest fallback covering the gap."
 ---
 
 # VP-004: No-Softlock Reachability
@@ -61,6 +65,14 @@ property is tractable only for bounded-horizon, finite-branching game graphs (de
 pilot: roguelike, factory/automation — small action space, bounded progression).
 For open-world or high-branching games, this VP degrades to targeted softlock
 scenario tests (property-based) on known high-risk progression chokepoints.
+
+**Soundness conditionality (F37-06):** The soundness of this proof result is conditional
+on the fidelity of `is_reachable_valid_state()` as a characterization of true reachability:
+an over-approximation (accepting unreachable states) risks spurious counterexamples on
+states the game never actually reaches; an under-approximation (rejecting reachable states)
+proves a weaker property than intended. The proptest fallback (generate random game states,
+verify goal reachability from each) provides complementary coverage over concrete reachable
+states and partially compensates for any predicate imprecision.
 
 ## Feasibility Assessment
 

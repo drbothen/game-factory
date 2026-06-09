@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "2.0"
+version: "2.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -51,7 +51,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | E-PLAY | CAP-008 | Structured playtest protocol errors | error-taxonomy.md §E-PLAY (added PRD rev 1.1) |
 | E-CERT | CAP-009 | Cert pre-flight errors | prd-cap-009-010.md §4 |
 | E-DIST | CAP-009 | Distribution adapter and upload tool errors | prd-cap-009-010.md §4 |
-| E-COMP | CAP-010 | Compliance pipeline errors (E-COMP-010: missing sidecar field; E-COMP-011: out-of-vocab disclosure_class at manifest aggregation; E-COMP-012: nft_blockchain/nft_mechanics inconsistency seam guard) | prd-cap-009-010.md §4 |
+| E-COMP | CAP-010 | Compliance pipeline errors (E-COMP-010: missing sidecar field; E-COMP-011: out-of-vocab disclosure_class at manifest aggregation; E-COMP-012: 3-signal NFT inconsistency seam guard — nft_blockchain / nft_mechanics / NFT_MECHANIC content-descriptor tag; F37-01 extended scope) | prd-cap-009-010.md §4 |
 | E-ETH | CAP-011 | Monetization ethics contract errors | error-taxonomy.md §E-ETH (added PRD rev 1.1) |
 | E-KB | CAP-012 | Canon Knowledge-Base structural errors | error-taxonomy.md §E-KB (added PRD rev 1.1) |
 | E-GENRE | CAP-013 | Genre-gated lane activation errors (E-GENRE covers core lane-activation BCs; E-GLG, E-MOD, E-MKT cover sub-lane BCs) | error-taxonomy.md §E-GENRE (added PRD rev 1.1) |
@@ -212,7 +212,7 @@ resolves to a registered code).
 | E-COMP-001 | IARC | Questionnaire version not recognized | 1 |
 | E-COMP-010 | AI-disclosure | Shipped asset MISSING required provenance sidecar field (DI-003 violation) — field absent or null | 1 |
 | E-COMP-011 | AI-disclosure | Inbound sidecar `disclosure_class` value is out-of-vocabulary at manifest aggregation — field is present but its value is not in `{pre-generated, live-generated, procedural-exempt}` (parallel to E-PRV-011 at generation time; added PRD rev 1.7) | 1 |
-| E-COMP-012 | IARC-compliance | `game-metadata-spec.nft_blockchain` is inconsistent with `genre-profile.nft_mechanics` — NFT declared active in one source but not the other; conservative PEGI-18 applied and manifest flagged for human review (DI-011 seam guard; added PRD rev 1.7) | 1 |
+| E-COMP-012 | IARC-compliance | Any divergence among the three NFT activation signals — `game-metadata-spec.nft_blockchain`, `genre-profile.nft_mechanics`, and/or `NFT_MECHANIC` in `game-metadata-spec.content_descriptors[]` — where signals disagree about NFT-active status; conservative PEGI-18 applied and manifest flagged for human review (DI-011 3-signal seam guard; scope extended F37-01 from 2-signal to 3-signal) | 1 |
 
 ---
 
@@ -525,6 +525,7 @@ provides human-readable context in the error payload.
 | UNCONSTRAINED_LTV_OBJECTIVE_DETECTED | E-ETH-003 | BC-11.01.001 postcondition 4 (field absent = fail-closed) |
 | UNCONSTRAINED_OPTIMIZATION_DETECTED | E-ETH-003 | BC-11.02.001 postcondition 2 (cross-agent config scan) |
 | OPTIMIZATION_OBJECTIVE_WITHOUT_CONSTRAINTS | E-ETH-003 | BC-11.02.001 postcondition 3 (sub-code for empty-constraints variant) |
+| CONSTRAINT_SOURCE_REF_STALE | E-ETH-003 | BC-11.02.001 postcondition 4 (agent config references expired ethics contract — stale ref is treated as no valid constraint; fail-closed; F37-04) |
 | SPEND_CONCENTRATION_EXCEEDS_ETHICS_BOUND | E-ETH-008 | BC-11.04.002 postcondition 2 |
 | MONETIZATION_ETHICS_ADVERSARIAL_REVIEW_REQUIRED | E-ETH-006 | BC-11.01.003 postcondition 1 (no evidence) |
 | MONETIZATION_ETHICS_CONTRACT_MODIFIED_SINCE_REVIEW | E-ETH-006 | BC-11.01.003 postcondition 4 (stale evidence) |
@@ -756,6 +757,15 @@ Message format uses `<placeholder>` syntax.
 
 ---
 
+### PRD Revision 2.1 Changes (F37-01, F37-04 — Pass-37 adversarial deep BC logic fixes)
+
+| Change | Detail |
+|--------|--------|
+| E-COMP-012 scope extended (F37-01) | **IMPORTANT (regulatory):** E-COMP-012 trigger condition extended from a 2-signal check (`nft_blockchain` vs `nft_mechanics`) to a 3-signal check that also includes `NFT_MECHANIC` in `game-metadata-spec.content_descriptors[]`. The `NFT_MECHANIC` content-descriptor tag is an independently authoritative NFT signal (used by BC-7.08.001 EC-006 and BC-10.01.001 EC-001). BC-10.01.001 step-4 matrix, INV-2, VP-COMP-002, and EC-001 updated to reflect the 3-signal rule. No new registered code — E-COMP-012 scope broadened. Total error codes: **255** (unchanged). |
+| CONSTRAINT_SOURCE_REF_STALE sub-code added (F37-04) | **IMPORTANT (DI-005):** New symbolic sub-code `CONSTRAINT_SOURCE_REF_STALE` registered as `error.data.reason` sub-code of E-ETH-003. Emitted by BC-11.02.001 postcondition 4 (new) when an agent config's `constraint_source_ref` points to an expired ethics contract. Fail-closed: stale reference is treated as no valid constraint — FAIL, never PASS. BC-11.02.001 test vectors updated with stale-ref FAIL vector. No new registered code — E-ETH-003 extended with new sub-code. Total error codes: **255** (unchanged). |
+
+---
+
 ### PRD Revision 1.8 Changes (Pass-13 C13-01 — online-services seam)
 
 | Change | Detail |
@@ -825,7 +835,7 @@ Message format uses `<placeholder>` syntax.
 | E-PROD | 3 | |
 | E-CERT | 3 | |
 | E-DIST | 19 | |
-| E-COMP | 4 | v1.7: +E-COMP-011 (out-of-vocab disclosure_class at manifest aggregation), +E-COMP-012 (nft_blockchain/nft_mechanics inconsistency seam guard) |
+| E-COMP | 4 | v1.7: +E-COMP-011 (out-of-vocab disclosure_class at manifest aggregation), +E-COMP-012 (nft_blockchain/nft_mechanics inconsistency seam guard); v2.1: E-COMP-012 scope extended to 3-signal (adds NFT_MECHANIC content-descriptor tag, F37-01) — count unchanged |
 | E-SIM | 9 | v1.1 addition |
 | E-CONV | 6 | v1.1 addition |
 | E-PLAY | 15 | v1.1: 5 codes; v2.0: +E-PLAY-006..015 (10 new — symbolic token reconciliation Pass-20) |
