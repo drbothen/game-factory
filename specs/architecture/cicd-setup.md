@@ -1,9 +1,9 @@
 ---
 document_type: cicd-setup
-version: "1.1"
+version: "1.2"
 status: active
 producer: devops-engineer
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1
 decision: D-009
 traces_to: ARCH-INDEX.md
@@ -347,6 +347,110 @@ and on merge to `main` (controlled via `ASSET_LANE_SMOKE_MODE` environment varia
 
 ---
 
+## Output-Bundle Secrets Gate
+
+> **Pass-42 F42-03 addition.** This gate is DISTINCT from the existing
+> `security / semgrep` job (which scans the factory source tree with
+> `continue-on-error: true`). This gate scans the GENERATED OUTPUT BUNDLE
+> (game artifacts emitted by the factory pipeline) and is fail-closed
+> (no `continue-on-error`). The distinction is critical: factory source
+> having a false-positive in a non-blocking Semgrep scan is acceptable;
+> the generated output bundle containing secrets is a production security failure.
+
+### Purpose
+
+Enforce DI-013 (never-emit-secrets into the generated output bundle) by running
+a secret-pattern and entropy scan over every generated artifact bundle before
+acceptance. This gate wires to the never-emit-secrets behavioral contract
+(reserved as a sibling to BC-1.15.002 in ss-01/, subsystem SS-01;
+product-owner to author as BC-1.15.003 per Pass-42 F42-03 reserved-ID table)
+and to the D-SEC convergence dimension pass predicate (methodology-layer.md §D-SEC,
+sub-predicate 4).
+
+### What Is Scanned
+
+The output bundle scan covers all files written to the factory's designated output
+directory (configurable via `FACTORY_OUTPUT_BUNDLE_PATH` environment variable):
+
+- Generated source code files (`.rs`, `.ts`, `.go`, `.py`, `.cs`, `.cpp`, `.h`, etc.)
+- Generated configuration files (`.yaml`, `.json`, `.toml`, `.env.*`, `.ini`)
+- Generated scripts (`.sh`, `.bat`, `.ps1`)
+- Generated documentation (`.md`, `.txt`)
+- Manifest and sidecar files (`*.manifest.json`, `*.sidecar.json`)
+
+The scan does NOT cover engine binary assets (`.fbx`, `.png`, `.wav`, etc.) —
+secret-pattern scanning of binary assets is not meaningful and would produce noise.
+Binary asset scanning is limited to MIME-type check (ensure they are actual binary
+assets, not text files with binary extensions).
+
+### Scan Method: Pattern + Entropy
+
+Two-pass scan:
+
+**Pass 1 — Pattern Match** (fast; covers known secret formats):
+- High-entropy strings matching patterns: `sk_live_`, `ghp_`, `AIza`, `xoxb-`,
+  AWS access key patterns (`AKIA[0-9A-Z]{16}`), private key PEM headers
+  (`-----BEGIN RSA PRIVATE KEY-----`, `-----BEGIN EC PRIVATE KEY-----`,
+  `-----BEGIN OPENSSH PRIVATE KEY-----`), base64-encoded blobs that decode to
+  known key material.
+- Tool: `trufflehog filesystem` or `gitleaks detect --no-git` over the output
+  bundle path.
+
+**Pass 2 — Entropy Analysis** (catches novel formats):
+- Shannon entropy over sliding windows on text files; threshold: > 4.5 bits/char
+  over 32+ character non-whitespace runs, filtered by a corpus of known
+  high-entropy-but-benign patterns (base64-encoded game data, hash digests).
+- Tool: `gitleaks detect` or equivalent entropy scanner; false-positive baseline
+  established per corpus type.
+
+### Fail-Closed Behavior
+
+This gate has NO `continue-on-error`. Any detected secret causes:
+
+1. CI job exits with code 1.
+2. The factory pipeline halts; the output bundle is not accepted.
+3. Error code E-SEC-001 (reserved; product-owner to register in error-taxonomy.md
+   under the new E-SEC family when authoring BC-1.15.003) is emitted in the scan
+   report.
+4. D-SEC convergence dimension sub-predicate 4 is BLOCKED until the gate passes.
+
+The output bundle is quarantined (not uploaded as a CI artifact) until the scan
+passes. Developers must audit and remove the detected secret, then re-run the
+pipeline.
+
+### CI Job
+
+Added to `ci.yml` as a stub job in Phase-1 (Pass-42); fleshed out in Phase-3:
+
+| Job name (stable) | Runner | Timeout | Description |
+|-------------------|--------|---------|-------------|
+| `CI / output-bundle-secrets-scan` | ubuntu-22.04 | 10 min (stub: immediate exit 0) | Run gitleaks/trufflehog pattern + entropy scan over `$FACTORY_OUTPUT_BUNDLE_PATH`; fail-closed (no continue-on-error); emits E-SEC-001 on detection; gates D-SEC sub-predicate 4 |
+
+**Trigger:** Same as `ci.yml` — every push to `main`, `feature/**`, `fix/**`, and
+every PR targeting `main`. Also triggered by `release.yml` before the publish step.
+
+**Required status check:** `CI / output-bundle-secrets-scan` MUST be added to the
+required status checks on `main` (alongside `CI / lint`, `CI / test`, `CI / build`,
+`CI / pure-sim-verify`) in Phase-3 when SS-01 output-bundle linting lands.
+
+### Stub / Scaffold Entry
+
+| Job | Step stub | Flesh-out phase | What replaces the stub |
+|-----|-----------|-----------------|------------------------|
+| `CI / output-bundle-secrets-scan` | `echo "output-bundle-secrets-scan: stub (Phase-3-instantiated)" && exit 0` | Phase-3, SS-01 | `gitleaks detect --no-git --source=$FACTORY_OUTPUT_BUNDLE_PATH --config=.gitleaks.toml` or `trufflehog filesystem $FACTORY_OUTPUT_BUNDLE_PATH --fail` |
+
+### Distinction from `security / semgrep`
+
+| Attribute | `security / semgrep` (existing) | `CI / output-bundle-secrets-scan` (new) |
+|-----------|--------------------------------|-----------------------------------------|
+| What is scanned | Factory source tree (`.factory/`, `crates/`, scripts) | Generated output bundle (`$FACTORY_OUTPUT_BUNDLE_PATH`) |
+| Blocking | Non-blocking (`continue-on-error: true`) until Phase-5 rules tuned | Blocking (no `continue-on-error`) from Phase-3 |
+| Trigger | Weekly schedule + PRs to main | Every push + every PR + release pipeline |
+| Enforces | D-SEC (source-level) + advisory rule catalog | DI-013 (never-emit-secrets); D-SEC sub-predicate 4 |
+| Error code | Semgrep SARIF findings | E-SEC-001 (reserved for product-owner to register) |
+
+---
+
 ## Secrets Reference
 
 | Secret name | Required by | When to provision |
@@ -383,10 +487,17 @@ This table maps CI jobs to the convergence dimensions they gate
 | `security / deny` | D-PROV (license compliance) + D-SEC (banned crates DI-009) | Advisory (promote in Phase-5) |
 | `release / build (*)` | D-IMPL (cross-platform build pass) | Hard gate on release tag |
 | `CI / asset-lane-smoke` | D-PROV (provenance sidecar completeness) + SS-03 (asset quality) | Hard gate (Phase-3-instantiated; stub exits 0 until SS-03 lands) |
+| `CI / output-bundle-secrets-scan` | D-SEC sub-predicate 4 (DI-013 never-emit-secrets; BC-1.15.003 reserved) | Hard gate — fail-closed, no continue-on-error (Phase-3-instantiated; stub exits 0 until SS-01 output-bundle linting lands) |
 
 ---
 
 ## Changelog
+
+### v1.2 (2026-06-09)
+
+| Change | Detail |
+|--------|--------|
+| Pass-42 F42-03: Output-Bundle Secrets Gate section added | Added `§Output-Bundle Secrets Gate` specifying a BLOCKING (fail-closed, no continue-on-error) secret-pattern + entropy scan over the generated output bundle (distinct from the existing non-blocking `security / semgrep` factory-source scan). Scan covers generated source, config, scripts, manifests; uses trufflehog/gitleaks pattern + entropy passes. CI job `CI / output-bundle-secrets-scan` stub added. Architecture Gate Mapping table updated. Enforces DI-013 (never-emit-secrets invariant; product-owner to add to domain-spec/invariants.md) and D-SEC sub-predicate 4. Error code E-SEC-001 reserved (product-owner to register E-SEC family in error-taxonomy.md when authoring BC-1.15.003). |
 
 ### v1.1 (2026-06-09)
 

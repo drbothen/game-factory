@@ -1,10 +1,10 @@
 ---
 document_type: architecture-index
 level: L4
-version: "1.9"
+version: "2.1"
 status: draft
 producer: architect
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1d
 deployment_topology: single-service
 studio_roster_count: 66
@@ -31,6 +31,22 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v2.1 — Pass-42 D-019 PO burst (3 new BCs authored; count surfaces updated; DI-013 added).**
+> - **F42-01:** D-SEC convergence predicate (methodology-layer.md §D-SEC) hardened to
+>   fail-closed. BC-13.03.005 (moderation-pipeline-contract, ss-13/, SS-11) and
+>   BC-13.02.006 (anti-cheat-integration-adapter, ss-13/, SS-11) authored by PO. Both
+>   BCs are now active signals in D-SEC. D-SEC is BLOCKED if either absent for applicable
+>   game profiles.
+> - **F42-02:** ADR-0008 authored: anti-cheat provider policy. Allowed set: {EAC, EOS,
+>   BattlEye}. Rejected: Riot Vanguard (kernel-anomaly, not licensable, DI-010).
+>   ADR Registry updated below.
+> - **F42-03:** Never-emit-secrets output-bundle lint gate added to D-SEC predicate
+>   (sub-predicate 4). BC-1.15.003 (never-emit-secrets, ss-01/, SS-01) authored by PO.
+>   DI-013 added to invariants.md v1.2. E-SEC family registered in error-taxonomy.md.
+> - **BC counts updated by PO:** Grand total 190 → **193**. SS-01=41→42, SS-11=15→17.
+>   Priority subtotals: P0 126→127 (+BC-1.15.003), P2 22→24 (+BC-13.02.006, BC-13.03.005),
+>   P1=42 unchanged. VP-TBD-324..327 reserved (4 IDs for 3 new BCs).
+>
 > **v1.9 — Pass-14 adversarial defect I14-02 (Document Map ADR-0004 row description).**
 > - **I14-02:** Document Map row for `ADR-0004-adapter-family-anti-lock-in.md` (line ~127)
 >   corrected "Four-seam adapter family" → "Five-seam adapter family". The ADR Registry
@@ -125,7 +141,7 @@ traces_to: .factory/specs/product-brief.md
 |------|-----------------|---------------|
 | `ARCH-INDEX.md` (this file) | Subsystem Registry, ADR registry, VP registry, document map | ~500 |
 | `layered-architecture.md` | 4-layer model, reuse/replace/adapt table, config/content seam | ~1,000 |
-| `subsystem-decomposition.md` | SS-01..SS-13 definitions, BC→Subsystem assignment table (190 total), Directory→Subsystem alias table | ~1,600 |
+| `subsystem-decomposition.md` | SS-01..SS-13 definitions, BC→Subsystem assignment table (193 total), Directory→Subsystem alias table | ~1,600 |
 | `dtu-assessment.md` | DTU analog: replay harness + conformance doubles; DTU_REQUIRED verdict | ~900 |
 | `adapter-protocols.md` | Layer 3 adapter protocol spec: JSON-RPC transport, capability schema, fidelity grades, conformance suite, compatibility matrix; v1.2: §6 online-services seam (SS-13) added | ~1,500 |
 | `methodology-layer.md` | Layer 2 game methodology: sim-BC schema, design-intent contract, replay-regression contract, asset-provenance, 11-dim convergence criteria; **§3.0 = canonical `convergence-report.dimensions.<field>` name registry (single source of truth for all 11 dimension field names)** | ~1,200 |
@@ -134,6 +150,7 @@ traces_to: .factory/specs/product-brief.md
 | `adrs/ADR-0005-config-content-extraction-seam.md` | Extraction seam: spine vs quality-model at content/config boundary | ~400 |
 | `adrs/ADR-0006-11-dimension-convergence-model.md` | 11-dim convergence model replacing vsdd 7-dim | ~350 |
 | `adrs/ADR-0007-human-gated-fidelity-tier.md` | human-gated as a first-class fidelity value | ~350 |
+| `adrs/ADR-0008-anti-cheat-provider-policy.md` | Anti-cheat provider policy: allowed set {EAC, EOS, BattlEye}; Riot Vanguard rejected; kernel-anomaly rationale; conformance assertion for reserved BC-13.02.006 | ~600 |
 | `verification-architecture.md` | Verification strategy: provable-properties catalog, P0/P1 assignment, tool mapping (Kani/proptest), pure-sim slice boundary, VP-TBD rationale | ~1,000 |
 | `verification-coverage-matrix.md` | VP→BC/invariant coverage matrix; per-VP tool/phase/module assignments; explicitly-unguarded invariant justifications | ~700 |
 
@@ -177,11 +194,11 @@ traces_to: .factory/specs/product-brief.md
 | SS-12 | XR Platform Seam | CAP-014 | BC-14.* | P2 |
 | SS-13 | Online-Services Adapter | CAP-015 | BC-15.* | P1 (Tier-1 always-on; disableable for offline projects) |
 
-**BC count by subsystem (v1.8 — 190 total):**
+**BC count by subsystem (v2.0 — 193 total):**
 
 | Subsystem | BC Count | Change from v1.0 |
 |-----------|----------|-----------------|
-| SS-01 | 41 (34 CAP-001 + 6 CAP-002 + 1 BC-1.15.002) | +1 v1.1 |
+| SS-01 | 42 (34 CAP-001 + 6 CAP-002 + 1 BC-1.15.002 + 1 BC-1.15.003) | +1 v1.1, +1 v2.0 |
 | SS-02 | 9 | — |
 | SS-03 | 15 | — |
 | SS-04 | 16 | — |
@@ -191,10 +208,10 @@ traces_to: .factory/specs/product-brief.md
 | SS-08 | 17 (11 CAP-009 + 6 CAP-010) | — |
 | SS-09 | 14 (13 original + 1 BC-11.03.006) | +1 v1.2 |
 | SS-10 | 9 | — |
-| SS-11 | 15 (14 original + 1 BC-13.01.004) | +1 v1.1 |
+| SS-11 | 17 (14 original + 1 BC-13.01.004 + 1 BC-13.02.006 + 1 BC-13.03.005) | +1 v1.1, +2 v2.0 |
 | SS-12 | 7 | — |
 | SS-13 | 12 (BC-15.01.001..BC-15.11.001; 9 P0 + 3 P1) | +12 v1.8 |
-| **TOTAL** | **190** | +12 from CAP-015 (v1.8) |
+| **TOTAL** | **193** | +3 from Pass-42 security burst (v2.0) |
 
 ---
 
@@ -209,6 +226,7 @@ traces_to: .factory/specs/product-brief.md
 | ADR-0005 | Config/content extraction seam (spine vs quality-model) | Draft | `adrs/ADR-0005-config-content-extraction-seam.md` |
 | ADR-0006 | 11-dimension convergence model | Draft | `adrs/ADR-0006-11-dimension-convergence-model.md` |
 | ADR-0007 | human-gated as a first-class fidelity tier | Draft | `adrs/ADR-0007-human-gated-fidelity-tier.md` |
+| ADR-0008 | Anti-cheat provider policy: allowed user-space {EAC, EOS, BattlEye}; kernel-anomaly providers (Riot Vanguard) rejected per DI-010 and R-017 | Draft | `adrs/ADR-0008-anti-cheat-provider-policy.md` |
 
 ---
 
@@ -225,4 +243,6 @@ traces_to: .factory/specs/product-brief.md
 | R-013 (PEGI 2026) | SS-08 | `compliance-checklist` with min-rating rules; `content-descriptor-contract` |
 | R-014 (EU AI Act) | SS-03, SS-08 | C2PA marks from provenance sidecar; 2026-08-02 hard deadline wired to distribution gate |
 | R-015 (COPPA) | SS-08, SS-09 | Per-SDK consent flags in `privacy-config-contract`; `ad-monetization-spec` COPPA gate |
-| R-017 (kernel AC) | SS-01 | DI-010 policy hook; anti-cheat = wrap-only; never autonomously authored (enforced via BC-1.15.002 VP-TBD-060/061) |
+| R-017 (kernel AC) | SS-01, SS-11 | DI-010 policy hook; anti-cheat = wrap-only; never autonomously authored (enforced via BC-1.15.002 VP-TBD-060/061); ADR-0008 formalizes allowed provider set {EAC, EOS, BattlEye} and rejects Riot Vanguard; conformance BC reserved as BC-13.02.006 (PO to author) |
+| F42-SEC (secrets in output) | SS-01 | DI-013 (never-emit-secrets invariant; PO to add to invariants.md); output-bundle lint gate in cicd-setup.md §Output-Bundle Secrets Gate; D-SEC sub-predicate 4; BC-1.15.003 reserved (PO to author) |
+| F42-MOD (moderation absent) | SS-11, SS-06 | 18 U.S.C. §2258A CSAM→NCMEC obligation; D-SEC fail-closed when `moderation-pipeline-contract` absent for UGC/chat games; BC-13.03.005 reserved (PO to author) |

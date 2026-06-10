@@ -71,9 +71,9 @@ This supplement specifies the full Engine Adapter Protocol (EAP) surface:
 | 1.12 — Determinism-Tier Declaration and Enforcement | BC-1.12.001 – BC-1.12.003 |
 | 1.13 — Graceful Degradation (Declare-and-Degrade) | BC-1.13.001 – BC-1.13.003 |
 | 1.14 — Protocol Versioning and Compatibility | BC-1.14.001 – BC-1.14.002 |
-| 1.15 — DI-001 Enforcement (Core Never Names Engine) | BC-1.15.001 |
+| 1.15 — DI-001 Enforcement (Core Never Names Engine) | BC-1.15.001 – BC-1.15.003 |
 
-**Total CAP-001 BCs: 35** (34 original + BC-1.15.002 added v1.1)
+**Total CAP-001 BCs: 36** (34 original + BC-1.15.002 added v1.1 + BC-1.15.003 never-emit-secrets added v2.3/Pass-42)
 
 ---
 

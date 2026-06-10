@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.7"
+version: "1.8"
 status: draft
 producer: architect
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1d
 traces_to: ARCH-INDEX.md
 inputs:
@@ -17,6 +17,14 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Subsystem Decomposition
+
+> **v1.8 changes (Pass-42 D-019 security burst — PO BC authoring step):**
+> - BC count updated: SS-01=41→42 (+1 BC-1.15.003 never-emit-secrets, P0, CAP-001).
+>   SS-11=15→17 (+2 BC-13.02.006 anti-cheat + BC-13.03.005 moderation, P2, CAP-013).
+>   Grand total: 190→**193**.
+>   Priority subtotals: P0 126→127 (+BC-1.15.003), P2 22→24 (+BC-13.02.006, BC-13.03.005),
+>   P1 42 unchanged. Sum: 127+42+24=193. ✓
+>   BC→Subsystem table updated with new rows. DI-013 added (invariants.md v1.2).
 
 > **v1.7 changes (Pass-31 I31-01 fix — Canon-KB seam ordinal fifth→sixth in SS-10 description):**
 > - **I31-01 fixed:** SS-10 (Canon Knowledge-Base) description corrected "fifth load-bearing
@@ -101,7 +109,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 **Layer:** 3 + 4 (protocol layer + adapter implementations)
 **Owned capabilities:** CAP-001, CAP-002
-**BC count:** 41 (34 CAP-001 + 6 CAP-002 + 1 v1.1: BC-1.15.002 never-author enforcement)
+**BC count:** 42 (34 CAP-001 + 6 CAP-002 + 1 v1.1: BC-1.15.002 never-author enforcement + 1 v1.8: BC-1.15.003 never-emit-secrets)
 **Priority:** P0
 
 Owns the complete engine adapter protocol surface (JSON-RPC 2.0 transport, capability
@@ -298,7 +306,7 @@ hallucinating lore. The Canon-KB is identified as the sixth load-bearing seam
 
 **Layer:** 2 (methodology layer — genre activation)
 **Owned capabilities:** CAP-013
-**BC count:** 15 (+1 v1.1: BC-13.01.004 NFT/web3 off-by-default DI-011)
+**BC count:** 17 (+1 v1.1: BC-13.01.004 NFT/web3 off-by-default DI-011; +2 v1.8: BC-13.02.006 anti-cheat integration adapter + BC-13.03.005 moderation pipeline contract)
 **Priority:** P2
 
 Owns the genre-profile schema, inactive-lane zero-artifact guarantee, lane idempotency,
@@ -385,13 +393,15 @@ for single-player or offline projects. The conformance suite must include a
 > This table is the authoritative resolution of all SS-TBD placeholders.
 > A mechanical pass will apply `subsystem: SS-NN` to each BC file's frontmatter.
 > BC directory names (ss-01/…ss-15/) are navigability aliases for CAP numbers only.
-> Grand total: **190** (178 pre-CAP-015 + 12 CAP-015 BCs delivered by PO v1.6).
+> Grand total: **193** (178 pre-CAP-015 + 12 CAP-015 BCs delivered by PO v1.6 + 3 security BCs v1.8).
 > CAP-015 BCs: BC-15.01.001..BC-15.11.001 (9 P0 + 3 P1) assigned to SS-13.
+> v1.8 BCs: BC-1.15.003 (SS-01, P0), BC-13.02.006 (SS-11, P2), BC-13.03.005 (SS-11, P2).
 
 | BC ID Range | Count | Assigned Subsystem | Rationale |
 |-------------|-------|--------------------|-----------|
 | BC-1.01.001 – BC-1.15.001 | 34 | **SS-01** | CAP-001 = engine adapter protocol surface |
 | BC-1.15.002 | 1 | **SS-01** | CAP-001; v1.1 add: never-author enforcement DI-010 |
+| BC-1.15.003 | 1 | **SS-01** | CAP-001; v1.8 add: never-emit-secrets output-bundle lint DI-013 |
 | BC-2.02.001 – BC-2.02.006 | 6 | **SS-01** | CAP-002 = conformance gating (protocol quality gate) |
 | BC-3.03.001 – BC-3.03.009 | 9 | **SS-02** | CAP-003 = deterministic replay harness |
 | BC-4.01.001 – BC-4.06.001 | 15 | **SS-03** | CAP-004 = asset generation pipeline |
@@ -407,9 +417,11 @@ for single-player or offline projects. The conformance suite must include a
 | BC-12.12.001 – BC-12.12.009 | 9 | **SS-10** | CAP-012 = canon knowledge-base |
 | BC-13.01.001 – BC-13.04.002 | 14 | **SS-11** | CAP-013 = genre-gated lanes (original 14) |
 | BC-13.01.004 | 1 | **SS-11** | CAP-013; v1.1 add: NFT/web3 off-by-default DI-011 (dir: ss-13/) |
+| BC-13.02.006 | 1 | **SS-11** | CAP-013; v1.8 add: anti-cheat integration adapter allowed-provider enforcement (dir: ss-13/) |
+| BC-13.03.005 | 1 | **SS-11** | CAP-013; v1.8 add: moderation pipeline contract UGC/chat CSAM enforcement (dir: ss-13/) |
 | BC-14.01.001 – BC-14.02.003 | 7 | **SS-12** | CAP-014 = XR platform seam |
 | BC-15.01.001 – BC-15.11.001 | 12 | **SS-13** | CAP-015 = Online-Services Adapter (9 P0 + 3 P1; delivered by PO v1.6) |
-| **TOTAL** | **190** | | 178 pre-CAP-015 + 12 CAP-015 BCs |
+| **TOTAL** | **193** | | 178 pre-CAP-015 + 12 CAP-015 + 3 security BCs v1.8 |
 
 ---
 
@@ -480,7 +492,7 @@ own subsystem: engine→SS-01, asset→SS-03, distribution→SS-08, XR→SS-12, 
 
 | Priority | Subsystems | BC Count |
 |----------|-----------|----------|
-| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06, SS-09 (partial), **SS-13 (partial)** | 126 (SS-01=41, SS-02=9, SS-03=13, SS-04=16, SS-05=11, SS-06=19, SS-09=8, **SS-13=9**) |
+| P0 (must ship v1) | SS-01, SS-02, SS-03, SS-04, SS-05, SS-06, SS-09 (partial), **SS-13 (partial)** | 127 (SS-01=42, SS-02=9, SS-03=13, SS-04=16, SS-05=11, SS-06=19, SS-09=8, **SS-13=9**) |
 | P1 (ship v1) | SS-03 (partial), SS-07, SS-08, SS-09 (partial), SS-10, **SS-13 (partial)** | 42 (SS-03=2, SS-07=5, SS-08=17, SS-09=6, SS-10=9, **SS-13=3**) |
-| P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 22 (SS-11=15, SS-12=7) |
-| **Total** | | **190** |
+| P2 (v1-ready, opt-in/deferred) | SS-11, SS-12 | 24 (SS-11=17, SS-12=7) |
+| **Total** | | **193** |

@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "2.2"
+version: "2.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-09T00:00:00Z
@@ -58,6 +58,9 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | E-GLG | CAP-013 | Genre-lane gate schema/config errors for sub-lane BCs (BC-13.01.*/13.02.*/13.03.*/13.04.*) | error-taxonomy.md §E-GLG (added PRD rev 1.6) |
 | E-MOD | CAP-013 | Modding/UGC lane errors (BC-13.03.*) | error-taxonomy.md §E-MOD (added PRD rev 1.6) |
 | E-MKT | CAP-013 | Marketing lane asset conformance errors (BC-13.04.*) | error-taxonomy.md §E-MKT (added PRD rev 1.6) |
+| E-TMOD | CAP-013 | Moderation pipeline contract errors — UGC/chat CSAM reporting + fail-closed enforcement (BC-13.03.005) | error-taxonomy.md §E-TMOD (added PRD rev 2.3 Pass-42) |
+| E-ANTICH | CAP-013 | Anti-cheat integration adapter errors — provider allowlist + kernel-anomaly rejection (BC-13.02.006) | error-taxonomy.md §E-ANTICH (added PRD rev 2.3 Pass-42) |
+| E-SEC | CAP-001 | Output-bundle secrets gate errors — secret-pattern scan + entropy scan (BC-1.15.003) | error-taxonomy.md §E-SEC (added PRD rev 2.3 Pass-42) |
 | E-XR | CAP-014 | XR platform seam errors | error-taxonomy.md §E-XR (added PRD rev 1.1) |
 | E-PRV | CAP-004 | Provenance sidecar field validation errors (`disclosure_class` + sidecar completeness) | error-taxonomy.md §E-PRV (added PRD rev 1.2; extended rev 1.6) |
 | E-OSVC | CAP-015 | Online-Services Adapter errors (identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity) | prd-supplements/prd-cap-015.md §5 (populated PRD rev 1.9) |
@@ -695,6 +698,47 @@ and marketing asset manifest completeness (BC-13.04.002).
 
 ---
 
+## E-TMOD — Moderation Pipeline Contract (CAP-013, BC-13.03.005)
+
+Errors emitted by the moderation pipeline contract BC (BC-13.03.005) when a UGC/chat
+game's `moderation-pipeline-manifest` is absent, incomplete, or declares a fail-open
+configuration. All E-TMOD errors cause D-SEC BLOCKED.
+
+| Error Code | Category | Severity | Exit Code | Message Format |
+|-----------|----------|----------|-----------|----------------|
+| E-TMOD-001 | Moderation pipeline absent or provider invalid | broken | 1 | `moderation: moderation-pipeline-manifest absent or invalid for game '<game_id>' with ugc_enabled/chat_enabled=true — provider must be non-empty and csam_detection_method must be one of {PhotoDNA, C2PA scan, hash-match}; D-SEC BLOCKED (BC-13.03.005)` |
+| E-TMOD-002 | NCMEC report path missing | broken | 1 | `moderation: moderation-pipeline-manifest.ncmec_report_path is null or absent for game '<game_id>' — NCMEC CyberTipline must be configured (18 U.S.C. §2258A); D-SEC BLOCKED (BC-13.03.005)` |
+| E-TMOD-003 | Moderation fail-open declared | broken | 1 | `moderation: moderation-pipeline-manifest declares degraded_behavior: 'pass_through' (fail-open) for game '<game_id>' — fail-open moderation is not a valid configuration; must be 'block_ugc' or equivalent fail-closed behavior; D-SEC BLOCKED (BC-13.03.005)` |
+
+---
+
+## E-ANTICH — Anti-Cheat Integration Adapter (CAP-013, BC-13.02.006)
+
+Errors emitted by the anti-cheat integration adapter BC (BC-13.02.006) when a
+competitive-multiplayer or esports-enabled game's `anti_cheat_config` is absent,
+declares a provider not in the allowed set, or attempts to use a kernel-anomaly
+provider.
+
+| Error Code | Category | Severity | Exit Code | Message Format |
+|-----------|----------|----------|-----------|----------------|
+| E-ANTICH-001 | Provider not in allowed set | broken | 1 | `anti-cheat: provider '<provider>' declared in anti_cheat_config for game '<game_id>' is not in the factory-allowed set {eac, eos, battleye} (case-insensitive); D-SEC BLOCKED (BC-13.02.006, ADR-0008)` |
+| E-ANTICH-002 | Kernel-anomaly provider attempted | broken | 1 | `anti-cheat: provider '<provider>' is a kernel-anomaly provider (Riot Vanguard / vgk.sys variant) — unconditionally rejected; not licensable, DI-010 violation; scaffolding generation BLOCKED; not overridable (BC-13.02.006, ADR-0008)` |
+| E-ANTICH-003 | Provider absent for competitive lane | broken | 1 | `anti-cheat: anti_cheat_config absent or provider field missing for game '<game_id>' with competitive_multiplayer=true or esports_enabled=true; anti-cheat provider declaration is required; D-SEC BLOCKED (BC-13.02.006)` |
+
+---
+
+## E-SEC — Output-Bundle Secrets Gate (CAP-001, BC-1.15.003)
+
+Errors emitted by the output-bundle secrets gate (BC-1.15.003) when a factory-generated
+artifact bundle contains a detected secret pattern or high-entropy string outside declared
+baseline exclusions. E-SEC-001 is a hard stop: no override path exists.
+
+| Error Code | Category | Severity | Exit Code | Message Format |
+|-----------|----------|----------|-----------|----------------|
+| E-SEC-001 | Secret in output bundle | broken | 1 | `secrets-gate: factory output bundle for game '<game_id>' contains secret material at '<file_path>' — pattern: '<pattern_description>' / entropy: <entropy> bits/char; bundle rejected; CI exit 1; DI-013 violation (BC-1.15.003)` |
+
+---
+
 ## E-XR — XR Platform Seam (CAP-014)
 
 | Error Code | Category | Severity | Exit Code | Message Format |
@@ -747,6 +791,21 @@ Message format uses `<placeholder>` syntax.
 ---
 
 ## Coverage Notes
+
+### PRD Revision 2.3 Changes (Pass-42 D-019 security burst — 3 new families, 7 new codes, DI-013)
+
+| Change | Detail |
+|--------|--------|
+| E-TMOD family registered (Pass-42) | **NEW FAMILY:** `E-TMOD` (Moderation Pipeline Contract, CAP-013, BC-13.03.005) registered with 3 codes: E-TMOD-001 (ModerationPipelineAbsent — absent manifest or invalid provider/csam_detection_method), E-TMOD-002 (NCMECReportPathMissing — ncmec_report_path null or absent), E-TMOD-003 (ModerationFailOpen — degraded_behavior: pass_through declared). All 3 codes are severity: broken, exit code: 1. E-TMOD: 0 → **3 codes**. |
+| E-ANTICH family registered (Pass-42) | **NEW FAMILY:** `E-ANTICH` (Anti-Cheat Integration Adapter, CAP-013, BC-13.02.006) registered with 3 codes: E-ANTICH-001 (ProviderNotInAllowedSet), E-ANTICH-002 (KernelAnomalyProviderAttempted — unconditional Vanguard/vgk rejection), E-ANTICH-003 (ProviderAbsentForCompetitiveLane). All 3 codes are severity: broken, exit code: 1. E-ANTICH: 0 → **3 codes**. |
+| E-SEC family registered (Pass-42) | **NEW FAMILY:** `E-SEC` (Output-Bundle Secrets Gate, CAP-001, BC-1.15.003) registered with 1 code: E-SEC-001 (SecretInOutputBundle — secret-pattern scan or entropy scan failure on CI). Severity: broken, exit code: 1. E-SEC: 0 → **1 code**. |
+| DI-013 added to invariants.md | **NEW INVARIANT:** DI-013 (Factory Output Bundle Never Contains Secret Material) added to domain-spec/invariants.md v1.2. Enforced by BC-1.15.003. Grounded in ARCH-INDEX.md §F42-03 (D-SEC sub-predicate 4) and cicd-setup.md §Output-Bundle Secrets Gate. |
+| BC-1.15.003 authored (Pass-42) | New BC `BC-1.15.003` (Never-Emit-Secrets Output-Bundle Lint, SS-01, CAP-001, P0) authored. Primary enforcer of DI-013. VP-TBD-327 reserved. |
+| BC-13.02.006 authored (Pass-42) | New BC `BC-13.02.006` (Anti-Cheat Integration Adapter, SS-11, CAP-013, P2) authored. VP-TBD-326 reserved. |
+| BC-13.03.005 authored (Pass-42) | New BC `BC-13.03.005` (Moderation Pipeline Contract, SS-11, CAP-013, P2) authored. VP-TBD-324/325 reserved. |
+| Total codes 260 → 267 | E-TMOD: 0→3 (+3), E-ANTICH: 0→3 (+3), E-SEC: 0→1 (+1). Net: **+7 new codes**. Active codes: 251 → **258**. Total registered (incl. retired E-GEN): 260 → **267**. Active families: 30 → **33** (+3 new). Total families: 31 → **34** (+3 new). BC count: 190 → **193** (+3). |
+
+---
 
 ### PRD Revision 2.0 Changes (Pass-20 — symbolic token reconciliation: E-KB, E-PLAY, E-REPLAY, E-NAR)
 
@@ -833,7 +892,7 @@ Message format uses `<placeholder>` syntax.
 | Total 139 → 196 (CI-computed) | **Net:** +57 new codes (E-AAG×7 + E-SVC×6 + E-PRV×5 + E-QG×11 + E-SHIP×3 + E-ING×4 + E-GLG×5 + E-MOD×11 + E-MKT×4 + E-XR×1) = 139 + 57 = **196 total registered codes** (CI computes all distinct E-xxx-NNN tokens including retired E-GEN). E-GEN (9 codes) retired but its codes remain in the taxonomy as a retired table, so CI still counts them. Active families: 22 − 1 (E-GEN retired) + 8 new = **29 active families**. Active codes only (excl. E-GEN): **187**. |
 | Total 196 → 198 (PRD rev 1.7) | **+E-COMP-011** (out-of-vocabulary `disclosure_class` at manifest aggregation; I-1 fix) and **+E-COMP-012** (`nft_blockchain`/`nft_mechanics` inconsistency seam guard; I-2 fix). E-COMP family: 2 → 4. Total all registered (incl. retired E-GEN): **198**. Active codes only (excl. E-GEN): **189**. |
 
-**Total defined error codes: 260** across 31 families (30 active + 1 retired E-GEN). Per-family breakdown (active codes: 251; retired codes: 9 E-GEN):
+**Total defined error codes: 267** across 34 families (33 active + 1 retired E-GEN). Per-family breakdown (active codes: 258; retired codes: 9 E-GEN):
 
 | Family | Code Count | Notes |
 |--------|-----------|-------|
@@ -868,8 +927,11 @@ Message format uses `<placeholder>` syntax.
 | E-XR | 7 | v1.1: 6 codes; v1.6: +E-XR-007 (visionOS/OpenXR namespace error) |
 | ~~E-GEN~~ | ~~9~~ | **RETIRED v1.6** — orphaned placeholder; no BC ever referenced these codes |
 | E-OSVC | 16 | v1.9 addition: online-services adapter (CAP-015) — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity; v2.2: +E-OSVC-016 (SaveSizeLimitExceeded) — F39-01 fix |
-| **TOTAL (all registered incl. retired E-GEN)** | **260** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 260 |
-| *(active only, excl. E-GEN retired)* | *251* | Active codes only (30 active families) |
+| E-TMOD | 3 | v2.3 addition (Pass-42): moderation pipeline contract (CAP-013, BC-13.03.005) |
+| E-ANTICH | 3 | v2.3 addition (Pass-42): anti-cheat provider policy (CAP-013, BC-13.02.006) |
+| E-SEC | 1 | v2.3 addition (Pass-42): output-bundle secrets gate (CAP-001, BC-1.15.003) |
+| **TOTAL (all registered incl. retired E-GEN)** | **267** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 267 |
+| *(active only, excl. E-GEN retired)* | *258* | Active codes only (33 active families) |
 
 ---
 

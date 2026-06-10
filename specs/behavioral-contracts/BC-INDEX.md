@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract-index
 level: L3
-version: "1.8"
+version: "1.9"
 status: draft
 producer: product-owner
 timestamp: 2026-06-09T00:00:00Z
@@ -34,11 +34,11 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 > mirror capability numbers (CAP-001 = ss-01, etc.) for navigability only and are NOT
 > architecture subsystem IDs. The subsystem mapping is documented in the Summary table below.
 
-**Grand total: 190 behavioral contracts** across 15 capabilities. (178 from CAP-001..014 + 12 added in v1.5 for CAP-015 online-services adapter: BC-15.01.001, BC-15.01.002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001. v1.5: CAP-015/SS-13 online-services seam BCs (12 BCs); new E-OSVC error family (15 codes) registered. v1.8: Pass-39 F39-01/F39-02 error-code semantic-fit fixes — E-OSVC-016, E-ENG-003/004, E-CIN-005/006 registered; total error codes 255→260. BC count unchanged: 190.)
+**Grand total: 193 behavioral contracts** across 15 capabilities. (178 from CAP-001..014 + 12 added in v1.5 for CAP-015 online-services adapter: BC-15.01.001, BC-15.01.002, BC-15.02.001, BC-15.03.001, BC-15.04.001, BC-15.05.001, BC-15.06.001, BC-15.07.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001. v1.5: CAP-015/SS-13 online-services seam BCs (12 BCs); new E-OSVC error family (15 codes) registered. v1.8: Pass-39 F39-01/F39-02 error-code semantic-fit fixes — E-OSVC-016, E-ENG-003/004, E-CIN-005/006 registered; total error codes 255→260. BC count unchanged: 190. v1.9: Pass-42 D-019 security burst — +3 BCs: BC-1.15.003 (P0, SS-01), BC-13.02.006 (P2, SS-11), BC-13.03.005 (P2, SS-11); +3 error families (E-TMOD, E-ANTICH, E-SEC); +7 error codes 260→267; DI-013 added to invariants.md. BC count: 190→193.)
 
 ---
 
-## CAP-001 — Engine-Agnostic Game Build and Test (P0) — 35 BCs
+## CAP-001 — Engine-Agnostic Game Build and Test (P0) — 36 BCs
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-001.md`
 
@@ -79,6 +79,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-001.md`
 | BC-1.14.002 | Core Compatibility Matrix Maps Core Version to Supported Protocol Major Versions | P0 | ss-01/BC-1.14.002.md | active |
 | BC-1.15.001 | Factory Core Source Artifacts Contain No Engine SDK Imports or Engine Name References | P0 | ss-01/BC-1.15.001.md | active |
 | BC-1.15.002 | Factory Core Output Contains No Kernel-Mode or Ring-0 Authored Code (Never-Author Enforcement) | P0 | ss-01/BC-1.15.002.md | active |
+| BC-1.15.003 | Factory Output Bundle Never Contains Secret Material (Output-Bundle Secrets Gate) | P0 | ss-01/BC-1.15.003.md | active |
 
 ---
 
@@ -306,7 +307,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-008-012.md`
 
 ---
 
-## CAP-013 — Genre-Gated Optional Lane Activation (P2) — 15 BCs
+## CAP-013 — Genre-Gated Optional Lane Activation (P2) — 17 BCs
 
 Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 
@@ -320,10 +321,12 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-013-014.md`
 | BC-13.02.003 | Esports Replay Format — CAP-003 Spine Reuse | P2 | ss-13/BC-13.02.003.md | active |
 | BC-13.02.004 | Spectator Spec — Observer Data Layer | P2 | ss-13/BC-13.02.004.md | active |
 | BC-13.02.005 | Tournament Mode Spec — Bracket Combinatorics and Match-Result Audit | P2 | ss-13/BC-13.02.005.md | active |
+| BC-13.02.006 | Anti-Cheat Integration Adapter — Allowed-Provider Enforcement and Kernel-Anomaly Rejection | P2 | ss-13/BC-13.02.006.md | active |
 | BC-13.03.001 | Mod-API Contract — Versioned Surface with Semver Stability Enforcement | P2 | ss-13/BC-13.03.001.md | active |
 | BC-13.03.002 | UGC Content Schema Validation | P2 | ss-13/BC-13.03.002.md | active |
 | BC-13.03.003 | Mod Load Determinism — Topological Ordering and Conflict Detection | P2 | ss-13/BC-13.03.003.md | active |
 | BC-13.03.004 | UGC Distribution Adapter — mod.io Round-Trip Conformance | P2 | ss-13/BC-13.03.004.md | active |
+| BC-13.03.005 | Moderation Pipeline Contract — UGC/Chat CSAM Reporting and Fail-Closed Enforcement | P2 | ss-13/BC-13.03.005.md | active |
 | BC-13.01.004 | Genre Profile Default Enforces NFT/Web3 Off-By-Default (DI-011) | P2 | ss-13/BC-13.01.004.md | active |
 | BC-13.04.001 | Store Page Asset Conformance | P2 | ss-13/BC-13.04.001.md | active |
 | BC-13.04.002 | Marketing Asset Manifest Completeness | P2 | ss-13/BC-13.04.002.md | active |
@@ -371,7 +374,7 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
 
 | Capability | Priority | Subsystem | BC Count |
 |-----------|----------|-----------|----------|
-| CAP-001 — Engine-Agnostic Build and Test | P0 | SS-01 | 35 |
+| CAP-001 — Engine-Agnostic Build and Test | P0 | SS-01 | 36 (+1 v1.9: BC-1.15.003 never-emit-secrets) |
 | CAP-002 — Conformance Gating | P0 | SS-01 (merged into Engine-Adapter Protocol) | 6 |
 | CAP-003 — Replay Regression | P0 | SS-02 | 9 |
 | CAP-004 — Asset Generation + Provenance | P0 | SS-03 | 15 |
@@ -383,10 +386,10 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
 | CAP-010 — Compliance + AI Disclosure | P1 | SS-08 (merged into Cert+Distribution) | 6 |
 | CAP-011 — Monetization Ethics | P0/P1 | SS-09 | 14 (+1 v1.2: BC-11.03.006 DP-007) |
 | CAP-012 — Canon KB | P1 | SS-10 | 9 |
-| CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 15 |
+| CAP-013 — Genre-Gated Lanes | P2 | SS-11 | 17 (+1 v1.1: BC-13.01.004; +2 v1.9: BC-13.02.006 anti-cheat, BC-13.03.005 moderation) |
 | CAP-014 — XR Seam | P2 | SS-12 | 7 |
 | CAP-015 — Online-Services Adapter | P0/P1 | SS-13 | 12 (v1.5: all new; P0×9: BC-15.01.001/002, 15.02.001, 15.04.001, 15.06.001, 15.08.001, 15.09.001, 15.10.001, 15.11.001; P1×3: BC-15.03.001, 15.05.001, 15.07.001) |
-| **TOTAL** | | | **190** |
+| **TOTAL** | | | **193** |
 
 ---
 
@@ -394,5 +397,6 @@ Supplement: `.factory/specs/prd-supplements/prd-cap-015.md`
 
 | Version | Date | Change |
 |---------|------|--------|
+| v1.9 | 2026-06-09 | Pass-42 D-019 security burst: +3 BCs — BC-1.15.003 (Factory Output Bundle Never Contains Secret Material, P0, SS-01, CAP-001), BC-13.02.006 (Anti-Cheat Integration Adapter, P2, SS-11, CAP-013), BC-13.03.005 (Moderation Pipeline Contract, P2, SS-11, CAP-013). Grand total 190→193. CAP-001 header 35→36 BCs. CAP-013 header 15→17 BCs. Summary table updated. Priority subtotals: P0 126→127 (+1 BC-1.15.003), P2 22→24 (+2 BC-13.02.006, BC-13.03.005). |
 | v1.7 | 2026-06-08 | Fix (I-16-01): Corrected 2 stale per-capability section-header BC counts. CAP-007 header: "12 BCs" → "19 BCs" (section has 19 rows: BC-7.01.001..BC-7.12.001 incl. BC-7.11.002..008 server-authority invariant suite). CAP-015 header: "11 BCs" → "12 BCs" (section has 12 rows: BC-15.01.001..BC-15.11.001 incl. BC-15.01.002). Grand total (190), Summary table, prd.md, and subsystem-decomposition were correct and unchanged. All 15 capability section headers verified against section row counts. |
 | v1.6 | 2026-06-08 | (prior version — see git history) |

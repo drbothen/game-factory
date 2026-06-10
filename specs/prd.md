@@ -1,7 +1,7 @@
 ---
 document_type: prd
 level: L3
-version: "2.6"
+version: "2.7"
 status: draft
 producer: product-owner
 timestamp: 2026-06-09T00:00:00Z
@@ -108,7 +108,7 @@ Must ship in v1. These capabilities form the load-bearing factory spine.
 
 | Capability | Description | BC Count |
 |-----------|-------------|---------|
-| CAP-001 | Engine-Agnostic Game Build and Test (EAP + full adapter protocol) | 35 |
+| CAP-001 | Engine-Agnostic Game Build and Test (EAP + full adapter protocol) | 36 (+1 v2.7: BC-1.15.003 never-emit-secrets) |
 | CAP-002 | Engine Adapter Conformance Gating (anti-drift load-bearing artifact) | 6 |
 | CAP-003 | Determinism-Tier-Governed Replay Regression (T1/T2/T3 + golden state) | 9 |
 | CAP-004 | Pure-Maximal Asset Generation with Auto-Provenance | 15 |
@@ -116,7 +116,7 @@ Must ship in v1. These capabilities form the load-bearing factory spine.
 | CAP-006 | Contract-Driven Simulation Quality Verification | 11 |
 | CAP-007 | 11-Dimension Convergence Tracking | 19 (+7 v1.2: BC-7.11.002..008 server-authority invariant suite CWE-602) |
 
-**Tier 1 total: 123 BCs** (111 prior + 12 added in v1.9: BC-15.01.001/002, BC-15.02.001, BC-15.04.001, BC-15.06.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001 are P0; BC-15.03.001, BC-15.05.001, and BC-15.07.001 are P1 but CAP-015 is Tier-1)
+**Tier 1 total: 124 BCs** (111 prior + 12 added in v1.9: BC-15.01.001/002, BC-15.02.001, BC-15.04.001, BC-15.06.001, BC-15.08.001, BC-15.09.001, BC-15.10.001, BC-15.11.001 are P0; BC-15.03.001, BC-15.05.001, and BC-15.07.001 are P1 but CAP-015 is Tier-1; +1 in v2.7: BC-1.15.003 CAP-001)
 
 | Capability | Description | BC Count |
 |-----------|-------------|---------|
@@ -142,12 +142,12 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 
 | Capability | Description | BC Count |
 |-----------|-------------|---------|
-| CAP-013 | Genre-Gated Optional Lane Activation (esports / UGC / marketing lanes) | 15 |
+| CAP-013 | Genre-Gated Optional Lane Activation (esports / UGC / marketing lanes) | 17 (+2 v2.7: BC-13.02.006 anti-cheat, BC-13.03.005 moderation) |
 | CAP-014 | XR Platform Seam (seam spec complete; implementation deferred) | 7 |
 
-**Tier 3 total: 22 BCs** (21 original + 1 added in v1.1: BC-13.01.004 for DI-011)
+**Tier 3 total: 24 BCs** (21 original + 1 added in v1.1: BC-13.01.004 for DI-011 + 2 added in v2.7: BC-13.02.006 anti-cheat + BC-13.03.005 moderation)
 
-**Grand total: 190 BCs**
+**Grand total: 193 BCs**
 
 ---
 
@@ -155,7 +155,7 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 
 | Capability | Priority | Tier | Supplement File | BC Subsystem Dir | BC Count |
 |-----------|----------|------|----------------|-----------------|---------|
-| CAP-001 | P0 | 1 | prd-supplements/prd-cap-001.md | ss-01/ | 35 |
+| CAP-001 | P0 | 1 | prd-supplements/prd-cap-001.md | ss-01/ | 36 |
 | CAP-002 | P0 | 1 | prd-supplements/prd-cap-002-003.md | ss-02/ | 6 |
 | CAP-003 | P0 | 1 | prd-supplements/prd-cap-002-003.md | ss-03/ | 9 |
 | CAP-004 | P0 | 1 | prd-supplements/prd-cap-004.md | ss-04/ | 15 |
@@ -167,7 +167,7 @@ Activated by genre profile or platform declaration. XR implementation deferred (
 | CAP-010 | P1 | 2 | prd-supplements/prd-cap-009-010.md | ss-10/ | 6 |
 | CAP-011 | P1 | 2 | prd-supplements/prd-cap-011.md | ss-11/ | 14 |
 | CAP-012 | P1 | 2 | prd-supplements/prd-cap-008-012.md | ss-12/ | 9 |
-| CAP-013 | P2 | 3 | prd-supplements/prd-cap-013-014.md | ss-13/ | 15 |
+| CAP-013 | P2 | 3 | prd-supplements/prd-cap-013-014.md | ss-13/ | 17 |
 | CAP-014 | P2 | 3 | prd-supplements/prd-cap-013-014.md | ss-14/ | 7 |
 | CAP-015 | P1 | 1 | prd-supplements/prd-cap-015.md | ss-15/ | 12 |
 
@@ -236,9 +236,9 @@ NFR summary — capabilities now with defined numeric targets (v1.1 additions ma
 
 ## Section 5 — Consolidated Error Taxonomy
 
-Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (260 error codes, 30 active families + 1 retired — v2.2). Note: 9 of the 260 are in the retired E-GEN family; 251 are active codes. (v2.2: +5 codes — E-ENG-003/004, E-CIN-005/006, E-OSVC-016 — F39-01/F39-02 semantic-fit fixes; v2.0: +42 codes across E-KB/E-PLAY/E-REPLAY/E-NAR — Pass-20 symbolic token reconciliation + F-20-02 E-NAR fix.)
+Full taxonomy: `.factory/specs/prd-supplements/error-taxonomy.md` (267 error codes, 33 active families + 1 retired — v2.3). Note: 9 of the 267 are in the retired E-GEN family; 258 are active codes. (v2.3: +7 codes — E-TMOD-001/002/003, E-ANTICH-001/002/003, E-SEC-001 — Pass-42 D-019 security burst: 3 new families; v2.2: +5 codes — E-ENG-003/004, E-CIN-005/006, E-OSVC-016 — F39-01/F39-02 semantic-fit fixes; v2.0: +42 codes across E-KB/E-PLAY/E-REPLAY/E-NAR — Pass-20 symbolic token reconciliation + F-20-02 E-NAR fix.)
 
-Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`; v1.6 additions marked with `***`; v1.9 additions marked with `****`):
+Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`; v1.6 additions marked with `***`; v1.9 additions marked with `****`; v2.3/Pass-42 additions marked with `*****`):
 
 | Family | Owning Capability | Code Count |
 |--------|------------------|-----------|
@@ -273,9 +273,12 @@ Family summary (v1.1 additions marked with `*`; v1.2 additions marked with `**`;
 | E-MKT *** | CAP-013 (Marketing lane, BC-13.04.*) | 4 |
 | E-XR * | CAP-014 (XR seam) | 7 (v1.1: 6 codes; v1.6: +E-XR-007 visionOS/OpenXR) |
 | E-OSVC **** | CAP-015 (Online-Services Adapter — identity, cloud-save, leaderboards, matchmaking, entitlements, remote-config, seam integrity) | 16 (v1.9: 15 new; v2.2: +E-OSVC-016 SaveSizeLimitExceeded — F39-01) |
-| **TOTAL (all registered incl. retired E-GEN)** | **30 active + 1 retired** | **260** |
+| E-TMOD ***** | CAP-013 (Moderation pipeline contract — UGC/chat CSAM reporting; BC-13.03.005) | 3 (v2.3: E-TMOD-001 ModerationPipelineAbsent, E-TMOD-002 NCMECReportPathMissing, E-TMOD-003 ModerationFailOpen) |
+| E-ANTICH ***** | CAP-013 (Anti-cheat integration adapter — allowed-provider enforcement; BC-13.02.006) | 3 (v2.3: E-ANTICH-001 ProviderNotInAllowedSet, E-ANTICH-002 KernelAnomalyProviderAttempted, E-ANTICH-003 ProviderAbsentForCompetitiveLane) |
+| E-SEC ***** | CAP-001 (Output-bundle secrets gate; BC-1.15.003) | 1 (v2.3: E-SEC-001 SecretInOutputBundle) |
+| **TOTAL (all registered incl. retired E-GEN)** | **33 active + 1 retired** | **267** |
 
-**Error family gap status:** All 15 capability families have error families defined. v2.2 (Pass-39) registers 5 new codes — E-ENG-003/004, E-CIN-005/006, E-OSVC-016 — closing F39-01 (save-size/conflict semantic mismatch) and F39-02 ("variant" language for unregistered conditions). v2.0 (Pass-20) extends E-KB (7→26), E-PLAY (5→15), E-REPLAY (7→18), E-NAR (4→6) to cover all symbolic tokens emitted by their BCs. Every registered non-retired family is now cited by ≥1 BC. See `error-taxonomy.md §Coverage Notes`.
+**Error family gap status:** All 15 capability families have error families defined. v2.3 (Pass-42) registers 7 new codes across 3 new families — E-TMOD (3), E-ANTICH (3), E-SEC (1) — covering D-SEC security invariants for moderation pipeline, anti-cheat provider enforcement, and output-bundle secrets gate. v2.2 (Pass-39) registers 5 new codes — E-ENG-003/004, E-CIN-005/006, E-OSVC-016 — closing F39-01 (save-size/conflict semantic mismatch) and F39-02 ("variant" language for unregistered conditions). v2.0 (Pass-20) extends E-KB (7→26), E-PLAY (5→15), E-REPLAY (7→18), E-NAR (4→6) to cover all symbolic tokens emitted by their BCs. Every registered non-retired family is now cited by ≥1 BC. See `error-taxonomy.md §Coverage Notes`.
 
 ---
 
@@ -311,7 +314,7 @@ BC with testable postconditions backing the claim.
 
 ### 7.2 Domain Invariant Coverage
 
-All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan invariants. (DI-010 and DI-011 gaps closed in PRD v1.1.)
+All 13 domain invariants (DI-001 through DI-013) have BC coverage. No orphan invariants. (DI-010 and DI-011 gaps closed in PRD v1.1; DI-013 added PRD v2.7.)
 
 | Invariant | Description | Primary Enforcing BCs |
 |-----------|-------------|----------------------|
@@ -324,15 +327,16 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | DI-007 | Playtest Satisfaction Is Always a Human Gate | BC-8.08.004, BC-7.05.001, BC-8.08.005 |
 | DI-008 | Factory Core Spec Layer Is Engine-Portable by Construction | BC-5.01.001, BC-1.15.001 |
 | DI-009 | Suno/Udio and Unlicensed AI Music Providers Are Blocked | BC-4.01.004 |
-| DI-010 | Kernel Anti-Cheat Is Never Autonomously Authored | **BC-1.15.002** (added PRD v1.1; primary enforcement) |
+| DI-010 | Kernel Anti-Cheat Is Never Autonomously Authored | **BC-1.15.002** (added PRD v1.1; primary enforcement); **BC-13.02.006** (anti-cheat provider policy, added PRD v2.7) |
 | DI-011 | NFT and Web3 Mechanics Are Off by Default | **BC-13.01.004** (added PRD v1.1; primary enforcement) |
 | DI-012 | Every ContractArtifact Has a Declared Validation Method | BC-6.04.001, BC-5.05.002 |
+| DI-013 | Factory Output Bundle Never Contains Secret Material | **BC-1.15.003** (added PRD v2.7; primary enforcement) |
 
 ### 7.3 CAP → BC ID Range → Domain Invariants Matrix
 
 | CAP | BC ID Ranges | Primary DIs Enforced |
 |-----|-------------|---------------------|
-| CAP-001 | BC-1.01.001 – BC-1.15.002 | DI-001, DI-004, DI-006, DI-010 |
+| CAP-001 | BC-1.01.001 – BC-1.15.003 | DI-001, DI-004, DI-006, DI-010, DI-013 |
 | CAP-002 | BC-2.02.001 – BC-2.02.006 | DI-002 |
 | CAP-003 | BC-3.03.001 – BC-3.03.009 | DI-004 |
 | CAP-004 | BC-4.01.001 – BC-4.06.001 | DI-003, DI-006, DI-009 |
@@ -344,7 +348,7 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 | CAP-010 | BC-10.01.001 – BC-10.06.001 | DI-003, DI-006 |
 | CAP-011 | BC-11.01.001 – BC-11.04.002 (+ BC-11.03.006) | DI-005 |
 | CAP-012 | BC-12.12.001 – BC-12.12.009 | DI-012 |
-| CAP-013 | BC-13.01.001 – BC-13.04.002 (+ BC-13.01.004) | DI-004 (esports replay reuse), DI-011, DI-006 |
+| CAP-013 | BC-13.01.001 – BC-13.04.002 (+ BC-13.01.004, BC-13.02.006, BC-13.03.005) | DI-004 (esports replay reuse), DI-006, DI-010 (anti-cheat via BC-13.02.006), DI-011 |
 | CAP-014 | BC-14.01.001 – BC-14.02.003 | DI-006, DI-001 |
 
 ---
@@ -355,6 +359,7 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 2.7 | 2026-06-09 | product-owner | Pass-42 D-019 security burst: +3 BCs (BC-1.15.003 P0 SS-01, BC-13.02.006 P2 SS-11, BC-13.03.005 P2 SS-11); +3 error families (E-TMOD, E-ANTICH, E-SEC) with 7 codes total; DI-013 (Factory Output Bundle Never Contains Secret Material) added to invariants.md; all count surfaces updated: BC total 190→193, error codes 260→267, active families 30→33. Priority subtotals: P0 126→127, P2 22→24, P1=42 unchanged. |
 | 1.0 | 2026-06-08 | product-owner | Initial PRD: 168 BCs, 19 NFRs, 59 error codes / 11 families |
 | 1.1 | 2026-06-08 | product-owner | PRD revision (FU-001/002/003): +2 BCs (BC-1.15.002, BC-13.01.004); +16 NFRs (NFR-020..035); +10 error families, +79 error codes; all DI orphan invariants closed; incorporates DI-010 (kernel AC never authored, §DI-010) and DI-011 (NFT/web3 off by default, §DI-011) as primary architectural decisions, plus ADR-0006 (11-dim convergence model) and ADR-0007 (human-gated fidelity tier) |
 | 1.2 | 2026-06-08 | product-owner | Phase-1d adversarial pass-1 resolution: +9 BCs (BC-11.03.006 DP-007; BC-7.11.002–008 server-authority CWE-602 invariants); E-PRV family (3 codes); E-ETH-009; E-GEN-004 vocabulary corrected; E-ETH-005 mislabel fixed; E-SIM-009 identifier corrected; BC-1.15.002 kernel patterns extended (macOS/IOKit, eBPF, binary blobs, build.rs); BC-13.01.004 console cert-preflight routing added; BC-4.03.002 procedural-exempt audit controls specified; DP deny-list coverage documented; priority fields backfilled on ss-01..ss-08 BCs |
@@ -373,15 +378,15 @@ All 12 domain invariants (DI-001 through DI-012) have BC coverage. No orphan inv
 
 ### 8.1 Subsystem Assignment (Resolved)
 
-**All 190 behavioral contracts have been assigned to architecture subsystems (SS-01 through
+**All 193 behavioral contracts have been assigned to architecture subsystems (SS-01 through
 SS-13).** The `subsystem: SS-TBD` placeholder has been replaced in all BC frontmatter.
 The assignment was propagated from `.factory/specs/architecture/subsystem-decomposition.md`
 (see ARCH-INDEX.md Subsystem Registry). BC file paths (directory `ss-NN/`, filename) are
 immutable per `append_only_numbering` policy.
 
-Subsystem distribution: SS-01 (41 BCs: CAP-001+002 + BC-1.15.002), SS-02 (9), SS-03 (15),
+Subsystem distribution: SS-01 (42 BCs: CAP-001+002 + BC-1.15.002 + BC-1.15.003), SS-02 (9), SS-03 (15),
 SS-04 (16), SS-05 (11), SS-06 (19: CAP-007 12 original + 7 server-authority invariant BCs v1.2), SS-07 (5), SS-08 (17: CAP-009+010), SS-09 (14: CAP-011 13 original + BC-11.03.006 v1.2),
-SS-10 (9), SS-11 (15: CAP-013 + BC-13.01.004), SS-12 (7), SS-13 (12: CAP-015 online-services adapter, v1.9).
+SS-10 (9), SS-11 (17: CAP-013 + BC-13.01.004 + BC-13.02.006 + BC-13.03.005), SS-12 (7), SS-13 (12: CAP-015 online-services adapter, v1.9).
 
 ### 8.2 BC Frontmatter Priority Gap — CLOSED (v1.3)
 

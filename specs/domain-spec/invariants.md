@@ -2,10 +2,10 @@
 document_type: domain-spec-section
 level: L2
 section: invariants
-version: "1.1"
+version: "1.2"
 status: draft
 producer: business-analyst
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/product-brief.md
@@ -169,3 +169,21 @@ declared validation method is structurally invalid.
 DI-012 is a business invariant because machine-checkability is the core value of the
 contract-driven quality model. A contract that cannot be validated provides no quality
 signal. Grounded in RECONCILIATION §6.1 (validation method column) and Brief §In Scope.
+
+---
+
+## DI-013 — Factory Output Bundle Never Contains Secret Material
+
+Every generated output bundle must pass a secret-pattern scan and a high-entropy
+string scan (Shannon entropy >4.5 bits/char over 32+ character windows) before CI
+acceptance. The scan is fail-closed: if either scan fails, CI exits 1 and the bundle
+is rejected. The scan is not disableable by any flag, config, or agent instruction.
+The scan runs after the full bundle is assembled. Enforced by BC-1.15.003 and
+cicd-setup.md §Output-Bundle Secrets Gate.
+
+DI-013 is a business invariant because secrets accidentally committed to a generated
+output bundle (API keys, private keys, bearer tokens, high-entropy credentials)
+represent a critical security risk. Post-CrowdStrike and post-incident reviews of
+supply-chain attacks consistently identify secrets-in-artifacts as a leading attack
+vector. Grounded in ARCH-INDEX.md §F42-03 (D-SEC sub-predicate 4) and
+Brief §Constraints (factory output must be safe for distribution).

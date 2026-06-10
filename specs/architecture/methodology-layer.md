@@ -2,10 +2,10 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.12"
+version: "1.13"
 status: draft
 producer: architect
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1d
 traces_to: ARCH-INDEX.md
 traces_to_caps:
@@ -34,6 +34,19 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Game Methodology Layer (Layer 2)
 
+> **v1.13 changes (Pass-42 F42 — D-SEC predicate hardened; moderation-pipeline-contract and anti-cheat-integration-adapter wired; never-emit-secrets gate added):**
+> - **F42-01 fixed:** D-SEC `blocked predicate` updated to reference:
+>   (a) `moderation-pipeline-contract` BC (reserved as BC-13.02.006 in ss-13/ subsystem SS-11; product-owner to author — see §D-SEC);
+>   (b) `anti-cheat-integration-adapter` conformance BC (reserved as BC-13.02.006 — see correction below — actually BC-13.02.006 is anti-cheat; moderation is BC-13.03.005; see reserved ID table for PO); and
+>   (c) a new "never-emit-secrets" gate: factory output bundle must pass secret-pattern/entropy scan (DI-013 invariant; product-owner to add to invariants.md).
+>   D-SEC is now fail-closed on all three. Predicate updated below.
+> - **F42-02 fixed:** ADR-0008 authored recording the anti-cheat provider policy: allowed
+>   set {EAC, EOS, BattlEye}; kernel-anomaly providers (Riot Vanguard) rejected.
+>   ADR-0008 referenced from the D-SEC blocked predicate below.
+> - **F42-03 fixed:** Never-emit-secrets output-bundle lint gate added to D-SEC pass predicate
+>   and to cicd-setup.md §Output-Bundle Secrets Gate (new blocking CI job). DI-013
+>   invariant specified for product-owner to add to domain-spec/invariants.md.
+>
 > **v1.12 changes (Pass-40 F40-01 fix — T2 comparison method corrected to snapshot-structured-diff; F40-03 fix — playtest_delegation schema updated to structured form with delegated_claims[]):**
 > - **F40-01 fixed:** `comparison_method` enum extended from 2 values to 3: `snapshot-hash-diff | snapshot-structured-diff | tolerance-window`. T1 = snapshot-hash-diff (same-platform bitwise); T2 = snapshot-structured-diff (pinned-runner, field-by-field — bitwise hash equality not guaranteed cross-platform); T3 = tolerance-window (unchanged). D-REPLAY pass predicate at §D-REPLAY corrected to state T2 = snapshot-structured-diff. BC-1.12.002 PC2 must be updated by PO to emit `comparison.method: "snapshot-structured-diff"` for T2.
 > - **F40-03 fixed:** §2.2 design-intent-contract schema updated: scalar `playtest_delegation_note` field replaced by structured `playtest_delegation` section with required `delegated_claims[]` (matching BC-6.02.005 shape). The DI-012 / D-DOCS pass predicate at §D-DOCS updated to gate on the structured form being non-empty. This REFINES D-012's field name (playtest_delegation_note scalar → playtest_delegation structured section) while preserving D-012's intent.
@@ -1006,19 +1019,56 @@ pattern detected; adversarial review not completed.
 
 **ID:** D-SEC | **Automated:** Yes (required for online games) | **Subsystem:** SS-06
 
-**Pass predicate:** `server-authority-invariant-suite` (CWE-602 spine) all assertions
-green: no-trust-client, input range/rate/sequence validation, replay-attack prevention,
-authoritative reconciliation, interest-management, economy conservation/atomicity,
-secure entitlement. Anti-cheat adapter wired for competitive-MP targets. Moderation
-pipeline wired if UGC/chat present.
+**Pass predicate** (v1.13 — hardened, F42-01/02/03):
+All of the following must be true simultaneously:
+
+1. `server-authority-invariant-suite` (CWE-602 spine) all assertions green:
+   no-trust-client, input range/rate/sequence validation, replay-attack prevention,
+   authoritative reconciliation, interest-management, economy conservation/atomicity,
+   secure entitlement.
+2. For games with the competitive-multiplayer lane active: `anti-cheat-integration-adapter`
+   conformance BC (reserved as BC-13.02.006, directory ss-13/, subsystem SS-11;
+   product-owner to author per Pass-42 F42-02 reserved-ID table) passes conformance.
+   Provider declared in `{eac, eos, battleye}` (ADR-0008 allowed set).
+3. For games with UGC/chat features active: `moderation-pipeline-contract` BC
+   (reserved as BC-13.03.005, directory ss-13/, subsystem SS-11;
+   product-owner to author per Pass-42 F42-01 reserved-ID table) is present and passes
+   conformance. CSAM → NCMEC reporting path verified; fail-closed when moderation absent.
+4. Generated output bundle passes the never-emit-secrets lint gate (DI-013;
+   reserved cicd-setup.md §Output-Bundle Secrets Gate; product-owner to add DI-013
+   to domain-spec/invariants.md). Secret-pattern/entropy scan must exit 0.
+
+All four sub-predicates must be green for D-SEC to be PASS. Absence of any required
+contract or failed lint gate ⇒ D-SEC BLOCKED (not degraded). This is fail-closed by
+construction.
 
 **Degraded predicate:** Applicable only for non-online, non-multiplayer games where
 `security-requirements-contract` is absent by design (premium single-player, offline).
-Degradation must be declared explicitly with `online_features: false`.
+Degradation must be declared explicitly with `online_features: false`. When degraded:
+sub-predicate (2) and (3) do not apply (no competitive-MP, no UGC/chat). Sub-predicate
+(4) (secrets lint) applies regardless of online/offline status — factory output bundles
+must never contain secrets in any deployment target.
 
-**Blocked predicate:** Online/multiplayer game without `server-authority-invariant-suite`;
-any CWE-602 invariant failing; kernel anti-cheat authored autonomously (DI-010 violation);
-`moderation-pipeline-contract` absent for a game with UGC/chat.
+**Blocked predicate** (v1.13 — fail-closed, F42-01/02/03):
+Any of the following causes D-SEC BLOCKED:
+
+- Online/multiplayer game without `server-authority-invariant-suite`;
+- Any CWE-602 invariant failing;
+- Kernel anti-cheat authored autonomously (DI-010 violation; BC-1.15.002);
+- Competitive-MP lane active and `anti-cheat-integration-adapter` conformance BC
+  (BC-13.02.006) absent or failing; or provider declared outside allowed set
+  {eac, eos, battleye} per ADR-0008;
+- UGC/chat active and `moderation-pipeline-contract` BC (BC-13.03.005) absent
+  or failing (CSAM→NCMEC path not verified; 18 U.S.C. §2258A obligation not met);
+- Output bundle fails never-emit-secrets lint gate (DI-013 violation; E-SEC error
+  family to be registered by product-owner when authoring the never-emit-secrets BC).
+
+> **NOTE (Pass-42 status):** As of this version, BC-13.02.006 (anti-cheat-integration-adapter)
+> and BC-13.03.005 (moderation-pipeline-contract) are RESERVED but not yet authored.
+> The product-owner burst following Pass-42 will create both BCs plus the DI-013 invariant.
+> The D-SEC predicate references these by BC-ID and name (prose references only — no
+> frontmatter path references to not-yet-existing files). The gate will be fully
+> fail-closed once the PO burst completes.
 
 ---
 

@@ -2,10 +2,10 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.008
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
-timestamp: 2026-06-08T00:00:00Z
+timestamp: 2026-06-09T00:00:00Z
 phase: 1d
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -19,7 +19,8 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0-prd-rev-1d
-modified: []
+modified:
+  - "v1.1: F42-04 — PC4 tightened: paid-entitlement DLC forces online_features:true; offline exemption scoped to no-entitlement-gated-content games only (consistent with BC-15.01.001 serverAuthoritative enforcement)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -64,7 +65,14 @@ client-side assertions.
    temporarily unavailable. Behavior is declared in `server-authority-spec.entitlement_
    fallback` — must be one of `{deny_access, cached_with_ttl, human_gated_override}`.
    The default is `deny_access` (fail-closed). Fail-open is a BLOCKED configuration.
-4. **OFFLINE EXEMPTION:** No entitlement-gated content or fully offline game. INAPPLICABLE.
+4. **Paid-entitlement DLC forces online:** Any game declaring paid-entitlement DLC in
+   its profile (`entitlements` array contains any entry with `type: paid_dlc` or
+   `type: premium_tier`) MUST declare `online_features: true`. A project configuration
+   declaring paid-entitlement DLC with `online_features: false` is a BLOCKED
+   configuration (`E-CONV-006`). This is consistent with BC-15.01.001's
+   `serverAuthoritative` enforcement: server-side entitlement verification requires
+   an active online-services seam. An offline or single-player game with NO
+   entitlement-gated content remains INAPPLICABLE to this BC.
 
 ## Invariants
 
