@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.38
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.39
 #
 # PURPOSE
 # -------
@@ -249,6 +249,40 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.39 to add check (hh) — economy-conservation BC-routing guard
+#   (F54-01 process-gap recurrence prevention):
+#   CANONICAL RULE: BC-6.01.001 = "Economy Conservation Invariant" (the simulation
+#   substrate invariant for economy mechanics). BC-6.02.001 = "Design Intent
+#   Reachability Contract" (a DIFFERENT BC — reachability of intended player
+#   experiences). Pass-54 root-cause (F54-01): 4 SS-09 monetization BCs
+#   (BC-11.04.001, BC-11.04.002, BC-11.02.002, BC-11.02.003) cited BC-6.02.001 in
+#   their Related BCs section with parentheticals describing economy conservation /
+#   economy sim substrate — which is BC-6.01.001, not BC-6.02.001.
+#
+#   ASSERTION: no operative line in any .factory/specs/behavioral-contracts/**/*.md
+#   file may co-locate BC-6.02.001 with an economy-conservation keyword:
+#     Economy-conservation keywords (case-insensitive, any of):
+#       "economy conservation", "economy sim", "economy simulation substrate",
+#       "economy substrate"
+#   Such a co-location means BC-6.02.001 (reachability) is being described as
+#   the economy-conservation BC — the precise F54-01 mis-routing pattern.
+#
+#   TARGETED DESIGN: this check is deliberately narrow. It does not attempt a
+#   general "Related BCs description fit" parser (infeasible / too many false
+#   positives). The BC-6.02.001 + economy-keyword co-location on the same line is
+#   the precise, robust signal for the F54-01 defect class.
+#
+#   EXCLUSIONS (suppress triggering entirely — mirrors existing check conventions):
+#     — Lines starting with ">" (blockquote / changelog annotation lines)
+#     — Lines containing "reason:" (YAML frontmatter lifecycle prose — the 4 fixed
+#       BCs have historical BC-6.02.001 references in their reason: fields)
+#     — Lines containing "modified:" (YAML changelog key lines)
+#     — Lines inside YAML frontmatter (between "---" delimiters)
+#
+#   After the PO fix (BC-11.04.001/002, BC-11.02.002/003 v1.1), no operative line
+#   co-locates BC-6.02.001 with an economy keyword — check must report 0 violations.
+#   POSIX/BSD-grep/awk compatible (no grep -P).
+#   POSITIVE-COVERAGE LOG: always printed. (F54-01 recurrence prevention).
 # extended in v1.27 to add check (x) — prd.md §4 NFR-table ID-set parity
 #   (F33-01 recurrence prevention): parses the set of NFR IDs that appear as rows in
 #   the prd.md §4 NFR summary table ("| NFR-NNN …" lines) and the set of NFR IDs
@@ -429,10 +463,11 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
-#   Positive-coverage log always printed. (F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
+#   Positive-coverage log always printed. (F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -872,6 +907,10 @@ ff_rows_validated=0
 ff_priority_violations=0
 # (gg) D-SEC evaluator-completeness counters: initialized here so SUMMARY is safe if check is skipped
 gg_violations=0
+# (hh) economy-conservation BC-routing counters: initialized here so SUMMARY is safe if check is skipped
+hh_violations=0
+hh_files_scanned=0
+hh_lines_scanned=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -892,7 +931,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.38) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.39) ==="
 echo ""
 
 # ============================================================================
@@ -6118,6 +6157,73 @@ fi
 echo ""
 
 # ============================================================================
+# CHECK (hh) — economy-conservation BC-routing guard
+# (F54-01 process-gap recurrence prevention)
+#
+# CANONICAL RULE: BC-6.01.001 = "Economy Conservation Invariant" (the sim-substrate
+# invariant). BC-6.02.001 = "Design Intent Reachability Contract" (a DIFFERENT BC).
+# An operative line that cites BC-6.02.001 AND contains an economy-conservation
+# keyword is the exact F54-01 mis-routing signal — BC-6.02.001 (reachability) being
+# described as the economy-conservation BC.
+#
+# Economy-conservation keywords (case-insensitive, any of):
+#   "economy conservation", "economy sim", "economy simulation substrate",
+#   "economy substrate"
+#
+# EXCLUSIONS: frontmatter lines (between "---" delimiters), blockquote lines (">"),
+# lines containing "reason:", lines containing "modified:".
+# ============================================================================
+echo "--- (hh) economy-conservation BC-routing guard (F54-01 recurrence prevention) ---"
+
+hh_violations=0
+hh_files_scanned=0
+hh_lines_scanned=0
+
+while IFS= read -r -d '' bc_file; do
+  hh_files_scanned=$(( hh_files_scanned + 1 ))
+  # Extract operative content: strip YAML frontmatter (between first two "---" delimiters),
+  # then filter out blockquote lines, reason: lines, and modified: lines.
+  # Uses same awk state-machine pattern as check (gg) for consistency.
+  hh_operative_lines=$(awk '
+    /^---/ {
+      if (front_count == 0) { front_count=1; in_front=1; next }
+      if (in_front) { in_front=0; next }
+    }
+    in_front { next }
+    /^>/ { next }
+    /reason:/ { next }
+    /modified:/ { next }
+    { print NR ":" $0 }
+  ' "$bc_file")
+
+  # Count operative lines for coverage log
+  this_lines=$(echo "$hh_operative_lines" | grep -c '.' || true)
+  hh_lines_scanned=$(( hh_lines_scanned + this_lines ))
+
+  # Detect co-location: BC-6.02.001 AND an economy-conservation keyword on the same line.
+  # Economy-conservation keywords (case-insensitive):
+  #   "economy conservation", "economy sim", "economy simulation substrate", "economy substrate"
+  # Note: "economy sim" also catches "economy simulation substrate" (substring), so the
+  # combined grep pattern covers all four keywords efficiently.
+  violations_in_file=$(echo "$hh_operative_lines" | grep -i 'BC-6\.02\.001' | grep -iE 'economy conservation|economy sim|economy substrate' || true)
+
+  if [[ -n "$violations_in_file" ]]; then
+    while IFS= read -r vline; do
+      [[ -z "$vline" ]] && continue
+      lineno=$(echo "$vline" | cut -d: -f1)
+      echo "    VIOLATION: $bc_file line $lineno — BC-6.02.001 co-located with economy-conservation keyword (BC-6.02.001 is the reachability BC, not economy conservation; use BC-6.01.001 for economy conservation)"
+      hh_violations=$(( hh_violations + 1 ))
+      errors+=("MISMATCH [economy-conservation-BC-routing (hh)]: $bc_file line $lineno — BC-6.02.001 cited with economy-conservation keyword; BC-6.02.001 is Design Intent Reachability, not Economy Conservation — use BC-6.01.001 (F54-01 recurrence prevention)")
+      fail=1
+    done <<< "$violations_in_file"
+  fi
+done < <(find "$BC_DIR" -name "*.md" -print0 | sort -z)
+
+# Positive-coverage log (always printed)
+echo "    Check (hh): $hh_files_scanned BC files scanned ($hh_lines_scanned operative lines); $hh_violations economy-conservation BC-routing violation(s) found."
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6164,6 +6270,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Genre-profile schema gate (ee):   $ee_files_scanned BC files scanned corpus-wide ($ee_lines_scanned lines), 0 non-schema genre-profile gate tokens found"
   echo "  L2-INDEX registry integrity (ff): $ff_rows_validated ID Registry rows validated, 0 stale counts vs source files"
   echo "  D-SEC evaluator-completeness (gg): BC-7.11.001 operative body references all 4 D-SEC sub-predicate anchors, 0 violations"
+  echo "  Economy-conservation BC-routing (hh): $hh_files_scanned BC files scanned ($hh_lines_scanned operative lines), 0 BC-6.02.001+economy-keyword co-locations (all economy-conservation citations use BC-6.01.001)"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
