@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,11 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-09
+    author: product-owner
+    change: "O45-01 (Pass-45): Reconcile D-SEC trigger vocabulary with methodology-layer.md v1.15 and BC-13.02.006/BC-13.03.005. Precondition 3 updated from 'competitive-multiplayer' to genre-profile.esports_enabled: true. Precondition 4 updated from 'UGC/chat present' to genre-profile.modding_enabled: true OR game-metadata-spec.user_to_user_communication: true. EC-002 and EC-007 updated to match reconciled signals."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,9 +51,14 @@ verified.
    inapplicable), online-leaderboard, cooperative-online, or competitive-multiplayer.
 2. If online features are present: `server-authority-invariant-suite` exists
    declaring all CWE-602 invariants.
-3. If competitive-multiplayer: `anti-cheat-integration-adapter` exists declaring
-   the provider (EAC/EOS default; BattlEye commercial; Riot Vanguard NOT allowed).
-4. If UGC/chat present: `moderation-pipeline-contract` exists.
+3. If `genre-profile.esports_enabled: true` (the schema-valid esports/competitive-multiplayer
+   lane signal per BC-13.01.001; the online-feature-profile value `competitive-multiplayer`
+   is the same lane described in enum terms):
+   `anti-cheat-integration-adapter` exists declaring the provider (EAC/EOS default;
+   BattlEye commercial; Riot Vanguard NOT allowed).
+4. If `genre-profile.modding_enabled: true` (UGC lane active, schema-valid per
+   BC-13.01.001) OR `game-metadata-spec.user_to_user_communication: true` (chat
+   signal, canonical IARC/PEGI field): `moderation-pipeline-contract` exists.
 5. Security assertion tests for the server-authority invariants are runnable
    headless (server-side logic only; no engine required).
 
@@ -83,12 +92,12 @@ verified.
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Game has online leaderboard only (no real-time multiplayer) | Security invariants scoped to leaderboard: no-trust-client for score submission; replay-attack prevention for score entries; no full multiplayer suite required |
-| EC-002 | Competitive-MP game with EAC/EOS declared | AC integration verified; EAC/EOS = allowed; PASS for this check |
+| EC-002 | Game with `genre-profile.esports_enabled: true` (competitive-multiplayer/esports lane) with EAC/EOS declared | AC integration verified; EAC/EOS = allowed; PASS for this check |
 | EC-003 | Client sends out-of-range input to the server | Server-authority invariant: input rejected without state mutation; assertion test verifies server rejects |
 | EC-004 | Economy atomicity violated — partial transaction committed during server crash | BLOCKED; economy conservation/atomicity invariant requires atomic transactions; partial commits are a security defect |
 | EC-005 | Moderation pipeline present but CSAM→NCMEC wiring not implemented | BLOCKED; CSAM reporting path is a legal requirement (18 U.S.C. §2258A) |
 | EC-006 | Factory agent authors a kernel-mode driver claiming it is "anti-tamper not anti-cheat" | BLOCKED; kernel-mode code is kernel-mode code regardless of framing; DI-010 violation |
-| EC-007 | Interest-management (anti-wallhack) not implemented for competitive-MP | BLOCKED; interest-management is a declared CWE-602-spine invariant for competitive multiplayer |
+| EC-007 | Interest-management (anti-wallhack) not implemented for a game with `genre-profile.esports_enabled: true` (competitive-multiplayer/esports lane) | BLOCKED; interest-management is a declared CWE-602-spine invariant for the esports/competitive-multiplayer lane |
 
 ## Canonical Test Vectors
 
