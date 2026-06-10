@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -29,6 +29,10 @@ modified:
     date: 2026-06-08
     by: product-owner
     reason: "Pass-15 F15-01: fix Related-BCs cross-reference mis-anchor — changed BC-7.05.001 (Playtest-Satisfaction) to BC-7.06.001 (Cert-Preflight and Distribution-Readiness Convergence Dimension Evaluation). The description 'Cert Pre-Flight Convergence Dimension Evaluation' correctly identifies the cert dimension owner; the cited ID was wrong. ID-citation fix only; no content change."
+  - version: "1.3"
+    date: 2026-06-10
+    by: product-owner
+    reason: "F51-02: static-slot reconciliation — add nft_blockchain_policy as a statically config-declared check in console (xbox/psn/switch) cert-preflight-config. The slot is always present in the console cert-preflight-report (satisfying INV-1's config-declared invariant and the postcondition that every config check appears in every report). Result is SKIP when NFT/web3 inactive; REQUIRES_HUMAN_REVIEW when NFT/web3 active (per-report evaluation of genre-profile state, not runtime check-set mutation). Resolves producer/consumer gap identified in Pass-51 F51-02 with BC-13.01.004."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -70,6 +74,19 @@ are explicitly flagged `requires-human-review` in the report.
 3. For each non-automatable check:
    - Record result as `REQUIRES_HUMAN_REVIEW` with a textual description of what the human
      reviewer must verify and a link to the relevant platform documentation section.
+3a. **Console-only static policy slot (`nft_blockchain_policy`):** For `target_platform` in
+   `{xbox, psn, switch}`, the `cert-preflight-config` MUST statically declare an
+   `nft_blockchain_policy` check (non-automatable). The harness evaluates it as follows:
+   - When the project's genre profile has `nft_mechanics: false` AND `web3_enabled: false`:
+     record result as `SKIP` with reason "NFT/web3 mechanics inactive — not applicable".
+   - When the project's genre profile has `nft_mechanics: true` OR `web3_enabled: true`:
+     record result as `REQUIRES_HUMAN_REVIEW` with message: "NFT/web3 mechanics declared —
+     verify platform holder NFT/blockchain policy compliance before cert submission (Sony,
+     Microsoft, and Nintendo each maintain independent policies that may block certification
+     independent of age rating)."
+   This is a per-report result evaluation (based on current genre-profile state), NOT a
+   runtime mutation of the check set. The slot is always present in the console
+   cert-preflight-report; only its result value varies.
 4. Emit a structured `cert-preflight-report` (JSON schema: `cert-preflight-report-v1.schema.json`)
    containing:
    - `build_version`, `target_platform`, `checklist_version`, `run_timestamp`
@@ -96,14 +113,20 @@ are explicitly flagged `requires-human-review` in the report.
   cert-preflight-<target_platform>.json`.
 - The report schema validates against `cert-preflight-report-v1.schema.json`.
 - Every check in the platform's `cert-preflight-config` appears in the report with a result
-  of `PASS | FAIL | SKIP | REQUIRES_HUMAN_REVIEW` — no check is silently omitted.
+  of `PASS | FAIL | SKIP | REQUIRES_HUMAN_REVIEW` — no check is silently omitted. For the
+  console-only `nft_blockchain_policy` slot, the result is `SKIP` (NFT inactive) or
+  `REQUIRES_HUMAN_REVIEW` (NFT active) — both are valid result values; the slot is always
+  present in the report.
 - The `convergence-report.dimensions.cert_preflight` field reflects the run outcome.
 - No check with `result: REQUIRES_HUMAN_REVIEW` is emitted as `PASS` or `FAIL`.
 
 ## Invariants
 
-- INV-1: The set of automatable checks for a platform is declared in `cert-preflight-config`,
-  not inferred at runtime. Adding a new check requires a config version bump.
+- INV-1: The set of checks for a platform is declared in `cert-preflight-config`, not
+  inferred or injected at runtime. Adding a new check requires a config version bump. Note:
+  a check whose result value depends on project state (e.g., `nft_blockchain_policy` emitting
+  `SKIP` vs `REQUIRES_HUMAN_REVIEW` based on genre-profile NFT state) does NOT violate this
+  invariant — the check SLOT is statically declared; only its per-run result value varies.
 - INV-2: A check that the harness cannot evaluate (missing tooling, missing artifact) is
   emitted as `SKIP` (with reason), not silently omitted and not auto-PASS.
 - INV-3: The harness never emits a result that contradicts observable build state. It reads
@@ -162,6 +185,7 @@ are explicitly flagged `requires-human-review` in the report.
 - BC-9.02.001 — Distribution-Adapter Capability Negotiation (declares `human-gated` fidelity)
 - BC-9.06.001 — Human-Gated Console Cert Sign-Off Task Surfacing (depends on: this BC's DEGRADED-PENDING state triggers it)
 - BC-7.06.001 — Cert Pre-Flight Convergence Dimension Evaluation (consumes this BC's output)
+- BC-13.01.004 — Genre Profile Default Enforces NFT/Web3 Off-By-Default (upstream producer: provides genre-profile NFT state that determines the `nft_blockchain_policy` slot result in console cert-preflight-reports)
 
 ## Architecture Anchors
 
