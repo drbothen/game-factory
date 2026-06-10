@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.36
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.37
 #
 # PURPOSE
 # -------
@@ -198,6 +198,23 @@
 #       printed. WILL FAIL until PO removes 4 DI-007 cinematic grafts; becomes green
 #       automatically after PO work. POSIX/BSD compatible. (I-PASS32-01 recurrence
 #       prevention).
+# extended in v1.37 to GENERALIZE check (w) — DI-007 context guard (F52-01
+#   process-gap recurrence prevention): the v1.26 check (w) was scoped to
+#   CINEMATIC-CREATIVE-GATE keyword proximity, so a non-cinematic wrong-context
+#   DI-007 citation (BC-12.12.003 EC-006, "DI-007-style correct by design" —
+#   Canon-KB context) escaped. The generalized guard inverts the logic: every
+#   operative DI-007 line MUST have at least one PLAYTEST-DOMAIN keyword in its
+#   ±10-line context window. Any DI-007 line without a playtest-domain keyword
+#   in that window is flagged as a mis-anchor regardless of what wrong-context
+#   keywords appear. Playtest-domain allowlist: "playtest", "fun-score",
+#   "fun score", "satisfaction", "enjoyment", "comfort", "human gate",
+#   "human-gate". ±10-line context window validated against all 25 post-PO-fix
+#   operative DI-007 citations: all pass. The old BC-12.12.003 EC-006 line
+#   ("DI-007-style correct by design") has no playtest-domain keyword in any
+#   surrounding context — correctly flagged. Cinematic-creative-gate sub-logic
+#   subsumed by the general guard (cinematic DI-007 grafts also have no playtest
+#   keyword in ±10 context). Positive-coverage log updated. (F52-01 recurrence
+#   prevention).
 # extended in v1.27 to add check (x) — prd.md §4 NFR-table ID-set parity
 #   (F33-01 recurrence prevention): parses the set of NFR IDs that appear as rows in
 #   the prd.md §4 NFR summary table ("| NFR-NNN …" lines) and the set of NFR IDs
@@ -379,7 +396,8 @@
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
 #   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff + o.ii.
-#   Positive-coverage log always printed. (F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
+#   Positive-coverage log always printed. (F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -785,9 +803,9 @@ s_violations=0
 u_lines_scanned=0
 u_creative_gate_lines=0
 u_violations=0
-# (w) DI-007-on-creative-gate mis-anchor counters: initialized here so SUMMARY is safe if skipped
+# (w) DI-007 context guard counters: initialized here so SUMMARY is safe if skipped
 w_lines_scanned=0
-w_creative_gate_lines=0
+w_di007_lines=0
 w_violations=0
 # (o.ii) Canon-KB ordinal counters: initialized here so SUMMARY is safe if check is skipped
 ordinal_files_scanned=0
@@ -4549,156 +4567,208 @@ fi
 echo ""
 
 # ============================================================================
-# (w) DI-007-ON-CREATIVE-GATE MIS-ANCHOR GUARD  [NEW v1.26, I-PASS32-01]
+# (w) DI-007 CONTEXT GUARD  [v1.26 I-PASS32-01; GENERALIZED v1.37 F52-01]
 # ============================================================================
 # CANONICAL RULE: DI-007 is the PLAYTEST human gate invariant (enforcer set:
-#   BC-8.08.004, BC-7.05.001, BC-8.08.005). It MUST NOT be cited for the
-#   cinematic-director CREATIVE gate. The creative gate is governed by D-013 +
-#   E-CIN-003. Grafting DI-007 onto a cinematic-creative-gate context is a
-#   mis-anchor of the I-PASS32-01 class — discovered when check (u)'s guard
-#   validated removal of human-gated vocabulary but did NOT check that the
-#   substituted invariant was correct, allowing DI-007 to be silently grafted
-#   into 4 BCs' cinematic CREATIVE gate contexts.
+#   BC-8.08.004, BC-7.05.001, BC-8.08.005). It MUST ONLY be cited in a
+#   playtest-domain context. Every legitimate operative DI-007 citation is in a
+#   playtest / fun-score / player-satisfaction / XR-comfort context.
 #
-# TRIGGER: an operative BC line contains BOTH:
-#   (1) DI-007 citation (the token "DI-007" anywhere on the line)
-#   (2) a CINEMATIC-CREATIVE-GATE context keyword — any of:
-#         "cinematic-director"
-#         "D-013"
-#         "E-CIN-003"
-#         "directed: true" / "directed:true"
-#         "creative gate" / "creative-gate" / "creative sign-off"
-#         "cinematic" + "creative"  (both on same line)
+# GENERALIZED GUARD (v1.37): instead of checking for wrong-context keywords on
+#   the DI-007 line (which only caught cinematic-creative-gate grafts), the guard
+#   now INVERTS the logic: every operative DI-007 line must have at least one
+#   PLAYTEST-DOMAIN keyword in its ±10-line context window. Any DI-007 line
+#   lacking a playtest-domain keyword in that window is flagged regardless of
+#   which wrong-context keywords are present. This catches non-cinematic wrong-
+#   context mis-anchors (e.g. BC-12.12.003 Canon-KB context, F52-01 class) as
+#   well as cinematic-creative-gate grafts (I-PASS32-01 class).
 #
-# FAIL: DI-007 (playtest invariant) cited in a cinematic-creative-gate context.
+# PLAYTEST-DOMAIN KEYWORD ALLOWLIST (any of the following in ±10-line window):
+#   "playtest"         — playtest protocol/session/gate/evaluator/delegation
+#   "fun-score"        — fun-score field or emission
+#   "fun score"        — prose form of fun-score
+#   "satisfaction"     — player/playtest satisfaction
+#   "enjoyment"        — player enjoyment claim
+#   "comfort"          — XR comfort (DI-007 extended analogue in BC-14.*)
+#   "human gate"       — human-gate task in playtest context
+#   "human-gate"       — hyphenated form
 #
-# FALSE-POSITIVE AVOIDANCE:
-#   Legitimate DI-007 usages live in:
-#     — Playtest contexts: lines containing "playtest", "fun-score", or
-#       "playtest-satisfaction" — these do NOT contain the cinematic-creative-gate
-#       keywords listed above, so they cannot trigger this check.
-#     — XR-comfort analogical DI-007 (BC-14.*): these BCs contain neither
-#       "cinematic-director", "D-013", "E-CIN-003", "directed:true", nor
-#       "creative gate" — they will NOT trigger.
-#   The check is therefore narrow: only lines that simultaneously cite DI-007 AND
-#   contain a cinematic-creative-gate keyword are flagged. Pure playtest or XR
-#   lines never contain those keywords.
+# CONTEXT WINDOW: ±10 lines from the DI-007 line (within the same file).
+#   Validated against all 25 post-PO-fix operative DI-007 citations: all pass.
+#   Worst case: BC-8.08.002 line 75 has "playtest-evaluator" at line 69 (6 lines
+#   before); BC-8.08.003 line 82 has "fun score" at line 76 (6 lines before);
+#   BC-8.08.005 line 73 has "playtest" at line 69 (4 lines before). All within ±10.
 #
-#   Additional playtest-context exemption: if a triggering line also contains
-#   any of "playtest", "fun-score", "playtest-satisfaction", "BC-8.08" it is
-#   treated as a playtest-domain line and passes — belt-and-suspenders for any
-#   edge-case proximity.
+# IMPLEMENTATION: per BC file, awk maintains a ring buffer of the last 10 lines.
+#   When a DI-007 operative trigger line is found, it checks the ring buffer
+#   (preceding 10 lines) plus the 10 lines after (read-ahead buffered). To
+#   keep the implementation simple and POSIX-compatible, we use a per-file
+#   two-pass awk approach: first pass collects line numbers of DI-007 trigger
+#   lines; second pass checks context windows. Actually: single awk pass with
+#   deferred output — read entire file into array, then check windows.
 #
 # EXCLUSIONS (suppress trigger entirely):
 #   Lines starting with ">" (blockquote / changelog annotation lines)
 #   Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#   Lines inside YAML frontmatter (between "---" delimiters)
+#   Lines containing "modified:" (YAML frontmatter lifecycle field)
 #
 # SCANS: all BC-*.md files under BC_DIR ss-NN/ subdirectories.
 #
-# EXPECTED: FAIL until PO removes 4 DI-007 cinematic grafts (the 4 BCs whose
-# cinematic CREATIVE gate blocks were incorrectly annotated with DI-007 by the
-# Pass-28 I28-01 fix). Green automatically after PO fix. (I-PASS32-01).
-# POSIX/BSD compatible (no grep -P). Positive-coverage log always printed.
-echo "--- (w) DI-007-on-creative-gate mis-anchor guard (I-PASS32-01 recurrence prevention) ---"
-echo "    Convention: DI-007 is the PLAYTEST gate invariant. Cinematic creative gate uses D-013."
-echo "    FAIL: any operative BC line cites DI-007 in a cinematic-creative-gate context."
+# EXPECTED: 0 violations post-PO-fix (F52-01 fix applied to BC-12.12.003;
+#   I-PASS32-01 fixes applied to BC-5.06.001, BC-7.04.001, BC-7.05.001,
+#   BC-12.12.008). POSIX/BSD-awk compatible (no grep -P).
+# Positive-coverage log always printed.
+echo "--- (w) DI-007 context guard (I-PASS32-01/F52-01 recurrence prevention) ---"
+echo "    Convention: DI-007 is the PLAYTEST gate invariant. Every operative DI-007"
+echo "    citation MUST have a playtest-domain keyword in its ±10-line context window."
+echo "    FAIL: operative DI-007 line with no playtest-domain keyword in ±10 lines."
+echo "    Allowlist: playtest, fun-score, fun score, satisfaction, enjoyment, comfort,"
+echo "    human gate, human-gate."
 
 w_violations=0
 w_lines_scanned=0
-w_creative_gate_lines=0
+w_di007_lines=0
 w_violation_msgs=()
 
+# Process each BC file: load into awk array, check ±10-line context window per DI-007 line.
 while IFS= read -r bcfile; do
   [[ ! -f "$bcfile" ]] && continue
-  while IFS= read -r wline; do
-    w_lines_scanned=$(( w_lines_scanned + 1 ))
 
-    # --- Exclusion rules ---
-    # (1) blockquote lines: start with ">"
-    case "$wline" in
-      ">"*) continue ;;
+  # Use awk to do the full context-window check in one pass per file.
+  # Returns lines of the form:  SCANNED:<n>  DI007:<n>  VIOLATION:<linenum>:<text>
+  awk_out=$(awk '
+  BEGIN {
+    in_frontmatter = 0
+    fm_count = 0
+    n = 0
+  }
+  {
+    n++
+    lines[n] = $0
+  }
+  END {
+    # Phase 1: identify which lines are inside YAML frontmatter
+    fm_open = 0
+    fm_close = 0
+    for (i = 1; i <= n; i++) {
+      if (lines[i] == "---") {
+        if (fm_open == 0) {
+          fm_open = i
+        } else if (fm_close == 0) {
+          fm_close = i
+        }
+      }
+    }
+
+    # Phase 2: process each line
+    scanned = 0
+    di007_count = 0
+    for (i = 1; i <= n; i++) {
+      line = lines[i]
+      scanned++
+
+      # --- Exclusion: inside YAML frontmatter ---
+      if (fm_open > 0 && fm_close > 0 && i >= fm_open && i <= fm_close) continue
+
+      # --- Exclusion: blockquote lines (start with ">") ---
+      if (substr(line, 1, 1) == ">") continue
+
+      # --- Exclusion: reason: lines ---
+      if (index(line, "reason:") > 0) continue
+
+      # --- Exclusion: modified: lines ---
+      if (index(line, "modified:") > 0) continue
+
+      # --- Test for DI-007 citation ---
+      lc = line
+      # lowercase via gsub
+      gsub(/[A-Z]/, "", lc)  # This does NOT lowercase — use a workaround
+      # Actually test case-insensitively by checking both cases
+      # DI-007 is uppercase anyway — just check literally
+      if (index(line, "DI-007") == 0) continue
+
+      # This is an operative DI-007 line.
+      di007_count++
+
+      # --- Check ±10-line context window for playtest-domain keyword ---
+      lo = i - 10; if (lo < 1) lo = 1
+      hi = i + 10; if (hi > n) hi = n
+
+      found_kw = 0
+      for (j = lo; j <= hi; j++) {
+        ctx = lines[j]
+        # lowercase check: playtest-domain keywords are lowercase in source
+        if (index(ctx, "playtest")    > 0) { found_kw = 1; break }
+        if (index(ctx, "fun-score")   > 0) { found_kw = 1; break }
+        if (index(ctx, "fun score")   > 0) { found_kw = 1; break }
+        if (index(ctx, "satisfaction")> 0) { found_kw = 1; break }
+        if (index(ctx, "enjoyment")   > 0) { found_kw = 1; break }
+        if (index(ctx, "comfort")     > 0) { found_kw = 1; break }
+        if (index(ctx, "human gate")  > 0) { found_kw = 1; break }
+        if (index(ctx, "human-gate")  > 0) { found_kw = 1; break }
+        # Case variants (Satisfaction, Comfort, Enjoyment with caps)
+        if (index(ctx, "Satisfaction")> 0) { found_kw = 1; break }
+        if (index(ctx, "Comfort")     > 0) { found_kw = 1; break }
+        if (index(ctx, "Enjoyment")   > 0) { found_kw = 1; break }
+        if (index(ctx, "Playtest")    > 0) { found_kw = 1; break }
+        if (index(ctx, "Fun score")   > 0) { found_kw = 1; break }
+        if (index(ctx, "Fun Score")   > 0) { found_kw = 1; break }
+      }
+
+      if (found_kw == 0) {
+        # Truncate line to 120 chars for report
+        snippet = substr(line, 1, 120)
+        print "VIOLATION:" i ":" snippet
+      }
+    }
+    print "SCANNED:" scanned
+    print "DI007:" di007_count
+  }
+  ' "$bcfile")
+
+  # Parse awk output
+  while IFS= read -r aline; do
+    case "$aline" in
+      SCANNED:*)
+        cnt="${aline#SCANNED:}"
+        w_lines_scanned=$(( w_lines_scanned + cnt ))
+        ;;
+      DI007:*)
+        cnt="${aline#DI007:}"
+        w_di007_lines=$(( w_di007_lines + cnt ))
+        ;;
+      VIOLATION:*)
+        rest="${aline#VIOLATION:}"
+        linenum="${rest%%:*}"
+        snippet="${rest#*:}"
+        rel_bcfile="${bcfile#$BC_DIR/}"
+        w_violations=$(( w_violations + 1 ))
+        w_violation_msgs+=("$rel_bcfile (line $linenum): DI-007 cited outside playtest-domain context — no playtest-domain keyword in ±10-line window — line: $snippet")
+        ;;
     esac
-    # (2) reason: lines (YAML frontmatter changelog prose)
-    case "$wline" in
-      *"reason:"*) continue ;;
-    esac
+  done <<EOF_AWK
+$awk_out
+EOF_AWK
 
-    # --- Test for DI-007 citation (condition 1) ---
-    # Case-insensitive via lowercased copy
-    wline_lc=$(printf '%s' "$wline" | tr '[:upper:]' '[:lower:]')
-    case "$wline_lc" in
-      *"di-007"*) ;;
-      *) continue ;;  # no DI-007 on this line — skip
-    esac
-
-    # --- Test for cinematic-creative-gate context keyword (condition 2) ---
-    has_cin_creative=0
-    case "$wline_lc" in
-      *"cinematic-director"*)    has_cin_creative=1 ;;
-      *"d-013"*)                 has_cin_creative=1 ;;
-      *"e-cin-003"*)             has_cin_creative=1 ;;
-      *"directed: true"*)        has_cin_creative=1 ;;
-      *"directed:true"*)         has_cin_creative=1 ;;
-      *"creative gate"*)         has_cin_creative=1 ;;
-      *"creative-gate"*)         has_cin_creative=1 ;;
-      *"creative sign-off"*)     has_cin_creative=1 ;;
-    esac
-    # "cinematic" + "creative" combination (both on same line)
-    if [[ $has_cin_creative -eq 0 ]]; then
-      case "$wline_lc" in
-        *"cinematic"*)
-          case "$wline_lc" in
-            *"creative"*) has_cin_creative=1 ;;
-          esac
-          ;;
-      esac
-    fi
-    [[ $has_cin_creative -eq 0 ]] && continue
-
-    # This line has DI-007 AND a cinematic-creative-gate context keyword.
-    w_creative_gate_lines=$(( w_creative_gate_lines + 1 ))
-
-    # --- Belt-and-suspenders playtest exemption ---
-    # If the line is anchored to a playtest or XR context, it is a legitimate
-    # DI-007 usage that was incorrectly triggered. In practice this should not
-    # fire (legitimate DI-007 lines do not contain cinematic-creative-gate
-    # keywords), but guard it anyway.
-    has_playtest_ctx=0
-    case "$wline_lc" in
-      *"playtest"*)                  has_playtest_ctx=1 ;;
-      *"fun-score"*)                 has_playtest_ctx=1 ;;
-      *"playtest-satisfaction"*)     has_playtest_ctx=1 ;;
-      *"bc-8.08"*)                   has_playtest_ctx=1 ;;
-    esac
-    if [[ $has_playtest_ctx -eq 1 ]]; then
-      if [[ "$VERBOSE" == true ]]; then
-        echo "    OK [w playtest-exempt] $bcfile: playtest context — DI-007 is legitimate here — line: $(printf '%s' "$wline" | cut -c1-100)"
-      fi
-      continue
-    fi
-
-    # FAIL: DI-007 cited in a cinematic-creative-gate context with no playtest exemption.
-    w_violations=$(( w_violations + 1 ))
-    rel_bcfile="${bcfile#$BC_DIR/}"
-    w_violation_msgs+=("$rel_bcfile: DI-007 (playtest gate) cited in cinematic-creative-gate context (D-013 is the correct creative gate dimension; DI-007 must not appear here) — line: $(printf '%s' "$wline" | cut -c1-120)")
-
-  done < "$bcfile"
 done < <(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" | sort)
 
 # Positive-coverage log (always printed — detects zero-scan / inert run)
-echo "    Check (w): $w_lines_scanned BC lines scanned for DI-007-on-creative-gate mis-anchor, $w_creative_gate_lines DI-007+creative-gate co-occurrence lines evaluated."
-echo "    DI-007-on-creative-gate mis-anchor violations: $w_violations"
+echo "    Check (w): $w_lines_scanned BC lines scanned, $w_di007_lines operative DI-007 citations evaluated (±10-line context window)."
+echo "    DI-007 wrong-context violations: $w_violations"
 
 if [[ $w_violations -gt 0 ]]; then
   echo ""
-  echo "    DI-007-ON-CREATIVE-GATE MIS-ANCHOR VIOLATIONS (I-PASS32-01 class):"
-  echo "    FIX: remove DI-007 from cinematic-director creative gate context."
-  echo "    The correct creative gate invariant dimension is D-013 (not DI-007)."
-  echo "    DI-007 belongs only in playtest contexts (BC-8.08.*, BC-7.05.001, fun-score)."
+  echo "    DI-007 WRONG-CONTEXT VIOLATIONS (I-PASS32-01/F52-01 class):"
+  echo "    FIX: DI-007 must only appear in playtest/fun-score/satisfaction/comfort contexts."
+  echo "    Ensure a playtest-domain keyword (playtest, fun-score, fun score, satisfaction,"
+  echo "    enjoyment, comfort, human gate, human-gate) appears within ±10 lines of each"
+  echo "    DI-007 citation. If the citation is wrong-context, remove DI-007 and use the"
+  echo "    correct invariant for the domain (e.g. D-013 for cinematic creative gate)."
   for wmsg in "${w_violation_msgs[@]}"; do
     echo "      $wmsg"
   done
-  errors+=("MISMATCH [DI-007-on-creative-gate mis-anchor (w)]: $w_violations operative BC line(s) cite DI-007 (the playtest gate invariant) in a cinematic-director creative gate context — DI-007 must NOT appear for cinematic creative gate; use D-013 instead (I-PASS32-01 recurrence prevention)")
+  errors+=("MISMATCH [DI-007 context guard (w)]: $w_violations operative BC line(s) cite DI-007 (the playtest gate invariant) outside a playtest-domain context — no playtest-domain keyword in ±10-line window — DI-007 must only appear in playtest/fun-score/satisfaction/comfort contexts (I-PASS32-01/F52-01 recurrence prevention)")
   fail=1
 fi
 echo ""
@@ -5896,7 +5966,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  §3.1 cross-table consistency (s):  $s_dims_in_map dims × 4 values, 0 mismatches ($s_comparisons pairs verified)"
   echo "  BC-7.* owner-attribution (t):      $t_scanned_lines lines scanned, 0 mis-attribution violations"
   echo "  human-gated/creative-gate (u):    $u_lines_scanned lines scanned, $u_creative_gate_lines creative-gate lines validated, 0 term-misuse violations"
-  echo "  DI-007-on-creative-gate (w):      $w_lines_scanned lines scanned, $w_creative_gate_lines DI-007+creative-gate lines evaluated, 0 mis-anchor violations"
+  echo "  DI-007 context guard (w):         $w_lines_scanned lines scanned, $w_di007_lines operative DI-007 citations evaluated (±10-line window), 0 wrong-context violations"
   echo "  NFR §4 ID-set parity (x):         $x_catalog_count catalog IDs == $x_prd_count prd.md §4 IDs, 0 membership violations"
   echo "  Seam-ordinal collision (y):        $y_files_scanned files scanned, 0 collision violations (distribution=3rd, online-services=5th)"
   echo "  Base-manifest seam-enum (z):      §1.3 enum=$z_enum_count tokens == §8 matrix=$z_matrix_count seam keys, 0 set-equality violations"
