@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.002
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -24,6 +24,9 @@ modified:
   - version: "1.1"
     date: 2026-06-08
     reason: "O8-02: clarified DI-012 is the meta-invariant anchor for CWE-602/server-authority; no dedicated DI-NNN exists"
+  - version: "1.2"
+    date: 2026-06-10
+    reason: "F56-01: corrected stale offline test vector — inapplicability scoped to no-trust-client sub-invariant only; removed erroneous dimension-level 'D-SEC = GREEN by inapplicability' claim (contradicted BC-7.11.001 PC1 and DI-013: secrets scan applies unconditionally)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -94,7 +97,7 @@ This BC specifies the testable assertion that must be verified by the
 |-------|----------------|----------|
 | Server receives `{event: "move", destination: {x,y}}` and re-runs movement from server pos | PASS: no-trust-client maintained | happy-path |
 | Server receives `{event: "hit", damage: 50}` and applies 50 damage without re-computing | FAIL: E-CONV-006 `CWE-602 no-trust-client` | error |
-| Offline single-player game | INAPPLICABLE: D-SEC = GREEN by inapplicability | inapplicable |
+| Offline single-player game | no-trust-client sub-invariant INAPPLICABLE (no client/server trust boundary); D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass — dimension is NOT GREEN-by-inapplicability | inapplicable |
 
 ## Verification Properties
 

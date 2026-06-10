@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.15"
+version: "1.16"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -34,6 +34,14 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Game Methodology Layer (Layer 2)
 
+> **v1.16 changes (Pass-56 F56-01 — D-SEC summary tables hardened to match authoritative BC-7.11.001 v1.2 / DI-013 unconditional secrets predicate):**
+> - **F56-01 fixed (fail-open security regression — summary tables stale after Pass-53 F53-01 hardening):** The Pass-53 burst hardened BC-7.11.001 (SP4 secrets sub-predicate unconditional, no DEGRADED path) but did NOT propagate those changes to the methodology-layer summary tables. This left the detailed D-SEC predicate (§D-SEC) inconsistent with:
+>   - §3.1 Canonical Status-Value Enum table (A): DEGRADED row listed "D-SEC (offline only)" → D-SEC removed. DEGRADED now applies to D-SIM, D-REPLAY, D-ASSET, D-PLAY, D-CERT, D-PERF, D-PROV only.
+>   - §3.1 Per-Dimension Allowed Value Subsets table (B): D-SEC row had "GREEN, DEGRADED (offline only), BLOCKED" → corrected to "GREEN, BLOCKED". Rationale updated: no DEGRADED state; SP4 secrets gate is unconditional.
+>   - §D-SEC "Degraded predicate" block: described a DEGRADED/offline-degradable path → replaced with explicit "No DEGRADED state for D-SEC" prose explaining GREEN/BLOCKED-only semantics, SP4 unconditional applicability, and SP1-3 conditional applicability for online/UGC features.
+>   - §4.3 "Dimension enable/disable by game profile": "D-SEC is enabled when any online/multiplayer features are declared" → corrected to state D-SEC is ALWAYS enabled (SP4 unconditional); SP1-3 conditioned on online/multiplayer/UGC.
+> - **OBS-3 recurrence guard (check jj) added (v1.41):** CI gate extended with check (jj): asserts methodology-layer.md's Per-Dimension Allowed Value Subsets row for D-SEC does NOT list DEGRADED, consistent with BC-7.11.001 Invariant 5 (no-degradation-path for secrets). Prevents F56-01 class re-occurrence — any future edit that re-introduces D-SEC DEGRADED in the §3.1 table will trip the gate.
+>
 > **v1.15 changes (Pass-44 F44-01 — D-SEC predicate trigger vocabulary reconciled to schema-valid genre-profile signals):**
 > - **F44-01 fixed:** D-SEC pass-predicate sub-predicate 2 and blocked-predicate anti-cheat trigger updated: "competitive-multiplayer lane active" → `genre-profile.esports_enabled: true` (the sole schema-valid activation signal per BC-13.01.001; `competitive_multiplayer` is not a genre-profile schema field).
 > - **F44-01 fixed:** D-SEC pass-predicate sub-predicate 3 and blocked-predicate moderation trigger updated: "UGC/chat features active" → `genre-profile.modding_enabled: true` (UGC lane) OR `game-metadata-spec.user_to_user_communication: true` (chat signal); both are schema-valid signals consistent with BC-13.03.005 reconciled preconditions.
@@ -724,7 +732,7 @@ subordinate consumers and must adopt this vocabulary.
 | Value | Meaning | Applicable Dimensions |
 |-------|---------|----------------------|
 | `GREEN` | All pass predicates satisfied; no outstanding gates. | All 11 dimensions (subject to per-dimension rules below) |
-| `DEGRADED` | Pass preconditions partially met with an explicit, documented fallback; human acknowledgment recorded. Generic intermediate state when a degradation path exists. | D-SIM, D-REPLAY, D-ASSET, D-PLAY, D-CERT, D-PERF, D-PROV, D-SEC (offline only) |
+| `DEGRADED` | Pass preconditions partially met with an explicit, documented fallback; human acknowledgment recorded. Generic intermediate state when a degradation path exists. | D-SIM, D-REPLAY, D-ASSET, D-PLAY, D-CERT, D-PERF, D-PROV |
 | `DEGRADED-PENDING` | All automatable work is complete; one or more human or on-device acts are outstanding (e.g. console cert sign-off, attorney review, store publish, playtest session not yet run, GPU/XR hardware not yet available). Distinct from DEGRADED in that the factory has done its full automated share — only an external human act or on-device measurement remains. | D-CERT, D-PROV, D-PLAY, D-PERF |
 | `BLOCKED` | A hard failure predicate is met; the dimension cannot proceed. A BLOCKED dimension halts release. | All 11 dimensions |
 
@@ -755,7 +763,7 @@ not suppressed).
 | D-PROV | GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED | DEGRADED-PENDING when schema checks pass but consent/legal tasks outstanding. |
 | D-DOCS | GREEN, BLOCKED | No degradation path defined. |
 | **D-ETHICS** | **GREEN, BLOCKED** | **Binary. No degradation path. DI-005: unconstrained LTV = factory defect. If monetization is active, the ethics contract must be present and clean-reviewed — no intermediate fallback. See ADR-0006.** |
-| D-SEC | GREEN, DEGRADED (offline only), BLOCKED | DEGRADED only when `online_features: false` explicitly declared. Online games: no degradation path. |
+| D-SEC | GREEN, BLOCKED | No DEGRADED state; SP4 secrets gate is unconditional (all games incl. offline); offline games are GREEN only if the secrets scan passes, else BLOCKED. |
 
 **D-ETHICS binary decision (adjudication):** BC-7.10.001 states "NO DEGRADATION
 PATH" and DI-005 defines unconstrained LTV optimization as a factory defect. An
@@ -1057,12 +1065,7 @@ All four sub-predicates must be green for D-SEC to be PASS. Absence of any requi
 contract or failed lint gate ⇒ D-SEC BLOCKED (not degraded). This is fail-closed by
 construction.
 
-**Degraded predicate:** Applicable only for non-online, non-multiplayer games where
-`security-requirements-contract` is absent by design (premium single-player, offline).
-Degradation must be declared explicitly with `online_features: false`. When degraded:
-sub-predicate (2) and (3) do not apply (no `esports_enabled`, no `modding_enabled` or `user_to_user_communication`). Sub-predicate
-(4) (secrets lint) applies regardless of online/offline status — factory output bundles
-must never contain secrets in any deployment target.
+**No DEGRADED state for D-SEC:** D-SEC has no degradation path. Allowed status values are GREEN and BLOCKED only (see §3.1 Per-Dimension Allowed Value Subsets table). For fully offline games, sub-predicates (1) server-authority-invariant-suite, (2) anti-cheat-integration-adapter, and (3) moderation-pipeline-contract are inapplicable (no online features). However, sub-predicate (4) the never-emit-secrets lint gate (BC-1.15.003 / DI-013) is unconditional — it applies to every game regardless of online/offline status. An offline game that passes the secrets scan is D-SEC GREEN; an offline game where the secrets scan fails is D-SEC BLOCKED. There is no intermediate DEGRADED path. This is fail-closed by construction and cannot be waived by any flag, config, or agent instruction (DI-013).
 
 **Blocked predicate** (v1.15 — fail-closed, F42-01/02/03; trigger vocabulary reconciled F44-01):
 Any of the following causes D-SEC BLOCKED:
@@ -1187,8 +1190,7 @@ adapter fidelity declarations:
 
 **Dimension enable/disable by game profile.** Inactive genre lanes do not add
 dimensions. D-ETHICS is enabled when any monetization mechanics are declared.
-D-SEC is enabled when any online/multiplayer features are declared. All other
-dimensions are always active regardless of genre.
+D-SEC is ALWAYS enabled (sub-predicate 4 secrets gate is unconditional for all games); sub-predicates 1-3 (server-authority, anti-cheat, moderation) are enabled when online/multiplayer/UGC features are declared. All other dimensions are always active regardless of genre.
 
 ---
 
