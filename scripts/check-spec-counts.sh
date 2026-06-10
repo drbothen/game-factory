@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.35
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.36
 #
 # PURPOSE
 # -------
@@ -296,6 +296,32 @@
 #   After PO reconciliation all corpus occurrences are in excluded lines, so a
 #   correctly-scoped corpus-wide (ee) must report 0 violations.
 #   POSIX/BSD compatible (no grep -P). (F44-01/F46-01 recurrence prevention).
+# extended in v1.36 to add check (ff) — L2-INDEX registry vs source-file integrity
+#   guard (F49-01 recurrence prevention): validates the domain-spec/L2-INDEX.md "ID
+#   Registry Summary" table counts and "Priority Distribution" grand total against
+#   ACTUAL source-file counts. The Pass-49 process-gap (F49-01) was that the gate
+#   triangulated BC-INDEX/PRD/architecture but never checked L2-INDEX registry counts;
+#   stale CAP/DI/Glossary counts survived to Pass-49.
+#   SOURCE PATTERNS (exact patterns the PO used for F49-01 fix verification):
+#     CAP-NNN  : grep -c '^## CAP-0'  domain-spec/capabilities.md       (expected 15)
+#     DI-NNN   : grep -c '^## DI-0'   domain-spec/invariants.md          (expected 13)
+#     ASM-NNN  : grep -c '^| ASM-'    domain-spec/assumptions.md         (expected 8)
+#     R-NNN    : grep -c '^| R-'      domain-spec/risks.md               (expected 17)
+#     FM-NNN   : grep -c '^### FM-'   domain-spec/failure-modes.md       (expected 10)
+#     Glossary : grep -c '^\*\*'      domain-spec/ubiquitous-language.md (expected 36)
+#     Entities : grep -c '^### '      domain-spec/entities.md            (expected 18)
+#     Processes: grep -c '^## PROC-'  domain-spec/processes.md           (expected 6)
+#   PRIORITY DISTRIBUTION: parse the Priority Distribution table from L2-INDEX.md;
+#     assert P0+P1+P2 grand total == CAP-NNN computed count (currently 15).
+#   ANCHORING: parse each stated count from the L2-INDEX "ID Registry Summary" table
+#     by matching the ID-format label in column 1 (e.g. row whose first cell contains
+#     "CAP-NNN"). Parsing uses awk on the pipe-delimited markdown table.
+#   POSITIVE-COVERAGE LOG: always printed — lists each registry row validated.
+#   POSIX/BSD-awk/grep compatible (no grep -P). (F49-01 recurrence prevention).
+#   BUGFIX (v1.36): Priority Distribution awk parser used \s which is unsupported
+#     in BSD awk (macOS); replaced with POSIX [[:space:]] so the P0/P1/P2 row
+#     pattern matches correctly and the sum is non-zero on macOS. ID Registry
+#     row validation (working) is unchanged.
 # extended in v1.33 to add check (dd) — active-BC / stale-architecture-doc status
 #   consistency guard (F43-01 recurrence prevention): when a BC file exists under
 #   .factory/specs/behavioral-contracts/ (i.e., it is an authored, active contract),
@@ -352,8 +378,8 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee + o.ii.
-#   Positive-coverage log always printed. (F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff + o.ii.
+#   Positive-coverage log always printed. (F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -787,6 +813,10 @@ cc_pairs_checked=0
 dd_violations=0
 dd_lines_scanned=0
 dd_files_scanned=0
+# (ff) L2-INDEX registry vs source-file integrity counters: initialized here so SUMMARY is safe if skipped
+ff_violations=0
+ff_rows_validated=0
+ff_priority_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -807,7 +837,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.35) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.36) ==="
 echo ""
 
 # ============================================================================
@@ -5677,6 +5707,160 @@ fi
 echo ""
 
 # ============================================================================
+# (ff) L2-INDEX REGISTRY VS SOURCE-FILE INTEGRITY GUARD  [NEW v1.36]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-49 process-gap (F49-01) — the gate triangulated
+# BC-INDEX/PRD/architecture but never checked domain-spec/L2-INDEX.md registry
+# counts. Stale CAP/DI/Glossary counts survived to Pass-49 because no CI gate
+# compared the "ID Registry Summary" table in L2-INDEX against actual source files.
+#
+# ASSERTION: for each of the 8 rows in the "ID Registry Summary" table, the count
+# stated in L2-INDEX.md column 2 MUST equal the count computed from the source file
+# using the exact pattern the PO used for F49-01 fix verification. Also validates
+# the Priority Distribution grand total (P0+P1+P2) equals the CAP-NNN computed count.
+#
+# SOURCE PATTERNS (PO-verified, exact):
+#   CAP-NNN  : grep -c '^## CAP-0'  (capabilities.md)       — currently 15
+#   DI-NNN   : grep -c '^## DI-0'   (invariants.md)          — currently 13
+#   ASM-NNN  : grep -c '^| ASM-'    (assumptions.md)         — currently 8
+#   R-NNN    : grep -c '^| R-'      (risks.md)               — currently 17
+#   FM-NNN   : grep -c '^### FM-'   (failure-modes.md)       — currently 10
+#   Glossary : grep -c '^\*\*'      (ubiquitous-language.md) — currently 36
+#   Entities : grep -c '^### '      (entities.md)            — currently 18
+#   Processes: grep -c '^## PROC-'  (processes.md)           — currently 6
+#
+# ANCHORING: parse stated counts from the L2-INDEX "ID Registry Summary" table
+# by matching the ID-format label text in column 1 of each pipe-delimited row.
+# Priority Distribution grand total parsed from the Priority Distribution table
+# by summing the Count cells of all three priority rows (P0/P1/P2).
+#
+# POSITIVE-COVERAGE LOG: always printed, listing each row validated.
+# POSIX/BSD-awk/grep compatible (no grep -P). (F49-01 recurrence prevention).
+
+echo "--- (ff) L2-INDEX registry vs source-file integrity guard (F49-01 recurrence prevention) ---"
+
+L2_INDEX="$REPO_ROOT/.factory/specs/domain-spec/L2-INDEX.md"
+DS_DIR="$REPO_ROOT/.factory/specs/domain-spec"
+
+ff_violations=0
+ff_rows_validated=0
+ff_priority_violations=0
+ff_violation_msgs=()
+
+if [[ ! -f "$L2_INDEX" ]]; then
+  echo "    SKIP: L2-INDEX.md not found at $L2_INDEX"
+else
+  # Compute actual counts from source files using exact PO-verified patterns
+  ff_cap_actual=$(grep -c '^## CAP-0' "$DS_DIR/capabilities.md" 2>/dev/null || echo 0)
+  ff_di_actual=$(grep -c '^## DI-0' "$DS_DIR/invariants.md" 2>/dev/null || echo 0)
+  ff_asm_actual=$(grep -c '^| ASM-' "$DS_DIR/assumptions.md" 2>/dev/null || echo 0)
+  ff_r_actual=$(grep -c '^| R-' "$DS_DIR/risks.md" 2>/dev/null || echo 0)
+  ff_fm_actual=$(grep -c '^### FM-' "$DS_DIR/failure-modes.md" 2>/dev/null || echo 0)
+  ff_gloss_actual=$(grep -c '^\*\*' "$DS_DIR/ubiquitous-language.md" 2>/dev/null || echo 0)
+  ff_ent_actual=$(grep -c '^### ' "$DS_DIR/entities.md" 2>/dev/null || echo 0)
+  ff_proc_actual=$(grep -c '^## PROC-' "$DS_DIR/processes.md" 2>/dev/null || echo 0)
+
+  # Parse stated counts from L2-INDEX.md "ID Registry Summary" table.
+  # Table rows have the form: | <label> | <count> | <section> |
+  # We anchor on the label text in column 1 to extract column 2 (stated count).
+  # awk splits on '|', trims whitespace from each field, and prints field 3 (the count).
+  parse_l2_count() {
+    local label_pattern="$1"
+    awk -F'|' -v pat="$label_pattern" '
+      $2 ~ pat {
+        val = $3
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", val)
+        if (val ~ /^[0-9]+$/) { print val; exit }
+      }
+    ' "$L2_INDEX" 2>/dev/null | head -1 || true
+  }
+
+  ff_cap_stated=$(parse_l2_count 'CAP-NNN')
+  ff_di_stated=$(parse_l2_count 'DI-NNN')
+  ff_asm_stated=$(parse_l2_count 'ASM-NNN')
+  ff_r_stated=$(parse_l2_count 'R-NNN')
+  ff_fm_stated=$(parse_l2_count 'FM-NNN')
+  ff_gloss_stated=$(parse_l2_count 'Glossary terms')
+  ff_ent_stated=$(parse_l2_count 'Entities')
+  ff_proc_stated=$(parse_l2_count 'Processes')
+
+  # Helper: validate one registry row
+  ff_check_row() {
+    local row_label="$1" stated="$2" actual="$3"
+    ff_rows_validated=$(( ff_rows_validated + 1 ))
+    if [[ -z "$stated" ]]; then
+      ff_violations=$(( ff_violations + 1 ))
+      ff_violation_msgs+=("(ff) L2-INDEX row '$row_label': stated count NOT FOUND in registry table")
+      echo "    [$row_label]: stated NOT_FOUND  actual=$actual  FAIL"
+    elif [[ "$stated" != "$actual" ]]; then
+      ff_violations=$(( ff_violations + 1 ))
+      ff_violation_msgs+=("(ff) L2-INDEX row '$row_label': stated $stated != computed $actual")
+      echo "    [$row_label]: stated $stated != computed $actual  FAIL"
+    else
+      echo "    [$row_label]: stated $stated == computed $actual  OK"
+    fi
+  }
+
+  ff_check_row "CAP-NNN"       "$ff_cap_stated"   "$ff_cap_actual"
+  ff_check_row "DI-NNN"        "$ff_di_stated"    "$ff_di_actual"
+  ff_check_row "ASM-NNN"       "$ff_asm_stated"   "$ff_asm_actual"
+  ff_check_row "R-NNN"         "$ff_r_stated"     "$ff_r_actual"
+  ff_check_row "FM-NNN"        "$ff_fm_stated"    "$ff_fm_actual"
+  ff_check_row "Glossary terms" "$ff_gloss_stated" "$ff_gloss_actual"
+  ff_check_row "Entities"      "$ff_ent_stated"   "$ff_ent_actual"
+  ff_check_row "Processes"     "$ff_proc_stated"  "$ff_proc_actual"
+
+  # Priority Distribution grand total: sum the Count cells from P0/P1/P2 rows.
+  # Rows match "| P0 (", "| P1 (", "| P2 (" in the Priority Distribution table.
+  # awk sums field 3 (count) across all three rows.
+  # NOTE: BSD awk (macOS) does not support \s — use POSIX [[:space:]] instead.
+  ff_priority_total=$(awk -F'|' '
+    $2 ~ /^[[:space:]]*P[012] \(/ {
+      val = $3
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", val)
+      if (val ~ /^[0-9]+$/) total += val
+    }
+    END { print (total+0) }
+  ' "$L2_INDEX" 2>/dev/null || echo 0)
+
+  # The grand total must equal the CAP computed count
+  echo "    [Priority Distribution grand total]: stated P0+P1+P2=$ff_priority_total  CAP-NNN computed=$ff_cap_actual"
+  if [[ "$ff_priority_total" != "$ff_cap_actual" ]]; then
+    ff_priority_violations=$(( ff_priority_violations + 1 ))
+    ff_violations=$(( ff_violations + 1 ))
+    ff_violation_msgs+=("(ff) L2-INDEX Priority Distribution grand total $ff_priority_total != CAP-NNN computed $ff_cap_actual")
+    echo "    [Priority Distribution grand total]: FAIL — P0+P1+P2 must equal CAP count"
+  else
+    echo "    [Priority Distribution grand total]: OK"
+  fi
+
+  # Positive-coverage log (always printed)
+  echo "    Check (ff): $ff_rows_validated ID Registry rows validated, $ff_priority_violations priority-total violations; $ff_violations violation(s) found."
+
+  if [[ $ff_violations -gt 0 ]]; then
+    echo ""
+    echo "    L2-INDEX REGISTRY INTEGRITY VIOLATIONS (F49-01 recurrence prevention):"
+    echo "    The 'ID Registry Summary' table in domain-spec/L2-INDEX.md has stale counts."
+    echo "    FIX: update L2-INDEX.md 'ID Registry Summary' table counts to match source files."
+    echo "    Source patterns:"
+    echo "      CAP-NNN  : grep -c '^## CAP-0' domain-spec/capabilities.md"
+    echo "      DI-NNN   : grep -c '^## DI-0'  domain-spec/invariants.md"
+    echo "      ASM-NNN  : grep -c '^| ASM-'   domain-spec/assumptions.md"
+    echo "      R-NNN    : grep -c '^| R-'      domain-spec/risks.md"
+    echo "      FM-NNN   : grep -c '^### FM-'  domain-spec/failure-modes.md"
+    echo "      Glossary : grep -c '^\*\*'      domain-spec/ubiquitous-language.md"
+    echo "      Entities : grep -c '^### '      domain-spec/entities.md"
+    echo "      Processes: grep -c '^## PROC-' domain-spec/processes.md"
+    for ffmsg in "${ff_violation_msgs[@]}"; do
+      echo "      $ffmsg"
+    done
+    errors+=("MISMATCH [l2-index-registry-integrity (ff)]: $ff_violations L2-INDEX registry row(s) have stale counts vs source files (F49-01 recurrence prevention)")
+    fail=1
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5721,6 +5905,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  D-SEC contract-existence (cc):    $cc_pairs_checked (contract, BC) pairs verified: all exist on disk and registered in BC-INDEX.md, 0 violations"
   echo "  Active-BC stale-status (dd):      $dd_lines_scanned lines scanned across $dd_files_scanned arch files, 0 active-BC stale-status contradictions"
   echo "  Genre-profile schema gate (ee):   $ee_files_scanned BC files scanned corpus-wide ($ee_lines_scanned lines), 0 non-schema genre-profile gate tokens found"
+  echo "  L2-INDEX registry integrity (ff): $ff_rows_validated ID Registry rows validated, 0 stale counts vs source files"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
