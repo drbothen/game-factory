@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,6 +19,10 @@ priority: P0
 lifecycle_status: active
 introduced: v0.1.0
 modified:
+  - version: "1.2"
+    date: 2026-06-10
+    author: product-owner
+    change: "F53-01 (Pass-53): Add D-SEC sub-predicate 4 (never-emit-secrets / BC-1.15.003 / DI-013). PC1 narrowed — offline games are inapplicable ONLY for sub-predicates 1-3; secrets lint (SP4) applies unconditionally. PC2 GREEN extended with SP4 condition. Invariant 5 added: secrets-gate failure is fail-closed regardless of online/offline. BC-1.15.003 added to Related BCs. DI-013 added to L2 Domain Invariants traceability. Fixes fail-open security defect where offline single-player games bypassed secrets gate."
   - version: "1.1"
     date: 2026-06-09
     author: product-owner
@@ -36,14 +40,15 @@ removal_reason: null
 ## Description
 
 Defines the evaluation criteria for convergence dimension #11:
-security-invariants. This dimension is conditional — required for any game with
-online/multiplayer features. When required, it is NOT degradable. The
-`server-authority-invariant-suite` (CWE-602 spine) must pass: no-trust-client,
-input range/rate/sequence validation, replay-attack prevention, authoritative
-reconciliation, interest-management (anti-wallhack), economy conservation/
-atomicity, and secure entitlement. Kernel anti-cheat is never autonomously
-authored (DI-010). Anti-cheat integration for competitive-MP targets must be
-verified.
+security-invariants. This dimension evaluates FOUR sub-predicates: (1) the
+`server-authority-invariant-suite` (CWE-602 spine) for online games; (2)
+anti-cheat-integration-adapter conformance for esports/competitive-MP; (3)
+moderation-pipeline-contract with CSAM→NCMEC wiring for UGC/chat; and (4)
+the never-emit-secrets output-bundle lint gate (BC-1.15.003 / DI-013) which
+applies UNCONDITIONALLY to ALL games including fully offline ones. Sub-predicates
+1-3 are conditional on online/multiplayer features; sub-predicate 4 is not
+degradable and applies regardless of deployment target. Kernel anti-cheat is
+never autonomously authored (DI-010).
 
 ## Preconditions
 
@@ -64,17 +69,32 @@ verified.
 
 ## Postconditions
 
-1. **INAPPLICABLE (offline):** Game is fully offline. Dimension is GREEN by inapplicability.
-2. **GREEN:** All `server-authority-invariant-suite` assertions pass in CI.
-   `anti-cheat-integration-adapter` is wired (for competitive-MP).
-   `moderation-pipeline-contract` is wired and CSAM→NCMEC path verified (if UGC/chat).
+1. **PARTIALLY-INAPPLICABLE (offline):** Game is fully offline. Sub-predicates
+   (1) server-authority-invariant-suite, (2) anti-cheat-integration-adapter, and
+   (3) moderation-pipeline-contract are inapplicable (no online features; no
+   `esports_enabled`; no UGC/chat). Sub-predicate (4) never-emit-secrets lint
+   (BC-1.15.003 / DI-013) is NOT inapplicable — it STILL applies and STILL gates.
+   An offline game is D-SEC GREEN only when the secrets scan passes (exit 0).
+   If the secrets scan fails, the dimension is BLOCKED even for fully offline games.
+   There is NO blanket GREEN-by-inapplicability for this dimension.
+2. **GREEN:** All applicable sub-predicates pass:
+   (SP1) All `server-authority-invariant-suite` assertions pass in CI (for online games).
+   (SP2) `anti-cheat-integration-adapter` is wired (for games with `genre-profile.esports_enabled: true`).
+   (SP3) `moderation-pipeline-contract` is wired and CSAM→NCMEC path verified (for UGC/chat games).
+   (SP4) Output bundle passes the never-emit-secrets lint gate (BC-1.15.003 / DI-013) — ALL games.
    No kernel anti-cheat driver authored by the factory (DI-010).
-3. **BLOCKED:** Any server-authority invariant fails. Unchecked client input
-   reaches game-authoritative state. Kernel AC driver detected in codebase.
-   Riot Vanguard referenced as AC provider (DI-010: not licensable).
+3. **BLOCKED:** Any of the following: Any server-authority invariant fails (online games).
+   Unchecked client input reaches game-authoritative state. Kernel AC driver detected
+   in codebase. Riot Vanguard referenced as AC provider (DI-010: not licensable).
+   Output bundle fails the never-emit-secrets lint gate (DI-013 violation) — for any
+   game regardless of online/offline status. Fail-closed: secrets-scan failure ⇒
+   D-SEC BLOCKED with no exception.
 4. **NO DEGRADATION PATH (if online):** Online games must pass all security
    invariants. No tolerance for CWE-602 violations — they are not debatable
    quality choices, they are security defects.
+5. **NO DEGRADATION PATH (secrets, all games):** Sub-predicate (4) is not
+   degradable for any game. Factory output bundles must never contain secrets
+   in any deployment target (methodology-layer.md §D-SEC lines 1063-1065).
 
 ## Invariants
 
@@ -86,6 +106,11 @@ verified.
    violation and triggers immediate BLOCKED state.
 4. CSAM→NCMEC path wiring is required for any game with user-generated content or
    unmoderated chat (18 U.S.C. §2258A actual-knowledge trigger).
+5. The never-emit-secrets output-bundle lint gate (BC-1.15.003 / DI-013) is
+   fail-closed and unconditional. A secrets-scan failure causes D-SEC BLOCKED
+   regardless of whether the game is online or fully offline. No deployment target,
+   game genre, or online-feature-profile value exempts a game from sub-predicate (4).
+   This invariant cannot be waived by any agent, flag, or config (DI-013).
 
 ## Edge Cases
 
@@ -103,10 +128,12 @@ verified.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Offline single-player game | security-invariants = GREEN (inapplicable) | happy-path |
-| Online game; all CWE-602 invariants PASS; EAC/EOS wired | security-invariants = GREEN | happy-path |
+| Offline single-player game; secrets scan exits 0 | security-invariants = GREEN (SP1-3 inapplicable; SP4 passed) | happy-path |
+| Offline single-player game; secrets scan exits 1 (API key found in output bundle) | security-invariants = BLOCKED; DI-013 violation; secrets gate fail-closed | error |
+| Online game; all CWE-602 invariants PASS; EAC/EOS wired; secrets scan exits 0 | security-invariants = GREEN | happy-path |
 | Online game; client input bypasses server validation | security-invariants = BLOCKED; "CWE-602: client input not validated server-side" | error |
 | Competitive-MP; Riot Vanguard declared as AC provider | security-invariants = BLOCKED; DI-010 violation | error |
+| Any game (online or offline); output bundle contains high-entropy credential | security-invariants = BLOCKED; DI-013 violation regardless of online/offline status | error |
 
 ## Verification Properties
 
@@ -120,13 +147,14 @@ verified.
 |-------|-------|
 | L2 Capability | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 |
 | Capability Anchor Justification | CAP-007 ("11-Dimension Convergence Tracking") per capabilities.md §CAP-007 — this BC defines the evaluation rule for convergence dimension #11 (security-invariants) |
-| L2 Domain Invariants | DI-010 (kernel anti-cheat never autonomously authored), DI-012 |
+| L2 Domain Invariants | DI-010 (kernel anti-cheat never autonomously authored), DI-012, DI-013 (factory output bundle never contains secret material — enforced via BC-1.15.003 as D-SEC sub-predicate 4; unconditional across all games) |
 | Architecture Module | convergence-tracker / security-gate (SS-06) |
 | Stories | S-TBD |
 
 ## Related BCs
 
 - BC-7.12.001 — depended on by (convergence loop reads this dimension)
+- BC-1.15.003 — composes with (D-SEC sub-predicate 4: never-emit-secrets output-bundle lint gate; BC-1.15.003 is the producer; this BC is the evaluator that consumes its pass/fail signal unconditionally for all games)
 
 ## Architecture Anchors
 
