@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.33
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.34
 #
 # PURPOSE
 # -------
@@ -271,6 +271,27 @@
 #   cleanup (all operative occurrences already resolved to registered codes).
 #   POSIX/BSD-awk compatible (no grep -P). Positive-coverage log always printed.
 #   (F39-05 recurrence prevention).
+# extended in v1.34 to add check (ee) — genre-profile schema gate integrity guard
+#   (F44-01 recurrence prevention): the Pass-44 root-cause was that two security/lane
+#   BCs (BC-13.02.006, BC-13.03.005) gated on flag tokens that are NOT defined in the
+#   strict-mode genre-profile schema (BC-13.01.001 defines: schema_version, esports_enabled,
+#   esports_config, modding_enabled, modding_config, marketing_lane). The removed tokens
+#   were `ugc_enabled`, `chat_enabled`, `competitive_multiplayer`. This check asserts that
+#   those three known-bad tokens do NOT appear as operative trigger flags in the two BC
+#   files that had the defect (BC-13.02.006.md, BC-13.03.005.md). Scoped to those two
+#   files (targeted implementation) to avoid false positives on legitimate non-genre-profile
+#   uses in other BCs (BC-10.04.001 `ugc_enabled` in game-profile ToS context; BC-7.11.006
+#   `game_mode: competitive_multiplayer` dimension context; BC-3.03.009
+#   `competitive_multiplayer_enabled` replay context — these are not genre-profile schema
+#   gates). Exclusions: lines starting with ">" (blockquotes); lines containing
+#   "reason:" (YAML lifecycle prose — changelog reason field); lines containing "is not",
+#   "not a", or "does not" (negation/explanatory context — BC-13.02.006 legitimately
+#   says "schema does not define a separate `competitive_multiplayer` flag" to document
+#   why the token was removed; such lines are not gate triggers). SCOPING CHOICE:
+#   targeted to BC-13.02.006 and BC-13.03.005 only (the two BCs that had the defect) to
+#   avoid false positives on legitimate non-genre-profile uses elsewhere. After PO
+#   reconciliation, this check must report 0 violations. POSIX/BSD compatible (no
+#   grep -P). (F44-01 recurrence prevention).
 # extended in v1.33 to add check (dd) — active-BC / stale-architecture-doc status
 #   consistency guard (F43-01 recurrence prevention): when a BC file exists under
 #   .factory/specs/behavioral-contracts/ (i.e., it is an authored, active contract),
@@ -327,8 +348,8 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd + o.ii.
-#   Positive-coverage log always printed. (F43-01/F42-01/F42-02 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee + o.ii.
+#   Positive-coverage log always printed. (F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -782,7 +803,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.33) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.34) ==="
 echo ""
 
 # ============================================================================
@@ -5541,6 +5562,108 @@ fi
 echo ""
 
 # ============================================================================
+# (ee) GENRE-PROFILE SCHEMA GATE INTEGRITY GUARD  [NEW v1.34, F44-01]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-44 process-gap (F44-01) — BC-13.02.006 and
+# BC-13.03.005 gated on flag tokens (`ugc_enabled`, `chat_enabled`,
+# `competitive_multiplayer`) that are NOT in the strict-mode genre-profile schema
+# defined by BC-13.01.001 (which defines: schema_version, esports_enabled,
+# esports_config, modding_enabled, modding_config, marketing_lane). Unknown fields
+# in strict-mode → E-GLG-001 (schema validation failure).
+#
+# SCOPE: targeted to the two BC files that had the defect:
+#   .factory/specs/behavioral-contracts/ss-13/BC-13.02.006.md
+#   .factory/specs/behavioral-contracts/ss-13/BC-13.03.005.md
+# This avoids false positives on legitimate non-genre-profile uses elsewhere:
+#   BC-10.04.001 `ugc_enabled` in game-profile ToS context
+#   BC-7.11.006  `game_mode: competitive_multiplayer` dimension value
+#   BC-3.03.009  `competitive_multiplayer_enabled` replay context
+#
+# ASSERTION: no operative line in BC-13.02.006.md or BC-13.03.005.md
+#   contains the token `ugc_enabled`, `chat_enabled`, or `competitive_multiplayer`
+#   as a gating trigger. The check explicitly excludes explanatory/negation prose
+#   that references the token to document WHY it was removed ("not a schema field").
+#
+# EXCLUSIONS:
+#   — Lines starting with ">" (blockquote / changelog annotation lines)
+#   — Lines containing "reason:" (YAML lifecycle prose — changelog reason field)
+#     may cite old tokens as historical record of the fix
+#   — Lines containing "is not", "not a", or "does not" (negation/explanatory context —
+#     BC-13.02.006 says "schema does not define a separate `competitive_multiplayer` flag"
+#     and "`competitive_multiplayer` is not a defined schema field" to document the
+#     correction; such explanatory lines are not gating triggers)
+#
+# POSITIVE-COVERAGE LOG: always printed. (F44-01 recurrence prevention).
+echo "--- (ee) Genre-profile schema gate integrity guard (F44-01 recurrence prevention) ---"
+echo "    Assertion: BC-13.02.006 and BC-13.03.005 must not gate on non-schema tokens ugc_enabled/chat_enabled/competitive_multiplayer."
+
+ee_violations=0
+ee_violation_msgs=()
+ee_files_scanned=0
+
+BC_BASE_DIR_EE=".factory/specs/behavioral-contracts"
+ee_target_files=(
+  "$BC_BASE_DIR_EE/ss-13/BC-13.02.006.md"
+  "$BC_BASE_DIR_EE/ss-13/BC-13.03.005.md"
+)
+# Three known-bad tokens (as grep alternation patterns — POSIX ERE)
+EE_BAD_TOKENS="ugc_enabled|chat_enabled|competitive_multiplayer"
+
+for ee_file in "${ee_target_files[@]}"; do
+  if [[ ! -f "$ee_file" ]]; then
+    echo "    WARNING: expected file not found: $ee_file (skipping)"
+    continue
+  fi
+  ee_files_scanned=$(( ee_files_scanned + 1 ))
+  lineno=0
+  while IFS= read -r line; do
+    lineno=$(( lineno + 1 ))
+    # Skip blockquote lines
+    trimmed="${line#"${line%%[! ]*}"}"
+    case "$trimmed" in
+      ">"*) continue ;;
+    esac
+    # Skip YAML reason: lines
+    case "$line" in
+      *"reason:"*) continue ;;
+    esac
+    # Skip explanatory/negation lines — lines that reference the token to document
+    # its absence/invalidity are not gate triggers ("is not a schema field", "not a defined",
+    # "does not define a separate ... flag")
+    case "$line" in
+      *"is not"*|*"not a"*|*"does not"*) continue ;;
+    esac
+    # Check for any of the three bad tokens
+    if printf '%s\n' "$line" | grep -qE "$EE_BAD_TOKENS"; then
+      ee_violations=$(( ee_violations + 1 ))
+      # Identify which token matched
+      matched=$(printf '%s\n' "$line" | grep -oE "$EE_BAD_TOKENS" | head -1)
+      ee_violation_msgs+=("(ee) $ee_file:$lineno — non-schema genre-profile gate token '$matched' found: $line")
+    fi
+  done < "$ee_file"
+done
+
+# Positive-coverage log (always printed)
+echo "    Check (ee): $ee_files_scanned target BC files scanned; $ee_violations violation(s) found."
+
+if [[ $ee_violations -gt 0 ]]; then
+  echo ""
+  echo "    GENRE-PROFILE SCHEMA GATE VIOLATIONS (F44-01 recurrence prevention):"
+  echo "    BC-13.02.006 and BC-13.03.005 must gate only on schema-valid genre-profile fields."
+  echo "    Schema-valid fields (BC-13.01.001): schema_version, esports_enabled, esports_config,"
+  echo "      modding_enabled, modding_config, marketing_lane."
+  echo "    Anti-cheat gate must use: genre-profile.esports_enabled: true"
+  echo "    Moderation gate must use: genre-profile.modding_enabled: true OR game-metadata-spec.user_to_user_communication: true"
+  echo "    FIX: replace the non-schema token with the schema-valid equivalent in the operative BC content."
+  for eemsg in "${ee_violation_msgs[@]}"; do
+    echo "      $eemsg"
+  done
+  errors+=("MISMATCH [genre-profile-schema-gate (ee)]: $ee_violations non-schema genre-profile gate token(s) found in BC-13.02.006 or BC-13.03.005 (F44-01 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5584,6 +5707,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  No-variant/registered-code (bb):  $bb_lines_scanned BC lines scanned, 0 operative 'E-code variant' tokens found"
   echo "  D-SEC contract-existence (cc):    $cc_pairs_checked (contract, BC) pairs verified: all exist on disk and registered in BC-INDEX.md, 0 violations"
   echo "  Active-BC stale-status (dd):      $dd_lines_scanned lines scanned across $dd_files_scanned arch files, 0 active-BC stale-status contradictions"
+  echo "  Genre-profile schema gate (ee):   $ee_files_scanned target BC files scanned, 0 non-schema genre-profile gate tokens found"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
