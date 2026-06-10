@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.37
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.38
 #
 # PURPOSE
 # -------
@@ -215,6 +215,40 @@
 #   subsumed by the general guard (cinematic DI-007 grafts also have no playtest
 #   keyword in ±10 context). Positive-coverage log updated. (F52-01 recurrence
 #   prevention).
+# extended in v1.38 to add check (gg) — D-SEC evaluator-completeness guard
+#   (F53-01 fail-open recurrence prevention): methodology-layer.md §D-SEC defines
+#   D-SEC's pass predicate as FOUR sub-predicates, each tied to a contract/BC:
+#   (1) server-authority / CWE-602 spine, (2) anti-cheat-integration-adapter
+#   (BC-13.02.006), (3) moderation-pipeline-contract (BC-13.03.005), (4)
+#   never-emit-secrets output-bundle lint (BC-1.15.003 / DI-013). The authoritative
+#   D-SEC evaluator BC is BC-7.11.001 per methodology-layer §3.0/§3.1 dimension-owner
+#   registry. Pass-53 root-cause (F53-01): BC-7.11.001 v1.1 omitted sub-predicate 4
+#   (secrets) from its operative body — the secrets gate was defined in methodology-
+#   layer §D-SEC but not referenced by the evaluator BC. No gate caught this because
+#   check (cc) asserts the defining security BCs EXIST, but does not assert the
+#   evaluator BC REFERENCES them. This is the evaluator-completeness gap.
+#
+#   ASSERTION: BC-7.11.001's operative body (EXCLUDING changelog / reason: / modified:
+#   lines) MUST reference EACH of the four D-SEC sub-predicate anchors:
+#     (SP1) anti-cheat-integration-adapter reference: "BC-13.02.006" OR "anti-cheat"
+#     (SP2) moderation-pipeline-contract reference: "BC-13.03.005" OR
+#           "moderation-pipeline-contract"
+#     (SP3) secrets sub-predicate (MINIMUM viable assertion — would have caught F53-01):
+#           "BC-1.15.003" AND "DI-013" both present in operative content
+#     (SP4) offline-applicability rule: secrets sub-predicate is NOT inapplicable for
+#           offline games — operative content must contain a line stating the secrets
+#           predicate applies to offline / is unconditional (e.g. "offline" near
+#           "BC-1.15.003" or "never-emit-secrets" or "NOT inapplicable").
+#
+#   Each missing anchor is reported as a separate violation. After the PO fix
+#   (BC-7.11.001 v1.2), all four anchors are present — check must report 0 violations.
+#
+#   EXCLUSIONS: lines inside YAML frontmatter (between "---" delimiters), lines
+#   starting with ">" (blockquotes), lines containing "reason:", lines containing
+#   "modified:". Only operative body content is scanned.
+#
+#   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
+#   (no grep -P). (F53-01 recurrence prevention).
 # extended in v1.27 to add check (x) — prd.md §4 NFR-table ID-set parity
 #   (F33-01 recurrence prevention): parses the set of NFR IDs that appear as rows in
 #   the prd.md §4 NFR summary table ("| NFR-NNN …" lines) and the set of NFR IDs
@@ -395,9 +429,10 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
-#   Positive-coverage log always printed. (F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
+#   Positive-coverage log always printed. (F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -835,6 +870,8 @@ dd_files_scanned=0
 ff_violations=0
 ff_rows_validated=0
 ff_priority_violations=0
+# (gg) D-SEC evaluator-completeness counters: initialized here so SUMMARY is safe if check is skipped
+gg_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -855,7 +892,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.36) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.38) ==="
 echo ""
 
 # ============================================================================
@@ -5931,6 +5968,156 @@ fi
 echo ""
 
 # ============================================================================
+# (gg) D-SEC EVALUATOR-COMPLETENESS GUARD  [NEW v1.38]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-53 process-gap (F53-01) — BC-7.11.001 v1.1 omitted
+# sub-predicate 4 (never-emit-secrets / BC-1.15.003 / DI-013) from its operative
+# body. The secrets gate was defined in methodology-layer §D-SEC but the evaluator
+# BC did not reference it. check (cc) asserts the defining security BCs EXIST, but
+# does not assert the evaluator BC REFERENCES them. This is the evaluator-
+# completeness gap that no prior gate caught.
+#
+# ASSERTION: BC-7.11.001's operative body MUST reference EACH of the four D-SEC
+# sub-predicate anchors. Operative body = all content EXCLUDING:
+#   - YAML frontmatter lines (between "---" delimiters)
+#   - Lines starting with ">" (blockquotes / changelog annotations)
+#   - Lines containing "reason:" (YAML lifecycle prose)
+#   - Lines containing "modified:" (YAML changelog key lines)
+#
+# Sub-predicate assertions:
+#   (SP1) anti-cheat reference: "BC-13.02.006" OR "anti-cheat" in operative content
+#   (SP2) moderation reference: "BC-13.03.005" OR "moderation-pipeline-contract"
+#   (SP3) secrets sub-predicate (MINIMUM viable — would have caught F53-01):
+#         both "BC-1.15.003" AND "DI-013" present in operative content
+#   (SP4) offline-applicability: operative content contains a line asserting the
+#         secrets predicate applies unconditionally to offline games — detected by
+#         finding "offline" co-occurring with "BC-1.15.003" OR "never-emit-secrets"
+#         OR "NOT inapplicable" on the same or adjacent lines (within 5 lines).
+#
+# After PO fix (BC-7.11.001 v1.2): all four anchors present — must report 0 violations.
+# POSIX/BSD-grep/awk compatible (no grep -P). (F53-01 recurrence prevention).
+
+echo "--- (gg) D-SEC evaluator-completeness guard (F53-01 recurrence prevention) ---"
+
+GG_BC_FILE="$BC_DIR/ss-07/BC-7.11.001.md"
+gg_violations=0
+
+if [[ ! -f "$GG_BC_FILE" ]]; then
+  echo "    SKIP: BC-7.11.001.md not found at $GG_BC_FILE"
+else
+  # Extract operative body: strip YAML frontmatter (between first two "---" delimiters),
+  # then filter out blockquote lines, reason: lines, and modified: lines.
+  # awk state machine: in_front=1 inside the frontmatter block (between first two ---).
+  # After the closing ---, emit lines that are not excluded.
+  gg_operative=$(awk '
+    /^---/ {
+      if (front_count == 0) { front_count=1; in_front=1; next }
+      if (in_front) { in_front=0; next }
+    }
+    in_front { next }
+    /^>/ { next }
+    /reason:/ { next }
+    /modified:/ { next }
+    { print }
+  ' "$GG_BC_FILE")
+
+  # SP1: anti-cheat-integration-adapter reference
+  # Assert: "BC-13.02.006" OR "anti-cheat" present in operative content
+  if echo "$gg_operative" | grep -qiE 'BC-13\.02\.006|anti-cheat'; then
+    echo "    [SP1] anti-cheat reference: FOUND (BC-13.02.006 or anti-cheat in operative content) — OK"
+  else
+    echo "    [SP1] anti-cheat reference: MISSING — BC-7.11.001 operative body must reference BC-13.02.006 or anti-cheat"
+    gg_violations=$(( gg_violations + 1 ))
+    errors+=("MISMATCH [dsec-evaluator-completeness (gg) SP1]: BC-7.11.001 operative body missing anti-cheat sub-predicate reference (BC-13.02.006 / anti-cheat) (F53-01 recurrence prevention)")
+    fail=1
+  fi
+
+  # SP2: moderation-pipeline-contract reference
+  # Assert: "BC-13.03.005" OR "moderation-pipeline-contract" present in operative content
+  if echo "$gg_operative" | grep -qiE 'BC-13\.03\.005|moderation-pipeline-contract'; then
+    echo "    [SP2] moderation reference: FOUND (BC-13.03.005 or moderation-pipeline-contract in operative content) — OK"
+  else
+    echo "    [SP2] moderation reference: MISSING — BC-7.11.001 operative body must reference BC-13.03.005 or moderation-pipeline-contract"
+    gg_violations=$(( gg_violations + 1 ))
+    errors+=("MISMATCH [dsec-evaluator-completeness (gg) SP2]: BC-7.11.001 operative body missing moderation sub-predicate reference (BC-13.03.005 / moderation-pipeline-contract) (F53-01 recurrence prevention)")
+    fail=1
+  fi
+
+  # SP3 (MINIMUM viable assertion — would have caught F53-01):
+  # Assert: BOTH "BC-1.15.003" AND "DI-013" present in operative content.
+  # This is the core assertion: the secrets gate (BC-1.15.003 / DI-013) must be
+  # explicitly referenced in the evaluator BC's operative body.
+  gg_has_bc1_15=$(echo "$gg_operative" | grep -c 'BC-1\.15\.003' || true)
+  gg_has_di013=$(echo "$gg_operative" | grep -c 'DI-013' || true)
+  if [[ "$gg_has_bc1_15" -gt 0 && "$gg_has_di013" -gt 0 ]]; then
+    echo "    [SP3] secrets sub-predicate (BC-1.15.003 + DI-013): FOUND in operative content — OK"
+  else
+    if [[ "$gg_has_bc1_15" -eq 0 ]]; then
+      echo "    [SP3] secrets sub-predicate: MISSING BC-1.15.003 reference in operative content"
+    fi
+    if [[ "$gg_has_di013" -eq 0 ]]; then
+      echo "    [SP3] secrets sub-predicate: MISSING DI-013 reference in operative content"
+    fi
+    gg_violations=$(( gg_violations + 1 ))
+    errors+=("MISMATCH [dsec-evaluator-completeness (gg) SP3]: BC-7.11.001 operative body missing secrets sub-predicate (needs both BC-1.15.003 AND DI-013) — this is the F53-01 fail-open defect class (F53-01 recurrence prevention)")
+    fail=1
+  fi
+
+  # SP4: offline-applicability rule for the secrets sub-predicate.
+  # Assert: the operative content contains a line establishing that the secrets gate
+  # applies unconditionally to offline games (i.e., it is NOT inapplicable for offline).
+  # Detection: look for "offline" appearing within 5 lines of "BC-1.15.003" OR
+  # "never-emit-secrets" OR a line containing "NOT inapplicable" in the operative body.
+  # Implementation: use awk to track whether any of the trigger lines appear within
+  # a 5-line sliding window alongside "offline".
+  #
+  # Strategy: extract a 5-line context window around every occurrence of the
+  # secrets anchors (BC-1.15.003, never-emit-secrets, NOT inapplicable) and check
+  # whether "offline" appears in that window.
+  gg_offline_ok=0
+  # Also accept: a direct assertion that SP4 is unconditional (e.g. "applies unconditionally")
+  if echo "$gg_operative" | grep -qiE 'unconditional|applies.*ALL games|ALL games.*applies'; then
+    gg_offline_ok=1
+  fi
+  if [[ "$gg_offline_ok" -eq 0 ]]; then
+    # Check: any line containing "offline" that also contains or is near a secrets anchor
+    # Use awk: for each line, track a rolling 5-line window; if a secrets anchor line
+    # is within 5 lines of an "offline" line, flag as found.
+    gg_offline_ok=$(echo "$gg_operative" | awk '
+      BEGIN { found=0 }
+      {
+        lines[NR] = $0
+      }
+      END {
+        for (i=1; i<=NR; i++) {
+          if (lines[i] ~ /offline/) {
+            # check within ±5 lines for secrets anchor
+            for (j = (i-5 > 1 ? i-5 : 1); j <= (i+5 <= NR ? i+5 : NR); j++) {
+              if (lines[j] ~ /BC-1\.15\.003|never-emit-secrets|NOT inapplicable/) {
+                found=1
+              }
+            }
+          }
+        }
+        print found
+      }
+    ')
+  fi
+  if [[ "$gg_offline_ok" -gt 0 ]]; then
+    echo "    [SP4] offline-applicability rule: FOUND (offline + secrets anchor co-occur in operative content) — OK"
+  else
+    echo "    [SP4] offline-applicability rule: MISSING — BC-7.11.001 operative body must state the secrets sub-predicate applies to offline games (not inapplicable)"
+    gg_violations=$(( gg_violations + 1 ))
+    errors+=("MISMATCH [dsec-evaluator-completeness (gg) SP4]: BC-7.11.001 operative body missing offline-applicability assertion for secrets sub-predicate (F53-01 recurrence prevention)")
+    fail=1
+  fi
+
+  # Positive-coverage log (always printed)
+  echo "    Check (gg): BC-7.11.001 operative body scanned for all 4 D-SEC sub-predicate anchors; $gg_violations violation(s) found."
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5976,6 +6163,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Active-BC stale-status (dd):      $dd_lines_scanned lines scanned across $dd_files_scanned arch files, 0 active-BC stale-status contradictions"
   echo "  Genre-profile schema gate (ee):   $ee_files_scanned BC files scanned corpus-wide ($ee_lines_scanned lines), 0 non-schema genre-profile gate tokens found"
   echo "  L2-INDEX registry integrity (ff): $ff_rows_validated ID Registry rows validated, 0 stale counts vs source files"
+  echo "  D-SEC evaluator-completeness (gg): BC-7.11.001 operative body references all 4 D-SEC sub-predicate anchors, 0 violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
