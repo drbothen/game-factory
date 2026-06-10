@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.39
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.40
 #
 # PURPOSE
 # -------
@@ -249,6 +249,51 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.40 to add check (ii) — visionOS/OpenXR dedicated-code routing
+#   guard (F55-01 recurrence prevention):
+# CANONICAL RULE (error-taxonomy.md:755): E-XR-007 is the DEDICATED error code for
+# "visionOS manifest contains an OpenXR-specific field (openxr_version / khronos-cts /
+# XR_* namespace)", owned by BC-14.02.003. The generic E-XR-001 (manifest schema
+# validation failure) MUST NOT be used for the visionOS+OpenXR input that has a
+# dedicated code.
+#
+# ASSERTION: no operative line (or its immediately enclosing ±3-line edge-case /
+# test-vector context) in any .factory/specs/behavioral-contracts/**/*.md file may
+# co-locate ALL THREE of:
+#   (1) a visionOS signal: "visionos" or "visionOS"
+#   (2) an OpenXR-field signal: "openxr_version" OR "khronos-cts" OR "XR_" (namespace)
+#   (3) the generic code "E-XR-001"
+# Such a co-location means the generic code is being used for the visionOS+OpenXR
+# violation that E-XR-007 was specifically registered to handle — the precise F55-01
+# mis-routing pattern.
+#
+# IMPLEMENTATION NOTE: the context-window approach (±3 lines around every EC/test-vector
+# table row) is used to handle table-row splits where the error code appears on a
+# different row than the input description. For each BC file, operative content is
+# extracted (frontmatter, blockquote, reason:, modified: lines excluded), then the
+# file is scanned in a sliding window: for each line that contains the visionOS signal,
+# the surrounding ±3-line window is checked for both an OpenXR-field signal AND E-XR-001.
+# A window hit means the visionOS+OpenXR EC is citing the generic code.
+#
+# EXCLUSIONS (suppress triggering entirely):
+#   — Lines inside YAML frontmatter (between "---" delimiters)
+#   — Lines starting with ">" (blockquote / changelog annotation lines)
+#   — Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#   — Lines containing "modified:" (YAML changelog key lines)
+#
+# FALSE-POSITIVE AVOIDANCE:
+#   — EC-002 (comfort_certify omission) and EC-003 (invalid fidelity) in BC-14.01.001
+#     cite E-XR-001 correctly — they don't mention visionOS+openxr_version, so they
+#     do NOT have the visionOS signal and will not trigger.
+#   — EC-005 (unknown capability) also cites E-XR-001 without visionOS context — same.
+#   — The legitimate E-XR-007 citation in EC-001 and the visionOS test vector now use
+#     E-XR-007 (after the F55-01 PO fix), so they will NOT cite E-XR-001 at all.
+#   — The check is deliberately scoped to the three-signal co-location; it does NOT
+#     attempt a general cross-BC same-input-routing parser (infeasible / too many
+#     false positives).
+#
+# POSITIVE-COVERAGE LOG: always printed.
+# POSIX/BSD-awk/grep compatible (no grep -P). (F55-01 recurrence prevention).
 # extended in v1.39 to add check (hh) — economy-conservation BC-routing guard
 #   (F54-01 process-gap recurrence prevention):
 #   CANONICAL RULE: BC-6.01.001 = "Economy Conservation Invariant" (the simulation
@@ -463,11 +508,12 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
-#   Positive-coverage log always printed. (F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (ii) added in v1.40: visionOS/OpenXR dedicated-code routing guard (F55-01 recurrence prevention).
+#   Positive-coverage log always printed. (F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -911,6 +957,9 @@ gg_violations=0
 hh_violations=0
 hh_files_scanned=0
 hh_lines_scanned=0
+# (ii) visionOS/OpenXR dedicated-code routing counters: initialized here so SUMMARY is safe if check is skipped
+ii_violations=0
+ii_files_scanned=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -931,7 +980,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.39) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.40) ==="
 echo ""
 
 # ============================================================================
@@ -6224,6 +6273,115 @@ echo "    Check (hh): $hh_files_scanned BC files scanned ($hh_lines_scanned oper
 echo ""
 
 # ============================================================================
+# CHECK (ii) — visionOS/OpenXR dedicated-code routing guard
+# (F55-01 recurrence prevention)
+#
+# CANONICAL RULE (error-taxonomy.md:755): E-XR-007 is the DEDICATED error code
+# for "visionOS manifest contains an OpenXR-specific field (openxr_version /
+# khronos-cts / XR_* namespace)", owned by BC-14.02.003. The generic E-XR-001
+# MUST NOT be used for this specific input. Pass-55 root-cause (F55-01): BC-14.01.001
+# EC-001 emitted generic E-XR-001 for the visionOS+OpenXR input that has a
+# dedicated code E-XR-007. PO fixed this in v1.2; this guard prevents recurrence.
+#
+# SIGNAL: any operative line that co-locates ALL THREE on the SAME LINE:
+#   (1) visionOS signal: "visionos" or "visionOS" (case-insensitive)
+#   (2) OpenXR-field signal: "openxr_version" OR "khronos-cts" OR "XR_" (namespace)
+#   (3) the generic code "E-XR-001"
+# is a violation — an edge-case or test-vector table row that describes the
+# visionOS+OpenXR-field input and cites E-XR-001 instead of the dedicated E-XR-007.
+#
+# SAME-LINE rationale: markdown table rows for edge cases and test vectors encode
+# BOTH the input description AND the expected error code on the same pipe-delimited
+# row. The F55-01 defect was exactly such a row: the visionOS+openxr_version input
+# description and E-XR-001 on the same line. Same-line co-location is the precise
+# and robust signal — it avoids false positives from neighboring EC rows where
+# E-XR-001 appears for unrelated inputs (comfort_certify omission, invalid fidelity,
+# unknown capability) that happen to be within a few lines of a visionOS-signal line.
+#
+# FALSE-POSITIVE AVOIDANCE (verified against BC-14.01.001 post-fix):
+#   — EC-002 (comfort_certify omission → E-XR-001): line contains NO visionOS signal
+#     or OpenXR-field signal → NOT triggered.
+#   — EC-003 (comfort_certify=full → E-XR-001): line contains NO visionOS signal
+#     or OpenXR-field signal → NOT triggered.
+#   — EC-005 (unknown capability → E-XR-001): line contains NO visionOS or
+#     OpenXR-field signal → NOT triggered.
+#   — BC-14.02.003 EC-004 (visionOS + comfort_certify → E-XR-001): line contains
+#     "visionos" and "E-XR-001" but NO OpenXR-field signal (openxr_version /
+#     khronos-cts / XR_) → NOT triggered (correct: comfort_certify is platform-
+#     agnostic; E-XR-001 is the right code for this EC).
+#
+# EXCLUSIONS (suppress triggering entirely):
+#   — Lines inside YAML frontmatter (between "---" delimiters)
+#   — Lines starting with ">" (blockquote / changelog annotation lines)
+#   — Lines containing "reason:" (YAML frontmatter lifecycle prose)
+#   — Lines containing "modified:" (YAML changelog key lines)
+# ============================================================================
+echo "--- (ii) visionOS/OpenXR dedicated-code routing guard (F55-01 recurrence prevention) ---"
+
+ii_violations=0
+ii_files_scanned=0
+
+while IFS= read -r -d '' bc_file; do
+  ii_files_scanned=$(( ii_files_scanned + 1 ))
+
+  # Extract operative content with line numbers, stripping:
+  #   — YAML frontmatter (between first two "---" delimiters)
+  #   — blockquote lines (starting with ">")
+  #   — lines containing "reason:"
+  #   — lines containing "modified:"
+  # Output format: "LINENUM:content"
+  # Uses same awk state-machine pattern as checks (gg) and (hh) for consistency.
+  ii_operative_lines=$(awk '
+    /^---/ {
+      if (front_count == 0) { front_count=1; in_front=1; next }
+      if (in_front) { in_front=0; next }
+    }
+    in_front { next }
+    /^>/ { next }
+    /reason:/ { next }
+    /modified:/ { next }
+    { print NR ":" $0 }
+  ' "$bc_file")
+
+  if [[ -z "$ii_operative_lines" ]]; then
+    continue
+  fi
+
+  # Detect SAME-LINE co-location of all three signals:
+  #   (1) visionOS signal (case-insensitive): visionos / visionOS
+  #   (2) OpenXR-field signal: openxr_version (case-insensitive) OR khronos-cts
+  #       (case-insensitive) OR XR_ (namespace prefix, case-sensitive)
+  #   (3) generic error code E-XR-001
+  # Use awk to evaluate all three conditions on each line atomically, avoiding
+  # the pipe-consumption problem of chained greps where the first grep consumes
+  # stdin before the fallback grep can read it.
+  violations_in_file=$(echo "$ii_operative_lines" | awk '
+    {
+      line_lower = tolower($0)
+      has_visios = (line_lower ~ /visionos/)
+      has_openxr = (line_lower ~ /openxr_version/ || line_lower ~ /khronos-cts/ || $0 ~ /XR_/)
+      has_exr001 = ($0 ~ /E-XR-001/)
+      if (has_visios && has_openxr && has_exr001) print
+    }
+  ' || true)
+
+  if [[ -n "$violations_in_file" ]]; then
+    while IFS= read -r vline; do
+      [[ -z "$vline" ]] && continue
+      lineno=$(echo "$vline" | cut -d: -f1)
+      echo "    VIOLATION: $bc_file line $lineno — visionOS+OpenXR-field signal co-located with E-XR-001 on the same line; this input must cite E-XR-007 (the dedicated visionOS/OpenXR code, BC-14.02.003)"
+      ii_violations=$(( ii_violations + 1 ))
+      errors+=("MISMATCH [visionOS-OpenXR-dedicated-code-routing (ii)]: $bc_file line $lineno — visionOS+OpenXR field co-located with generic E-XR-001 on same line; use E-XR-007 (F55-01 recurrence prevention)")
+      fail=1
+    done <<< "$violations_in_file"
+  fi
+done < <(find "$BC_DIR" -name "*.md" -print0 | sort -z)
+
+# Positive-coverage log (always printed)
+echo "    Check (ii): $ii_files_scanned BC files scanned for visionOS+OpenXR+E-XR-001 same-line co-location; $ii_violations violation(s) found."
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6271,6 +6429,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  L2-INDEX registry integrity (ff): $ff_rows_validated ID Registry rows validated, 0 stale counts vs source files"
   echo "  D-SEC evaluator-completeness (gg): BC-7.11.001 operative body references all 4 D-SEC sub-predicate anchors, 0 violations"
   echo "  Economy-conservation BC-routing (hh): $hh_files_scanned BC files scanned ($hh_lines_scanned operative lines), 0 BC-6.02.001+economy-keyword co-locations (all economy-conservation citations use BC-6.01.001)"
+  echo "  visionOS/OpenXR dedicated-code (ii): $ii_files_scanned BC files scanned, 0 visionOS+OpenXR+E-XR-001 co-locations (all visionOS/OpenXR inputs cite E-XR-007)"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
