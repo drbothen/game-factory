@@ -41,7 +41,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (RESET — Pass 46 found an important; the Pass-45 clean streak broke). Next action: dispatch FRESH-CONTEXT adversary for Pass 47 (candidate clean #1, streak restart). The genre-profile trigger-drift class that broke the streak is now gated CORPUS-WIDE (check ee v1.35), so it cannot recur.
+**Current clean-pass counter: 1/3** (Pass 47 CLEAN — streak restart #1; spec FROZEN). Next action: dispatch FRESH-CONTEXT adversary for Pass 48 (candidate clean #2). Spec is FROZEN — defer any new minor observations to FUs; only a critical/important resets to 0/3.
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
@@ -69,7 +69,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 45 CLEAN (1/3) → Pass 46 FINDINGS (1I/2obs) RESET counter 0/3; F46-01(I): genre-profile trigger drift in 3 sibling BCs fixed + gated CORPUS-WIDE (check ee v1.35); **CLEAN-PASS COUNTER: 0/3**; Pass 47 pending (streak restart, candidate clean #1) | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Pass 45 CLEAN (1/3) → Pass 46 FINDINGS (1I/2obs) RESET counter 0/3; F46-01(I): genre-profile trigger drift in 3 sibling BCs fixed + gated CORPUS-WIDE (check ee v1.35); Pass 47 CLEAN (1/3, streak restart); spec FROZEN; **CLEAN-PASS COUNTER: 1/3**; Passes 1–46 resolved; Pass 47 CLEAN (1/3, streak restart); spec frozen; Pass 48/49 needed for 3/3 | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,7 +78,7 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 47** (candidate clean #1 — streak RESTART after Pass-46 reset). Pass 45 was clean but Pass 46 found a sibling-propagation important (F46-01), now fixed + gated corpus-wide. The pre-existing spec body remains confirmed-sound; the recent importants (Pass 43/44/46) were all Pass-42-security-burst propagation tails, now all resolved + gated (dd/ee). FU-007/008/010/011/012 open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 48** (candidate clean #2). Pass 47 CLEAN (1/3) — streak restart. Spec FROZEN. The genre-profile trigger-drift class (which reset the prior streak) is now gated corpus-wide (ee v1.35). FU-007/008/010/011/012/013/014 open (non-blocking).
 
 **Spec state:** prd v2.7; BC-INDEX v1.9 (193 BCs); error-taxonomy v2.4 (267 codes / 34 families total / 258 active; E-GEN 9 retired; E-TMOD-001/E-ANTICH-003 messages reconciled); prd-cap-005 v1.2; prd-cap-001 (bumped); prd-cap-015 v1.1; subsystem-decomposition v2.0 (P0=127/P1=42/P2=24, 193 BCs); ARCH-INDEX v2.3 (13 subsystems, ADR-0008, §F42 anchors; F43-01/03; SS-13 priority split annotation 9 P0/3 P1); VP-INDEX v1.5; VP-006 v1.1; VP-007 v1.1; VP-008 v1.2; VP-009 v1.1; VP-004 v1.1; methodology-layer v1.15 (D-SEC predicate sub-pred 2/3 reconciled to esports_enabled / modding_enabled + user_to_user_communication); ADR-0004 v1.3; ADR-0006 v1.2; ADR-0008 v1.1; adapter-protocols.md v1.4; studio-of-agents v1.4; dtu-assessment v1.1; nfr-catalog v1.4 (41 NFRs); layered-architecture v1.1; capabilities v1.2; prd-cap-008-012 v1.2; prd-cap-009-010 v1.1; BC-7.04.001 v1.2; BC-5.05.001 v1.2; BC-5.05.002 v1.2; BC-5.06.001 v1.4; BC-5.06.002 v1.3; BC-7.05.001 v1.3; BC-12.12.008 v1.3; BC-10.06.001 v1.2; BC-10.01.001 v1.2; BC-13.01.004 v1.3; BC-13.04.002 v1.2; BC-11.02.001 v1.2; BC-4.03.003 v1.1; BC-3.03.001 v1.2; BC-3.03.002 (bumped); BC-15.02.001 v1.2; BC-15.03.001 v1.2; BC-15.04.001 v1.1; BC-15.06.001 v1.2; BC-1.12.002 v1.2; BC-1.12.003 v1.2; BC-10.05.001 v1.3; BC-15.01.001 v1.1; BC-7.11.008 (bumped — F42-04); BC-7.11.001 v1.1 (O45-01: D-SEC trigger vocab reconciled to esports_enabled / modding_enabled / user_to_user_communication); cicd-setup v1.3; invariants.md v1.3 (DI-013); BC-13.03.005 v1.1 (modding_enabled + user_to_user_communication; CSAM gate now reachable), BC-13.02.006 v1.1 (esports_enabled only), BC-1.15.003 (never-emit-secrets); BC-10.04.001 v1.1 (F46-01: ugc_enabled→genre-profile.modding_enabled), BC-3.03.009 v1.1 (F46-01: removed competitive_multiplayer_enabled OR-branch; gate on esports_enabled), BC-7.11.006 v1.1 (F46-01: game_mode:competitive_multiplayer→genre-profile.esports_enabled); CI gate v1.35 (checks a–z + aa, bb, cc, dd, ee + o.ii, ~38 sub-assertions; check ee now CORPUS-WIDE). Totals UNCHANGED: 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / priority P0=127/P1=42/P2=24.
 
@@ -106,7 +106,8 @@ Loop protocol:
 | 44 | 2026-06-09 | FINDINGS | 0C / 1I / 2obs RESOLVED | F44-01(I): Pass-42 security BCs gated on undefined genre-profile flags (ugc_enabled/chat_enabled/competitive_multiplayer) the strict schema rejects → CSAM gate unreachable; reconciled BC-13.03.005 v1.1→modding_enabled+user_to_user_communication, BC-13.02.006 v1.1→esports_enabled; methodology D-SEC predicate sub-preds 2/3 reconciled (v1.15); error-taxonomy v2.4 (E-TMOD-001/E-ANTICH-003 messages reconciled); OBS-44-A(obs): SS-13 priority split annotation added to ARCH-INDEX v2.3; F44-01 process-gap → CI check (ee) genre-profile schema gate-integrity guard (gate v1.34). BROAD pass (pre-existing body confirmed sound; 2nd consecutive pass where the important is a Pass-42 artifact). | **0/3** (stays; findings pass) |
 | 45 | 2026-06-09 | **CLEAN** | 0C / 0I / 1obs | First clean pass. Broad fresh-context sweep independently re-derived counts/traceability — package converged; D-010/011/013/017/019, BC-1.15.002/003, BC-13.01.004 all consistent. O45-01(obs): BC-7.11.001 D-SEC trigger vocab tail → reconciled (v1.1). | **1/3** ✓ |
 | 46 | 2026-06-10 | FINDINGS | 0C / 1I / 2obs RESOLVED | F46-01(I): F44-01/O45-01 trigger-vocab sweep was too narrow (D-SEC spine only) — non-schema genre-profile triggers survived in 3 sibling BCs: BC-10.04.001 (ugc_enabled→modding_enabled, EULA UGC clause), BC-3.03.009 (removed competitive_multiplayer_enabled OR-branch), BC-7.11.006 (game_mode→esports_enabled). [process-gap]: check (ee) broadened 2-file→CORPUS-WIDE (gate v1.35, 194 files). | **RESET 1/3→0/3** |
-| 47 | — | PENDING | — | — | — |
+| 47 | 2026-06-10 | **CLEAN** | 0C / 0I / 2obs | Streak restart #1. Broad fresh-context sweep of under-trodden subsystems (SS-04/05/06/08/10/12) + all FU-005 targets — package coherent, trigger-reconciliation campaign fully threaded. OBS-47-A (BC-13.02.006:149 descriptive vocab residual, LOW) + OBS-47-B (Architecture-Anchors forward-ref convention, process-gap) DEFERRED → FU-013/FU-014. | **1/3** ✓ |
+| 48 | — | PENDING | — | — | — |
 
 ---
 
@@ -122,7 +123,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–46 resolved; Pass 46 FINDINGS (1I) RESET counter 1/3→0/3 (sibling trigger drift, now gated corpus-wide); Pass 47 = streak restart | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–46 resolved; Pass 47 CLEAN (1/3, streak restart); spec frozen; Pass 48/49 needed for 3/3 | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -200,6 +201,8 @@ _(none open)_
 | FU-010 | methodology-layer.md §4.3 ~line 1066: release-gating verb "blocked" for DEGRADED-PENDING D-CERT. Optional polish before Phase-1 human gate — NOT mid-streak. | product-owner | OPEN — non-blocking |
 | FU-011 | Online-services seam-isolation NFR parity: no NFR parallels NFR-035 (XR seam isolation) for BC-15.09.001. Property IS enforced by BC-15.09.001 + E-OSVC-011; adding an NFR cascades count 41→42. Deferred — flag for human awareness at Phase-1 gate. | product-owner / human | OPEN — non-blocking |
 | FU-012 | VP-TBD placeholder ID collisions across BCs (VP-TBD-043..046 reused in ss-01/ss-03/ss-14 BCs with different properties). Harmless until promotion. Resolve (renumber to globally-unique or namespace by BC-ID) AND add a VP-TBD uniqueness lint at Phase-6 VP promotion. | architect | OPEN — non-blocking; target Phase-6 |
+| FU-013 | OBS-47-A: BC-13.02.006:149 Related-BCs annotation uses descriptive "competitive-multiplayer lane" without the genre-profile.esports_enabled pin. Prose-only; operative trigger unambiguous elsewhere. Cleanup at Phase-1 gate or next BC touch. | product-owner | OPEN — non-blocking |
+| FU-014 | OBS-47-B [process-gap]: BC "Architecture Anchors" sections reference forward-reference module files architecture/SS-NN-*.md that don't exist yet (uniform across 13 subsystems; likely intentional convention). Decide: (a) document the forward-reference convention explicitly, or (b) extend gate to assert anchor subsystem-prefix matches BC subsystem: field. | architect | OPEN — non-blocking; decide at Phase-1 gate |
 | LESSON-F43 | [codified] Scaffold-then-author two-burst pattern (architect reserves IDs → PO authors) MUST include a status-propagation sweep; the architect's "reserved/to author" prose becomes stale once PO authors the BCs. Codified by CI check (dd) gate v1.33 (F43-01 process-gap). | — | CODIFIED |
 | LESSON-F46 | [codified] Vocabulary/trigger-drift fixes MUST grep the WHOLE corpus up front and gate corpus-wide — a fix scoped to the originally-reported files leaves sibling-BC drift that a later fresh-context pass will surface and reset the streak. Codified by corpus-wide check (ee) v1.35 (F46-01 process-gap). | — | CODIFIED |
 
@@ -208,14 +211,14 @@ _(none open)_
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-10
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–46 DONE.
-**Phase-1d Pass 46:** FINDINGS (0C/1I/2obs) — COUNTER RESET 1/3→0/3. F46-01(I): trigger-vocab sweep (F44-01/O45-01) was scoped only to D-SEC spine; non-schema genre-profile triggers (ugc_enabled, competitive_multiplayer_enabled, game_mode:competitive_multiplayer) survived in 3 sibling BCs: BC-10.04.001 (→modding_enabled), BC-3.03.009 (removed competitive_multiplayer_enabled OR-branch), BC-7.11.006 (→esports_enabled). All 3 BCs fixed to v1.1. Process-gap closed: CI check (ee) broadened from 2-file to CORPUS-WIDE (gate v1.35, 194 BC files). CI gate v1.35 exit 0, BC 193, codes 267.
-**Clean-pass counter: 0/3 (RESET).** Streak must restart from Pass 47.
-**Next action:** `phase-1d-adversarial` — **Pass 47** (streak restart, candidate clean #1). The pre-existing spec body remains confirmed-sound; all importants since Pass-43 were Pass-42-security-burst propagation tails, now fully resolved + gated (dd/ee). FU-007/FU-008/FU-010/FU-011/FU-012 remain open (non-blocking).
-**Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / priority P0=127/P1=42/P2=24 / CI gate v1.35 (checks a–z + aa, bb, cc, dd, ee + o.ii, ~38 sub-assertions; check ee CORPUS-WIDE).
-**Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking), FU-011 (non-blocking), FU-012 (non-blocking; target Phase-6). FU-009 CLOSED (Pass-24).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–47 DONE.
+**Phase-1d Pass 47:** CLEAN (0C/0I/2obs) — streak restart #1. Broad fresh-context sweep of under-trodden subsystems (SS-04/05/06/08/10/12) + all FU-005 targets — package coherent, trigger-reconciliation campaign fully threaded. OBS-47-A (BC-13.02.006:149 descriptive vocab residual, LOW) + OBS-47-B (Architecture-Anchors forward-ref convention, process-gap) DEFERRED to FU-013/FU-014 (non-blocking). No spec changes; spec is FROZEN.
+**Clean-pass counter: 1/3 (streak restart).** Pass 48 and Pass 49 needed to complete 3/3.
+**Next action:** `phase-1d-adversarial` — **Pass 48** (candidate clean #2). Spec FROZEN. The genre-profile trigger-drift class (prior streak reset) is gated corpus-wide (check ee v1.35). FU-007/FU-008/FU-010/FU-011/FU-012/FU-013/FU-014 open (non-blocking).
+**Phase 1 remaining:** Phase-1d adversarial convergence (1/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
+**Spec totals:** 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / priority P0=127/P1=42/P2=24 / CI gate v1.35 (checks a–z + aa, bb, cc, dd, ee + o.ii, ~38 sub-assertions; check ee CORPUS-WIDE). No version bumps this pass.
+**Open FUs:** FU-007 (non-blocking), FU-008 (non-blocking), FU-010 (non-blocking), FU-011 (non-blocking), FU-012 (non-blocking; target Phase-6), FU-013 (OBS-47-A, non-blocking), FU-014 (OBS-47-B, non-blocking). FU-009 CLOSED (Pass-24).
 **Decisions:** D-019 RATIFIED (human, Pass-42 security gap). D-018 in effect (Pass-40). D-014/D-015/D-016/D-017: see Decisions Log. D-014/D-015/D-019 flagged for human gate review.
-**Version bumps Pass 46:** BC-10.04.001 v1.1, BC-3.03.009 v1.1, BC-7.11.006 v1.1 (F46-01 genre-profile trigger reconciliation). Totals UNCHANGED (193 BCs / 267 codes / 13 DI / 41 NFRs / 15 caps / 13 subsystems / P0=127/P1=42/P2=24).
-**main branch:** IN SYNC with origin/main (v1.35 gate; check (ee) now CORPUS-WIDE genre-profile gate guard).
+**Version bumps Pass 47:** none (spec frozen; observations deferred). Totals UNCHANGED (193 BCs / 267 codes / 13 DI / 41 NFRs / 15 caps / 13 subsystems / P0=127/P1=42/P2=24).
+**main branch:** IN SYNC with origin/main (v1.35 gate; check (ee) CORPUS-WIDE genre-profile gate guard).
 **Step history:** see `.factory/cycles/v0.1.0-greenfield/phase-1-log.md`
