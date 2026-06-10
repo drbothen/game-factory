@@ -1,10 +1,10 @@
 ---
 document_type: domain-spec-index
 level: L2
-version: "1.1"
+version: "1.2"
 status: draft
 producer: business-analyst
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-10T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/product-brief.md
@@ -74,12 +74,12 @@ load-bearing seam).
 
 | ID Format | Count | Section |
 |-----------|-------|---------|
-| CAP-NNN | 14 | capabilities.md |
-| DI-NNN | 12 | invariants.md |
+| CAP-NNN | 15 | capabilities.md |
+| DI-NNN | 13 | invariants.md |
 | ASM-NNN | 8 | assumptions.md |
 | R-NNN | 17 | risks.md |
 | FM-NNN | 10 | failure-modes.md |
-| Glossary terms | 42 | ubiquitous-language.md |
+| Glossary terms | 36 | ubiquitous-language.md |
 | Entities | 18 | entities.md |
 | Processes | 6 | processes.md |
 
@@ -88,5 +88,12 @@ load-bearing seam).
 | Priority | Count | Items |
 |----------|-------|-------|
 | P0 (must-have) | 7 | CAP-001, CAP-002, CAP-003, CAP-004, CAP-005, CAP-006, CAP-007 |
-| P1 (should-have) | 5 | CAP-008, CAP-009, CAP-010, CAP-011, CAP-012 |
+| P1 (should-have) | 6 | CAP-008, CAP-009, CAP-010, CAP-011, CAP-012, CAP-015 |
 | P2 (nice-to-have) | 2 | CAP-013, CAP-014 |
+
+## Changelog
+
+| Version | Date | Author | Change |
+|---------|------|--------|--------|
+| 1.2 | 2026-06-10 | product-owner | F49-01: Re-verified all 8 ID registry counts against source files. Fixed stale counts: CAP-NNN 14→15 (CAP-015 added), DI-NNN 12→13 (DI-013 added), Glossary terms 42→36 (actual bold-term count). Added CAP-015 (P1, Tier-1 online-services) to Priority Distribution; P1 count 5→6, grand total 14→15. |
+| 1.1 | 2026-06-07 | business-analyst | Initial sharded index with cross-references and priority distribution. |
