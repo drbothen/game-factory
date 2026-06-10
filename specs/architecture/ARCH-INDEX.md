@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "2.1"
+version: "2.2"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -31,6 +31,13 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v2.2 — Pass-43 F43 status-propagation fix (F43-01/F43-03).**
+> - **F43-01:** Risk Mitigations table rows for R-017, F42-SEC, F42-MOD updated: "reserved (PO
+>   to author)" prose replaced with "authored / active" for BC-13.02.006, BC-13.03.005, BC-1.15.003.
+>   Document Map ADR-0008 row description: "reserved BC-13.02.006" → "BC-13.02.006 (authored / active)".
+> - **F43-03:** Added §F42 Security Contracts section with stable heading anchors (F42-01, F42-MOD,
+>   F42-03) so the three new BCs' `§F42-*` traceability references resolve.
+>
 > **v2.1 — Pass-42 D-019 PO burst (3 new BCs authored; count surfaces updated; DI-013 added).**
 > - **F42-01:** D-SEC convergence predicate (methodology-layer.md §D-SEC) hardened to
 >   fail-closed. BC-13.03.005 (moderation-pipeline-contract, ss-13/, SS-11) and
@@ -150,7 +157,7 @@ traces_to: .factory/specs/product-brief.md
 | `adrs/ADR-0005-config-content-extraction-seam.md` | Extraction seam: spine vs quality-model at content/config boundary | ~400 |
 | `adrs/ADR-0006-11-dimension-convergence-model.md` | 11-dim convergence model replacing vsdd 7-dim | ~350 |
 | `adrs/ADR-0007-human-gated-fidelity-tier.md` | human-gated as a first-class fidelity value | ~350 |
-| `adrs/ADR-0008-anti-cheat-provider-policy.md` | Anti-cheat provider policy: allowed set {EAC, EOS, BattlEye}; Riot Vanguard rejected; kernel-anomaly rationale; conformance assertion for reserved BC-13.02.006 | ~600 |
+| `adrs/ADR-0008-anti-cheat-provider-policy.md` | Anti-cheat provider policy: allowed set {EAC, EOS, BattlEye}; Riot Vanguard rejected; kernel-anomaly rationale; conformance assertion for BC-13.02.006 (authored / active) | ~600 |
 | `verification-architecture.md` | Verification strategy: provable-properties catalog, P0/P1 assignment, tool mapping (Kani/proptest), pure-sim slice boundary, VP-TBD rationale | ~1,000 |
 | `verification-coverage-matrix.md` | VP→BC/invariant coverage matrix; per-VP tool/phase/module assignments; explicitly-unguarded invariant justifications | ~700 |
 
@@ -243,6 +250,42 @@ traces_to: .factory/specs/product-brief.md
 | R-013 (PEGI 2026) | SS-08 | `compliance-checklist` with min-rating rules; `content-descriptor-contract` |
 | R-014 (EU AI Act) | SS-03, SS-08 | C2PA marks from provenance sidecar; 2026-08-02 hard deadline wired to distribution gate |
 | R-015 (COPPA) | SS-08, SS-09 | Per-SDK consent flags in `privacy-config-contract`; `ad-monetization-spec` COPPA gate |
-| R-017 (kernel AC) | SS-01, SS-11 | DI-010 policy hook; anti-cheat = wrap-only; never autonomously authored (enforced via BC-1.15.002 VP-TBD-060/061); ADR-0008 formalizes allowed provider set {EAC, EOS, BattlEye} and rejects Riot Vanguard; conformance BC reserved as BC-13.02.006 (PO to author) |
-| F42-SEC (secrets in output) | SS-01 | DI-013 (never-emit-secrets invariant; PO to add to invariants.md); output-bundle lint gate in cicd-setup.md §Output-Bundle Secrets Gate; D-SEC sub-predicate 4; BC-1.15.003 reserved (PO to author) |
-| F42-MOD (moderation absent) | SS-11, SS-06 | 18 U.S.C. §2258A CSAM→NCMEC obligation; D-SEC fail-closed when `moderation-pipeline-contract` absent for UGC/chat games; BC-13.03.005 reserved (PO to author) |
+| R-017 (kernel AC) | SS-01, SS-11 | DI-010 policy hook; anti-cheat = wrap-only; never autonomously authored (enforced via BC-1.15.002 VP-TBD-060/061); ADR-0008 formalizes allowed provider set {EAC, EOS, BattlEye} and rejects Riot Vanguard; BC-13.02.006 (anti-cheat-integration-adapter) authored / active |
+| F42-SEC (secrets in output) | SS-01 | DI-013 (never-emit-secrets invariant; registered in domain-spec/invariants.md v1.2); output-bundle lint gate in cicd-setup.md §Output-Bundle Secrets Gate; D-SEC sub-predicate 4; BC-1.15.003 (never-emit-secrets) authored / active; E-SEC family registered |
+| F42-MOD (moderation absent) | SS-11, SS-06 | 18 U.S.C. §2258A CSAM→NCMEC obligation; D-SEC fail-closed when `moderation-pipeline-contract` absent for UGC/chat games; BC-13.03.005 (moderation-pipeline-contract) authored / active; E-TMOD family registered |
+
+---
+
+## F42 Security Contracts (Pass-42)
+
+The following section provides stable anchor targets for the three D-SEC security BCs
+authored in the Pass-42 PO burst. BC files reference these anchors for traceability.
+
+### F42-01 — Anti-Cheat Integration Adapter (BC-13.02.006) {#F42-01}
+
+**BC:** BC-13.02.006 — `anti-cheat-integration-adapter` — authored / active.
+**Subsystem:** SS-11 (Genre-Gated Lanes), directory `ss-13/`.
+**D-SEC role:** Sub-predicate 2 — competitive-MP lane: anti-cheat provider must be
+in the allowed set `{eac, eos, battleye}` per ADR-0008. Gate BLOCKED if absent or
+provider outside allowed set.
+**Error family:** E-ANTICH (registered in error-taxonomy.md).
+**Architectural basis:** ADR-0008 (Anti-Cheat Provider Policy).
+
+### F42-MOD — Moderation Pipeline Contract (BC-13.03.005) {#F42-MOD}
+
+**BC:** BC-13.03.005 — `moderation-pipeline-contract` — authored / active.
+**Subsystem:** SS-11 (Genre-Gated Lanes), directory `ss-13/`.
+**D-SEC role:** Sub-predicate 3 — UGC/chat lane: moderation pipeline must be present
+and pass conformance. CSAM → NCMEC reporting path verified (18 U.S.C. §2258A).
+Gate BLOCKED if moderation absent when UGC/chat features active.
+**Error family:** E-TMOD (registered in error-taxonomy.md).
+
+### F42-03 — Never-Emit-Secrets Output-Bundle Gate (BC-1.15.003) {#F42-03}
+
+**BC:** BC-1.15.003 — `never-emit-secrets` — authored / active.
+**Subsystem:** SS-01 (Engine-Adapter Protocol), directory `ss-01/`.
+**D-SEC role:** Sub-predicate 4 — all games: generated output bundle must pass
+secret-pattern/entropy scan (DI-013). Gate BLOCKED if scan exits non-zero.
+**Error family:** E-SEC (registered in error-taxonomy.md).
+**CI job:** `CI / output-bundle-secrets-scan` (see cicd-setup.md §Output-Bundle Secrets Gate).
+**Invariant:** DI-013 (registered in domain-spec/invariants.md v1.2).

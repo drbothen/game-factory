@@ -2,7 +2,7 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0008"
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -45,8 +45,8 @@ both absent, referenced only as role labels in the studio-of-agents.md. The gate
 did not have a defining BC to evaluate against.
 
 This ADR formalizes the anti-cheat provider policy so that:
-1. The reserved BC for `anti-cheat-integration-adapter` conformance (product-owner
-   to author as BC-13.02.006 per the F42 reserved-ID table) has an architectural basis.
+1. The BC for `anti-cheat-integration-adapter` conformance (BC-13.02.006, ss-13/,
+   authored / active) has an architectural basis in this ADR.
 2. The D-SEC predicate can reference a formal provider policy (not just a role label).
 3. The policy is auditable and change-controlled.
 
@@ -80,15 +80,15 @@ vendor-supplied binary.
 
 ### Conformance Assertion
 
-The `anti-cheat-integration-adapter` behavioral contract (product-owner to author as
-BC-13.02.006 in ss-13/) MUST assert:
+The `anti-cheat-integration-adapter` behavioral contract (BC-13.02.006, ss-13/,
+authored / active) MUST assert:
 
 1. `anti_cheat_provider` is declared in the project configuration.
 2. `anti_cheat_provider` value is a member of the allowed set:
    `{eac, eos, battleye}` (case-insensitive).
 3. Any value mapping to a kernel-anomaly provider (currently: `vanguard`,
-   `riot-vanguard`, `vgk`) causes the conformance gate to emit the reserved
-   E-ANTICH-001 error code and block integration scaffolding generation.
+   `riot-vanguard`, `vgk`) causes the conformance gate to emit error code
+   E-ANTICH-001 (registered in error-taxonomy.md) and block integration scaffolding generation.
 4. Integration scaffolding produced by the factory contains no ring-0 driver
    compilation targets (verified jointly with BC-1.15.002).
 
@@ -152,17 +152,17 @@ does not apply.
 
 ## Consequences
 
-1. The `anti-cheat-integration-adapter` BC (BC-13.02.006, reserved by F42 Pass-42)
-   uses this ADR as its architectural anchor. Product-owner authors the BC;
-   this ADR provides the allowed-provider set and rejection rationale.
+1. The `anti-cheat-integration-adapter` BC (BC-13.02.006, authored / active)
+   uses this ADR as its architectural anchor. This ADR provides the allowed-provider
+   set and rejection rationale.
 
 2. The D-SEC convergence dimension pass predicate (methodology-layer.md §D-SEC)
    is updated to reference `anti-cheat-integration-adapter` BC conformance as
    a required signal for competitive-MP targets (alongside the existing
    `server-authority-invariant-suite` and `moderation-pipeline-contract` signals).
 
-3. The error code family E-ANTICH (to be registered by product-owner when authoring
-   BC-13.02.006) covers: provider not in allowed set (E-ANTICH-001), kernel-anomaly
+3. The error code family E-ANTICH (registered in error-taxonomy.md; BC-13.02.006
+   authored / active) covers: provider not in allowed set (E-ANTICH-001), kernel-anomaly
    provider attempted (E-ANTICH-002), provider declaration absent when competitive
    lane is active (E-ANTICH-003).
 
@@ -189,4 +189,5 @@ does not apply.
 
 | Version | Change |
 |---------|--------|
-| 1.0 | Initial authoring. Pass-42 F42-02 architectural basis. Reserved BC: BC-13.02.006 (product-owner to author). Reserved error family: E-ANTICH (product-owner to register in error-taxonomy.md). |
+| 1.0 | Initial authoring. Pass-42 F42-02 architectural basis. BC-13.02.006 authored / active. E-ANTICH error family registered in error-taxonomy.md. |
+| 1.1 | Pass-43 F43-01: swept stale "reserved/to author" prose. All references to BC-13.02.006 and E-ANTICH updated to reflect authored/active status. |

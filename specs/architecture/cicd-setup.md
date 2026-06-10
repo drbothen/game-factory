@@ -1,6 +1,6 @@
 ---
 document_type: cicd-setup
-version: "1.2"
+version: "1.3"
 status: active
 producer: devops-engineer
 timestamp: 2026-06-09T00:00:00Z
@@ -362,8 +362,7 @@ and on merge to `main` (controlled via `ASSET_LANE_SMOKE_MODE` environment varia
 Enforce DI-013 (never-emit-secrets into the generated output bundle) by running
 a secret-pattern and entropy scan over every generated artifact bundle before
 acceptance. This gate wires to the never-emit-secrets behavioral contract
-(reserved as a sibling to BC-1.15.002 in ss-01/, subsystem SS-01;
-product-owner to author as BC-1.15.003 per Pass-42 F42-03 reserved-ID table)
+(BC-1.15.003, ss-01/, subsystem SS-01; authored / active — sibling to BC-1.15.002)
 and to the D-SEC convergence dimension pass predicate (methodology-layer.md §D-SEC,
 sub-predicate 4).
 
@@ -409,9 +408,8 @@ This gate has NO `continue-on-error`. Any detected secret causes:
 
 1. CI job exits with code 1.
 2. The factory pipeline halts; the output bundle is not accepted.
-3. Error code E-SEC-001 (reserved; product-owner to register in error-taxonomy.md
-   under the new E-SEC family when authoring BC-1.15.003) is emitted in the scan
-   report.
+3. Error code E-SEC-001 (registered in error-taxonomy.md under the E-SEC family;
+   BC-1.15.003 authored / active) is emitted in the scan report.
 4. D-SEC convergence dimension sub-predicate 4 is BLOCKED until the gate passes.
 
 The output bundle is quarantined (not uploaded as a CI artifact) until the scan
@@ -447,7 +445,7 @@ required status checks on `main` (alongside `CI / lint`, `CI / test`, `CI / buil
 | Blocking | Non-blocking (`continue-on-error: true`) until Phase-5 rules tuned | Blocking (no `continue-on-error`) from Phase-3 |
 | Trigger | Weekly schedule + PRs to main | Every push + every PR + release pipeline |
 | Enforces | D-SEC (source-level) + advisory rule catalog | DI-013 (never-emit-secrets); D-SEC sub-predicate 4 |
-| Error code | Semgrep SARIF findings | E-SEC-001 (reserved for product-owner to register) |
+| Error code | Semgrep SARIF findings | E-SEC-001 (registered; E-SEC family active in error-taxonomy.md) |
 
 ---
 
@@ -487,11 +485,17 @@ This table maps CI jobs to the convergence dimensions they gate
 | `security / deny` | D-PROV (license compliance) + D-SEC (banned crates DI-009) | Advisory (promote in Phase-5) |
 | `release / build (*)` | D-IMPL (cross-platform build pass) | Hard gate on release tag |
 | `CI / asset-lane-smoke` | D-PROV (provenance sidecar completeness) + SS-03 (asset quality) | Hard gate (Phase-3-instantiated; stub exits 0 until SS-03 lands) |
-| `CI / output-bundle-secrets-scan` | D-SEC sub-predicate 4 (DI-013 never-emit-secrets; BC-1.15.003 reserved) | Hard gate — fail-closed, no continue-on-error (Phase-3-instantiated; stub exits 0 until SS-01 output-bundle linting lands) |
+| `CI / output-bundle-secrets-scan` | D-SEC sub-predicate 4 (DI-013 never-emit-secrets; BC-1.15.003 authored / active) | Hard gate — fail-closed, no continue-on-error (Phase-3-instantiated; stub exits 0 until SS-01 output-bundle linting lands) |
 
 ---
 
 ## Changelog
+
+### v1.3 (2026-06-09)
+
+| Change | Detail |
+|--------|--------|
+| Pass-43 F43-01: Swept stale "reserved/to author" status prose | BC-1.15.003 (never-emit-secrets) is authored and active. §Output-Bundle Secrets Gate Purpose rewritten: "reserved…product-owner to author as BC-1.15.003" → "BC-1.15.003 authored / active". Fail-Closed Behavior E-SEC-001 description updated: "reserved…to register" → "registered". Architecture Gate Mapping table updated: "BC-1.15.003 reserved" → "BC-1.15.003 authored / active". Comparison table E-SEC-001 row updated similarly. |
 
 ### v1.2 (2026-06-09)
 
