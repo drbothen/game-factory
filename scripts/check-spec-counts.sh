@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.31
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.32
 #
 # PURPOSE
 # -------
@@ -271,9 +271,27 @@
 #   cleanup (all operative occurrences already resolved to registered codes).
 #   POSIX/BSD-awk compatible (no grep -P). Positive-coverage log always printed.
 #   (F39-05 recurrence prevention).
+# extended in v1.32 to add check (cc) — D-SEC predicate contract-existence guard
+#   (F42-01/F42-02 fail-open recurrence prevention): the Pass-42 root-cause was that
+#   the D-SEC pass-predicate referenced security contracts (moderation-pipeline-contract,
+#   anti-cheat-integration-adapter, never-emit-secrets output-bundle gate) that had NO
+#   defining BC — a fail-open security gate. This check asserts that the three defining
+#   BCs referenced by the D-SEC predicate EXIST on disk AND are registered in BC-INDEX.md.
+#   The three required BCs are:
+#     BC-13.03.005  — moderation-pipeline-contract (UGC/chat CSAM fail-closed enforcement)
+#     BC-13.02.006  — anti-cheat-integration-adapter (competitive-MP allowed-provider check)
+#     BC-1.15.003   — Factory Output Bundle Never Contains Secret Material (secrets gate)
+#   For each BC, two sub-assertions:
+#     (cc.a) The BC file exists under .factory/specs/behavioral-contracts/
+#     (cc.b) The BC ID appears as a row in BC-INDEX.md (registered)
+#   Reports each missing (contract, expected-BC) pair as a violation. This prevents
+#   re-introducing the fail-open hole: removing a security BC while the D-SEC predicate
+#   still references its contract. Positive-coverage log always printed. All three BCs
+#   were authored in the PO burst following Pass-42, so the check is green from the start.
+#   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb + o.ii.
-#   Positive-coverage log always printed. (F39-05 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc + o.ii.
+#   Positive-coverage log always printed. (F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -700,6 +718,9 @@ z_matrix_count=0
 # (bb) no-variant / every-condition-resolves-to-registered-code counters: initialized here so SUMMARY is safe if skipped
 bb_violations=0
 bb_lines_scanned=0
+# (cc) D-SEC predicate contract-existence counters: initialized here so SUMMARY is safe if skipped
+cc_violations=0
+cc_pairs_checked=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -720,7 +741,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.31) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.32) ==="
 echo ""
 
 # ============================================================================
@@ -5278,6 +5299,82 @@ fi
 echo ""
 
 # ============================================================================
+# (cc) D-SEC PREDICATE CONTRACT-EXISTENCE GUARD  [NEW v1.32, F42-01/F42-02]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-42 process-gap (F42-01/F42-02) — D-SEC dimension
+# referenced security contracts (moderation-pipeline-contract, anti-cheat-
+# integration-adapter, never-emit-secrets output-bundle gate) that had NO
+# defining BC, creating a fail-open security gate. The PO subsequently authored
+# BC-13.03.005, BC-13.02.006, and BC-1.15.003. This check is a standing detector
+# so a dimension predicate can never again name a contract that lacks a defining BC.
+#
+# ASSERTION: for each of the three security-critical BCs referenced by D-SEC,
+#   (cc.a) the BC file must exist on disk under .factory/specs/behavioral-contracts/
+#   (cc.b) the BC ID must appear as a row in BC-INDEX.md (| BC-ID | pattern)
+#
+# SECURITY BCs COVERED:
+#   BC-13.03.005  — moderation-pipeline-contract (UGC/chat CSAM fail-closed; BC-INDEX registered)
+#   BC-13.02.006  — anti-cheat-integration-adapter (competitive-MP provider enforcement)
+#   BC-1.15.003   — Factory Output Bundle Never Contains Secret Material (secrets lint gate; DI-013)
+#
+# POSITIVE-COVERAGE LOG: "Check (cc): N (contract, BC) pairs verified; M violation(s)."
+# POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
+echo "--- (cc) D-SEC predicate contract-existence guard (F42-01/F42-02 recurrence prevention) ---"
+echo "    Assertion: each security contract named in the D-SEC pass-predicate must have a defining BC"
+echo "    that (a) exists on disk under .factory/specs/behavioral-contracts/ and (b) is registered in BC-INDEX.md."
+
+cc_violations=0
+cc_pairs_checked=0
+cc_violation_msgs=()
+
+# Define the three (contract-name, BC-ID, expected-file-path) triples.
+# File paths are relative to BC_DIR — the check resolves them to absolute paths.
+declare -a CC_CONTRACTS=( "moderation-pipeline-contract" "anti-cheat-integration-adapter" "never-emit-secrets/output-bundle-secrets-gate" )
+declare -a CC_BC_IDS=( "BC-13.03.005" "BC-13.02.006" "BC-1.15.003" )
+declare -a CC_BC_RELPATHS=( "ss-13/BC-13.03.005.md" "ss-13/BC-13.02.006.md" "ss-01/BC-1.15.003.md" )
+
+for idx in 0 1 2; do
+  contract_name="${CC_CONTRACTS[$idx]}"
+  bc_id="${CC_BC_IDS[$idx]}"
+  bc_relpath="${CC_BC_RELPATHS[$idx]}"
+  bc_fullpath="$BC_DIR/$bc_relpath"
+  cc_pairs_checked=$(( cc_pairs_checked + 1 ))
+
+  # Sub-assertion (cc.a): BC file must exist on disk.
+  if [[ ! -f "$bc_fullpath" ]]; then
+    cc_violations=$(( cc_violations + 1 ))
+    cc_violation_msgs+=("(cc.a) $bc_id ($contract_name): FILE NOT FOUND at $bc_fullpath — D-SEC predicate references a contract with no defining BC (fail-open security gate)")
+  fi
+
+  # Sub-assertion (cc.b): BC ID must appear as a row in BC-INDEX.md.
+  if [[ -f "$BC_INDEX" ]]; then
+    if ! grep -qF "| $bc_id |" "$BC_INDEX" 2>/dev/null; then
+      cc_violations=$(( cc_violations + 1 ))
+      cc_violation_msgs+=("(cc.b) $bc_id ($contract_name): NOT REGISTERED in BC-INDEX.md — D-SEC predicate references an unregistered security BC")
+    fi
+  else
+    cc_violations=$(( cc_violations + 1 ))
+    cc_violation_msgs+=("(cc.b) $bc_id ($contract_name): BC-INDEX.md not found at $BC_INDEX — cannot verify registration")
+  fi
+done
+
+# Positive-coverage log (always printed)
+echo "    Check (cc): $cc_pairs_checked (contract, BC) pairs verified; $cc_violations violation(s) found."
+
+if [[ $cc_violations -gt 0 ]]; then
+  echo ""
+  echo "    D-SEC CONTRACT-EXISTENCE VIOLATIONS (F42-01/F42-02 recurrence prevention):"
+  echo "    The D-SEC pass-predicate references security contracts that MUST have defining BCs."
+  echo "    FIX: author the missing BC under .factory/specs/behavioral-contracts/ and register it in BC-INDEX.md."
+  for ccmsg in "${cc_violation_msgs[@]}"; do
+    echo "      $ccmsg"
+  done
+  errors+=("MISMATCH [D-SEC-contract-existence (cc)]: $cc_violations D-SEC security contract(s) lack a defining BC or are unregistered in BC-INDEX.md (F42-01/F42-02 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5319,6 +5416,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Base-manifest seam-enum (z):      §1.3 enum=$z_enum_count tokens == §8 matrix=$z_matrix_count seam keys, 0 set-equality violations"
   echo "  Frontmatter path-existence (aa):  $aa_total_paths .factory/ paths verified across $aa_source_files source files, 0 unresolved paths"
   echo "  No-variant/registered-code (bb):  $bb_lines_scanned BC lines scanned, 0 operative 'E-code variant' tokens found"
+  echo "  D-SEC contract-existence (cc):    $cc_pairs_checked (contract, BC) pairs verified: all exist on disk and registered in BC-INDEX.md, 0 violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
