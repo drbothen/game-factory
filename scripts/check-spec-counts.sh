@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.32
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.33
 #
 # PURPOSE
 # -------
@@ -271,6 +271,43 @@
 #   cleanup (all operative occurrences already resolved to registered codes).
 #   POSIX/BSD-awk compatible (no grep -P). Positive-coverage log always printed.
 #   (F39-05 recurrence prevention).
+# extended in v1.33 to add check (dd) — active-BC / stale-architecture-doc status
+#   consistency guard (F43-01 recurrence prevention): when a BC file exists under
+#   .factory/specs/behavioral-contracts/ (i.e., it is an authored, active contract),
+#   any OPERATIVE prose in an architecture doc (.factory/specs/architecture/**/*.md)
+#   that describes that same BC-ID as "reserved", "to author", "to be authored",
+#   "not yet authored", or "PO to author" is a stale-status contradiction — the doc
+#   still calls the BC reserved after it was authored. This check detects that class.
+#
+#   SCOPE: architecture doc files only (flat + adrs/ subdir): all *.md files matching
+#   .factory/specs/architecture/**/*.md.
+#
+#   TRIGGER PATTERN: an operative line containing BOTH:
+#     (1) a BC-ID token (BC-NN.NN.NNN pattern — any valid BC ID format), AND
+#     (2) a stale-status phrase within the same line: "reserved", "to author",
+#         "to be authored", "not yet authored", "PO to author"
+#         (case-insensitive for the phrase; the BC-ID is case-sensitive).
+#   The BC-ID and the stale phrase must appear on the SAME line (proximity guard).
+#
+#   EXISTENCE CHECK: the BC-ID on the triggering line must correspond to an EXISTING
+#   BC file under .factory/specs/behavioral-contracts/. If the BC file does not
+#   exist, the line is silently skipped (the concern is stale-status for AUTHORED
+#   BCs, not dangling references to non-existent BCs — check (cc) handles that class).
+#
+#   EXCLUSIONS (suppress triggering entirely):
+#     — Lines starting with ">" (blockquote / changelog annotation lines).
+#     — Lines inside frontmatter (between "---" delimiters — catches modified:/
+#       changelog version notes that cite the BC-ID + reserved phrasing as historical).
+#     — Lines containing "modified:" (YAML changelog key lines).
+#     — Lines containing "reason:" (YAML lifecycle prose).
+#
+#   NOTE: This check intentionally does NOT look inside the BC files themselves
+#   (they are authoritative) — only architecture docs are scanned.
+#
+#   POSITIVE-COVERAGE LOG: "Check (dd): N architecture doc lines scanned across
+#     M files; K violations found (active-BC stale-status contradictions)."
+#   POSIX/BSD-awk/grep compatible (no grep -P). (F43-01 recurrence prevention).
+#
 # extended in v1.32 to add check (cc) — D-SEC predicate contract-existence guard
 #   (F42-01/F42-02 fail-open recurrence prevention): the Pass-42 root-cause was that
 #   the D-SEC pass-predicate referenced security contracts (moderation-pipeline-contract,
@@ -290,8 +327,8 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc + o.ii.
-#   Positive-coverage log always printed. (F42-01/F42-02 recurrence prevention).
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd + o.ii.
+#   Positive-coverage log always printed. (F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -721,6 +758,10 @@ bb_lines_scanned=0
 # (cc) D-SEC predicate contract-existence counters: initialized here so SUMMARY is safe if skipped
 cc_violations=0
 cc_pairs_checked=0
+# (dd) active-BC / stale-architecture-doc status contradiction counters: initialized here so SUMMARY is safe if skipped
+dd_violations=0
+dd_lines_scanned=0
+dd_files_scanned=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -741,7 +782,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.32) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.33) ==="
 echo ""
 
 # ============================================================================
@@ -5375,6 +5416,131 @@ fi
 echo ""
 
 # ============================================================================
+# (dd) ACTIVE-BC / STALE-ARCHITECTURE-DOC STATUS CONTRADICTION GUARD  [NEW v1.33, F43-01]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-43 process-gap (F43-01) — architecture docs still
+# contained "reserved / PO to author / not yet authored" prose for BC-IDs that had
+# already been authored (bc file exists under behavioral-contracts/). This check
+# detects that contradiction: for any BC-ID that EXISTS as an active file, flag
+# operative architecture-doc lines that describe that same BC-ID as reserved/to-author.
+#
+# ASSERTION: for each operative line in any architecture/*.md file (flat + adrs/):
+#   if the line contains a BC-ID token (BC-NN.NN.NNN) AND a stale-status phrase,
+#   AND the BC file for that BC-ID exists on disk → VIOLATION.
+#
+# STALE-STATUS PHRASES (case-insensitive): "reserved", "to author", "to be authored",
+#   "not yet authored", "PO to author".
+#
+# EXCLUSIONS: lines starting with ">" (blockquotes/changelog annotations);
+#   lines starting with "|" (markdown table rows — changelog tables quote historical
+#     stale-status text as record of the fix and must not trigger);
+#   lines inside frontmatter (between "---" delimiters);
+#   lines containing "modified:" or "reason:" (YAML changelog/lifecycle prose).
+#
+# POSITIVE-COVERAGE LOG: always printed. (F43-01 recurrence prevention).
+echo "--- (dd) Active-BC / stale-architecture-doc status contradiction guard (F43-01 recurrence prevention) ---"
+echo "    Assertion: no operative architecture-doc line may describe an authored/active BC-ID as reserved/to-author."
+
+dd_violations=0
+dd_lines_scanned=0
+dd_files_scanned=0
+dd_violation_msgs=()
+
+ARCH_DIR=".factory/specs/architecture"
+BC_BASE_DIR=".factory/specs/behavioral-contracts"
+
+# Collect all architecture doc files (flat + adrs/ subdir)
+arch_files=()
+while IFS= read -r f; do
+  arch_files+=("$f")
+done < <(find "$ARCH_DIR" -name "*.md" 2>/dev/null | sort)
+
+for arch_file in "${arch_files[@]}"; do
+  dd_files_scanned=$(( dd_files_scanned + 1 ))
+  in_frontmatter=0
+  frontmatter_count=0
+  lineno=0
+  while IFS= read -r line; do
+    lineno=$(( lineno + 1 ))
+    # Track frontmatter delimiters
+    trimmed="${line#"${line%%[! ]*}"}"  # ltrim for leading spaces
+    if [[ "$trimmed" == "---" ]]; then
+      frontmatter_count=$(( frontmatter_count + 1 ))
+      if [[ $frontmatter_count -le 2 ]]; then
+        in_frontmatter=$(( frontmatter_count == 1 ? 1 : 0 ))
+        continue
+      fi
+    fi
+    # Skip lines inside frontmatter
+    if [[ $in_frontmatter -eq 1 ]]; then
+      continue
+    fi
+    # Skip blockquote lines and markdown table rows
+    case "$trimmed" in
+      ">"*) continue ;;
+      "|"*) continue ;;
+    esac
+    # Skip YAML lifecycle lines
+    case "$line" in
+      *"modified:"*|*"reason:"*) continue ;;
+    esac
+
+    dd_lines_scanned=$(( dd_lines_scanned + 1 ))
+
+    # Check if line contains a BC-ID token (BC-NN.NN.NNN pattern)
+    # Use grep -o to extract all BC-ID tokens on this line; POSIX-compatible
+    bc_tokens=$(printf '%s\n' "$line" | grep -oE 'BC-[0-9]+\.[0-9]+\.[0-9]+' || true)
+    if [[ -z "$bc_tokens" ]]; then
+      continue
+    fi
+
+    # Check if line contains a stale-status phrase (case-insensitive)
+    # We use lowercase comparison for the phrase check
+    line_lower=$(printf '%s\n' "$line" | tr '[:upper:]' '[:lower:]')
+    has_stale=0
+    case "$line_lower" in
+      *"not yet authored"*|*"to be authored"*|*"po to author"*|*"to author"*)
+        has_stale=1 ;;
+      *"reserved"*)
+        has_stale=1 ;;
+    esac
+    if [[ $has_stale -eq 0 ]]; then
+      continue
+    fi
+
+    # For each BC-ID token on this line, check if the BC file exists
+    while IFS= read -r bc_id; do
+      [[ -z "$bc_id" ]] && continue
+      # Derive the expected file path from BC-ID
+      # BC-NN.NN.NNN → ss-NN/BC-NN.NN.NNN.md
+      # Extract first numeric segment for subsystem directory
+      ss_num=$(printf '%s\n' "$bc_id" | sed 's/BC-\([0-9]*\)\..*/\1/')
+      bc_file_candidate="$BC_BASE_DIR/ss-${ss_num}/${bc_id}.md"
+      if [[ -f "$bc_file_candidate" ]]; then
+        dd_violations=$(( dd_violations + 1 ))
+        dd_violation_msgs+=("(dd) $arch_file:$lineno — BC $bc_id is authored/active but line describes it as reserved/to-author: $line")
+      fi
+    done <<< "$bc_tokens"
+  done < "$arch_file"
+done
+
+# Positive-coverage log (always printed)
+echo "    Check (dd): $dd_lines_scanned operative lines scanned across $dd_files_scanned architecture files; $dd_violations violation(s) found."
+
+if [[ $dd_violations -gt 0 ]]; then
+  echo ""
+  echo "    ACTIVE-BC STALE-STATUS VIOLATIONS (F43-01 recurrence prevention):"
+  echo "    Architecture docs must not call a BC 'reserved' or 'PO to author' once its BC file exists."
+  echo "    FIX: update the architecture doc prose to reflect the BC's authored/active status."
+  for ddmsg in "${dd_violation_msgs[@]}"; do
+    echo "      $ddmsg"
+  done
+  errors+=("MISMATCH [active-bc-stale-status (dd)]: $dd_violations operative architecture-doc line(s) describe an authored/active BC as reserved/to-author (F43-01 recurrence prevention)")
+  fail=1
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -5417,6 +5583,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Frontmatter path-existence (aa):  $aa_total_paths .factory/ paths verified across $aa_source_files source files, 0 unresolved paths"
   echo "  No-variant/registered-code (bb):  $bb_lines_scanned BC lines scanned, 0 operative 'E-code variant' tokens found"
   echo "  D-SEC contract-existence (cc):    $cc_pairs_checked (contract, BC) pairs verified: all exist on disk and registered in BC-INDEX.md, 0 violations"
+  echo "  Active-BC stale-status (dd):      $dd_lines_scanned lines scanned across $dd_files_scanned arch files, 0 active-BC stale-status contradictions"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
