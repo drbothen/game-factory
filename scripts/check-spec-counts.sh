@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.40
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.41
 #
 # PURPOSE
 # -------
@@ -249,6 +249,41 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.41 to add check (jj) — D-SEC allowed-value / BC-7.11.001
+#   no-degradation-path consistency guard (F56-01 fail-open recurrence prevention):
+# CANONICAL RULE (BC-7.11.001 Invariant 5 / DI-013): D-SEC has NO DEGRADED state.
+# The secrets sub-predicate (SP4) is unconditional and fail-closed for all games
+# (incl. offline). The methodology-layer.md §3.1 Per-Dimension Allowed Value Subsets
+# table must NOT list DEGRADED for D-SEC. Pass-56 root-cause (F56-01): the Pass-53
+# burst hardened BC-7.11.001 (SP4 unconditional, no DEGRADED path) but the §3.1
+# summary tables were not updated — the methodology-layer still listed D-SEC as
+# DEGRADED-capable (offline-only), creating an internal inconsistency and a
+# fail-open security regression class.
+#
+# ASSERTION (minimum viable — targeted to D-SEC as the security-critical dimension):
+# The §3.1 Per-Dimension Allowed Value Subsets table row for D-SEC must NOT contain
+# the token "DEGRADED" (excluding "DEGRADED-PENDING" — that is a separate value not
+# applicable to D-SEC either, but the primary guard targets DEGRADED). Detection: scan
+# the D-SEC table row in methodology-layer.md (the line starting with "| D-SEC") for
+# the presence of "DEGRADED" as a standalone allowed-value token.
+# Specifically: the D-SEC row must NOT match the pattern:
+#   DEGRADED(?! *-PENDING)   — i.e. DEGRADED not immediately followed by "-PENDING"
+# (so "DEGRADED-PENDING" tokens do NOT trigger this check).
+#
+# COMPLEMENTARY assertion: BC-7.11.001 Invariant 5 asserts no-degradation for SP4.
+# Check (jj) does NOT re-parse BC-7.11.001 (check (gg) covers that); it checks the
+# METHODOLOGY TABLE side to close the gap that caused F56-01 (table not updated after
+# BC hardening).
+#
+# RATIONALE: F56-01 was a fail-open regression — the detailed predicate said no-DEGRADED
+# but the summary table still advertised D-SEC as DEGRADED-capable. Downstream producers
+# reading the summary table could implement a degradation path that the owner BC and
+# DI-013 both prohibit. This guard closes the recurrence class.
+#
+# After the F56-01 fix (methodology-layer.md v1.16): the D-SEC row lists only
+# GREEN, BLOCKED — check must report 0 violations.
+# POSIX/BSD-grep/awk compatible (no grep -P). (F56-01 recurrence prevention).
+#
 # extended in v1.40 to add check (ii) — visionOS/OpenXR dedicated-code routing
 #   guard (F55-01 recurrence prevention):
 # CANONICAL RULE (error-taxonomy.md:755): E-XR-007 is the DEDICATED error code for
@@ -508,12 +543,13 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
 #   check (ii) added in v1.40: visionOS/OpenXR dedicated-code routing guard (F55-01 recurrence prevention).
-#   Positive-coverage log always printed. (F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (jj) added in v1.41: D-SEC no-degradation-path consistency guard (F56-01 recurrence prevention).
+#   Positive-coverage log always printed. (F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -980,7 +1016,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.40) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.41) ==="
 echo ""
 
 # ============================================================================
@@ -6382,6 +6418,69 @@ echo "    Check (ii): $ii_files_scanned BC files scanned for visionOS+OpenXR+E-X
 echo ""
 
 # ============================================================================
+# CHECK (jj) — D-SEC NO-DEGRADATION-PATH CONSISTENCY GUARD  [NEW v1.41]
+# (F56-01 fail-open recurrence prevention)
+# ============================================================================
+# ASSERTION: The §3.1 Per-Dimension Allowed Value Subsets table row for D-SEC
+# must NOT list DEGRADED as an allowed value. D-SEC is binary: {GREEN, BLOCKED}.
+# The SP4 secrets gate (BC-1.15.003 / DI-013) is unconditional — no degradation
+# path for any game including fully offline games (BC-7.11.001 Invariant 5).
+#
+# Detection: find the "| D-SEC |" table row in methodology-layer.md §3.1 and
+# assert it does NOT contain "DEGRADED" as a standalone token (i.e., DEGRADED
+# not immediately followed by "-PENDING", to avoid false-positives if
+# "DEGRADED-PENDING" were ever listed, though D-SEC should not have either).
+#
+# After the F56-01 fix (methodology-layer.md v1.16): D-SEC row = "GREEN, BLOCKED".
+# This check reports 0 violations.
+# POSIX/BSD-grep/awk compatible (no grep -P). (F56-01 recurrence prevention).
+# ============================================================================
+echo "--- (jj) D-SEC no-degradation-path consistency guard (F56-01 recurrence prevention) ---"
+
+jj_violations=0
+
+if [[ ! -f "$METHODOLOGY_LAYER" ]]; then
+  echo "    SKIP: methodology-layer.md not found at $METHODOLOGY_LAYER"
+else
+  # Extract the D-SEC row from the §3.1 Per-Dimension Allowed Value Subsets table.
+  # The row starts with "| D-SEC" (with optional bold markers "| **D-SEC**").
+  # Strip bold markers for consistent parsing.
+  dsec_row=$(grep -E '^\| (\*\*)?D-SEC' "$METHODOLOGY_LAYER" 2>/dev/null \
+    | grep 'GREEN' | head -1 || true)
+
+  if [[ -z "$dsec_row" ]]; then
+    echo "    SKIP: D-SEC row not found in methodology-layer.md §3.1 Per-Dimension table (cannot validate)"
+  else
+    # Extract the allowed-values cell (field 3, pipe-delimited)
+    dsec_allowed=$(printf '%s' "$dsec_row" | awk -F'|' '{print $3}')
+
+    # Check for DEGRADED as a standalone token (NOT followed by "-PENDING").
+    # Use awk to detect "DEGRADED" not immediately followed by "-":
+    # This catches: "DEGRADED," "DEGRADED " "DEGRADED)" etc. — any DEGRADED not hyphenated.
+    # Implementation: grep for "DEGRADED" and then ensure it's not "DEGRADED-PENDING"
+    # by stripping "DEGRADED-PENDING" from the allowed cell and checking if "DEGRADED" remains.
+    dsec_stripped_pending=$(printf '%s' "$dsec_allowed" | sed 's/DEGRADED-PENDING//g')
+    if printf '%s' "$dsec_stripped_pending" | grep -qF 'DEGRADED'; then
+      jj_violations=$(( jj_violations + 1 ))
+      echo "    VIOLATION: methodology-layer.md §3.1 D-SEC row lists DEGRADED as an allowed value."
+      echo "    D-SEC allowed values: $dsec_allowed"
+      echo "    REQUIRED: D-SEC must be {GREEN, BLOCKED} only. Sub-predicate 4 (secrets gate, BC-1.15.003 / DI-013)"
+      echo "    is unconditional and fail-closed for all games including offline."
+      echo "    BC-7.11.001 Invariant 5 explicitly states no degradation path for SP4."
+      echo "    Fix: remove DEGRADED from the D-SEC row in §3.1 Per-Dimension Allowed Value Subsets table."
+      errors+=("MISMATCH [dsec-no-degradation-path (jj)]: methodology-layer.md §3.1 Per-Dimension table D-SEC row lists DEGRADED as an allowed value — D-SEC must be {GREEN, BLOCKED} only per BC-7.11.001 Invariant 5 / DI-013 (F56-01 recurrence prevention)")
+      fail=1
+    else
+      echo "    [D-SEC allowed values]: $dsec_allowed"
+      echo "    D-SEC row does NOT list DEGRADED — consistent with BC-7.11.001 Invariant 5 (no-degradation-path) — OK"
+    fi
+  fi
+
+  echo "    Check (jj): D-SEC §3.1 Per-Dimension row validated for no-DEGRADED-path consistency; $jj_violations violation(s) found."
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6430,6 +6529,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  D-SEC evaluator-completeness (gg): BC-7.11.001 operative body references all 4 D-SEC sub-predicate anchors, 0 violations"
   echo "  Economy-conservation BC-routing (hh): $hh_files_scanned BC files scanned ($hh_lines_scanned operative lines), 0 BC-6.02.001+economy-keyword co-locations (all economy-conservation citations use BC-6.01.001)"
   echo "  visionOS/OpenXR dedicated-code (ii): $ii_files_scanned BC files scanned, 0 visionOS+OpenXR+E-XR-001 co-locations (all visionOS/OpenXR inputs cite E-XR-007)"
+  echo "  D-SEC no-degradation-path (jj):    D-SEC §3.1 row validated {GREEN, BLOCKED} only — no DEGRADED listed, 0 violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
