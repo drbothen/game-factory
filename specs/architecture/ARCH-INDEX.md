@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "2.2"
+version: "2.3"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -31,6 +31,10 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v2.3 — Pass-44 OBS-44-A cosmetic: SS-13 Subsystem Registry priority annotation aligned with per-BC P0/P1 split.**
+> - **OBS-44-A:** SS-13 Priority column annotated with per-BC split "9 P0 / 3 P1" to match the
+>   parallel treatment of SS-09 (added in a prior pass). BC count table row already had "9 P0 + 3 P1" detail.
+>
 > **v2.2 — Pass-43 F43 status-propagation fix (F43-01/F43-03).**
 > - **F43-01:** Risk Mitigations table rows for R-017, F42-SEC, F42-MOD updated: "reserved (PO
 >   to author)" prose replaced with "authored / active" for BC-13.02.006, BC-13.03.005, BC-1.15.003.
@@ -199,7 +203,7 @@ traces_to: .factory/specs/product-brief.md
 | SS-10 | Canon Knowledge-Base | CAP-012 | BC-12.* | P1 |
 | SS-11 | Genre-Gated Lanes | CAP-013 | BC-13.* | P2 |
 | SS-12 | XR Platform Seam | CAP-014 | BC-14.* | P2 |
-| SS-13 | Online-Services Adapter | CAP-015 | BC-15.* | P1 (Tier-1 always-on; disableable for offline projects) |
+| SS-13 | Online-Services Adapter | CAP-015 | BC-15.* | P1 (Tier-1 always-on; disableable for offline projects; split — 9 P0 / 3 P1 per BC) |
 
 **BC count by subsystem (v2.0 — 193 total):**
 

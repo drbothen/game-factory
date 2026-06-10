@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "2.3"
+version: "2.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-09T00:00:00Z
@@ -58,8 +58,8 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | E-GLG | CAP-013 | Genre-lane gate schema/config errors for sub-lane BCs (BC-13.01.*/13.02.*/13.03.*/13.04.*) | error-taxonomy.md §E-GLG (added PRD rev 1.6) |
 | E-MOD | CAP-013 | Modding/UGC lane errors (BC-13.03.*) | error-taxonomy.md §E-MOD (added PRD rev 1.6) |
 | E-MKT | CAP-013 | Marketing lane asset conformance errors (BC-13.04.*) | error-taxonomy.md §E-MKT (added PRD rev 1.6) |
-| E-TMOD | CAP-013 | Moderation pipeline contract errors — UGC/chat CSAM reporting + fail-closed enforcement (BC-13.03.005) | error-taxonomy.md §E-TMOD (added PRD rev 2.3 Pass-42) |
-| E-ANTICH | CAP-013 | Anti-cheat integration adapter errors — provider allowlist + kernel-anomaly rejection (BC-13.02.006) | error-taxonomy.md §E-ANTICH (added PRD rev 2.3 Pass-42) |
+| E-TMOD | CAP-013 | Moderation pipeline contract errors — UGC/chat CSAM reporting + fail-closed enforcement (BC-13.03.005); scope: modding_enabled=true OR user_to_user_communication=true | error-taxonomy.md §E-TMOD (added PRD rev 2.3 Pass-42; scope corrected rev 2.4 F44-01) |
+| E-ANTICH | CAP-013 | Anti-cheat integration adapter errors — provider allowlist + kernel-anomaly rejection (BC-13.02.006); scope: esports_enabled=true | error-taxonomy.md §E-ANTICH (added PRD rev 2.3 Pass-42; scope corrected rev 2.4 F44-01) |
 | E-SEC | CAP-001 | Output-bundle secrets gate errors — secret-pattern scan + entropy scan (BC-1.15.003) | error-taxonomy.md §E-SEC (added PRD rev 2.3 Pass-42) |
 | E-XR | CAP-014 | XR platform seam errors | error-taxonomy.md §E-XR (added PRD rev 1.1) |
 | E-PRV | CAP-004 | Provenance sidecar field validation errors (`disclosure_class` + sidecar completeness) | error-taxonomy.md §E-PRV (added PRD rev 1.2; extended rev 1.6) |
@@ -702,11 +702,13 @@ and marketing asset manifest completeness (BC-13.04.002).
 
 Errors emitted by the moderation pipeline contract BC (BC-13.03.005) when a UGC/chat
 game's `moderation-pipeline-manifest` is absent, incomplete, or declares a fail-open
-configuration. All E-TMOD errors cause D-SEC BLOCKED.
+configuration. Scope: games where `genre-profile.modding_enabled: true` (UGC lane) OR
+`game-metadata-spec.user_to_user_communication: true` (chat). All E-TMOD errors cause
+D-SEC BLOCKED.
 
 | Error Code | Category | Severity | Exit Code | Message Format |
 |-----------|----------|----------|-----------|----------------|
-| E-TMOD-001 | Moderation pipeline absent or provider invalid | broken | 1 | `moderation: moderation-pipeline-manifest absent or invalid for game '<game_id>' with ugc_enabled/chat_enabled=true — provider must be non-empty and csam_detection_method must be one of {PhotoDNA, C2PA scan, hash-match}; D-SEC BLOCKED (BC-13.03.005)` |
+| E-TMOD-001 | Moderation pipeline absent or provider invalid | broken | 1 | `moderation: moderation-pipeline-manifest absent or invalid for game '<game_id>' with modding_enabled=true or user_to_user_communication=true — provider must be non-empty and csam_detection_method must be one of {PhotoDNA, C2PA scan, hash-match}; D-SEC BLOCKED (BC-13.03.005)` |
 | E-TMOD-002 | NCMEC report path missing | broken | 1 | `moderation: moderation-pipeline-manifest.ncmec_report_path is null or absent for game '<game_id>' — NCMEC CyberTipline must be configured (18 U.S.C. §2258A); D-SEC BLOCKED (BC-13.03.005)` |
 | E-TMOD-003 | Moderation fail-open declared | broken | 1 | `moderation: moderation-pipeline-manifest declares degraded_behavior: 'pass_through' (fail-open) for game '<game_id>' — fail-open moderation is not a valid configuration; must be 'block_ugc' or equivalent fail-closed behavior; D-SEC BLOCKED (BC-13.03.005)` |
 
@@ -714,16 +716,17 @@ configuration. All E-TMOD errors cause D-SEC BLOCKED.
 
 ## E-ANTICH — Anti-Cheat Integration Adapter (CAP-013, BC-13.02.006)
 
-Errors emitted by the anti-cheat integration adapter BC (BC-13.02.006) when a
-competitive-multiplayer or esports-enabled game's `anti_cheat_config` is absent,
-declares a provider not in the allowed set, or attempts to use a kernel-anomaly
-provider.
+Errors emitted by the anti-cheat integration adapter BC (BC-13.02.006) when an
+esports-lane game's `anti_cheat_config` is absent, declares a provider not in the
+allowed set, or attempts to use a kernel-anomaly provider. Scope: games where
+`genre-profile.esports_enabled: true` (the sole schema-valid competitive-lane signal
+per BC-13.01.001).
 
 | Error Code | Category | Severity | Exit Code | Message Format |
 |-----------|----------|----------|-----------|----------------|
 | E-ANTICH-001 | Provider not in allowed set | broken | 1 | `anti-cheat: provider '<provider>' declared in anti_cheat_config for game '<game_id>' is not in the factory-allowed set {eac, eos, battleye} (case-insensitive); D-SEC BLOCKED (BC-13.02.006, ADR-0008)` |
 | E-ANTICH-002 | Kernel-anomaly provider attempted | broken | 1 | `anti-cheat: provider '<provider>' is a kernel-anomaly provider (Riot Vanguard / vgk.sys variant) — unconditionally rejected; not licensable, DI-010 violation; scaffolding generation BLOCKED; not overridable (BC-13.02.006, ADR-0008)` |
-| E-ANTICH-003 | Provider absent for competitive lane | broken | 1 | `anti-cheat: anti_cheat_config absent or provider field missing for game '<game_id>' with competitive_multiplayer=true or esports_enabled=true; anti-cheat provider declaration is required; D-SEC BLOCKED (BC-13.02.006)` |
+| E-ANTICH-003 | Provider absent for esports lane | broken | 1 | `anti-cheat: anti_cheat_config absent or provider field missing for game '<game_id>' with esports_enabled=true; anti-cheat provider declaration is required; D-SEC BLOCKED (BC-13.02.006)` |
 
 ---
 
@@ -791,6 +794,17 @@ Message format uses `<placeholder>` syntax.
 ---
 
 ## Coverage Notes
+
+### PRD Revision 2.4 Changes (Pass-44 F44-01 — trigger vocabulary reconciliation: E-TMOD, E-ANTICH scope fix)
+
+| Change | Detail |
+|--------|--------|
+| E-TMOD-001 message format fixed (F44-01) | **CORRECTION:** E-TMOD-001 message format replaced non-schema tokens `ugc_enabled/chat_enabled` with schema-valid signals `modding_enabled` (genre-profile UGC lane) and `user_to_user_communication` (game-metadata-spec chat signal). BC-13.03.005 precondition 1, invariant 1, edge cases, and test vectors updated accordingly. CSAM gate is now reachable via any valid genre profile with `modding_enabled: true` or any game-metadata-spec with `user_to_user_communication: true`. No code count change. |
+| E-ANTICH-003 message format fixed (F44-01) | **CORRECTION:** E-ANTICH-003 message format removed non-schema token `competitive_multiplayer=true`; now references only `esports_enabled=true` (the sole schema-valid competitive-lane signal per BC-13.01.001). Category renamed ProviderAbsentForCompetitiveLane → ProviderAbsentForEsportsLane. BC-13.02.006 precondition 1, invariant 1, edge cases, and test vectors updated accordingly. No code count change. |
+| E-ANTICH section scope note updated (F44-01) | Section intro now states scope as `esports_enabled: true` only; previous "competitive-multiplayer or esports-enabled" language removed. E-TMOD section intro now explicitly states scope as `modding_enabled: true` OR `user_to_user_communication: true`. |
+| Total codes unchanged | No new codes added. E-TMOD: 3 (unchanged). E-ANTICH: 3 (unchanged). Total: **267** (unchanged). |
+
+---
 
 ### PRD Revision 2.3 Changes (Pass-42 D-019 security burst — 3 new families, 7 new codes, DI-013)
 

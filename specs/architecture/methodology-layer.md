@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: methodology-layer
-version: "1.14"
+version: "1.15"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -34,6 +34,11 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # Game Methodology Layer (Layer 2)
 
+> **v1.15 changes (Pass-44 F44-01 — D-SEC predicate trigger vocabulary reconciled to schema-valid genre-profile signals):**
+> - **F44-01 fixed:** D-SEC pass-predicate sub-predicate 2 and blocked-predicate anti-cheat trigger updated: "competitive-multiplayer lane active" → `genre-profile.esports_enabled: true` (the sole schema-valid activation signal per BC-13.01.001; `competitive_multiplayer` is not a genre-profile schema field).
+> - **F44-01 fixed:** D-SEC pass-predicate sub-predicate 3 and blocked-predicate moderation trigger updated: "UGC/chat features active" → `genre-profile.modding_enabled: true` (UGC lane) OR `game-metadata-spec.user_to_user_communication: true` (chat signal); both are schema-valid signals consistent with BC-13.03.005 reconciled preconditions.
+> - Degraded predicate parenthetical "(no competitive-MP, no UGC/chat)" updated to reference the canonical schema-field names.
+>
 > **v1.14 changes (Pass-43 F43 — stale "reserved/to author" status prose swept; all three D-SEC security BCs are authored and active):**
 > - **F43-01 fixed:** Sub-predicates 2/3/4 and the post-Pass-42 NOTE block updated to reflect
 >   that BC-13.02.006 (anti-cheat-integration-adapter), BC-13.03.005 (moderation-pipeline-contract),
@@ -1028,19 +1033,22 @@ pattern detected; adversarial review not completed.
 
 **ID:** D-SEC | **Automated:** Yes (required for online games) | **Subsystem:** SS-06
 
-**Pass predicate** (v1.13 — hardened, F42-01/02/03):
+**Pass predicate** (v1.15 — hardened, F42-01/02/03; trigger vocabulary reconciled F44-01):
 All of the following must be true simultaneously:
 
 1. `server-authority-invariant-suite` (CWE-602 spine) all assertions green:
    no-trust-client, input range/rate/sequence validation, replay-attack prevention,
    authoritative reconciliation, interest-management, economy conservation/atomicity,
    secure entitlement.
-2. For games with the competitive-multiplayer lane active: `anti-cheat-integration-adapter`
-   conformance BC (BC-13.02.006, directory ss-13/, subsystem SS-11; authored / active)
-   passes conformance. Provider declared in `{eac, eos, battleye}` (ADR-0008 allowed set).
-3. For games with UGC/chat features active: `moderation-pipeline-contract` BC
-   (BC-13.03.005, directory ss-13/, subsystem SS-11; authored / active) is present and
-   passes conformance. CSAM → NCMEC reporting path verified; fail-closed when moderation absent.
+2. For games with `genre-profile.esports_enabled: true` (schema-valid per BC-13.01.001):
+   `anti-cheat-integration-adapter` conformance BC (BC-13.02.006, directory ss-13/, subsystem
+   SS-11; authored / active) passes conformance. Provider declared in `{eac, eos, battleye}`
+   (ADR-0008 allowed set).
+3. For games with `genre-profile.modding_enabled: true` (UGC lane) OR
+   `game-metadata-spec.user_to_user_communication: true` (chat signal):
+   `moderation-pipeline-contract` BC (BC-13.03.005, directory ss-13/, subsystem SS-11;
+   authored / active) is present and passes conformance. CSAM → NCMEC reporting path
+   verified; fail-closed when moderation absent.
 4. Generated output bundle passes the never-emit-secrets lint gate (DI-013;
    cicd-setup.md §Output-Bundle Secrets Gate; BC-1.15.003, ss-01/, authored / active).
    Secret-pattern/entropy scan must exit 0.
@@ -1052,21 +1060,22 @@ construction.
 **Degraded predicate:** Applicable only for non-online, non-multiplayer games where
 `security-requirements-contract` is absent by design (premium single-player, offline).
 Degradation must be declared explicitly with `online_features: false`. When degraded:
-sub-predicate (2) and (3) do not apply (no competitive-MP, no UGC/chat). Sub-predicate
+sub-predicate (2) and (3) do not apply (no `esports_enabled`, no `modding_enabled` or `user_to_user_communication`). Sub-predicate
 (4) (secrets lint) applies regardless of online/offline status — factory output bundles
 must never contain secrets in any deployment target.
 
-**Blocked predicate** (v1.13 — fail-closed, F42-01/02/03):
+**Blocked predicate** (v1.15 — fail-closed, F42-01/02/03; trigger vocabulary reconciled F44-01):
 Any of the following causes D-SEC BLOCKED:
 
 - Online/multiplayer game without `server-authority-invariant-suite`;
 - Any CWE-602 invariant failing;
 - Kernel anti-cheat authored autonomously (DI-010 violation; BC-1.15.002);
-- Competitive-MP lane active and `anti-cheat-integration-adapter` conformance BC
-  (BC-13.02.006) absent or failing; or provider declared outside allowed set
+- `genre-profile.esports_enabled: true` and `anti-cheat-integration-adapter` conformance
+  BC (BC-13.02.006) absent or failing; or provider declared outside allowed set
   {eac, eos, battleye} per ADR-0008;
-- UGC/chat active and `moderation-pipeline-contract` BC (BC-13.03.005) absent
-  or failing (CSAM→NCMEC path not verified; 18 U.S.C. §2258A obligation not met);
+- `genre-profile.modding_enabled: true` OR `game-metadata-spec.user_to_user_communication: true`
+  and `moderation-pipeline-contract` BC (BC-13.03.005) absent or failing
+  (CSAM→NCMEC path not verified; 18 U.S.C. §2258A obligation not met);
 - Output bundle fails never-emit-secrets lint gate (DI-013 violation; E-SEC error
   family registered in error-taxonomy.md; BC-1.15.003 authored and active).
 
