@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -20,7 +20,11 @@ capability: CAP-003
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-09
+    author: product-owner
+    reason: "F46-01: remove non-schema `competitive_multiplayer_enabled: true` OR-branch from Precondition 2. The genre-profile schema defines no separate `competitive_multiplayer_enabled` field; `genre-profile.esports_enabled: true` is the sole schema-valid competitive/esports lane signal (per BC-13.01.001 and BC-13.02.006 F44-01 resolution). The OR-branch was redundant and referenced a non-existent schema field. Gate now reads solely on `genre-profile.esports_enabled: true`."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,8 +51,10 @@ discipline as competitive-grade deterministic lockstep netcode.
 
 1. The adapter is T1 or T2 (`determinism_tier` is not `tolerance-only`) — T3 cannot
    provide the authoritative state integrity required for esports/anti-cheat use.
-2. The competitive-multiplayer lane is active (game's genre profile has
-   `esports_enabled: true` or `competitive_multiplayer_enabled: true` per CAP-013).
+2. The competitive-multiplayer/esports lane is active: `genre-profile.esports_enabled: true`
+   (schema-valid per BC-13.01.001; the sole genre-profile activation signal for the
+   competitive/esports lane per CAP-013; no separate `competitive_multiplayer_enabled`
+   field exists in the schema).
 3. A sealed input recording (BC-3.03.001) and optionally a golden-state record
    (BC-3.03.008) exist for the session to be exported.
 4. The export is requested for one of: `demo_playback`, `anti_cheat_evidence`.
