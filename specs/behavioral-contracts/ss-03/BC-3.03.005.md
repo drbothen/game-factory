@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,10 @@ capability: CAP-003
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-10
+    reason: "F54-02 fix (option b) — EC-006 T2→T3 degradation clarified: T3 comparison only proceeds if the T2 golden contains shadow tolerance_spec (declared at capture time). If no shadow tolerances exist, BC-3.03.004 EC-002 blocks with E-REPLAY-002 before this BC is reached. Precondition 3 clarified to reflect both native T3 and shadow-T2 tolerance sources. Test vector updated accordingly."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,7 +48,16 @@ inherent floating-point variance of T3 engines.
 
 1. The adapter's accepted record contains `determinism_tier: tolerance-only`.
 2. A golden state recording exists with metric values at configured checkpoint frames.
-3. Each metric in the golden state has an associated `tolerance_spec`:
+3. Each metric in the golden state has an associated `tolerance_spec`. The source of
+   `tolerance_spec` is one of:
+   - **Native T3 golden:** tolerance specs declared at T3 golden capture time (normal case
+     for adapters with `determinism_tier: tolerance-only`).
+   - **Shadow T2 golden:** tolerance specs optionally declared at T2 golden capture time to
+     enable T3 degradation when the pinned runner becomes unavailable (per BC-3.03.008 and
+     BC-3.03.004 EC-002). If a T2 golden reaches this BC, it is because shadow tolerances
+     exist; if no shadow tolerances exist, BC-3.03.004 blocks with E-REPLAY-002 before
+     this BC is invoked.
+   Each `tolerance_spec` entry contains:
    - `metric_name`: name of the metric (e.g., `enemy_position_x`, `player_health`,
      `entity_count_enemies`)
    - `tolerance_type`: `absolute` (±N units) or `relative` (±N%)
@@ -100,7 +112,7 @@ inherent floating-point variance of T3 engines.
 | EC-003 | A metric regresses by tolerance_value + ε (just outside tolerance) | Fail; delta logged. |
 | EC-004 | A new metric exists in replay that was not in the golden tolerance spec | The new metric is captured but not evaluated (no tolerance spec exists for it). Logged as `unchecked_metric`. |
 | EC-005 | An entity that existed in the golden state is absent from the replay state | The metric for that entity (e.g., `enemy_4_health`) has `replay_value = null`. Treated as out-of-tolerance fail. |
-| EC-006 | T2 comparison degrades to T3 (pinned runner unavailable per BC-3.03.004 EC-002) | T3 comparison executed; result labeled `degraded_from_T2`; note added to convergence report. |
+| EC-006 | T2 comparison degrades to T3 (pinned runner unavailable per BC-3.03.004 EC-002) and shadow tolerance_spec IS present in the T2 golden | T3 comparison executed using shadow `tolerance_spec` from the T2 golden; result labeled `degraded_from_T2: true`; note added to convergence report. If no shadow tolerances exist, this BC is never reached — BC-3.03.004 blocks with E-REPLAY-002 (`T3_DEGRADATION_MISSING_TOLERANCE_SPEC`). |
 | EC-007 | All metrics pass but by design the tolerance is very wide (poor test sensitivity) | Passes; but the warning that T3 has lower sensitivity is in the comparison tier label. Tolerance spec quality is an authoring concern, not a BC concern. |
 
 ## Canonical Test Vectors
@@ -112,7 +124,8 @@ inherent floating-point variance of T3 engines.
 | T3 adapter; `enemy_position_x` golden=0.0, tolerance=relative ±5% | Comparison: `replay_value == 0` as pass condition. | edge-case (zero baseline) |
 | T3 adapter; delta == tolerance exactly | Pass (boundary inclusive). | edge-case |
 | T3 adapter; metric `boss_health` present in replay but absent from tolerance spec | Logged as `unchecked_metric`; not evaluated. | edge-case |
-| T3 degraded from T2 (pinned runner unavailable) | T3 comparison runs; result labeled `degraded_from_T2`. | edge-case (degradation) |
+| T3 degraded from T2 (pinned runner unavailable); T2 golden has shadow tolerance_spec | T3 comparison runs using shadow tolerances; result labeled `degraded_from_T2: true`. | edge-case (degradation — proceeds) |
+| T3 degraded from T2 (pinned runner unavailable); T2 golden has NO shadow tolerance_spec | BC-3.03.004 blocks with E-REPLAY-002 before this BC is reached; this row never executes. | edge-case (degradation — blocked upstream) |
 
 ## Verification Properties
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -20,7 +20,10 @@ capability: CAP-003
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-10
+    reason: "F54-02 fix (option b) — golden capture postconditions updated to document the optional shadow tolerance_spec for T2 goldens, enabling coherent T2→T3 degradation (BC-3.03.004 EC-002). Without shadow tolerances, T2→T3 degradation blocks with E-REPLAY-002 (T3_DEGRADATION_MISSING_TOLERANCE_SPEC). Added EC-007 clarification for T2 shadow tolerance capture."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -57,7 +60,12 @@ regression system has no reliable baseline and produces noise.
    - The `adapter_id` and `engine_version`
    - The `determinism_tier`
    - For T1: SHA-256 snapshot hashes at each checkpoint frame
-   - For T2: serialized snapshot data at each checkpoint frame + `pinned_runner_image_id`
+   - For T2: serialized snapshot data at each checkpoint frame + `pinned_runner_image_id`;
+     optionally, per-metric `tolerance_spec` (shadow tolerances) may be declared at capture
+     time to enable T3 degradation if the pinned runner later becomes unavailable. Shadow
+     tolerances are not required; if absent and the pinned runner is retired, T2→T3
+     degradation blocks with E-REPLAY-002 (`T3_DEGRADATION_MISSING_TOLERANCE_SPEC`)
+     per BC-3.03.004 EC-002.
    - For T3: metric values at each checkpoint frame + tolerance specs
    - `authorized_by`: the user or automation token that initiated capture
    - `captured_at` timestamp
@@ -113,7 +121,7 @@ regression system has no reliable baseline and produces noise.
 | EC-004 | Automated pipeline attempts to re-capture golden state without producer-role token | Rejected: E-REPLAY-013 (`UNAUTHORIZED_GOLDEN_STATE_CAPTURE`). |
 | EC-005 | Recording associated with a golden state is deleted (storage expiry) | Golden state automatically invalidated; `tests/replay` dimension blocked; task generated to re-capture recording + golden state. |
 | EC-006 | Multiple golden states exist for the same game+adapter pair (history) | Only the most recent `active` golden state is used for regression. Prior golden states are retained as `superseded` for audit. |
-| EC-007 | T2 adapter; golden state was captured on pinned runner A; pinned runner A is decommissioned | Golden state remains valid for history but T2 regression is no longer executable. Adapter's accepted record must be updated with a new pinned runner; new golden state captured. |
+| EC-007 | T2 adapter; golden state was captured on pinned runner A; pinned runner A is decommissioned | Golden state remains valid for history but T2 regression is no longer executable. If the golden was captured with shadow `tolerance_spec`, T2→T3 degradation proceeds per BC-3.03.004 EC-002. If no shadow tolerances were declared, degradation blocks with E-REPLAY-002 (`T3_DEGRADATION_MISSING_TOLERANCE_SPEC`). Resolution: update adapter's accepted record with a replacement pinned runner and re-capture golden, OR re-capture golden with shadow tolerances to unlock degradation path. |
 
 ## Canonical Test Vectors
 

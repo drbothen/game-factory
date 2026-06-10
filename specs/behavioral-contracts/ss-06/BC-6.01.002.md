@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,10 @@ capability: CAP-006
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-10
+    reason: "OBS-54-A fix — VP-009 back-reference title corrected from 'Damage I/O matrix row-sum correctness' to 'Damage I/O matrix range containment and split-damage sum' per VP-INDEX:221 prescribed corrected text (F40-06 retitling). Added F40-06 disambiguation note to VP Anchors entry."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -134,4 +137,4 @@ S-TBD — Damage I/O Sim Contract
 
 - VP-TBD-003 — hp_delta clamping invariant
 - VP-TBD-004 — damage function determinism
-- Formally verified by VP-009 (Damage I/O matrix row-sum correctness) — see verification-properties/VP-009-damage-io-matrix.md
+- Formally verified by VP-009 (Damage I/O matrix range containment and split-damage sum) — see verification-properties/VP-009-damage-io-matrix.md. Note: exact-equality to declared matrix value (PC1) is validated by BC-6.01.002 test vectors, not VP-009 (F40-06 disambiguation).

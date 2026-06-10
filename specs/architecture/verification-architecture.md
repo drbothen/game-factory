@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-architecture
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -14,6 +14,10 @@ inputs:
   - .factory/specs/behavioral-contracts/BC-INDEX.md
   - .factory/specs/architecture/subsystem-decomposition.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.1"
+    date: 2026-06-10
+    reason: "OBS-54-A fix — VP-009 title in P0 proofs table corrected from 'Damage I/O matrix row-sum correctness' to 'Damage I/O matrix range containment and split-damage sum — damage output within declared I/O matrix bounds' to match VP-INDEX:58 corrected title (F40-06 retitling); VP-008 description also corrected to match VP-INDEX current title."
 ---
 
 # Verification Architecture
@@ -56,8 +60,8 @@ The boundary between tiers is the **purity boundary** (see Section 3).
 | VP-002 | FSM state legality — no invalid state or illegal transition reachable | Kani | FSM runtime | SS-05 |
 | VP-003 | Balance band containment — metric stays within declared bounds after N steps | proptest | Economy simulation core | SS-05 |
 | VP-004 | No-softlock reachability — goal state reachable from any valid game state | Kani (bounded) | Reachability / solvability engine | SS-05 |
-| VP-008 | Replay determinism equality — T1 bitwise snapshot hash invariant | Kani (harness) | Replay harness golden-state comparison | SS-02 |
-| VP-009 | Damage I/O matrix row-sum correctness — damage output within declared I/O matrix bounds | proptest | Economy simulation core | SS-05 |
+| VP-008 | Pure-sim step referential transparency (intra-process purity) | Kani (harness) | Replay harness golden-state comparison | SS-02 |
+| VP-009 | Damage I/O matrix range containment and split-damage sum — damage output within declared I/O matrix bounds | proptest | Economy simulation core | SS-05 |
 
 ### P1 — Phase 6 target proofs (genre-gated / conditional)
 

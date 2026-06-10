@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,10 @@ capability: CAP-003
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-10
+    reason: "F54-02 fix (option b) — EC-002 T2→T3 degradation path made coherent: degradation BLOCKS with E-REPLAY-002 (T3_DEGRADATION_MISSING_TOLERANCE_SPEC) when the T2 golden contains no shadow tolerance_spec, rather than silently degrading to a T3 comparison whose required input was never produced. Tolerance-spec source for the degraded path now explicitly specified."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -92,7 +95,7 @@ Variance detected within the pinned runner is a genuine regression signal.
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
 | EC-001 | Replay run on wrong runner (different CPU arch than pinned) | Result flagged `runner_mismatch: true`; excluded from gating. Warning emitted. |
-| EC-002 | Pinned runner image is retired or unavailable | Regression test cannot run on pinned runner; degrades to T3 tolerance comparison with note in convergence report. |
+| EC-002 | Pinned runner image is retired or unavailable | Regression test cannot run on pinned runner. Degradation to T3 tolerance comparison is attempted. If the T2 golden state contains a shadow `tolerance_spec` (per BC-3.03.008 golden capture protocol for T2 goldens with declared shadow tolerances), the T3 comparison proceeds using that spec with a note in the convergence report. If no shadow `tolerance_spec` exists in the golden state (the common case for T2 goldens captured without shadow tolerances), degradation BLOCKS with **E-REPLAY-002** (`error.data.reason: T3_DEGRADATION_MISSING_TOLERANCE_SPEC`): T3 comparison method is unavailable because the golden state contains no per-metric tolerance spec. A bootstrap task is generated to re-capture the golden with shadow tolerances or to update the accepted record with a replacement pinned runner. |
 | EC-003 | Code change in physics integration produces different SIMD rounding on the pinned runner | Detected as diff; regression `fail` reported. |
 | EC-004 | T2 adapter's golden was captured on pinned runner but the comparison runner has same CPU but different OS minor version | Runner match check uses `pinned_runner_image_id`; OS minor version difference = mismatch unless explicitly in the pinned image spec. |
 | EC-005 | Floating-point value differs between runs on the same pinned runner (non-determinism on T2) | Detected as diff; signals that the T2 adapter has intra-runner non-determinism. Adapter re-conformance required; potential tier downgrade to T3. |
@@ -105,7 +108,8 @@ Variance detected within the pinned runner is a genuine regression signal.
 | T2 adapter; replay on pinned runner; same code as golden; no state change | `pass`; all diffs empty; `runner_match: true`. | happy-path |
 | T2 adapter; replay on pinned runner; enemy AI pathfinding bug at frame 60 | `fail`; checkpoint at frame 100 shows diff on enemy position fields. | regression detection |
 | T2 adapter; replay on non-pinned runner | `runner_mismatch: true`; result informational only; not a gate block. | edge-case |
-| Pinned runner unavailable; T2 replay attempted | Degrade to T3; note in convergence report. | edge-case (degradation) |
+| Pinned runner unavailable; T2 golden has no shadow tolerance_spec | E-REPLAY-002 (`T3_DEGRADATION_MISSING_TOLERANCE_SPEC`); bootstrap task generated; regression blocked until golden re-captured with shadow tolerances or replacement pinned runner updated. | edge-case (degradation — blocked) |
+| Pinned runner unavailable; T2 golden has shadow tolerance_spec declared | Degrade to T3 comparison using golden's shadow tolerance_spec; note in convergence report. | edge-case (degradation — proceeds) |
 
 ## Verification Properties
 
@@ -113,7 +117,7 @@ Variance detected within the pinned runner is a genuine regression signal.
 |-------|----------|-------------|
 | VP-TBD-028 | T2 comparison on non-matching runner never produces a gate-blocking regression result. | integration test |
 | VP-TBD-029 | T2 comparison on matching runner detects state change equivalent to the injected simulation bug. | integration test with known injected regression |
-| VP-TBD-030 | When pinned runner is unavailable, the system degrades to T3 without blocking on T2 runner requirement. | integration test |
+| VP-TBD-030 | When pinned runner is unavailable and golden has no shadow tolerance_spec, degradation emits E-REPLAY-002 (T3_DEGRADATION_MISSING_TOLERANCE_SPEC) and blocks. When shadow tolerance_spec is present, degradation proceeds to T3 comparison without blocking. | integration test |
 
 ## Traceability
 
