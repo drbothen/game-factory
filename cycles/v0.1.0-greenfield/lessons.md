@@ -51,6 +51,10 @@ STATE.md now indexes these by ID with a pointer to this file.
    Check (k) enforced registration of E-codes (E-XXX-NNN) referenced in BCs. No equivalent existed for W-codes (W-XXX-NNN). This gap allowed BC-14.02.001 EC-001 to cite W-XR-002 in a case where the contract's own Invariant 1 and canonical test vector required E-XR-004 (rejected input), and the error went undetected by the gate. Codified by: (a) PO registering W-XR-001..004 in error-taxonomy.md under a new `## Warning Codes` section (v2.5); (b) architect adding check (kk) W-code identifier-resolution guard to check-spec-counts.sh (gate v1.42). Pattern: any new warning code family introduced in a BC must be registered in error-taxonomy.md and confirmed by gate.
    _Discovered: Pass 58, 2026-06-13_
 
+9. **LESSON-F60 — A VP property-statement re-scope must sweep ALL downstream surfaces: VP-INDEX, verification-architecture P0/P1 table, verification-coverage-matrix, AND every guarded-BC "Formally verified by VP-NNN (...)" back-ref (including the counterpart BC).** [pending-codification]
+   F40-04 corrected VP-007 to cover dual invariants (INV-TS-02 + INV-TS-03). Pass 60 found that two downstream surfaces still carried the stale single-invariant form: verification-architecture.md:72 P1 table and BC-13.02.001:190 VP Anchors. Similarly, F60-02 found VP-004's property statement over-stated (win-only), contradicting BC-6.02.004 EC-001 (win OR game-over) — requiring correction across VP-004 file, VP-INDEX, verification-architecture, verification-coverage-matrix, AND BC-6.02.004's own VP-004 back-ref. The pattern: any VP re-scope must atomically sweep all surfaces that restate the property: (a) the VP file itself, (b) VP-INDEX Summary Table + I2 table, (c) verification-architecture P0/P1 Property column, (d) verification-coverage-matrix Guarded Invariant column, (e) every guarded BC's VP Anchors/Formally-Verified line. Codification tracked as FU-024 — gate check (ll) deferred until BC VP back-refs are normalized verbatim-from-VP-INDEX (per LESSON-F52: avoid over-firing gates).
+   _Discovered: Pass 60, 2026-06-13_
+
 ---
 
 ## Policy Candidates
@@ -65,3 +69,4 @@ STATE.md now indexes these by ID with a pointer to this file.
 | LESSON-F53 | Dimension hardening must update evaluator BC body | Security BC authoring | adopted (check gg) |
 | LESSON-F56 | Dimension-semantics hardening sweeps all restatement surfaces | Architecture/BC sync | adopted (check jj) |
 | LESSON-F58 | Warning codes must be registered in error taxonomy and gated (same as E-codes) | BC authoring workflow | adopted (check kk) |
+| LESSON-F60 | VP re-scope must sweep all downstream surfaces (VP file, VP-INDEX, arch tables, coverage-matrix, guarded BC back-refs) | VP authoring / adversarial review | pending-codification (FU-024; gate deferred per LESSON-F52) |

@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-coverage-matrix
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -14,6 +14,10 @@ inputs:
   - .factory/specs/domain-spec/invariants.md
   - .factory/specs/architecture/verification-architecture.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.3"
+    date: 2026-06-13
+    reason: "F60-02 fix — VP-004 row updated to reflect terminal-set reachability (win OR game-over) in Guarded Invariant column and BC Coverage SS-05 Notes; prior 'goal state reachable from any valid state' over-stated the property vs BC-6.02.004 EC-001. Matches VP-INDEX:53 corrected description (F60-02)."
 ---
 
 # Verification Coverage Matrix
@@ -32,7 +36,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | VP-001 | P0 | Kani + proptest | SS-05 | Economy simulation core | BC-6.01.001 | DI-012 (validation method declared) | HIGH |
 | VP-002 | P0 | Kani | SS-05 | FSM runtime | BC-6.01.003 | DI-012 | HIGH |
 | VP-003 | P0 | proptest | SS-05 | Economy simulation core | BC-6.02.003 | DI-012 | HIGH |
-| VP-004 | P0 | Kani (bounded) | SS-05 | Reachability / solvability engine | BC-6.02.004 | DI-012 | MEDIUM (state-space bound required) |
+| VP-004 | P0 | Kani (bounded) | SS-05 | Reachability / solvability engine | BC-6.02.004 | DI-012, BC-6.02.004/VP-TBD-015 (terminal-set reachability — win OR game-over; F60-02) | MEDIUM (state-space bound required) |
 | VP-005 | P1 | proptest + algebraic | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | HIGH (float precision constraints) — see I4 note |
 | VP-006 | P1 | proptest | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | HIGH — see I4 note |
 | VP-007 | P1 | proptest | SS-11 | Rating-math library | BC-13.02.001 | DI-012 | MEDIUM (partial order over floats; NaN exclusion required) — see I4 note |
@@ -91,7 +95,7 @@ Note: VP-001 uses Kani + proptest (counted under both); VP-005 uses proptest + a
 | BC-6.01.002 | VP-009 | — | Damage I/O matrix bounds |
 | BC-6.01.003 | VP-002 | — | FSM state legality |
 | BC-6.02.003 | VP-003 | — | Balance band containment |
-| BC-6.02.004 | VP-004 | — | No-softlock reachability |
+| BC-6.02.004 | VP-004 | — | No-softlock reachability (terminal-set: win OR game-over; F60-02) |
 | Other BC-6.* | — | TDD | Simulation setup, balance methodology, reporting |
 
 ### SS-11 — Genre-Gated Lanes (competitive/esports)

@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-architecture
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,9 @@ modified:
   - version: "1.1"
     date: 2026-06-10
     reason: "OBS-54-A fix — VP-009 title in P0 proofs table corrected from 'Damage I/O matrix row-sum correctness' to 'Damage I/O matrix range containment and split-damage sum — damage output within declared I/O matrix bounds' to match VP-INDEX:58 corrected title (F40-06 retitling); VP-008 description also corrected to match VP-INDEX current title."
+  - version: "1.2"
+    date: 2026-06-13
+    reason: "F60-01 fix — VP-007 P1 Property column updated from stale single-invariant 'TrueSkill μ−3σ partial-order monotonicity' to dual-invariant form 'TrueSkill INV-TS-02 conservative-rating ordering (μ−3σ monotonicity) + INV-TS-03 permutation equivariance' matching VP-INDEX:56 (F40-04 scope). F60-02 fix — VP-004 P0 Property column updated from over-strong win-only reachability to terminal-set reachability (win OR game-over) matching BC-6.02.004 EC-001 and BC-6.02.004/VP-TBD-015."
 ---
 
 # Verification Architecture
@@ -59,7 +62,7 @@ The boundary between tiers is the **purity boundary** (see Section 3).
 | VP-001 | Economy conservation — no resource creation/destruction outside declared faucets/sinks | Kani + proptest | Economy simulation core | SS-05 |
 | VP-002 | FSM state legality — no invalid state or illegal transition reachable | Kani | FSM runtime | SS-05 |
 | VP-003 | Balance band containment — metric stays within declared bounds after N steps | proptest | Economy simulation core | SS-05 |
-| VP-004 | No-softlock reachability — goal state reachable from any valid game state | Kani (bounded) | Reachability / solvability engine | SS-05 |
+| VP-004 | No-softlock reachability — every reachable non-terminal state has a forward path to at least one declared terminal (win OR game-over) | Kani (bounded) | Reachability / solvability engine | SS-05 |
 | VP-008 | Pure-sim step referential transparency (intra-process purity) | Kani (harness) | Replay harness golden-state comparison | SS-02 |
 | VP-009 | Damage I/O matrix range containment and split-damage sum — damage output within declared I/O matrix bounds | proptest | Economy simulation core | SS-05 |
 
@@ -69,7 +72,7 @@ The boundary between tiers is the **purity boundary** (see Section 3).
 |----|----------|---------------|---------------|-----------|-----------|
 | VP-005 | Elo zero-sum conservation — winner gain equals loser loss | proptest + algebraic | Rating-math library | SS-11 | Genre: competitive/esports |
 | VP-006 | Glicko-2 RD monotone decay — RD strictly decreasing across rating periods | proptest | Rating-math library | SS-11 | Genre: competitive/esports |
-| VP-007 | TrueSkill μ−3σ partial-order monotonicity | proptest | Rating-math library | SS-11 | Genre: competitive/esports |
+| VP-007 | TrueSkill INV-TS-02 conservative-rating ordering (μ−3σ monotonicity) + INV-TS-03 permutation equivariance | proptest | Rating-math library | SS-11 | Genre: competitive/esports |
 | VP-010 | Tournament bracket progression correctness — every participant advances exactly once per round per format rules | proptest | Tournament bracket engine | SS-11 | Genre: esports / tournament modes |
 
 **VP counts: 10 total — 6 P0 (VP-001, VP-002, VP-003, VP-004, VP-008, VP-009), 4 P1 (VP-005, VP-006, VP-007, VP-010).**

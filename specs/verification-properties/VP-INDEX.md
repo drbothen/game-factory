@@ -1,7 +1,7 @@
 ---
 document_type: verification-property-index
 level: L3
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -16,6 +16,9 @@ inputs:
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 modified:
+  - version: "1.6"
+    date: 2026-06-13
+    reason: "F60-02 fix — corrected VP-004 Short Description from over-strong win-only reachability ('goal state reachable from any valid state') to terminal-set reachability ('every reachable non-terminal has path to declared terminal — win OR game-over') to match BC-6.02.004 EC-001 and BC-6.02.004/VP-TBD-015. The prior form would flag valid loss-path designs as violations."
   - version: "1.5"
     date: 2026-06-09
     reason: "F40-04 fix — corrected VP-007 summary row to reflect actual covered invariants (INV-TS-02 conservative-rating ordering + INV-TS-03 permutation equivariance); corrected VP-006 summary row description to reflect correct baseline (RD' < RD_old, not RD' <= RD_inactive); corrected VP-009 title to reflect primary property (range-containment + split-damage-sum)."
@@ -50,7 +53,7 @@ modified:
 | VP-001 | Economy conservation (no creation/destruction) | Kani + proptest | P0 | SS-05 | BC-6.01.001 |
 | VP-002 | FSM state legality (no invalid state reachable) | Kani | P0 | SS-05 | BC-6.01.003 |
 | VP-003 | Balance band containment (metric within declared bounds) | proptest | P0 | SS-05 | BC-6.02.003 |
-| VP-004 | No-softlock reachability (goal state reachable from any valid state) | Kani (bounded) | P0 | SS-05 | BC-6.02.004 |
+| VP-004 | No-softlock reachability (every reachable non-terminal has path to declared terminal — win OR game-over; F60-02) | Kani (bounded) | P0 | SS-05 | BC-6.02.004 |
 | VP-005 | Elo zero-sum conservation | proptest + algebraic | P1 | SS-11 | BC-13.02.001 |
 | VP-006 | Glicko-2 RD monotone decay (RD_new < RD_old strict, against pre-inactivity baseline; INV-GL2-02 — F40-05) | proptest | P1 | SS-11 | BC-13.02.001 |
 | VP-007 | TrueSkill INV-TS-02 conservative-rating ordering + INV-TS-03 permutation equivariance (F40-04) | proptest | P1 | SS-11 | BC-13.02.001 |
@@ -213,7 +216,7 @@ modified:
 | VP-001 | Economy conservation | BC-6.01.001 | `ss-06/BC-6.01.001.md` | Add back-ref: "Formally verified by VP-001 (Economy conservation — no creation/destruction)" |
 | VP-002 | FSM state legality | BC-6.01.003 | `ss-06/BC-6.01.003.md` | Add back-ref: "Formally verified by VP-002 (FSM state legality — no invalid state reachable)" |
 | VP-003 | Balance band containment | BC-6.02.003 | `ss-06/BC-6.02.003.md` | Add back-ref: "Formally verified by VP-003 (Balance band containment — metric within declared bounds)" |
-| VP-004 | No-softlock reachability | BC-6.02.004 | `ss-06/BC-6.02.004.md` | Add back-ref: "Formally verified by VP-004 (No-softlock reachability — goal state reachable from any valid state)" |
+| VP-004 | No-softlock reachability | BC-6.02.004 | `ss-06/BC-6.02.004.md` | Add back-ref: "Formally verified by VP-004 (No-softlock reachability — every reachable non-terminal state has path to declared terminal: win OR game-over; F60-02 corrected)" |
 | VP-005 | Elo zero-sum conservation | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-005 (Elo zero-sum conservation)" |
 | VP-006 | Glicko-2 RD monotone decay (RD_new < RD_old strict — INV-GL2-02) | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-006 (Glicko-2 RD monotone decay — RD_new strictly less than pre-inactivity RD_old, INV-GL2-02, F40-05 corrected)" |
 | VP-007 | TrueSkill INV-TS-02 conservative-rating ordering + INV-TS-03 permutation equivariance | BC-13.02.001 | `ss-13/BC-13.02.001.md` | Add back-ref: "Formally verified by VP-007 (TrueSkill INV-TS-02 conservative-rating ordering and INV-TS-03 permutation equivariance — F40-04 corrected)" |

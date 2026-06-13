@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,11 @@ capability: CAP-006
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-13
+    author: architect
+    reason: "F60-02 VP-004 back-ref consistency fix — updated VP-004 parenthetical to match corrected property statement (every reachable non-terminal state has a forward path to a declared terminal: win OR game-over; not win-only)"
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -140,4 +144,4 @@ S-TBD — No-Softlock Design Intent Contract
 
 - VP-TBD-015 — every reachable non-terminal state has a forward exit
 - VP-TBD-016 — softlock detection terminates on finite graphs
-- Formally verified by VP-004 (No-softlock reachability — goal state reachable from any valid state) — see verification-properties/VP-004-no-softlock-reachability.md
+- Formally verified by VP-004 (No-softlock reachability — every reachable non-terminal state has a forward path to a declared terminal: win OR game-over; F60-02) — see verification-properties/VP-004-no-softlock-reachability.md
