@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.4"
+version: "1.5"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -39,6 +39,21 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Adapter Protocol Family
+
+> **v1.5 changes (Pass-61 F61-01 — §2.3/§2.5 T2 comparison-method propagation, F40-01 sibling-doc):**
+> - §2.3 Determinism Tier table: corrected the `same-machine` row comparison-method cell
+>   from `snapshot-hash-diff on pinned CI runner only` to `snapshot-structured-diff`
+>   (field-by-field on pinned runner; bitwise hash equality is NOT guaranteed
+>   cross-platform). Per BC-1.12.003, the original cell value is now a
+>   DeterminismTierViolation. The `bitwise-cross-platform → snapshot-hash-diff` and
+>   `tolerance-only → tolerance-window` rows are unchanged. (F61-01 / F40-01-propagation)
+> - §2.5 ReplayResult schema: extended the `method` enum from
+>   `"snapshot-hash-diff | tolerance-window"` to
+>   `"snapshot-hash-diff | snapshot-structured-diff | tolerance-window"` so a conformant
+>   T2 adapter emitting `snapshot-structured-diff` produces a schema-valid output.
+>   Updated the `diffs[]` field comment to document both the T2 structured-diff shape
+>   (field-by-field `{tick, field, expected, actual}` per BC-1.12.002 test vector) and
+>   the existing tolerance-window shape. (F61-01 / F40-01-propagation)
 
 > **v1.4 changes (Pass-35 F35-01 — §1.3 base manifest seam enum completeness):**
 > - §1.3 Capability Manifest Schema: added `online-services-adapter` to the `seam` field
@@ -368,7 +383,7 @@ method the core selects:
 | Tier | Replay comparison method | Reference engine |
 |------|--------------------------|-----------------|
 | `bitwise-cross-platform` | `snapshot-hash-diff` (exact, across any runner) | Bevy + Rapier |
-| `same-machine` | `snapshot-hash-diff` on pinned CI runner only | Unity PhysX (Enhanced Determinism) |
+| `same-machine` | `snapshot-structured-diff` (field-by-field on pinned runner; bitwise hash equality NOT guaranteed cross-platform) | Unity PhysX (Enhanced Determinism) |
 | `tolerance-only` | `tolerance-window` metric diff | Godot physics; FP-heavy sims |
 
 **Replay prerequisites.** For any `replay` fidelity other than `none`, the manifest
@@ -433,11 +448,12 @@ they never touch engine-native formats.
 {
   "mode": "play",
   "comparison": {
-    "method": "snapshot-hash-diff | tolerance-window",
+    "method": "snapshot-hash-diff | snapshot-structured-diff | tolerance-window",
     "passed": true,
     "baselineHash": "<hash>",           // hash-diff only
     "actualHash": "<hash>",             // hash-diff only
-    "diffs": []                         // tolerance-window: [{tick, field, expected, actual, delta, withinTolerance}]
+    "diffs": []                         // T2 structured-diff: [{tick, field, expected, actual}] (per BC-1.12.002 test vector)
+                                        // tolerance-window:   [{tick, field, expected, actual, delta, withinTolerance}]
   }
 }
 ```
