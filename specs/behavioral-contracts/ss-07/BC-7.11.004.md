@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.004
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -105,7 +105,7 @@ number, nonce, or timestamp that the server uses to detect and reject re-submiss
 
 - BC-7.11.001 — evaluated by D-SEC dimension
 - BC-7.11.002 — sibling (no-trust-client is the fundamental invariant)
-- BC-7.11.006 — composes with (economy atomicity extends replay prevention to transaction integrity)
+- BC-7.11.007 — composes with (economy atomicity extends replay prevention to transaction integrity)
 
 ## Architecture Anchors
 
