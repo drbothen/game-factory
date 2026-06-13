@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,11 @@ capability: CAP-005
 priority: P0
 lifecycle_status: active
 introduced: v1.0.0
-modified: []
+modified:
+  - date: 2026-06-13
+    version: "1.3"
+    author: product-owner
+    reason: "F59-01 OBS-20-B reciprocal reconciliation — clarified that CAP-012/SS-10 owns the authoritative Canon-KB store (entity registry, edge graph, timeline); this BC (CAP-005/SS-04) is the read/validation/integrity-check consumer view. Updated Invariant 2, Architecture Module, and Related BCs accordingly."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -29,6 +33,8 @@ removal_reason: null
 ---
 
 # BC-5.04.002: Canon-KB Maintains Structural Integrity (Entity Ref + Timeline Consistency)
+
+> **Canon-KB authority (OBS-20-B reciprocal):** The authoritative Canon-KB store — entity registry, edge graph, and timeline — is owned by CAP-012 / SS-10 (BC-12.12.002 entities, BC-12.12.003 edges, BC-12.12.004 timeline). This BC (CAP-005 / SS-04) is the narrative-grounding consumer / integrity-check view: it validates consistency of existing Canon-KB data but does not own or manage entity/timeline mutations.
 
 ## Description
 
@@ -81,8 +87,10 @@ Creative quality (worldbuilding depth, prose quality) is a human gate via playte
 
 1. Entity IDs are globally unique within the Canon-KB. Duplicate `entry_id` values in
    `entity_registry` are a schema validation error.
-2. The Canon-KB is the single source of truth for entity existence. No other artifact
-   may define new entity IDs; they must appear in the entity_registry.
+2. Every entity referenced for narrative grounding MUST already exist in the CAP-012-owned
+   Canon-KB entity registry (BC-12.12.002). This BC rejects references to undefined entity
+   IDs (raises E-NAR-003) but does not itself create, assign, or manage entity IDs — that
+   authority belongs exclusively to CAP-012 / SS-10.
 3. Timeline events are never deleted; they are marked `status: "retconned"` with
    `replaced_by_event_id` if superseded (append-only ID protection per VSDD policy).
 
@@ -121,12 +129,15 @@ Creative quality (worldbuilding depth, prose quality) is a human gate via playte
 | L2 Capability | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 |
 | Capability Anchor Justification | CAP-005 ("Multi-Discipline Game Artifact Production") per capabilities.md §CAP-005 — the canon-kb is listed as the "keystone artifact" in RECONCILIATION §5.6a and is a primary artifact in CAP-005's "generates EVERYTHING a game needs — narrative" mandate. This BC defines its structural integrity contract. |
 | L2 Domain Invariants | DI-008 (engine-neutral spec layer) |
-| Architecture Module | SS-04 — Canon-KB integrity validator; entity registry; timeline consistency checker |
+| Architecture Module | SS-04 — Canon-KB integrity validator / consistency checker (read view over the CAP-012-owned entity registry & timeline store; SS-04 does not own the registry) |
 | Stories | S-TBD (filled by story-writer) |
 
 ## Related BCs
 
 - BC-5.04.001 — depends on this (narrative graph grounding checks query this KB)
+- BC-12.12.002 — authoritative owner of the entity registry that this BC reads/validates (consumer/validation view of authoritative store; CAP-012 / SS-10)
+- BC-12.12.003 — authoritative owner of the relationship/edge graph that this BC validates (consumer/validation view of authoritative store; CAP-012 / SS-10)
+- BC-12.12.004 — authoritative owner of the timeline that this BC validates for consistency (consumer/validation view of authoritative store; CAP-012 / SS-10)
 
 ## Architecture Anchors
 
