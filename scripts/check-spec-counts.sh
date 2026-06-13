@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.42
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.43
 #
 # PURPOSE
 # -------
@@ -249,6 +249,36 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.43 to add check (ll) — T2 comparison-method consistency guard
+#   (F61-01 / F40-01-propagation recurrence prevention):
+# CANONICAL RULE (BC-1.12.002 / BC-1.12.003 / BC-3.03.004 / methodology-layer §D-REPLAY):
+#   determinism tier T2 (`same-machine` / pinned-runner) uses replay comparison method
+#   `snapshot-structured-diff` (field-by-field). Cross-platform bitwise hash equality
+#   is NOT guaranteed for T2, so `snapshot-hash-diff` MUST NOT be mapped to `same-machine`.
+#   The canonical ReplayResult `method` enum has THREE values:
+#   `snapshot-hash-diff | snapshot-structured-diff | tolerance-window`.
+#
+# ASSERTION A: in adapter-protocols.md, the `same-machine` determinism-tier row must NOT
+#   map to `snapshot-hash-diff`. Detection: a line containing both `same-machine` and
+#   `snapshot-hash-diff` → violation. (The F61-01 defect: §2.3 line 371 mapped same-machine
+#   to snapshot-hash-diff, contradicting BC-1.12.003 which classifies that exact request
+#   as a DeterminismTierViolation.)
+#
+# ASSERTION B: the ReplayResult `method` enum line in adapter-protocols.md must contain
+#   all THREE canonical comparison methods: `snapshot-hash-diff`, `snapshot-structured-diff`,
+#   AND `tolerance-window`. Detection: the `"method":` enum line missing any of the three →
+#   violation. (The F61-01 defect: §2.5 line 436 omitted `snapshot-structured-diff`, making
+#   any conformant T2 adapter produce a schema-invalid ReplayResult.)
+#
+# SCOPE: adapter-protocols.md only (the implementer-facing doc). Canonical BC/methodology
+#   sources are maintained by separate ownership; this gate guards only the propagation gap.
+#
+# On violation: print offending line(s), append to FAILURES list, exit non-zero (same
+#   aggregation as check (k)/(kk)).
+# Green summary: "T2 comparison-method consistency (ll): same-machine→structured-diff
+#   confirmed; ReplayResult enum has all 3 methods; 0 violations."
+# POSIX/BSD-grep compatible (no grep -P). (F61-01 / F40-01-propagation recurrence prevention).
+#
 # extended in v1.42 to add check (kk) — warning-identifier resolution: every
 #   W-[A-Z]+-[0-9]+ token referenced in any BC file must be registered in
 #   error-taxonomy.md (F58-03 process-gap recurrence prevention). Modeled on
@@ -550,14 +580,15 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
 #   check (ii) added in v1.40: visionOS/OpenXR dedicated-code routing guard (F55-01 recurrence prevention).
 #   check (jj) added in v1.41: D-SEC no-degradation-path consistency guard (F56-01 recurrence prevention).
 #   check (kk) added in v1.42: warning-identifier resolution guard (F58-03 process-gap recurrence prevention).
-#   Positive-coverage log always printed. (F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (ll) added in v1.43: T2 comparison-method consistency guard (F61-01 / F40-01-propagation recurrence prevention).
+#   Positive-coverage log always printed. (F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -1004,6 +1035,8 @@ hh_lines_scanned=0
 # (ii) visionOS/OpenXR dedicated-code routing counters: initialized here so SUMMARY is safe if check is skipped
 ii_violations=0
 ii_files_scanned=0
+# (ll) T2 comparison-method consistency counters: initialized here so SUMMARY is safe if check is skipped
+ll_violations=0
 
 check() {
   local label="$1" computed="$2" stated="$3" source_doc="$4"
@@ -1024,7 +1057,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.42) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.43) ==="
 echo ""
 
 # ============================================================================
@@ -6566,6 +6599,127 @@ fi
 echo ""
 
 # ============================================================================
+# (ll) T2 COMPARISON-METHOD CONSISTENCY  [NEW v1.43, F61-01 / F40-01-propagation]
+# ============================================================================
+# ASSERTION A: no line in adapter-protocols.md may co-locate `same-machine`
+#   and `snapshot-hash-diff` (that mapping is a DeterminismTierViolation per
+#   BC-1.12.003).
+# ASSERTION B: the ReplayResult `method` enum line in adapter-protocols.md must
+#   contain all three canonical comparison methods:
+#     snapshot-hash-diff, snapshot-structured-diff, tolerance-window.
+# ============================================================================
+ADAPTER_PROTOCOLS="$REPO_ROOT/.factory/specs/architecture/adapter-protocols.md"
+
+echo "--- (ll) T2 comparison-method consistency (adapter-protocols.md) ---"
+
+ll_violations=0
+
+if [[ ! -f "$ADAPTER_PROTOCOLS" ]]; then
+  echo "    SKIP: adapter-protocols.md not found at $ADAPTER_PROTOCOLS"
+else
+  # --- Assertion A: same-machine must NOT map to snapshot-hash-diff ---
+  # Scan all lines containing 'same-machine'; flag any that also contain 'snapshot-hash-diff'.
+  # Exclude blockquote lines (starting ">") and changelog/reason lines.
+  ll_a_offenders=()
+  ll_lineno=0
+  while IFS= read -r line; do
+    ll_lineno=$(( ll_lineno + 1 ))
+    # Skip blockquote and reason:/modified: lines
+    case "$line" in
+      ">"*) continue ;;
+      *"reason:"*) continue ;;
+      *"modified:"*) continue ;;
+    esac
+    # Check if line contains same-machine AND snapshot-hash-diff
+    if printf '%s' "$line" | grep -qF 'same-machine' 2>/dev/null && \
+       printf '%s' "$line" | grep -qF 'snapshot-hash-diff' 2>/dev/null; then
+      ll_a_offenders+=("line $ll_lineno: $line")
+      ll_violations=$(( ll_violations + 1 ))
+    fi
+  done < "$ADAPTER_PROTOCOLS"
+
+  if [[ ${#ll_a_offenders[@]} -gt 0 ]]; then
+    echo "    FAIL (A): same-machine row maps to snapshot-hash-diff (DeterminismTierViolation per BC-1.12.003):"
+    for offender in "${ll_a_offenders[@]}"; do
+      echo "      $offender"
+    done
+    errors+=("MISMATCH [T2 comparison-method (ll) Assertion A]: adapter-protocols.md has same-machine mapped to snapshot-hash-diff — must be snapshot-structured-diff (BC-1.12.003)")
+    fail=1
+  else
+    echo "    (A) same-machine row: no snapshot-hash-diff co-location found — PASS"
+  fi
+
+  # --- Assertion B: ReplayResult method enum must contain all 3 canonical methods ---
+  # Anchor: the ReplayResult comparison-method enum is the ONLY '"method":' line that also
+  # contains 'tolerance-window' (verified: line 451; matchmaking line 841 has 'latency', not
+  # 'tolerance-window'; JSON-RPC envelope line 121 has '<method>', not 'tolerance-window').
+  # Exclude blockquote ('>') and changelog/reason:/modified: lines to be consistent with (A).
+  ll_b_candidates=()
+  ll_lineno=0
+  while IFS= read -r line; do
+    ll_lineno=$(( ll_lineno + 1 ))
+    # Skip blockquote and reason:/modified: lines
+    case "$line" in
+      ">"*) continue ;;
+      *"reason:"*) continue ;;
+      *"modified:"*) continue ;;
+    esac
+    if printf '%s' "$line" | grep -qF '"method":' 2>/dev/null && \
+       printf '%s' "$line" | grep -qF 'tolerance-window' 2>/dev/null; then
+      ll_b_candidates+=("line $ll_lineno: $line")
+    fi
+  done < "$ADAPTER_PROTOCOLS"
+
+  ll_b_candidate_count=${#ll_b_candidates[@]}
+
+  if [[ $ll_b_candidate_count -eq 0 ]]; then
+    echo "    FAIL (B): could not locate ReplayResult 'method' enum line (anchor: '\"method\":.*tolerance-window') in adapter-protocols.md — enum is missing or renamed"
+    errors+=("MISMATCH [T2 comparison-method (ll) Assertion B]: adapter-protocols.md ReplayResult method enum line not found — anchor '\"method\":.*tolerance-window' matched 0 lines")
+    fail=1
+    ll_violations=$(( ll_violations + 1 ))
+  elif [[ $ll_b_candidate_count -gt 1 ]]; then
+    echo "    FAIL (B): anchor '\"method\":.*tolerance-window' matched $ll_b_candidate_count lines (expected exactly 1) — ambiguous; check is failing loudly rather than guessing"
+    for cand in "${ll_b_candidates[@]}"; do
+      echo "      $cand"
+    done
+    errors+=("MISMATCH [T2 comparison-method (ll) Assertion B]: adapter-protocols.md anchor '\"method\":.*tolerance-window' matched $ll_b_candidate_count lines — ambiguous anchor")
+    fail=1
+    ll_violations=$(( ll_violations + 1 ))
+  else
+    # Exactly one candidate — check it contains all 3 tokens
+    ll_method_text="${ll_b_candidates[0]}"
+    ll_b_missing=()
+
+    if ! printf '%s' "$ll_method_text" | grep -qF 'snapshot-hash-diff' 2>/dev/null; then
+      ll_b_missing+=("snapshot-hash-diff")
+    fi
+    if ! printf '%s' "$ll_method_text" | grep -qF 'snapshot-structured-diff' 2>/dev/null; then
+      ll_b_missing+=("snapshot-structured-diff")
+    fi
+    if ! printf '%s' "$ll_method_text" | grep -qF 'tolerance-window' 2>/dev/null; then
+      ll_b_missing+=("tolerance-window")
+    fi
+
+    if [[ ${#ll_b_missing[@]} -gt 0 ]]; then
+      echo "    FAIL (B): ReplayResult method enum is missing canonical comparison method(s): ${ll_b_missing[*]}"
+      echo "      Found line: $ll_method_text"
+      errors+=("MISMATCH [T2 comparison-method (ll) Assertion B]: adapter-protocols.md ReplayResult method enum missing: ${ll_b_missing[*]} — must include all 3: snapshot-hash-diff | snapshot-structured-diff | tolerance-window")
+      fail=1
+      ll_violations=$(( ll_violations + ${#ll_b_missing[@]} ))
+    else
+      echo "    (B) ReplayResult method enum: all 3 methods present (snapshot-hash-diff, snapshot-structured-diff, tolerance-window) — PASS"
+    fi
+  fi
+
+  if [[ $ll_violations -eq 0 ]]; then
+    echo "    T2 comparison-method consistency (ll): same-machine→structured-diff confirmed; ReplayResult enum has all 3 methods; 0 violations"
+  else
+    echo "    Check (ll): $ll_violations violation(s) found."
+  fi
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6616,6 +6770,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  visionOS/OpenXR dedicated-code (ii): $ii_files_scanned BC files scanned, 0 visionOS+OpenXR+E-XR-001 co-locations (all visionOS/OpenXR inputs cite E-XR-007)"
   echo "  D-SEC no-degradation-path (jj):    D-SEC §3.1 row validated {GREEN, BLOCKED} only — no DEGRADED listed, 0 violations"
   echo "  Warning-identifier resolution (kk): $kk_files_scanned BC files scanned, ${kk_distinct:-0} distinct W-codes, 0 unregistered"
+  echo "  T2 comparison-method consistency (ll): same-machine→structured-diff confirmed; ReplayResult enum has all 3 methods; 0 violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
