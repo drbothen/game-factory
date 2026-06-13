@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.43
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.44
 #
 # PURPOSE
 # -------
@@ -249,6 +249,8 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.44 to add check (mm) — anti-cheat kernel-anomaly routing guard
+#   (F62-01 process-gap recurrence prevention): see below.
 # extended in v1.43 to add check (ll) — T2 comparison-method consistency guard
 #   (F61-01 / F40-01-propagation recurrence prevention):
 # CANONICAL RULE (BC-1.12.002 / BC-1.12.003 / BC-3.03.004 / methodology-layer §D-REPLAY):
@@ -580,7 +582,7 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
@@ -588,7 +590,8 @@
 #   check (jj) added in v1.41: D-SEC no-degradation-path consistency guard (F56-01 recurrence prevention).
 #   check (kk) added in v1.42: warning-identifier resolution guard (F58-03 process-gap recurrence prevention).
 #   check (ll) added in v1.43: T2 comparison-method consistency guard (F61-01 / F40-01-propagation recurrence prevention).
-#   Positive-coverage log always printed. (F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (mm) added in v1.44: anti-cheat kernel-anomaly routing guard (F62-01 process-gap recurrence prevention).
+#   Positive-coverage log always printed. (F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -6720,6 +6723,96 @@ fi
 echo ""
 
 # ============================================================================
+# (mm) ANTI-CHEAT KERNEL-ANOMALY ROUTING GUARD  [NEW v1.44, F62-01]
+# ============================================================================
+# CANONICAL RULE (error-taxonomy.md; BC-13.02.006; ADR-0008):
+#   A kernel-anomaly provider (vanguard / riot-vanguard / vgk) MUST route to
+#   E-ANTICH-002 (KernelAnomalyProviderAttempted), NOT E-ANTICH-001
+#   (ProviderNotInAllowedSet). E-ANTICH-001 covers the general "not in allowed
+#   set" case; E-ANTICH-002 is the dedicated, unconditionally-rejected,
+#   safety-critical code for the kernel-anomaly class. Conflating the two codes
+#   misroutes the rejection signal (F62-01 root cause: ADR-0008 Conformance
+#   Assertion item 3 said E-ANTICH-001 where E-ANTICH-002 was required).
+#
+# VIOLATION PREDICATE (line-by-line):
+#   A line that contains BOTH:
+#     (1) a kernel-anomaly token: "vanguard" OR "riot-vanguard" OR "vgk"
+#     (2) the wrong error code token: "E-ANTICH-001"
+#   AND does NOT also contain "E-ANTICH-002" on the SAME line.
+#
+#   Rationale for the same-line E-ANTICH-002 exclusion: legitimate ENUMERATION
+#   lines (e.g. error-taxonomy.md family-registration summary) list the whole
+#   E-ANTICH family including BOTH E-ANTICH-001 and E-ANTICH-002 alongside
+#   Vanguard/vgk tokens. Those lines have E-ANTICH-002 present → excluded.
+#
+# KNOWN LEGITIMATE LINES (must NOT trip):
+#   error-taxonomy.md:830 — family-registration summary listing E-ANTICH-001
+#     AND E-ANTICH-002 AND "Vanguard/vgk" on one line → E-ANTICH-002 present → excluded.
+#   ADR-0008:165 — Consequences §3 listing E-ANTICH-001 AND E-ANTICH-002 across
+#     adjacent lines; the vanguard/vgk tokens appear on lines 89-90 not 165-166 →
+#     no single line co-locates vanguard+E-ANTICH-001 without E-ANTICH-002.
+#   error-taxonomy.md:728 — E-ANTICH-002 definition (has Vanguard/vgk but no
+#     E-ANTICH-001 token) → condition (2) not met → excluded.
+#   error-taxonomy.md:727 — E-ANTICH-001 definition ("not in allowed set"; no
+#     kernel-anomaly token) → condition (1) not met → excluded.
+#   ADR-0008 (post-fix) line 91 — now says E-ANTICH-002, no E-ANTICH-001 →
+#     condition (2) not met → excluded.
+#
+# SCOPE: all .md files under .factory/specs/ (behavioral-contracts/,
+#   architecture/, prd-supplements/, prd.md, domain-spec/).
+#
+# On violation: print offending file:line, append to FAILURES, exit non-zero.
+# Green summary: "Anti-cheat kernel-anomaly routing (mm): N files scanned,
+#   0 kernel-anomaly→E-ANTICH-001 mis-routes."
+# POSIX/BSD-grep compatible (no grep -P). (F62-01 recurrence prevention).
+# ============================================================================
+
+echo "--- (mm) Anti-cheat kernel-anomaly routing guard ---"
+
+mm_violations=0
+mm_files_scanned=0
+mm_offenders=()
+
+while IFS= read -r mm_file; do
+  mm_files_scanned=$(( mm_files_scanned + 1 ))
+  mm_lineno=0
+  while IFS= read -r mm_line; do
+    mm_lineno=$(( mm_lineno + 1 ))
+    # Skip blockquote and changelog/reason/modified lines
+    case "$mm_line" in
+      ">"*) continue ;;
+      *"reason:"*) continue ;;
+      *"modified:"*) continue ;;
+    esac
+    # Condition (1): line contains a kernel-anomaly token
+    if printf '%s' "$mm_line" | grep -qiF 'vanguard' 2>/dev/null || \
+       printf '%s' "$mm_line" | grep -qiF 'riot-vanguard' 2>/dev/null || \
+       printf '%s' "$mm_line" | grep -qiF 'vgk' 2>/dev/null; then
+      # Condition (2): line also contains E-ANTICH-001
+      if printf '%s' "$mm_line" | grep -qF 'E-ANTICH-001' 2>/dev/null; then
+        # Exclusion: line ALSO contains E-ANTICH-002 (enumeration line) → skip
+        if ! printf '%s' "$mm_line" | grep -qF 'E-ANTICH-002' 2>/dev/null; then
+          mm_offenders+=("$mm_file:$mm_lineno: $mm_line")
+          mm_violations=$(( mm_violations + 1 ))
+        fi
+      fi
+    fi
+  done < "$mm_file"
+done < <(find "$REPO_ROOT/.factory/specs" -name "*.md" -type f 2>/dev/null)
+
+if [[ ${#mm_offenders[@]} -gt 0 ]]; then
+  echo "    FAIL: kernel-anomaly provider(s) mis-routed to E-ANTICH-001 (must be E-ANTICH-002):"
+  for offender in "${mm_offenders[@]}"; do
+    echo "      $offender"
+  done
+  errors+=("MISMATCH [anti-cheat kernel-anomaly routing (mm)]: ${#mm_offenders[@]} line(s) co-locate a kernel-anomaly token (vanguard/riot-vanguard/vgk) with E-ANTICH-001 without E-ANTICH-002 — kernel-anomaly provider must route to E-ANTICH-002 (F62-01)")
+  fail=1
+else
+  echo "    Anti-cheat kernel-anomaly routing (mm): $mm_files_scanned files scanned, 0 kernel-anomaly→E-ANTICH-001 mis-routes"
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6771,6 +6864,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  D-SEC no-degradation-path (jj):    D-SEC §3.1 row validated {GREEN, BLOCKED} only — no DEGRADED listed, 0 violations"
   echo "  Warning-identifier resolution (kk): $kk_files_scanned BC files scanned, ${kk_distinct:-0} distinct W-codes, 0 unregistered"
   echo "  T2 comparison-method consistency (ll): same-machine→structured-diff confirmed; ReplayResult enum has all 3 methods; 0 violations"
+  echo "  Anti-cheat kernel-anomaly routing (mm): $mm_files_scanned files scanned, 0 kernel-anomaly→E-ANTICH-001 mis-routes"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
