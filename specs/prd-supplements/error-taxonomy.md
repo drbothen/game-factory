@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "2.4"
+version: "2.5"
 status: draft
 producer: product-owner
 timestamp: 2026-06-09T00:00:00Z
@@ -790,6 +790,22 @@ Message format uses `<placeholder>` syntax.
 | E-OSVC-014 | Lobby capacity exceeded | broken | 1 | `online-services: matchmaking.joinLobby: lobby '<lobbyId>' is at max capacity (<maxPlayers>) — join rejected` | BC-15.05.001 |
 | E-OSVC-015 | Lobby not found | broken | 1 | `online-services: matchmaking.joinLobby: joinCode '<code>' does not resolve to an active lobby — code may be expired or invalid` | BC-15.05.001 |
 | E-OSVC-016 | Save size limit exceeded | broken | 1 | `online-services: save.write: payload for playerId '<id>' key '<key>' exceeds backend size limit '<limit>'` | BC-15.03.001 |
+
+---
+
+## Warning Codes
+
+> Warning codes are advisory (`cosmetic` severity — non-halting). They are emitted alongside
+> a valid output and do not cause pipeline failure or exit code 1. All current warning codes
+> are scoped to the XR platform seam (CAP-014). W-codes are distinct from E-codes and are
+> never registered in the error Family Registry above.
+
+| Warning Code | Scope | Condition | Referenced In |
+|--------------|-------|-----------|---------------|
+| W-XR-001 | xr-perf-budget | `motion_to_photon_ceiling_ms` > 20 ms (above industry comfort consensus; will likely result in Moderate or Intense comfort rating) | BC-14.02.001 |
+| W-XR-002 | xr-perf-budget | `target_refresh_hz` in allowed set {72, 80, 90, 96, 100, 120} but below 90 Hz; comfort advisory (below 90 Hz targets may reduce comfort rating on some platforms) | BC-14.02.001 |
+| W-XR-003 | xr-perf-budget | `foveation_config.kind: eye_tracked` declared in budget but target headset lacks eye-tracking hardware; runtime will degrade to fixed foveated rendering (FFR) | BC-14.02.001 |
+| W-XR-004 | xr-comfort-spec | `locomotion_types` includes `smooth_locomotion` and `vignette_config.enabled: false`; smooth locomotion without vignette is a high sickness risk | BC-14.02.002 |
 
 ---
 

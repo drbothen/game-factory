@@ -41,11 +41,11 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (restart #3 still seeking clean #1). Next action: Pass 58 (candidate clean #1). Pass 57 FINDINGS (F57-01 fixed: BC-7.11.004 v1.1; F57-02 deferred as FU-021).
+**Current clean-pass counter: 0/3** (restart #3 still seeking clean #1). Next action: Pass 59 (candidate clean #1). Pass 58 FINDINGS (F58-01 fixed: BC-14.02.001 v1.2 EC-001 60→E-XR-004; F58-03 codified: W-XR-001..004 registered in error-taxonomy v2.5 + gate check (kk) v1.42; F58-02 deferred as FU-022).
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
-2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.41, checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj + o.ii, ~39 sub-assertions; check (gg) is D-SEC evaluator-completeness guard; check (hh) is economy-conservation BC-routing guard; check (ii) is visionOS/OpenXR dedicated-code routing guard; check (jj) is D-SEC no-DEGRADED-path consistency guard). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
+2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.42, checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk + o.ii, ~40 sub-assertions; check (gg) is D-SEC evaluator-completeness guard; check (hh) is economy-conservation BC-routing guard; check (ii) is visionOS/OpenXR dedicated-code routing guard; check (jj) is D-SEC no-DEGRADED-path consistency guard; check (kk) is W-code identifier-resolution guard). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
 3. Commit via state-manager (main branch for script changes; factory-artifacts for .factory/ changes).
 4. If pass is CLEAN (0 critical, 0 important): increment counter. If FINDINGS: reset counter to 0.
 5. On reaching 3/3 consecutive clean passes: Phase-1d CONVERGED.
@@ -58,7 +58,7 @@ Loop protocol:
 - Phase-1 spec-package HUMAN GATE — T12
 - Phase 2+ — T13
 
-**CI-gate contract:** `scripts/check-spec-counts.sh` v1.41 on `main` — checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj + o.ii (~39 sub-assertions). Key guards: (ee) corpus-wide genre-profile schema; (ff) L2-INDEX 8 registry counts; (w) GENERAL DI-007 context (playtest keyword required); (gg) D-SEC evaluator-completeness (4 sub-predicates); (hh) economy-conservation BC routing; (ii) visionOS/OpenXR dedicated-code routing; (jj) D-SEC no-DEGRADED-path. MUST exit 0 before crediting any pass.
+**CI-gate contract:** `scripts/check-spec-counts.sh` v1.42 on `main` — checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk + o.ii (~40 sub-assertions). Key guards: (ee) corpus-wide genre-profile schema; (ff) L2-INDEX 8 registry counts; (w) GENERAL DI-007 context (playtest keyword required); (gg) D-SEC evaluator-completeness (4 sub-predicates); (hh) economy-conservation BC routing; (ii) visionOS/OpenXR dedicated-code routing; (jj) D-SEC no-DEGRADED-path; (kk) W-code identifier-resolution guard. MUST exit 0 before crediting any pass.
 
 ---
 
@@ -71,7 +71,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Passes 1–57 resolved (see phase-1-log.md + convergence table below); 3 streak breaks at P46/49/51; security-burst tails at P43/44/53; latest: Pass 57 FINDINGS (F57-01 BC-7.11.004 wrong-BC-ID route fixed v1.1; F57-02→FU-021 deferred); **COUNTER: 0/3**; Pass 58 = restart #3 clean #1 candidate | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Passes 1–58 resolved (see phase-1-log.md + convergence table below); 3 streak breaks at P46/49/51; security-burst tails at P43/44/53; latest: Pass 58 FINDINGS (F58-01 BC-14.02.001 EC-001 fixed v1.2; F58-03→check(kk) codified; F58-02→FU-022 deferred); **COUNTER: 0/3**; Pass 59 = restart #3 clean #1 candidate | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -80,9 +80,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 58** (candidate clean #1, restart #3 continues). Pass-42/53 security-burst tails now found+fixed+gated at Passes 43(dd), 44(ee), 53(gg), 56(jj). The lesson recurs: a dimension-semantics fix must sweep ALL methodology summary tables + sub-invariant BCs, not just the owner BC. FU-007..021 open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 59** (candidate clean #1, restart #3 continues). Pass-42/53 security-burst tails now found+fixed+gated at Passes 43(dd), 44(ee), 53(gg), 56(jj). The lesson recurs: a dimension-semantics fix must sweep ALL methodology summary tables + sub-invariant BCs, not just the owner BC. FU-007..022 open (non-blocking).
 
-**Spec state:** prd v2.7; BC-INDEX v1.9 (193 BCs; BC-7.11.004 v1.1 — BC-INDEX has no per-BC version column, no index edit needed); error-taxonomy v2.4 (267 codes / 34 families / 258 active); nfr-catalog v1.4 (41 NFRs); subsystem-decomposition v2.0 (P0=127/P1=42/P2=24); ARCH-INDEX v2.3 (13 subsystems, ADR-0008); methodology-layer **v1.16** (F56: D-SEC=GREEN,BLOCKED always-enabled SP4 unconditional); BC-7.11.001 v1.2 (SP4 fail-closed secrets); BC-7.11.002 v1.2 (offline test vector scoped); BC-7.11.004 **v1.1** (F57-01: wrong-BC-ID route 7.11.006→7.11.007 fixed); L2-INDEX v1.2 (F49: comprehensive registry audit); BC-12.12.003 v1.3 (F52: DI-007 removed); CI gate **v1.41** (checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj + o.ii, ~39 sub-assertions). Totals: 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24. See Session Resume Checkpoint for full version-bump list.
+**Spec state:** prd v2.7; BC-INDEX v1.9 (193 BCs; BC-14.02.001 v1.2 — BC-INDEX has no per-BC version column, no index edit needed); error-taxonomy **v2.5** (267 error codes / 34 families / 258 active + Warning Codes registry: 4 W-codes W-XR-001..004); nfr-catalog v1.4 (41 NFRs); subsystem-decomposition v2.0 (P0=127/P1=42/P2=24); ARCH-INDEX v2.3 (13 subsystems, ADR-0008); methodology-layer **v1.16** (F56: D-SEC=GREEN,BLOCKED always-enabled SP4 unconditional); BC-7.11.001 v1.2 (SP4 fail-closed secrets); BC-7.11.002 v1.2 (offline test vector scoped); BC-7.11.004 **v1.1** (F57-01: wrong-BC-ID route 7.11.006→7.11.007 fixed); BC-14.02.001 **v1.2** (F58-01: EC-001 60→E-XR-004 corrected); L2-INDEX v1.2 (F49: comprehensive registry audit); BC-12.12.003 v1.3 (F52: DI-007 removed); CI gate **v1.42** (checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk + o.ii, ~40 sub-assertions). Totals: 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24. Note: error-taxonomy now carries a Warning Codes registry (4 W-codes) — warnings NOT counted in the 267 error codes. See Session Resume Checkpoint for full version-bump list.
 
 ---
 
@@ -97,7 +97,8 @@ Loop protocol:
 | 55 | 2026-06-10 | FINDINGS | F55-01(I): BC-14.01.001 visionOS generic E-XR-001→dedicated E-XR-007; check (ii) added. Comprehensive generic-vs-dedicated audit — only visionOS instance remained. FU-019/020. | **0/3** (stays) |
 | 56 | 2026-06-10 | FINDINGS | F56-01(I): D-SEC hardening (BC-7.11.001 v1.2 SP4 unconditional) did NOT propagate to methodology §3.1 (A)/(B) tables + §4.3 enable rule + BC-7.11.002 test vector. Fixed (methodology v1.16, BC-7.11.002 v1.2); check (jj) added. | **0/3** (stays) |
 | 57 | 2026-06-13 | FINDINGS | F57-01(I): BC-7.11.004:108 wrong-but-existing BC-ID route BC-7.11.006→BC-7.11.007 (Economy-Atomicity composition; reciprocal pair restored); v1.1. F57-02(obs→FU-021): VP-TBD-003 vs EC-005 healing-as-negative-damage non-entailment. | **0/3** (stays) |
-| 58 | — | PENDING | — | — |
+| 58 | 2026-06-13 | FINDINGS | F58-01(I): BC-14.02.001 EC-001 `target_refresh_hz: 60` → E-XR-004 (was wrongly W-XR-002; contradicted allowed-set Invariant 1 + test vector); BC-14.02.001 v1.2. F58-03(obs,process-gap→CODIFIED): W-XR-001..004 registered in error-taxonomy v2.5 + gate check (kk) added v1.42. F58-02(obs→FU-022): BC-12.12.009:105 stale EC-001 label (cosmetic). | **0/3** (stays) |
+| 59 | — | PENDING | — | — |
 
 ---
 
@@ -113,7 +114,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–57 resolved; Pass 57 FINDINGS (F57-01: BC-7.11.004 wrong-BC-ID route fixed v1.1; F57-02→FU-021 deferred); counter 0/3; Pass 58 = restart #3 clean #1 candidate | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–58 resolved; Pass 58 FINDINGS (F58-01: BC-14.02.001 EC-001 60→E-XR-004 fixed v1.2; F58-03→check(kk) codified; F58-02→FU-022 deferred); counter 0/3; Pass 59 = restart #3 clean #1 candidate | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -180,21 +181,22 @@ Loop protocol:
 | FU-019 | OBS-55-A/ambiguous: BC-14.02.002 EC-005 — automated sign-off of a human gate (playtest_gate.signed_off:true by tooling) emits E-XR-001 (schema). Genuinely ambiguous vs E-EAP-013 (HumanGatedTaskPending / human-gate-boundary). Human adjudication: schema-level vs DI-006-boundary enforcement. | human (Phase-1 gate) | OPEN — non-blocking |
 | FU-020 | OBS-55-B [process-gap codification]: generic-vs-dedicated error-code routing class has recurred (F39-02 E-ENG/E-CIN, F55-01 E-XR). A GENERAL cross-BC "same canonical-test-vector input → consistent error-code" check would codify it, but is infeasible as a simple grep (semantic input-matching). Targeted guards added per-instance (hh economy, ii visionOS). Consider a real tooling investment if the class recurs again. | architect | OPEN — non-blocking; codification candidate |
 | FU-021 | F57-02 (obs): VP-TBD-003 (BC-6.01.002:108) asserts `hp_delta ≥ 0` but EC-005 (line 90) permits healing modeled as negative damage → non-entailment. Non-blocking (VP-TBD-003 is unresolved placeholder; EC-005 conditional). Resolve at VP-TBD-003 promotion (Phase-6): scope VP-TBD-003 to non-healing rows OR restate as `hp_delta ∈ [-(max_hp − current_hp), current_hp]`. | product-owner | Phase-6 VP-TBD-003 promotion — OPEN non-blocking |
-| LESSONS-CODIFIED | LESSON-F43/F46/F49a/F49b/F52/F53/F56 — all codified in CI checks dd/ee/ff/w/gg/jj. Full text: `.factory/cycles/v0.1.0-greenfield/lessons.md` | — | CODIFIED |
+| FU-022 | F58-02 (obs): BC-12.12.009:105 canonical-test-vector label "(EC-001 bootstrap variant)" is a stale cross-ref — bootstrap behavior is in Postcondition §5, not EC-001. Cosmetic cleanup. | product-owner | Phase-1 gate or next BC touch — OPEN non-blocking |
+| LESSONS-CODIFIED | LESSON-F43/F46/F49a/F49b/F52/F53/F56/F58 — all codified in CI checks dd/ee/ff/w/gg/jj/kk. Full text: `.factory/cycles/v0.1.0-greenfield/lessons.md` | — | CODIFIED |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-13
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–57 DONE.
-**Phase-1d Pass 57:** FINDINGS (0C/1I/1obs). F57-01(I): BC-7.11.004:108 cited BC-7.11.006 (Anti-Wallhack) instead of BC-7.11.007 (Economy Atomicity); prose "economy atomicity extends replay prevention to transaction integrity" uniquely identifies BC-7.11.007. Reciprocal link BC-7.11.007.md:120 confirmed correct. Fixed: line 108 BC-7.11.006→BC-7.11.007; version bumped v1.0→v1.1. F57-02(obs): VP-TBD-003 vs EC-005 non-entailment — deferred as FU-021 (non-blocking; resolve at Phase-6 VP-TBD-003 promotion).
-**Clean-pass counter: 0/3 (counter unchanged — findings pass; restart #3 still seeking clean #1).** Pass 58 = restart #3 candidate clean #1.
-**Next action:** `phase-1d-adversarial` — **Pass 58** (candidate clean #1, restart #3 continues). Spec FROZEN after F57 fix. FU-007/FU-008/FU-010/FU-011/FU-012/FU-013/FU-014/FU-016/FU-017/FU-018/FU-019/FU-020/FU-021 open (non-blocking). FU-015 CLOSED (F51-02).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–58 DONE.
+**Phase-1d Pass 58:** FINDINGS (0C/1I/2obs). F58-01(I): BC-14.02.001 EC-001 `target_refresh_hz: 60` emitted W-XR-002 (wrongly "valid schema; W-XR-002 warning") — contradicts Invariant 1 (allowed set {72,80,90,96,100,120}) and canonical test vector (60→E-XR-004). Fixed: EC-001 corrected to `60→E-XR-004 (not in allowed set)`; fps/refresh-hz conflation removed; BC-14.02.001 v1.1→v1.2. F58-03(obs,process-gap→CODIFIED): W-XR-001..004 were BC-referenced but unregistered and ungated; PO registered all 4 in error-taxonomy.md under new `## Warning Codes` section (v2.4→v2.5); architect added gate check (kk) W-code identifier-resolution to scripts/check-spec-counts.sh (v1.41→v1.42); confirmed: 193 BC files, 4 distinct W-codes, 0 unregistered. F58-02(obs): BC-12.12.009:105 stale label "(EC-001 bootstrap variant)" — cosmetic, deferred as FU-022.
+**Clean-pass counter: 0/3 (counter stays — findings pass; restart #3 still seeking clean #1).** Pass 59 = restart #3 candidate clean #1.
+**Next action:** `phase-1d-adversarial` — **Pass 59** (candidate clean #1, restart #3 continues). Spec FROZEN after F58 fix burst. FU-007/FU-008/FU-010/FU-011/FU-012/FU-013/FU-014/FU-016/FU-017/FU-018/FU-019/FU-020/FU-021/FU-022 open (non-blocking). FU-015 CLOSED (F51-02).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / P0=127/P1=42/P2=24 / CI gate v1.41 (~39 sub-assertions). UNCHANGED since Pass 57 (content-only fix, no count change). §3.1 D-SEC = 2 allowed values (GREEN, BLOCKED); check (s) verifies 33 dim-value pairs.
-**Version bumps Pass 57:** BC-7.11.004 v1.1 (F57-01: wrong-BC-ID route BC-7.11.006→BC-7.11.007, reciprocal pair restored). BC-INDEX has no per-BC version column — no index edit made. CI gate unchanged (v1.41). No main-branch changes this pass.
-**Open FUs:** FU-005/006/007/008/010/011/012/013/014/016/017/018/019/020/021 open (all non-blocking except FU-005 ONGOING). FU-009 CLOSED (Pass-24). FU-015 CLOSED (F51-02). See Open Follow-up Items table above.
+**Spec totals:** 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / P0=127/P1=42/P2=24 / CI gate v1.42 (~40 sub-assertions). Error codes UNCHANGED (267); Warning Codes registry added (4 W-codes — NOT counted in 267). §3.1 D-SEC = 2 allowed values (GREEN, BLOCKED); check (s) verifies 33 dim-value pairs.
+**Version bumps Pass 58:** BC-14.02.001 v1.2 (F58-01: EC-001 60→E-XR-004 corrected, fps/refresh-hz conflation removed). error-taxonomy v2.5 (F58-03: Warning Codes section added, W-XR-001..004 registered). CI gate v1.42 (check (kk) added). BC-INDEX has no per-BC version column — no index edit made.
+**Open FUs:** FU-005/006/007/008/010/011/012/013/014/016/017/018/019/020/021/022 open (all non-blocking except FU-005 ONGOING). FU-009 CLOSED (Pass-24). FU-015 CLOSED (F51-02). See Open Follow-up Items table above.
 **Decisions:** D-014/015/019 flagged for human gate review. D-001..013 see decisions-log-archive.md. D-018/019 in effect.
-**main branch:** IN SYNC with origin/main at v1.41 (see git log for SHA). No main-branch change this pass. Step history: see phase-1-log.md.
+**main branch:** UPDATED v1.42 (check (kk) added; see git log for SHA). Step history: see phase-1-log.md.
 **GATE EXECUTION NOTE:** Run `bash scripts/check-spec-counts.sh` as a SINGLE isolated process — concurrent runs corrupt shared state and produced a spurious check-(k) false-positive during Pass 57. Gate must exit 0 before crediting any pass.

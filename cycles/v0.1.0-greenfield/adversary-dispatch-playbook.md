@@ -31,7 +31,7 @@ Five ADAPTER seams: engine / asset / distribution / XR / online-services + Canon
 
 ---
 
-### DO NOT Re-Derive (machine-gated, gate v1.41)
+### DO NOT Re-Derive (machine-gated, gate v1.42)
 
 These classes are fully covered by `scripts/check-spec-counts.sh` — do NOT spend adversary attention re-checking them:
 
@@ -50,6 +50,7 @@ These classes are fully covered by `scripts/check-spec-counts.sh` — do NOT spe
 - economy-conservation-BC-routing
 - visionOS/OpenXR-dedicated-code
 - D-SEC-no-DEGRADED-path
+- warning-identifier resolution (W-codes registered in error-taxonomy.md — check (kk))
 
 **Update this list when new gate checks are added.**
 

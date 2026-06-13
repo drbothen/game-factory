@@ -47,6 +47,10 @@ STATE.md now indexes these by ID with a pointer to this file.
    When D-SEC was hardened (fail-closed/no-degrade, SP4 unconditional in BC-7.11.001 v1.2), the fix propagated to the owner BC but NOT to the methodology §3.1 (A)/(B) summary tables (still listed DEGRADED/offline-only) nor to the §4.3 enable rule (online-only), nor to BC-7.11.002's test vector ("GREEN by inapplicability"). All restated surfaces must be swept atomically: owner BC, methodology summary tables, enable-rule prose, AND sub-invariant BC test vectors. Codified by check (jj) D-SEC no-DEGRADED-path consistency guard (gate v1.41).
    _Discovered: Pass 56, 2026-06-10_
 
+8. **LESSON-F58 — Warning codes, like error codes, must be registered in the error taxonomy and gated by the CI check.** [codified]
+   Check (k) enforced registration of E-codes (E-XXX-NNN) referenced in BCs. No equivalent existed for W-codes (W-XXX-NNN). This gap allowed BC-14.02.001 EC-001 to cite W-XR-002 in a case where the contract's own Invariant 1 and canonical test vector required E-XR-004 (rejected input), and the error went undetected by the gate. Codified by: (a) PO registering W-XR-001..004 in error-taxonomy.md under a new `## Warning Codes` section (v2.5); (b) architect adding check (kk) W-code identifier-resolution guard to check-spec-counts.sh (gate v1.42). Pattern: any new warning code family introduced in a BC must be registered in error-taxonomy.md and confirmed by gate.
+   _Discovered: Pass 58, 2026-06-13_
+
 ---
 
 ## Policy Candidates
@@ -60,3 +64,4 @@ STATE.md now indexes these by ID with a pointer to this file.
 | LESSON-F52 | Recurrence guards use right-context positive assertion | CI gate design | adopted (check w v1.37) |
 | LESSON-F53 | Dimension hardening must update evaluator BC body | Security BC authoring | adopted (check gg) |
 | LESSON-F56 | Dimension-semantics hardening sweeps all restatement surfaces | Architecture/BC sync | adopted (check jj) |
+| LESSON-F58 | Warning codes must be registered in error taxonomy and gated (same as E-codes) | BC authoring workflow | adopted (check kk) |
