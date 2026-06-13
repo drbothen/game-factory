@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.41
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.42
 #
 # PURPOSE
 # -------
@@ -249,6 +249,13 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.42 to add check (kk) — warning-identifier resolution: every
+#   W-[A-Z]+-[0-9]+ token referenced in any BC file must be registered in
+#   error-taxonomy.md (F58-03 process-gap recurrence prevention). Modeled on
+#   check (k) (E-code resolution); registration detected by token presence in the
+#   taxonomy file (same strategy). Unregistered W-codes cause FAIL. Green
+#   summary line: "Warning-identifier resolution (kk): N BC files scanned,
+#   M distinct W-codes, 0 unregistered." POSIX/BSD-grep compatible.
 # extended in v1.41 to add check (jj) — D-SEC allowed-value / BC-7.11.001
 #   no-degradation-path consistency guard (F56-01 fail-open recurrence prevention):
 # CANONICAL RULE (BC-7.11.001 Invariant 5 / DI-013): D-SEC has NO DEGRADED state.
@@ -543,13 +550,14 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
 #   check (ii) added in v1.40: visionOS/OpenXR dedicated-code routing guard (F55-01 recurrence prevention).
 #   check (jj) added in v1.41: D-SEC no-degradation-path consistency guard (F56-01 recurrence prevention).
-#   Positive-coverage log always printed. (F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (kk) added in v1.42: warning-identifier resolution guard (F58-03 process-gap recurrence prevention).
+#   Positive-coverage log always printed. (F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -1016,7 +1024,7 @@ extract_grep_awk() {
   grep -E "$pattern" "$file" 2>/dev/null | awk "$awk_prog" | head -1 || true
 }
 
-echo "=== check-spec-counts.sh — game-factory spec consistency (v1.41) ==="
+echo "=== check-spec-counts.sh — game-factory spec consistency (v1.42) ==="
 echo ""
 
 # ============================================================================
@@ -6481,6 +6489,83 @@ fi
 echo ""
 
 # ============================================================================
+# (kk) WARNING-IDENTIFIER RESOLUTION  [NEW v1.42, F58-03]
+# ============================================================================
+# Every W-[A-Z]{2,}-[0-9]+ token referenced in any BC file must be registered
+# in error-taxonomy.md.  Modeled on check (k) (E-code resolution): registration
+# is detected by token presence in the taxonomy file (same strategy as k.i).
+#
+# Background (F58-03 process-gap): check (k) enforces E-code registration but
+# had no equivalent for W-codes.  This gap allowed a BC to emit an unregistered
+# or mis-applied warning code (e.g. W-XR-002 on input the schema must reject)
+# without machine detection.  Check (kk) closes that class.
+#
+# Registration format (error-taxonomy.md): a W-code is considered registered if
+# the token W-XXX-NNN (exact string) appears anywhere in error-taxonomy.md,
+# matching what the PO adds in a "## Warning Codes" section with a markdown
+# table whose rows start "| W-XXX-NNN |".
+#
+# On any unregistered W-code: print offending code(s) + referencing file(s),
+# append to FAILURES list, exit non-zero (same aggregation as check (k)).
+# Positive-coverage log always printed.
+# POSIX/BSD-grep compatible (no grep -P). (F58-03 recurrence prevention).
+# ============================================================================
+echo "--- (kk) warning-identifier resolution (BC refs vs error-taxonomy.md) ---"
+
+kk_files_scanned=0
+kk_violations=0
+
+if [[ ! -f "$ERROR_TAX" ]]; then
+  echo "    SKIP: error-taxonomy.md not found at $ERROR_TAX"
+else
+  # Build sorted unique list of registered W-codes from taxonomy (token presence)
+  kk_registered_codes=$(grep -oE 'W-[A-Z]{2,}-[0-9]+' "$ERROR_TAX" 2>/dev/null | sort -u || true)
+
+  # Collect all W-[A-Z]{2,}-[0-9]+ tokens referenced across all BC files
+  kk_bc_referenced_codes=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+    -exec grep -ohE 'W-[A-Z]{2,}-[0-9]+' {} \; 2>/dev/null | sort -u || true)
+
+  kk_files_scanned=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" 2>/dev/null | wc -l | tr -d ' ')
+  kk_distinct=$(printf '%s\n' "$kk_bc_referenced_codes" | grep -c . 2>/dev/null || echo 0)
+
+  echo "    Registered W-codes in error-taxonomy.md: $(printf '%s\n' "$kk_registered_codes" | grep -c . 2>/dev/null || echo 0)"
+  echo "    Distinct W-codes referenced across BC files: $kk_distinct"
+
+  # Unregistered-code check
+  kk_unregistered=()
+  if [[ -n "$kk_bc_referenced_codes" ]]; then
+    while IFS= read -r code; do
+      [[ -z "$code" ]] && continue
+      if ! printf '%s\n' "$kk_registered_codes" | grep -qF "$code" 2>/dev/null; then
+        kk_unregistered+=("$code")
+      fi
+    done <<< "$kk_bc_referenced_codes"
+  fi
+
+  echo "    Unregistered W-codes found: ${#kk_unregistered[@]}"
+
+  if [[ ${#kk_unregistered[@]} -gt 0 ]]; then
+    echo ""
+    echo "    UNREGISTERED WARNING CODES (must be added to error-taxonomy.md):"
+    for code in "${kk_unregistered[@]}"; do
+      # Find which BC files reference this W-code
+      bc_files_with_wcode=$(find "$BC_DIR" -mindepth 2 -maxdepth 2 -name "BC-*.md" \
+        -exec grep -lE "${code}([^0-9]|$)" {} \; 2>/dev/null \
+        | awk -F'/' '{print $(NF-1)"/"$NF}' | tr '\n' ' ')
+      echo "      $code  (referenced in: $bc_files_with_wcode)"
+      kk_violations=$(( kk_violations + 1 ))
+    done
+    errors+=("MISMATCH [warning-identifier resolution (kk)]: ${#kk_unregistered[@]} W-code(s) referenced in BCs are not registered in error-taxonomy.md — PO must register (see list above)")
+    fail=1
+  else
+    echo "    Warning-identifier resolution (kk): $kk_files_scanned BC files scanned, $kk_distinct distinct W-codes, 0 unregistered"
+  fi
+
+  echo "    Check (kk): W-code resolution complete; $kk_violations violation(s) found."
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6530,6 +6615,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Economy-conservation BC-routing (hh): $hh_files_scanned BC files scanned ($hh_lines_scanned operative lines), 0 BC-6.02.001+economy-keyword co-locations (all economy-conservation citations use BC-6.01.001)"
   echo "  visionOS/OpenXR dedicated-code (ii): $ii_files_scanned BC files scanned, 0 visionOS+OpenXR+E-XR-001 co-locations (all visionOS/OpenXR inputs cite E-XR-007)"
   echo "  D-SEC no-degradation-path (jj):    D-SEC §3.1 row validated {GREEN, BLOCKED} only — no DEGRADED listed, 0 violations"
+  echo "  Warning-identifier resolution (kk): $kk_files_scanned BC files scanned, ${kk_distinct:-0} distinct W-codes, 0 unregistered"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
