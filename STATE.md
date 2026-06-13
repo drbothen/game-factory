@@ -50,6 +50,8 @@ Loop protocol:
 4. If pass is CLEAN (0 critical, 0 important): increment counter. If FINDINGS: reset counter to 0.
 5. On reaching 3/3 consecutive clean passes: Phase-1d CONVERGED.
 
+**Adversary dispatch template (turnkey resume):** see `.factory/cycles/v0.1.0-greenfield/adversary-dispatch-playbook.md` — captures the gated-class skip-list, accepted conventions, already-swept classes, FU-005 targets, and deep-cross-BC focus to reconstruct an equivalent Pass-N dispatch from zero context.
+
 **On Phase-1d CONVERGED:** proceed to:
 - Fresh-context consistency-validator audit (`/vsdd-factory:consistency-validation`) — T10
 - `/vsdd-factory:check-input-drift` — T11
