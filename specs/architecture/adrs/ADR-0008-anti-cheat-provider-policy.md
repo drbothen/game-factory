@@ -2,10 +2,10 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0008"
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
-timestamp: 2026-06-09T00:00:00Z
+timestamp: 2026-06-13T00:00:00Z
 phase: 1d
 traces_to: ARCH-INDEX.md
 supersedes: []
@@ -88,7 +88,7 @@ authored / active) MUST assert:
    `{eac, eos, battleye}` (case-insensitive).
 3. Any value mapping to a kernel-anomaly provider (currently: `vanguard`,
    `riot-vanguard`, `vgk`) causes the conformance gate to emit error code
-   E-ANTICH-001 (registered in error-taxonomy.md) and block integration scaffolding generation.
+   E-ANTICH-002 (registered in error-taxonomy.md) and block integration scaffolding generation.
 4. Integration scaffolding produced by the factory contains no ring-0 driver
    compilation targets (verified jointly with BC-1.15.002).
 
@@ -191,3 +191,4 @@ does not apply.
 |---------|--------|
 | 1.0 | Initial authoring. Pass-42 F42-02 architectural basis. BC-13.02.006 authored / active. E-ANTICH error family registered in error-taxonomy.md. |
 | 1.1 | Pass-43 F43-01: swept stale "reserved/to author" prose. All references to BC-13.02.006 and E-ANTICH updated to reflect authored/active status. |
+| 1.2 | Pass-62 F62-01: Conformance Assertion item 3 (line 91) corrected — kernel-anomaly provider mis-route fixed from E-ANTICH-001 to E-ANTICH-002. Canonical mapping: E-ANTICH-001 = Provider not in allowed set; E-ANTICH-002 = Kernel-anomaly provider attempted (Riot Vanguard / vgk.sys). Consistent with error-taxonomy.md:728, BC-13.02.006 PC3/INV-2, Consequences §3 (line 165), and prd.md:277. |
