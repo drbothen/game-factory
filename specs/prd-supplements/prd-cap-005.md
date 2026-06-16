@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: cap-005
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -11,6 +11,8 @@ modified:
     reason: "O28-01 fix: enriched E-CIN-003 row to match error-taxonomy.md I5 wording — changed category name from 'Directed flag missing gate' to 'Directed flag missing creative gate' and expanded message format to include '(creative gate, not human-gated fidelity tier — see D-013 distinction in methodology-layer.md §2.8)' so the canonical source and rollup agree."
   - pass: "Pass-39"
     reason: "F39-02 fix: registered E-ENG-003 (UnclassifiedModule) and E-ENG-004 (TestScopedToWrongModule) — closes 'E-ENG-001/002 variant' language in BC-5.05.001 EC-001 and BC-5.05.002 EC-005. Registered E-CIN-005 (TimestampOutOfRange) and E-CIN-006 (BlendshapeTrackSetIncomplete) — closes 'E-CIN-001/004 variant' language in BC-5.06.001 PC1/EC-003 and BC-5.06.002 PC1/EC-001. All four codes added to this supplement table."
+  - pass: "Pass-66"
+    reason: "F66-01 fix: propagation residual from 2026-06-16 error-code split. (1) E-AUD-004 row: updated category from 'AI audio provenance' to 'AI audio provenance — blocked tool' and replaced old coverage-gap message with authoritative blocked-tool message matching error-taxonomy.md:121. (2) Added E-AUD-005 row (AI audio provenance — coverage gap) matching error-taxonomy.md:122. (3) E-PROD-003 row: updated category from 'Wave ordering violation' to 'Wave ordering violation / predecessor not complete' matching error-taxonomy.md:176. (4) Added E-PROD-004 row (Discipline-DAG cycle at plan-validation) matching error-taxonomy.md:177."
 phase: 1a
 traces_to: CAP-005
 inputs:
@@ -427,7 +429,8 @@ See also: `.factory/specs/prd-supplements/error-taxonomy.md` (cross-CAP catalog)
 | E-AUD-001 | Bank build | broken | 1 | `audio bank build failed: <platform>/<bank_id>: <error>` |
 | E-AUD-002 | Loudness conformance | broken | 1 | `audio bank '<bank_id>' loudness = <lufs> LUFS, target = <target> ±2 LUFS` |
 | E-AUD-003 | True-peak | broken | 1 | `audio bank '<bank_id>' true-peak = <dBTP> dBTP, ceiling = -1 dBTP` |
-| E-AUD-004 | AI audio provenance | broken | 1 | `audio asset '<id>' not covered by ai-audio-provenance-ledger — violates DI-003` |
+| E-AUD-004 | AI audio provenance — blocked tool | broken | 1 | `audio asset '<id>' uses blocked tool '<tool>' in provenance sidecar — DI-009 violation; ledger blocked_tool_detected=true` |
+| E-AUD-005 | AI audio provenance — coverage gap | broken | 1 | `audio asset '<id>' missing from ai-audio-provenance-ledger — AI-generated asset not covered; coverage gap violates DI-003 (BC-5.03.002)` |
 | E-NAR-001 | Dead-end node | broken | 1 | `narrative-graph '<graph_id>' dead-end detected at node '<node_id>': no outgoing edges and not declared end` |
 | E-NAR-002 | Unreachable node | broken | 1 | `narrative-graph '<graph_id>' unreachable node '<node_id>': no path from start` |
 | E-NAR-003 | Dangling entity ref | broken | 1 | `narrative node '<node_id>' references canon entity '<entity_id>' not in Canon-KB` |
@@ -444,7 +447,8 @@ See also: `.factory/specs/prd-supplements/error-taxonomy.md` (cross-CAP catalog)
 | E-CIN-006 | Blendshape track set incomplete | broken | 1 | `lip-sync '<clip_id>' blendshape track set does not match ARKit-52; missing or extra tracks: <track_list>` |
 | E-PROD-001 | Missing dependency contract | broken | 1 | `wave '<wave_id>' starts discipline '<consumer>' but cross-discipline-dependency-contract from '<producer>' not found` |
 | E-PROD-002 | Dependency acceptance fail | broken | 1 | `cross-discipline-dependency-contract '<contract_id>' acceptance criterion '<crit_id>' failed: <assertion>` |
-| E-PROD-003 | Wave ordering violation | broken | 1 | `wave '<wave_id>' started but dependency '<dep_wave_id>' not yet green in discipline DAG` |
+| E-PROD-003 | Wave ordering violation / predecessor not complete | broken | 1 | `wave '<wave_id>' started but dependency '<dep_wave_id>' not yet green in discipline DAG` |
+| E-PROD-004 | Discipline-DAG cycle at plan-validation | broken | 1 | `game-production-plan rejected: discipline-DAG cycle detected — cycle: <discipline_path>; resolve cycle before any wave begins (BC-5.07.001 EC-001)` |
 
 ---
 

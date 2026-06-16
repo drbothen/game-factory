@@ -2,10 +2,13 @@
 document_type: domain-spec-section
 level: L2
 section: ubiquitous-language
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
+modified:
+  - pass: "Pass-66"
+    reason: "F66-02 fix: split conflated 'Backend Class (asset adapter sense)' entry into two correct entries: (1) Backend Class (backend_class) — 6-value automation taxonomy; (2) Indemnification Tier (indemnification_tier) — IP-risk Tier-1/2/3 classification. Prior entry conflated these two distinct fields on AssetAdapter."
 phase: 1a
 inputs:
   - .factory/specs/product-brief.md
@@ -130,10 +133,16 @@ assessment, and `disclosure_class`.
 and Steam policy: `pre-generated` / `live-generated` / `procedural-exempt`.
 Feeds the `ai-disclosure-manifest`.
 
-**Backend Class** (asset adapter sense) — Tier-1/2/3 risk classification of an
-asset generation provider: Tier-1 = licensed/indemnified, auto-ingest;
-Tier-2 = some indemnification, flagged but ingested; Tier-3 = unindemnified,
-flagged with copyrightability-assessment.
+**Backend Class** (`backend_class`) — The automation/transport modality of an asset
+generation backend. Six-value taxonomy: `cloud-api` | `headless-cli` | `mcp-headless`
+| `mcp-gui` | `saas-ui` | `desktop-gui`. Drives adapter routing and CI-testability
+decisions. Distinct from `indemnification_tier` (IP-risk classification). See entities.md
+§AssetAdapter and BC-4.01.001.
+
+**Indemnification Tier** (`indemnification_tier`) — IP-risk classification of an asset
+generation provider: Tier-1 = licensed/indemnified, auto-ingest; Tier-2 = some
+indemnification, flagged but ingested; Tier-3 = unindemnified, flagged with
+copyrightability-assessment. A separate field from `backend_class` on AssetAdapter.
 
 **Quality-Gate Report** — Per-asset validation output: topology, UV, PBR,
 loudness, and provenance completeness checks. Tier-1 auto-ingest on pass; all

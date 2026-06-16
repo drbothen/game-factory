@@ -9,7 +9,7 @@ phase: 1
 product: game-factory
 mode: greenfield
 brief_version: "2.0"
-timestamp: 2026-06-16T14:00:00Z
+timestamp: 2026-06-16T19:00:00Z
 brief_approval: PASSED
 preflight_verdict: READY-WITH-WARNINGS
 market_intel_verdict: PASSED
@@ -41,7 +41,7 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (restart #3 still seeking clean #1). Next action: Pass 66 (candidate clean #1, now against a drained corpus — Phase-1d consistency sweep fixed 36 propagation residuals 2026-06-16).
+**Current clean-pass counter: 0/3** (restart #3 still seeking clean #1). Next action: Pass 67 (candidate clean #1, now against a drained corpus — Pass 66 FINDINGS: 2 fix-induced residuals of the 2026-06-16 consistency sweep, both fixed).
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
@@ -65,7 +65,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Passes 1–65 resolved (see phase-1-log.md + convergence table below); 3 streak breaks at P46/49/51; security-burst tails at P43/44/53; Phase-1d consistency sweep (2026-06-16): 36 residuals R-01..R-36 fixed, +2 error codes (269 total); **COUNTER: 0/3**; Pass 66 = restart #3 clean #1 candidate | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Passes 1–66 resolved (see phase-1-log.md + convergence table below); 3 streak breaks at P46/49/51; security-burst tails at P43/44/53; Phase-1d consistency sweep (2026-06-16): 36 residuals R-01..R-36 fixed, +2 error codes (269 total); P66: F66-01/F66-02 fix-induced residuals fixed (prd-cap-005 v1.3, ADR-0004 v1.4, ubiquitous-language v1.1, L2-INDEX v1.3); **COUNTER: 0/3**; Pass 67 = restart #3 clean #1 candidate | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (T10; effectively pre-run 2026-06-16 as tail-drain; FINAL pre-gate audit still required after Phase-1d converges) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -74,9 +74,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 66** (candidate clean #1, restart #3 continues). Phase-1d consistency sweep (2026-06-16) drained the tail the adversary was finding one-per-pass: 36 propagation residuals R-01..R-36 fixed corpus-wide; +2 error codes (E-AUD-005, E-PROD-004); gate v1.46 green (EXIT=0, check (n) spec-id-prefix exclusion patched). Pass 66 now runs against a drained corpus.
+**NEXT: `phase-1d-adversarial` — Pass 67** (candidate clean #1, restart #3 continues). Pass 66 FINDINGS (0 critical / 2 important): F66-01 E-AUD/E-PROD code splits not propagated to prd-cap-005 §5 — fixed (v1.3); F66-02 backend_class 'Tier-1/2/3' residual in ADR-0004 + ubiquitous-language — fixed (ADR-0004 v1.4, ubiquitous-language v1.1); L2-INDEX glossary 36→37 (v1.3). Both fix-induced residuals of the consistency sweep. Gate v1.46 green (EXIT=0, orchestrator-run). Counter stays 0/3.
 
-**Spec state:** prd v2.8; BC-INDEX (193 BCs unchanged); error-taxonomy **v2.6** (269 error codes / 34 families / 260 active; +E-AUD-005/E-PROD-004); nfr-catalog v1.5 (41 NFRs); subsystem-decomposition v1.9; ARCH-INDEX v2.4 (13 subsystems, ADR-0008); verification-architecture v1.3; verification-coverage-matrix v1.4; adapter-protocols **v1.7**; BC-15.01.001 v1.3; CI gate **v1.46** (check (n) spec-id-prefix exclusion patched). Totals: 193 BCs / **269 error codes (260 active)** / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24. Warning Codes registry: 4 W-codes (NOT counted in 269). See Session Resume Checkpoint for full version-bump list.
+**Spec state:** prd v2.8; BC-INDEX (193 BCs unchanged); error-taxonomy **v2.6** (269 error codes / 34 families / 260 active); nfr-catalog v1.5 (41 NFRs); subsystem-decomposition v1.9; ARCH-INDEX v2.4 (13 subsystems, ADR-0008); verification-architecture v1.3; verification-coverage-matrix v1.4; adapter-protocols **v1.7**; BC-15.01.001 v1.3; ADR-0004 v1.4; prd-cap-005 v1.3; ubiquitous-language v1.1; L2-INDEX v1.3; CI gate **v1.46**. Totals: 193 BCs / **269 error codes (260 active)** / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24. Glossary terms: **37**. Warning Codes registry: 4 W-codes (NOT counted in 269).
 
 ---
 
@@ -92,7 +92,8 @@ Loop protocol:
 | 64 | 2026-06-16 | FINDINGS | F64-01(I,→CODIFIED): AMBER migration left 4 live-prose residuals; fixed 4 files; codified check (nn) v1.45. | **0/3** |
 | 65 | 2026-06-16 | FINDINGS | F65-01(I,→CODIFIED): adapter-seam divergence — §6.2 missing variantsSupported rule + BC-15.01.001 PC1 mis-cited; fixed adapter-protocols v1.6 + BC-15.01.001 v1.2; codified check (oo) v1.46. F65-02(obs→FU-026). | **0/3** |
 | **Phase-1d Consistency Sweep** | **2026-06-16** | **SWEEP (not a pass)** | Fresh-context consistency-validator audit (T10 pulled forward) found **36 propagation residuals R-01..R-36** (25 IMPORTANT, 11 OBSERVATION) — classes: stale-citation, stale-token, cardinality-drift, incomplete-propagation, producer-consumer-divergence. Fixed corpus-wide via file-disjoint PO+architect sub-bursts. **+2 error codes** (E-AUD-005 coverage-gap, E-PROD-004 DAG-cycle); 267→269. Gate v1.46 green (EXIT=0). Check (n) spec-id-prefix false-positive patched (gate script on main). Drained the tail the adversary was surfacing one-per-pass. **Counter unchanged: 0/3.** | **0/3 (unchanged)** |
-| 66 | — | PENDING | — | — |
+| 66 | 2026-06-16 | FINDINGS | F66-01(I,process-gap): E-AUD/E-PROD code splits not propagated to prd-cap-005 §5 (old E-AUD-004 message contradicted taxonomy). Fixed prd-cap-005 v1.3. F66-02(I): backend_class 'Tier-1/2/3' residual in ADR-0004 (v1.4) + ubiquitous-language.md (split entry, v1.1); L2-INDEX glossary 36→37 (v1.3). Both fix-induced residuals of the consistency sweep. | **0/3 (stays)** |
+| 67 | — | PENDING | — | — |
 
 ---
 
@@ -108,7 +109,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–65 resolved; Phase-1d consistency sweep interleaved (2026-06-16, R-01..R-36, +2 error codes, gate green); counter 0/3; Pass 66 = restart #3 clean #1 candidate | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–66 resolved; Phase-1d consistency sweep interleaved (2026-06-16, R-01..R-36, +2 error codes); P66: F66-01/F66-02 fix-induced residuals fixed (prd-cap-005 v1.3, ADR-0004 v1.4, ubiquitous-language v1.1, L2-INDEX v1.3; glossary 36→37); counter 0/3; Pass 67 = restart #3 clean #1 candidate | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit — effectively pre-run 2026-06-16 as tail-drain (36 residuals fixed); FINAL pre-gate T10 audit still required after Phase-1d converges | PENDING (partial) |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -163,18 +164,19 @@ Loop protocol:
 | FU-005 | Adversarial spec pass must validate D-010..D-013 + BC-1.15.002 + BC-13.01.004. Pass-1: ALL VALIDATED WITH CORRECTIONS. Pending: 3 clean passes from Pass 33. | Phase-1d adversary | ONGOING |
 | FU-006 | DTU framing divergence: DTU-01..10 authoritative vs brief §10 pre-architecture intent. Human confirm at Phase-1 gate. | human (Phase-1 gate) | OPEN |
 | FU-007..026 | Non-blocking open items (FU-007 coverage-note, FU-008 subsystem-column, FU-010 release-gating, FU-011 NFR parity, FU-012 VP-TBD collisions, FU-013/016/022/023/025/026 cosmetic BCs, FU-014 forward-refs, FU-017/018 BC completeness, FU-019 human-adjudication, FU-020/024 codification candidates, FU-021 VP-TBD-003 Phase-6). | various | OPEN — non-blocking. See lessons.md for FU-020/024 context. |
-| LESSONS-CODIFIED | LESSON-F43/F46/F49a/F49b/F52/F53/F56/F58/F60/F61/F62/F64/F65 — see cycles/v0.1.0-greenfield/lessons.md. LESSON-F66 [process] added 2026-06-16 (batch-sweep vs one-per-pass). | — | CODIFIED |
+| FU-027 | [process-gap, codification candidate] No gate check validates per-CAP §5 error-table rows (message/category) against authoritative error-taxonomy.md per-code rows; this propagation class can recur on any future code split/rename. A completeness check (every taxonomy code in a CAP's error families appears in that CAP's §5 table) is feasible; message-text matching is fragile (LESSON-F52). Owner: architect. Target: before Phase-6. Deferred (not built now — mid-streak scope creep risk + fragile gate). | architect | OPEN — deferred to pre-Phase-6. |
+| LESSONS-CODIFIED | LESSON-F43/F46/F49a/F49b/F52/F53/F56/F58/F60/F61/F62/F64/F65/F66 — see cycles/v0.1.0-greenfield/lessons.md. LESSON-F67 [process] added 2026-06-16 (code-split/rename propagation checklist). | — | CODIFIED |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-16
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–65 DONE + Phase-1d consistency sweep DONE (R-01..R-36).
-**Phase-1d Consistency Sweep (2026-06-16):** Fresh-context consistency-validator audit (T10 pulled forward) found 36 propagation residuals R-01..R-36 (25 IMPORTANT, 11 OBSERVATION). Classes: stale-citation, stale-token, cardinality-drift, incomplete-propagation, producer-consumer-divergence. Fixed corpus-wide via file-disjoint PO+architect sub-bursts. +2 error codes: E-AUD-005 (coverage-gap), E-PROD-004 (DAG-cycle); 267→269. Gate v1.46 green (EXIT=0, all 269/269 error codes consistent, 0 non-canonical). Check (n) spec-id-prefix false-positive patched on main (gate v1.46, unchanged version). SP4-caveat fix: R-07 rewording moved from operative postconditions to test-vector rows in BC-7.11.003/005/007. prd-cap-001.md version normalized from mis-set "2.3" to correct "1.2". Committed both branches (see commit SHAs below). Drained the one-per-pass propagation-residual tail.
-**Clean-pass counter: 0/3 (unchanged — sweep is NOT an adversary pass).** Pass 66 = restart #3 candidate clean #1, now against a drained corpus.
-**Next action:** `phase-1d-adversarial` — **Pass 66** (candidate clean #1, restart #3 continues). Spec FROZEN after sweep commit. FU-007/008/010/011/012/013/014/016/017/018/019/020/021/022/023/024/025/026 open (non-blocking).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–66 DONE + Phase-1d consistency sweep DONE (R-01..R-36).
+**Pass 66 (2026-06-16):** FINDINGS (0 critical / 2 important). F66-01 [process-gap]: E-AUD-004→E-AUD-005 / E-PROD-003→E-PROD-004 splits did not propagate to prd-cap-005 §5 error table (file not in split burst's set). Fixed prd-cap-005 v1.2→v1.3 (E-AUD-004 row semantics corrected, E-AUD-005 added, E-PROD-003 category updated, E-PROD-004 added). F66-02: backend_class taxonomy fix (entities.md) didn't reach ADR-0004:70 ("Tier-1/2/3"). Fixed ADR-0004 v1.3→v1.4 (6-value automation taxonomy). Sibling caught by comprehensive grep: ubiquitous-language.md:133 had conflated "Backend Class" entry (body described indemnification_tier). Split into two correct entries (Backend Class + Indemnification Tier), bumped v1.0→v1.1. L2-INDEX glossary count 36→37, v1.2→v1.3. Gate v1.46 green (EXIT=0, orchestrator-run, single isolated process).
+**Clean-pass counter: 0/3 (stays — Pass 66 was FINDINGS).** Pass 67 = restart #3 candidate clean #1.
+**Next action:** `phase-1d-adversarial` — **Pass 67** (candidate clean #1, restart #3 continues). FU-007/008/010/011/012/013/014/016/017/018/019/020/021/022/023/024/025/026/027 open (non-blocking).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3, need 3) → FINAL consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 193 BCs / **269 error codes (260 active)** / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24 / CI gate v1.46 (~44 sub-assertions). Warning Codes registry: 4 W-codes (NOT counted in 269). prd-cap-001 v1.2 (corrected from mis-set 2.3).
-**Version bumps Phase-1d sweep:** prd v2.8, error-taxonomy v2.6 (+E-AUD-005/E-PROD-004, 267→269), nfr-catalog v1.5, ARCH-INDEX v2.4, verification-architecture v1.3, verification-coverage-matrix v1.4, adapter-protocols v1.7, subsystem-decomposition v1.9, BC-INDEX (count note), prd-cap-001 v1.2 (corrected), prd-cap-006-007 v1.2, prd-cap-013-014 v1.1, entities.md v1.1, BC-1.02.001 v1.2, BC-1.06.001 v1.2, BC-1.08.003 v1.2, BC-1.12.001 v1.2, BC-1.12.003 v1.3, BC-2.02.005 v1.1, BC-2.02.006 v1.1, BC-3.03.007 v1.1, BC-3.03.009 v1.2, BC-5.03.001 v1.2, BC-5.03.002 v1.2, BC-5.04.001 v1.3, BC-5.07.001 v1.2, BC-5.07.003 v1.2, BC-6.03.001 v1.1, BC-7.01.001 v1.2, BC-7.11.003/004/005/007 v1.1/1.1/1.1/1.2, BC-8.08.001 v1.3, BC-10.06.001 v1.3, BC-11.03.002 v1.2, BC-11.04.001 v1.2, BC-13.01.001 v1.2, BC-15.01.001 v1.3.
+**Spec totals:** 193 BCs / **269 error codes (260 active)** / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24 / CI gate v1.46 (~44 sub-assertions). Warning Codes registry: 4 W-codes (NOT counted in 269). Glossary terms: **37**.
+**Version bumps Pass 66:** prd-cap-005 v1.3, ADR-0004 v1.4, ubiquitous-language v1.1, L2-INDEX v1.3. All prior version bumps (sweep + passes 1–65) unchanged — see phase-1-log.md.
 **GATE EXECUTION NOTE:** Run `bash scripts/check-spec-counts.sh` as a SINGLE isolated process — concurrent runs corrupt shared state.

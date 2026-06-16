@@ -1,7 +1,7 @@
 ---
 document_type: domain-spec-index
 level: L2
-version: "1.2"
+version: "1.3"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-10T00:00:00Z
@@ -79,7 +79,7 @@ load-bearing seam).
 | ASM-NNN | 8 | assumptions.md |
 | R-NNN | 17 | risks.md |
 | FM-NNN | 10 | failure-modes.md |
-| Glossary terms | 36 | ubiquitous-language.md |
+| Glossary terms | 37 | ubiquitous-language.md |
 | Entities | 18 | entities.md |
 | Processes | 6 | processes.md |
 
@@ -95,5 +95,6 @@ load-bearing seam).
 
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
+| 1.3 | 2026-06-16 | product-owner | F66-02 propagation: Glossary terms 36→37 after Backend Class / Indemnification Tier split in ubiquitous-language.md. |
 | 1.2 | 2026-06-10 | product-owner | F49-01: Re-verified all 8 ID registry counts against source files. Fixed stale counts: CAP-NNN 14→15 (CAP-015 added), DI-NNN 12→13 (DI-013 added), Glossary terms 42→36 (actual bold-term count). Added CAP-015 (P1, Tier-1 online-services) to Priority Distribution; P1 count 5→6, grand total 14→15. |
 | 1.1 | 2026-06-07 | business-analyst | Initial sharded index with cross-references and priority distribution. |

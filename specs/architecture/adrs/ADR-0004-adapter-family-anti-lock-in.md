@@ -2,7 +2,7 @@
 document_type: adr
 level: L4
 adr_id: "ADR-0004"
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 
 # ADR-0004 — Five-Seam Adapter Family as Primary Anti-Lock-In Mechanism
 
+> **v1.4 — Pass-66 fix F66-02 (backend_class taxonomy label correction in asset-adapter row).**
+> §Decision table asset-adapter row: `backend_class` cell previously read "taxonomy
+> (Tier-1/2/3)" — conflating `backend_class` (6-value automation/transport taxonomy)
+> with `indemnification_tier` (the separate IP-risk Tier-1/2/3 concept). Corrected to
+> the authoritative six-value taxonomy (cloud-api | headless-cli | mcp-headless |
+> mcp-gui | saas-ui | desktop-gui) per entities.md:56 and BC-4.01.001.
+>
 > **v1.3 — Pass-34 adversarial finding F34-04 (stale four-seam world in §Context and §Alternatives).**
 > - **§Context:** Added online-services to the enumerated axes so the narrative
 >   now matches the §Decision five-seam table. Previously said "three additional
@@ -67,7 +74,7 @@ adapter seams:
 | Seam | Lock-in prevented | Fidelity values | Reference targets | Subsystem |
 |------|------------------|-----------------|-------------------|-----------|
 | **engine-adapter** | N engines for one game capability | `full` / `partial` / `none` | Bevy (T1), Unity (T2), Godot (T3); Unreal deferred | SS-01 |
-| **asset-adapter** | N generative backends for one asset class | `full` / `partial` / `none`; `backend_class` taxonomy (Tier-1/2/3) | Tripo/Rodin, Stable Audio, ElevenLabs | SS-03 |
+| **asset-adapter** | N generative backends for one asset class | `full` / `partial` / `none`; `backend_class` 6-value automation taxonomy (cloud-api \| headless-cli \| mcp-headless \| mcp-gui \| saas-ui \| desktop-gui) | Tripo/Rodin, Stable Audio, ElevenLabs | SS-03 |
 | **distribution-adapter** | N store/platform targets for one build | `full` / `partial` / `human-gated` / `none` | steamcmd (VERIFIED), butler (VERIFIED), fastlane (VERIFIED); console cert = `human-gated` | SS-08 |
 | **xr-adapter** | N XR runtimes for one XR game | `full` / `partial/vendor` / `human-gated` / `none` | OpenXR 1.1 (Khronos CTS); visionOS = separate non-OpenXR backend | SS-12 |
 | **online-services-adapter** | N BaaS backends for one online-services surface | `full` / `partial` / `human-gated` / `none` | Nakama (self-hostable Docker-in-CI reference); EOS, PlayFab as alternatives | SS-13 |
