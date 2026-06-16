@@ -3086,6 +3086,11 @@ else
               continue ;;
             D-SIM|D-REPLAY|D-IMPL|D-ASSET|D-PLAY|D-CERT|D-PERF|D-PROV|D-DOCS|D-ETHICS|D-SEC)
               continue ;;
+            # Spec-identifier prefixes — never status values; verb_vals extraction can
+            # yield bare prefix fragments (e.g. "NFR-" from ": NFR-026 …") when a
+            # dim-context line also contains a spec-id reference.
+            NFR-*|R-*|FM-*|ASM-*|RID-*|FU-*|PROC-*|OBS-*)
+              continue ;;
           esac
           [[ "$sv" == E-* ]] && continue
           [[ "${#sv}" -lt 3 ]] && continue
@@ -3398,7 +3403,7 @@ else
           # Note: most of these patterns have digits after hyphen and won't match
           # [a-zA-Z][a-zA-Z]+ — but VP-COMP would match as VP- + COMP.
           # Exclude by prefix:
-          VP-*|BC-*|ADR-*|CAP-*|DI-*|EC-*|SS-*|DP-*|SBC-*|RRC-*|DIC-*|MEC-*|CDC-*) continue ;;
+          VP-*|BC-*|ADR-*|CAP-*|DI-*|EC-*|SS-*|DP-*|SBC-*|RRC-*|DIC-*|MEC-*|CDC-*|NFR-*|R-*|FM-*|ASM-*|RID-*|FU-*) continue ;;
           # Known legitimate hyphenated tokens in BC prose that are not status values
           SAG-AFTRA|AI-generated|CPU-bound|GPU-bound|NDA-gated|EOMM-style|CI-gated|NON-COMPETITIVE|GAME-DESIGN|AOI-filtered|AAA-RECONCILIATION|BC-linked|BC-INDEX) continue ;;
         esac
