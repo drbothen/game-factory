@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.45
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.46
 #
 # PURPOSE
 # -------
@@ -249,6 +249,8 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.46 to add check (oo) — §6.2 mandatory-field rule completeness guard
+#   (F65-01 process-gap recurrence prevention): see below.
 # extended in v1.45 to add check (nn) — non-canonical "amber" prose-token guard
 #   (F64-01 process-gap recurrence prevention): see below.
 # extended in v1.44 to add check (mm) — anti-cheat kernel-anomaly routing guard
@@ -584,7 +586,7 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm, nn + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm, nn, oo + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
@@ -594,7 +596,8 @@
 #   check (ll) added in v1.43: T2 comparison-method consistency guard (F61-01 / F40-01-propagation recurrence prevention).
 #   check (mm) added in v1.44: anti-cheat kernel-anomaly routing guard (F62-01 process-gap recurrence prevention).
 #   check (nn) added in v1.45: non-canonical "amber" prose-token guard (F64-01 process-gap recurrence prevention).
-#   Positive-coverage log always printed. (F64-01/F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (oo) added in v1.46: §6.2 mandatory-field rule completeness guard (F65-01 process-gap recurrence prevention).
+#   Positive-coverage log always printed. (F65-01/F64-01/F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -6885,6 +6888,82 @@ if [[ ${#nn_offenders[@]} -gt 0 ]]; then
 else
   echo "    Non-canonical amber-token prose guard (nn): $nn_files_scanned files scanned, 0 'amber' residuals (methodology-layer.md migration-doc exempt)"
 fi
+echo ""
+
+# ============================================================================
+# (oo) §6.2 MANDATORY-FIELD RULE COMPLETENESS GUARD  [NEW v1.46, F65-01]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-65 process-gap (F65-01) — BC-15.01.001 PC5 +
+#   EC-007/EC-008 hard-gate `capabilities.leaderboards.variantsSupported` with
+#   E-EAP-012/MalformedManifest, but the §6.2 "Mandatory field rules:" block in
+#   adapter-protocols.md had NO rule for this field. An adapter author consulting
+#   §6.2 would treat variantsSupported as optional and have the manifest rejected.
+#   This class has recurred: F35-01 (seam enum), F61-01 (T2 method), F65-01
+#   (variantsSupported). This guard closes the class.
+#
+# ASSERTION: For each field in the curated mandatory-field set
+#   {selfHostable, serverAuthoritative, offlineProject, variantsSupported},
+#   the string must appear in the §6.2 "Mandatory field rules:" block of
+#   adapter-protocols.md (within the 20 lines following that heading).
+#
+# IMPLEMENTATION: This is a CURATED ALLOW-LIST assertion — NOT a dynamic
+#   extraction from BC prose (which would over-fire per LESSON-F52). The list
+#   is hardcoded to exactly the fields known to be mandatory in §6.2. Adding a
+#   new mandatory field requires both (a) updating §6.2 in adapter-protocols.md
+#   and (b) adding the field name to OO_FIELDS below.
+#
+# SCOPE: adapter-protocols.md only. The check scans only the 20 lines after the
+#   "Mandatory field rules:" heading in §6.2 to avoid false-positives from
+#   illustrative schema examples earlier in the section.
+#
+# On violation: print the missing field name, append to FAILURES list, exit
+#   non-zero (same aggregation as (ll)/(mm)).
+# Green summary: "§6.2 mandatory-field rule completeness (oo): N fields checked,
+#   all present in §6.2 mandatory-rule block; 0 violations."
+# POSIX/BSD-grep/awk compatible (no grep -P). (F65-01 recurrence prevention).
+# ============================================================================
+
+echo "--- (oo) §6.2 mandatory-field rule completeness (adapter-protocols.md) ---"
+
+OO_ADAPTER_PROTOCOLS="$REPO_ROOT/.factory/specs/architecture/adapter-protocols.md"
+
+# Curated set: every field that a BC gates with E-EAP-012/MalformedManifest via §6.2.
+# To add a new mandatory field: update §6.2 mandatory-rule block AND add the field name here.
+OO_FIELDS=(
+  "selfHostable"
+  "serverAuthoritative"
+  "offlineProject"
+  "variantsSupported"
+)
+
+if [[ ! -f "$OO_ADAPTER_PROTOCOLS" ]]; then
+  echo "    SKIP: adapter-protocols.md not found at $OO_ADAPTER_PROTOCOLS"
+else
+  # Extract the 20 lines immediately following the "Mandatory field rules:" heading in §6.2.
+  # awk: after the heading is found, print up to 20 lines then stop.
+  oo_rule_block="$(awk '/\*\*Mandatory field rules:\*\*/{found=1; count=0; next} found && count<20{print; count++} count>=20{exit}' "$OO_ADAPTER_PROTOCOLS")"
+
+  oo_violations=0
+  oo_missing=()
+
+  for oo_field in "${OO_FIELDS[@]}"; do
+    if printf '%s' "$oo_rule_block" | grep -qF "$oo_field"; then
+      echo "    [OK] '$oo_field' present in §6.2 mandatory-rule block"
+    else
+      echo "    [FAIL] '$oo_field' NOT found in §6.2 mandatory-rule block — add a mandatory-field rule for this field"
+      oo_missing+=("$oo_field")
+      oo_violations=$(( oo_violations + 1 ))
+    fi
+  done
+
+  if [[ $oo_violations -gt 0 ]]; then
+    errors+=("MISMATCH [§6.2 mandatory-field rule completeness (oo)]: ${#oo_missing[@]} field(s) missing from §6.2 mandatory-rule block: ${oo_missing[*]} — add rule(s) to adapter-protocols.md §6.2 'Mandatory field rules:' block (F65-01 recurrence prevention)")
+    fail=1
+  else
+    echo "    §6.2 mandatory-field rule completeness (oo): ${#OO_FIELDS[@]} fields checked, all present in §6.2 mandatory-rule block; 0 violations"
+  fi
+fi
+
 echo ""
 
 # ============================================================================
