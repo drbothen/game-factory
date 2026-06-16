@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.46
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.47
 #
 # PURPOSE
 # -------
@@ -249,6 +249,15 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.47 to add check (pp) — binary-dimension owner-BC DEGRADED-header guard
+#   (F68-01 process-gap recurrence prevention): for each dimension whose §3.1 allowed-value
+#   subset excludes DEGRADED (D-IMPL, D-SEC, D-ETHICS, D-DOCS — the binary set), scan that
+#   dimension's §3.0 owner BC file for a postcondition section header matching
+#   "**DEGRADED" or "**DEGRADED-PENDING". Any such header in a binary dimension's owner BC
+#   = violation (the label-vs-token blind spot that allowed F68-01 to survive check (n.ii)).
+#   Robustness: only binary-dimension owner BCs are scanned; dimensions that legitimately
+#   allow DEGRADED (D-SIM, D-REPLAY, D-ASSET, D-PLAY, D-CERT, D-PERF, D-PROV) are excluded.
+#   Binary set and owner-BC mapping derived from §3.0 and §3.1 tables (hardcoded curated list).
 # extended in v1.46 to add check (oo) — §6.2 mandatory-field rule completeness guard
 #   (F65-01 process-gap recurrence prevention): see below.
 # extended in v1.45 to add check (nn) — non-canonical "amber" prose-token guard
@@ -597,7 +606,8 @@
 #   check (mm) added in v1.44: anti-cheat kernel-anomaly routing guard (F62-01 process-gap recurrence prevention).
 #   check (nn) added in v1.45: non-canonical "amber" prose-token guard (F64-01 process-gap recurrence prevention).
 #   check (oo) added in v1.46: §6.2 mandatory-field rule completeness guard (F65-01 process-gap recurrence prevention).
-#   Positive-coverage log always printed. (F65-01/F64-01/F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (pp) added in v1.47: binary-dimension owner-BC DEGRADED-header guard (F68-01 process-gap recurrence prevention).
+#   Positive-coverage log always printed. (F68-01/F65-01/F64-01/F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -6972,6 +6982,126 @@ fi
 echo ""
 
 # ============================================================================
+# (pp) BINARY-DIMENSION OWNER-BC DEGRADED-HEADER GUARD  [NEW v1.47, F68-01]
+# ============================================================================
+# ROOT-CAUSE PREVENTION: Pass-68 process-gap (F68-01) — methodology-layer.md
+#   §D-DOCS "Degraded predicate" block described a DEGRADED state while §3.1
+#   Per-Dimension Allowed Value Subsets declared D-DOCS = {GREEN, BLOCKED}
+#   (binary, no DEGRADED). The owner BC BC-7.09.001 PC2 had a matching
+#   "**DEGRADED (supplementary):" postcondition section header.
+#
+#   Check (n.ii) missed this because it scans lines pairing a
+#   `dimensions.<field>` token with a status value — it does NOT scan
+#   postcondition section header labels. This is the same label-vs-token
+#   blind spot as F-12-01.
+#
+# ASSERTION: For each binary dimension (whose §3.1 allowed-value subset
+#   EXCLUDES DEGRADED), the dimension's §3.0 owner BC must NOT contain a
+#   postcondition section header whose leading bold text starts with
+#   "**DEGRADED" or "**DEGRADED-PENDING".
+#
+# BINARY DIMENSIONS (derived from §3.1 Per-Dimension Allowed Value Subsets
+#   table — these four are the only dimensions with no DEGRADED path):
+#   D-IMPL  → owner BC-7.03.001  (ss-07)
+#   D-DOCS  → owner BC-7.09.001  (ss-07)
+#   D-ETHICS → owner BC-7.10.001 (ss-07)
+#   D-SEC   → owner BC-7.11.001  (ss-07)
+#
+# ROBUSTNESS (LESSON-F52): dimensions that legitimately allow DEGRADED
+#   (D-SIM, D-REPLAY, D-ASSET, D-PLAY, D-CERT, D-PERF, D-PROV) are NOT
+#   scanned — this check targets only the curated binary-dimension set.
+#
+# DETECTION: scan each owner BC's operative body (exclude frontmatter,
+#   blockquote lines starting ">", YAML "reason:" lines) for lines that
+#   match the pattern: starts with "**DEGRADED" (bold label). This catches
+#   postcondition headers of the form:
+#     **DEGRADED (supplementary):** ...
+#     **DEGRADED:** ...
+#     **DEGRADED-PENDING:** ...
+#
+# On violation: print offending dimension, owner BC, and line, append to
+#   FAILURES list, exit non-zero (same aggregation as (oo)).
+# Green summary: "Binary-dimension owner-BC DEGRADED-header guard (pp):
+#   N dimension/BC pairs checked, 0 DEGRADED-header violations."
+# POSIX/BSD-grep/awk compatible (no grep -P). (F68-01 recurrence prevention).
+# ============================================================================
+
+echo "--- (pp) binary-dimension owner-BC DEGRADED-header guard (F68-01 recurrence prevention) ---"
+
+pp_violations=0
+pp_pairs_checked=0
+
+# Curated binary-dimension → owner-BC mapping.
+# Source of truth: §3.0 Canonical Dimension Field Name Registry and
+#   §3.1 Per-Dimension Allowed Value Subsets (methodology-layer.md).
+# To add a new binary dimension: update both §3.0 and §3.1, then add a row here.
+# Format: "DIM_ID:relative/path/to/owner/BC.md"
+PP_BINARY_DIMS=(
+  "D-IMPL:ss-07/BC-7.03.001.md"
+  "D-DOCS:ss-07/BC-7.09.001.md"
+  "D-ETHICS:ss-07/BC-7.10.001.md"
+  "D-SEC:ss-07/BC-7.11.001.md"
+)
+
+pp_offenders=()
+
+for pp_entry in "${PP_BINARY_DIMS[@]}"; do
+  pp_dim="${pp_entry%%:*}"
+  pp_bc_rel="${pp_entry##*:}"
+  pp_bc_path="$BC_DIR/$pp_bc_rel"
+
+  if [[ ! -f "$pp_bc_path" ]]; then
+    echo "    SKIP [$pp_dim]: owner BC not found at $pp_bc_path"
+    continue
+  fi
+
+  pp_pairs_checked=$(( pp_pairs_checked + 1 ))
+
+  # Extract operative body: strip YAML frontmatter (lines between leading ---
+  # delimiters), then remove blockquote lines (starting ">") and YAML
+  # "reason:" lines.  Then scan for bold-label lines starting "**DEGRADED".
+  #
+  # Frontmatter strip: awk skips lines between first and second "^---" line.
+  # After frontmatter, grep for lines where the trimmed content starts with
+  # "**DEGRADED" — matching postcondition headers like:
+  #   **DEGRADED (supplementary):** ...
+  #   **DEGRADED:** ...
+  #   **DEGRADED-PENDING:** ...
+  #
+  # We use grep -E with anchored pattern to match bold-label headers only.
+  # The pattern: ^\*\*DEGRADED matches a line that begins (after optional
+  # leading whitespace) with **DEGRADED.
+  pp_hits=$(awk '
+    /^---/{fence++; next}
+    fence < 2 {next}
+    /^>/{next}
+    /^[ \t]*reason:/{next}
+    1
+  ' "$pp_bc_path" 2>/dev/null \
+    | grep -E '^\*\*DEGRADED' || true)
+
+  if [[ -n "$pp_hits" ]]; then
+    pp_violations=$(( pp_violations + 1 ))
+    echo "    VIOLATION [$pp_dim / $pp_bc_rel]: owner BC has DEGRADED postcondition header(s) — but $pp_dim is binary {GREEN, BLOCKED} (§3.1 allows no DEGRADED):"
+    printf '%s\n' "$pp_hits" | while IFS= read -r pp_line; do
+      echo "      LINE: $pp_line"
+    done
+    pp_offenders+=("$pp_dim ($pp_bc_rel)")
+  else
+    echo "    [OK] $pp_dim / $pp_bc_rel: no DEGRADED-header in operative body"
+  fi
+done
+
+if [[ $pp_violations -gt 0 ]]; then
+  errors+=("MISMATCH [binary-dimension owner-BC DEGRADED-header (pp)]: ${#pp_offenders[@]} binary-dimension owner BC(s) contain a '**DEGRADED' postcondition header that contradicts the §3.1 binary {GREEN, BLOCKED} subset: ${pp_offenders[*]} — remove or replace the DEGRADED postcondition header with explicit no-DEGRADED prose per methodology-layer §D-SEC / §D-DOCS pattern (F68-01 recurrence prevention)")
+  fail=1
+else
+  echo "    Binary-dimension owner-BC DEGRADED-header guard (pp): $pp_pairs_checked dimension/BC pair(s) checked, 0 DEGRADED-header violations"
+fi
+
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -7025,6 +7155,8 @@ if [[ $fail -eq 0 ]]; then
   echo "  T2 comparison-method consistency (ll): same-machine→structured-diff confirmed; ReplayResult enum has all 3 methods; 0 violations"
   echo "  Anti-cheat kernel-anomaly routing (mm): $mm_files_scanned files scanned, 0 kernel-anomaly→E-ANTICH-001 mis-routes"
   echo "  Non-canonical amber-token prose (nn):   $nn_files_scanned files scanned, 0 'amber' residuals (methodology-layer.md migration-doc exempt)"
+  echo "  §6.2 mandatory-field rule completeness (oo): ${#OO_FIELDS[@]} fields checked, all present in §6.2 mandatory-rule block; 0 violations"
+  echo "  Binary-dim owner-BC DEGRADED-header (pp): $pp_pairs_checked dimension/BC pair(s) checked, 0 DEGRADED-header violations"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
