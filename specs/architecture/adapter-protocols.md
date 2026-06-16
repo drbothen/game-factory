@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.5"
+version: "1.6"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -39,6 +39,17 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Adapter Protocol Family
+
+> **v1.6 changes (Pass-65 F65-01 — §6.2 variantsSupported mandatory-field rule and schema annotation):**
+> - §6.2 Mandatory field rules: added rule for `capabilities.leaderboards.variantsSupported` —
+>   must be a non-empty array for any `leaderboards` capability with non-`none` fidelity.
+>   An absent, null, or empty array is malformed (returns `MalformedManifest` / E-EAP-012).
+>   BC-15.04.001 variant-dispatch requires the declared variants. This rule was missing from
+>   §6.2 despite BC-15.01.001 PC5 + EC-007/EC-008 hard-gating the field with E-EAP-012
+>   — an adapter-seam producer/consumer spec divergence (F65-01).
+> - §6.2 schema: annotated the `variantsSupported` line with
+>   `// MUST be non-empty array for non-none fidelity` (mirroring the `serverAuthoritative`
+>   annotation style on the adjacent line).
 
 > **v1.5 changes (Pass-61 F61-01 — §2.3/§2.5 T2 comparison-method propagation, F40-01 sibling-doc):**
 > - §2.3 Determinism Tier table: corrected the `same-machine` row comparison-method cell
@@ -835,7 +846,7 @@ Fields extending the base manifest schema (§1.3):
 
     "leaderboards":   { "fidelity": "full | partial | none",
                         "serverAuthoritative": true,         // MUST be true for non-none fidelity
-                        "variantsSupported": ["daily", "weekly", "all-time"] },
+                        "variantsSupported": ["daily", "weekly", "all-time"] }, // MUST be non-empty array for non-none fidelity
 
     "matchmaking":    { "fidelity": "full | partial | none",
                         "method": "skill-based | region | latency | custom",
@@ -858,6 +869,11 @@ Fields extending the base manifest schema (§1.3):
 - `serverAuthoritative: true` is required for any `leaderboards` or `entitlements`
   capability with non-`none` fidelity. A manifest declaring `serverAuthoritative: false`
   on these capabilities is malformed (returns `MalformedManifest` / E-EAP-012).
+- `capabilities.leaderboards.variantsSupported` must be a non-empty array for any
+  `leaderboards` capability with non-`none` fidelity. An absent, null, or empty array
+  is malformed (returns `MalformedManifest` / E-EAP-012). BC-15.04.001 variant-dispatch
+  requires the declared variants; without this field the variant-routing contract is
+  unenforceable.
 - `offlineProject: true` causes the core to skip all online-services configuration
   and produce no BaaS artifacts. No conformance run is triggered.
 

@@ -41,22 +41,18 @@ The orchestrator auto-reads this file on startup. On resuming:
 
 **Phase-1d adversarial spec convergence IN PROGRESS — requires 3 CONSECUTIVE CLEAN adversary passes.**
 
-**Current clean-pass counter: 0/3** (restart #3 still seeking clean #1). Next action: Pass 65 (candidate clean #1). Pass 64 FINDINGS (F64-01: Pass-10 AMBER→canonical migration left 4 live-prose 'amber' residuals — fixed BC-11.01.002 v1.2, BC-11.01.003 v1.2, prd-cap-011 v1.4, processes.md v1.1; codified gate check (nn) v1.45).
+**Current clean-pass counter: 0/3** (restart #3 still seeking clean #1). Next action: Pass 66 (candidate clean #1). Pass 65 FINDINGS (F65-01: adapter-seam divergence — BC-15.01.001 hard-gates leaderboards.variantsSupported (E-EAP-012) but adapter-protocols §6.2 mandatory-field rules omitted it + BC citation mis-targeted; fixed adapter-protocols v1.6 + BC-15.01.001 v1.2; codified gate check (oo) v1.46).
 
 Loop protocol:
 1. Dispatch fresh-context adversary for Pass N. Route critical/important findings: product-owner (BC/PRD/error-taxonomy changes) and/or architect (architecture/methodology/ADR/CI-gate changes).
-2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.45, checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm, nn + o.ii, ~43 sub-assertions; check (gg) is D-SEC evaluator-completeness guard; check (hh) is economy-conservation BC-routing guard; check (ii) is visionOS/OpenXR dedicated-code routing guard; check (jj) is D-SEC no-DEGRADED-path consistency guard; check (kk) is W-code identifier-resolution guard; check (ll) is T2 comparison-method consistency guard; check (mm) is anti-cheat kernel-anomaly routing guard; check (nn) is non-canonical amber-token prose guard). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
+2. After each fix burst: run `bash scripts/check-spec-counts.sh` (must exit 0 — gate v1.46, checks a–z + aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm, nn, oo + o.ii, ~44 sub-assertions; check (gg) is D-SEC evaluator-completeness guard; check (hh) is economy-conservation BC-routing guard; check (ii) is visionOS/OpenXR dedicated-code routing guard; check (jj) is D-SEC no-DEGRADED-path consistency guard; check (kk) is W-code identifier-resolution guard; check (ll) is T2 comparison-method consistency guard; check (mm) is anti-cheat kernel-anomaly routing guard; check (nn) is non-canonical amber-token prose guard; check (oo) is §6.2 mandatory-field-rule completeness guard). Machine-enforced spec-integrity gate. NEVER credit a pass without a green gate run.
 3. Commit via state-manager (main branch for script changes; factory-artifacts for .factory/ changes).
 4. If pass is CLEAN (0 critical, 0 important): increment counter. If FINDINGS: reset counter to 0.
 5. On reaching 3/3 consecutive clean passes: Phase-1d CONVERGED.
 
 **Adversary dispatch template (turnkey resume):** see `.factory/cycles/v0.1.0-greenfield/adversary-dispatch-playbook.md` — captures the gated-class skip-list, accepted conventions, already-swept classes, FU-005 targets, and deep-cross-BC focus to reconstruct an equivalent Pass-N dispatch from zero context.
 
-**On Phase-1d CONVERGED:** proceed to:
-- Fresh-context consistency-validator audit (`/vsdd-factory:consistency-validation`) — T10
-- `/vsdd-factory:check-input-drift` — T11
-- Phase-1 spec-package HUMAN GATE — T12
-- Phase 2+ — T13
+**On Phase-1d CONVERGED:** T10 consistency-validator audit → T11 `/vsdd-factory:check-input-drift` → T12 Phase-1 human gate → T13 Phase 2+.
 
 ---
 
@@ -69,7 +65,7 @@ Loop protocol:
 | create-architecture | 13 subsystems (SS-01..SS-13), 4-layer stack, 10 VPs, DTU assessment | DONE |
 | prd-revision | Incorporate FU-001/002/003; close NFR gaps + error families + DI-010/011 BCs | DONE |
 | cicd-setup | devops-engineer; `.github/workflows/` + `cicd-setup.md` (D-009; MANDATORY before Phase 3) | DONE |
-| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Passes 1–64 resolved (see phase-1-log.md + convergence table below); 3 streak breaks at P46/49/51; security-burst tails at P43/44/53; latest: Pass 64 FINDINGS (F64-01: Pass-10 AMBER migration left 4 amber prose residuals — fixed BC-11.01.002/003 v1.2, prd-cap-011 v1.4, processes.md v1.1; codified nn v1.45; F64-01→FU-025 reinforced); **COUNTER: 0/3**; Pass 65 = restart #3 clean #1 candidate | IN PROGRESS |
+| phase-1d-adversarial | Adversarial spec convergence (>=3 clean passes); Passes 1–65 resolved (see phase-1-log.md + convergence table below); 3 streak breaks at P46/49/51; security-burst tails at P43/44/53; latest: Pass 65 FINDINGS (F65-01: adapter-seam divergence — BC-15.01.001 hard-gates variantsSupported (E-EAP-012) but §6.2 omitted rule + BC citation mis-targeted; fixed adapter-protocols v1.6 + BC-15.01.001 v1.2; codified oo v1.46; F65-02→FU-026); **COUNTER: 0/3**; Pass 66 = restart #3 clean #1 candidate | IN PROGRESS |
 | consistency-audit | Fresh-context consistency audit (consistency-validator) | PENDING |
 | drift-check | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | human-gate | Phase-1 spec-package human gate | PENDING |
@@ -78,9 +74,9 @@ Loop protocol:
 
 ## Next Action
 
-**NEXT: `phase-1d-adversarial` — Pass 65** (candidate clean #1, restart #3 continues). Pass-64 F64-01 fixed 4 non-canonical 'amber' prose residuals left by Pass-10 AMBER→canonical migration: BC-11.01.002 v1.2, BC-11.01.003 v1.2, prd-cap-011 v1.4, processes.md v1.1 → BLOCKED/DEGRADED-PENDING. Codified gate check (nn) v1.45 (amber prose guard). Gate v1.44→v1.45. FU-007..025 open (non-blocking).
+**NEXT: `phase-1d-adversarial` — Pass 66** (candidate clean #1, restart #3 continues). Pass-65 F65-01 fixed adapter-seam producer/consumer divergence: adapter-protocols v1.5→v1.6 (§6.2 variantsSupported mandatory-field rule + schema annotation), BC-15.01.001 v1.1→v1.2 (corrected PC1 citation from :822/selfHostable to §6.2). Codified gate check (oo) v1.46 (§6.2 mandatory-field-rule completeness). Gate v1.45→v1.46. FU-007..026 open (non-blocking).
 
-**Spec state:** prd v2.7; BC-INDEX v1.9 (193 BCs); error-taxonomy **v2.5** (267 error codes / 34 families / 258 active + Warning Codes registry: 4 W-codes W-XR-001..004); nfr-catalog v1.4 (41 NFRs); subsystem-decomposition v2.0 (P0=127/P1=42/P2=24); ARCH-INDEX v2.3 (13 subsystems, ADR-0008); methodology-layer **v1.16**; BC-7.11.001/002 v1.2; BC-7.01.001 v1.1 (F63-01); adapter-protocols v1.5; ADR-0008 v1.2; BC-11.01.002 **v1.2** / BC-11.01.003 **v1.2** (F64-01: amber residuals → BLOCKED); prd-cap-011 **v1.4** (F64-01: amber → BLOCKED); processes.md **v1.1** (F64-01: amber → DEGRADED-PENDING/BLOCKED); CI gate **v1.45** (checks a–z + aa..nn + o.ii, ~43 sub-assertions; check (nn) = non-canonical amber-token prose guard). Totals UNCHANGED: 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24. Note: error-taxonomy carries Warning Codes registry (4 W-codes) — NOT counted in 267. See Session Resume Checkpoint for full version-bump list.
+**Spec state:** prd v2.7; BC-INDEX v1.9 (193 BCs); error-taxonomy **v2.5** (267 error codes / 34 families / 258 active + Warning Codes registry: 4 W-codes W-XR-001..004); nfr-catalog v1.4 (41 NFRs); subsystem-decomposition v2.0 (P0=127/P1=42/P2=24); ARCH-INDEX v2.3 (13 subsystems, ADR-0008); methodology-layer **v1.16**; BC-7.11.001/002 v1.2; BC-7.01.001 v1.1 (F63-01); adapter-protocols **v1.6** (F65-01: §6.2 variantsSupported mandatory-field rule); BC-15.01.001 **v1.2** (F65-01: PC1 citation fix); ADR-0008 v1.2; BC-11.01.002/003 v1.2; prd-cap-011 v1.4; processes.md v1.1; CI gate **v1.46** (checks a–z + aa..oo + o.ii, ~44 sub-assertions; check (oo) = §6.2 mandatory-field-rule completeness guard). Totals UNCHANGED: 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI / P0=127/P1=42/P2=24. Note: error-taxonomy carries Warning Codes registry (4 W-codes) — NOT counted in 267. See Session Resume Checkpoint for full version-bump list.
 
 ---
 
@@ -91,10 +87,11 @@ Loop protocol:
 | 1–17 | 2026-06-08 | FINDINGS×16 / CLEAN×1 | (see phase-1-log.md rows 9–25) | 0/3 after Pass-17 |
 | 18–32 | 2026-06-08 | FINDINGS×5 / CLEAN×5 | (see phase-1-log.md rows 26–40) | 0/3 after Pass-32 |
 | 33–53 | 2026-06-08–10 | FINDINGS×18 / CLEAN×3 | (see phase-1-log.md — Passes 33–53 appended 2026-06-13; 3 streak breaks at Pass-46/49/51, security-burst tails at P43/44/53, Pass-45 clean 1/3 reset P46, Pass-47/48 clean 2/3 reset P49, Pass-50 clean 1/3 reset P51) | 0/3 after Pass-53 |
-| 54–62 | 2026-06-10–13 | FINDINGS×9 | (see phase-1-log.md — Passes 54–62 appended 2026-06-16; checks hh/ii/jj/kk/ll/mm added; gate stays v1.44; BC-7.11.001/002 v1.2, BC-7.11.004 v1.1, BC-14.02.001 v1.2, BC-5.04.002 v1.3, BC-14.01.001 v1.1, verification-architecture v1.2, BC-13.02.001 v1.2, VP-004 v1.2, VP-INDEX v1.6, adapter-protocols v1.5, ADR-0008 v1.2) | 0/3 after Pass-62 |
+| 54–62 | 2026-06-10–13 | FINDINGS×9 | (see phase-1-log.md — checks hh/ii/jj/kk/ll/mm added; gate v1.44; multiple BC/VP/arch fixes) | 0/3 after Pass-62 |
 | 63 | 2026-06-16 | FINDINGS | F63-01(I): BC-7.01.001 test vectors claimed 11 sim-BCs but precondition/postcondition define 10 (BC-6.04.001 Red Gate is impl-dimension input, not a sim-BC). Fixed test vectors to 10; v1.1. F63-02(obs→FU-025): BC-7.09.001:56-57 docs-dimension GREEN phrasing awkward. | **0/3** (stays) |
 | 64 | 2026-06-16 | FINDINGS | F64-01(I,process-gap→CODIFIED): Pass-10 AMBER→canonical migration left 4 live-prose 'amber' residuals (adversary found 2; orchestrator corpus-grep found 4 — LESSON-F46). Fixed BC-11.01.002 v1.2 / BC-11.01.003 v1.2 / prd-cap-011 v1.4 / processes.md v1.1 → BLOCKED/DEGRADED-PENDING; codified gate check (nn) v1.45 (amber prose guard). | **0/3** (stays) |
-| 65 | — | PENDING | — | — |
+| 65 | 2026-06-16 | FINDINGS | F65-01(I,process-gap→CODIFIED): adapter-seam divergence — BC-15.01.001 hard-gates leaderboards.variantsSupported (E-EAP-012) but §6.2 mandatory-field rules omitted it + BC citation pointed at :822 (selfHostable) not variantsSupported rule. Fixed adapter-protocols v1.6 (rule+annotation) + BC-15.01.001 v1.2 (citation); codified gate (oo) v1.46. F65-02(obs→FU-026): BC-15.04.001:76-78 PC5 'PASS' label returns E-EAP-002 (confusing vs sibling PCs); deferred. | **0/3** (stays) |
+| 66 | — | PENDING | — | — |
 
 ---
 
@@ -110,7 +107,7 @@ Loop protocol:
 | M6 | Phase-1 architecture + 10 VPs + DTU assessment (c29f412; DTU_REQUIRED=true) | DONE |
 | T7 | prd-revision — PRD v1.1; FU-001/002/003 closed; 170 BCs, 35 NFRs, 137 error codes | **DONE** |
 | T8 | CI/CD setup — devops-engineer; `.github/workflows/` + `cicd-setup.md`; D-009 | **DONE** |
-| T9 | Phase-1d adversarial spec convergence — Passes 1–64 resolved; Pass 64 FINDINGS (F64-01: Pass-10 AMBER→canonical migration left 4 amber prose residuals — fixed BC-11.01.002/003 v1.2, prd-cap-011 v1.4, processes.md v1.1; codified check (nn) v1.45); counter 0/3; Pass 65 = restart #3 clean #1 candidate | **IN PROGRESS** |
+| T9 | Phase-1d adversarial spec convergence — Passes 1–65 resolved; Pass 65 FINDINGS (F65-01: adapter-seam divergence — fixed adapter-protocols v1.6 + BC-15.01.001 v1.2; codified check (oo) v1.46); counter 0/3; Pass 66 = restart #3 clean #1 candidate | **IN PROGRESS** |
 | T10 | Fresh-context consistency audit (`consistency-validator`) | PENDING |
 | T11 | Input-hash drift check (`/vsdd-factory:check-input-drift`) | PENDING |
 | T12 | Phase-1 spec-package HUMAN GATE | PENDING |
@@ -181,21 +178,22 @@ Loop protocol:
 | FU-023 | F60-03 (obs): verification-architecture.md:71 paraphrases VP-006 loosely as "RD strictly decreasing across rating periods", eliding the F40-05 baseline nuance (RD increases over inactive periods; strictly decreases below pre-inactivity RD_old). Description-tightening only. | architect | Phase-1 gate or next touch — OPEN non-blocking |
 | FU-024 | [process-gap, codification candidate] Gate check (ll) — VP property-statement propagation to BC "Formally verified by VP-NNN (...)" back-refs. Deferred: prerequisite is normalizing BC VP back-refs verbatim-from-VP-INDEX (VP-006 abbreviated, VP-008 enriched). Once normalized, add lead-phrase-substring check (ll) to scripts/check-spec-counts.sh. Per LESSON-F52, avoid over-firing gate. | architect | Before Phase-6 VP promotion — OPEN non-blocking |
 | FU-025 | F63-02 (obs): BC-7.09.001:56-57 docs-dimension GREEN postcondition phrasing reads as if a Red-Gate bypass must EXIST to be GREEN; intent is "if any bypass occurred it must be logged." Awkward phrasing, not a contradiction; non-blocking. Cleanup at Phase-1 gate or next BC touch. | product-owner | Phase-1 gate or next BC touch — OPEN non-blocking |
-| LESSONS-CODIFIED | LESSON-F43/F46/F49a/F49b/F52/F53/F56/F58 — all codified in CI checks dd/ee/ff/w/gg/jj/kk. LESSON-F60 [pending-codification] — VP re-scope must sweep all downstream surfaces. LESSON-F61 [codified] — F40-01 determinism/replay fix must sweep adapter-protocols.md tier table + ReplayResult enum. Codified check (ll). LESSON-F62 [codified] — ADR normative; wrong-but-registered E-code passes check (k). Codified check (mm). LESSON-F64 [codified] — enum-value migration (AMBER→canonical) must sweep ALL live prose corpus-wide; adversary found 2 of 4; orchestrator grep found all 4 (reinforces LESSON-F46). Codified check (nn). Full text: `.factory/cycles/v0.1.0-greenfield/lessons.md` | — | CODIFIED |
+| FU-026 | F65-02 (obs): BC-15.04.001:76-78 PC5 labeled "PASS — variant not supported" but returns E-EAP-002 (CapabilityUnsupported); label is internally confusing vs sibling PCs (which use FAIL for errors). Behavior unambiguous; non-blocking. Relabel to "PASS (graceful degradation)" at next BC touch. | product-owner | Phase-1 gate or next BC touch — OPEN non-blocking |
+| LESSONS-CODIFIED | LESSON-F43/F46/F49a/F49b/F52/F53/F56/F58 — all codified in CI checks dd/ee/ff/w/gg/jj/kk. LESSON-F60 [pending-codification] — VP re-scope must sweep all downstream surfaces. LESSON-F61 [codified] — F40-01 determinism/replay fix must sweep adapter-protocols.md tier table + ReplayResult enum. Codified check (ll). LESSON-F62 [codified] — ADR normative; wrong-but-registered E-code passes check (k). Codified check (mm). LESSON-F64 [codified] — enum-value migration (AMBER→canonical) must sweep ALL live prose corpus-wide. Codified check (nn). LESSON-F65 [codified] — manifest-validation BC that hard-gates a field (E-EAP-012) MUST have matching mandatory-field rule in §6.2; recurred (F35-01 seam enum, F61-01 T2 method, F65-01 variantsSupported). Codified check (oo) as curated allow-list. Full text: `.factory/cycles/v0.1.0-greenfield/lessons.md` | — | CODIFIED |
 
 ---
 
 ## Session Resume Checkpoint
 
 **Date:** 2026-06-16
-**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–64 DONE.
-**Phase-1d Pass 64:** FINDINGS (0C/1I/0obs). F64-01(I,process-gap→CODIFIED): Pass-10 AMBER→canonical migration left 4 live-prose 'amber' residuals. Adversary flagged 2; orchestrator corpus-grep found all 4 (LESSON-F46 reinforced). Fixed: BC-11.01.002:126 DI-006 gloss → "default BLOCKED state" (v1.1→v1.2); BC-11.01.003:48 Precondition 3 → "default/pre-review BLOCKED-only state" (v1.1→v1.2); prd-cap-011.md:123 → "convergence BLOCKED state for monetization-ethics dimension #10" (v1.3→v1.4); domain-spec/processes.md:179 → "DEGRADED-PENDING or BLOCKED" (v1.0→v1.1). D-ETHICS (#10) binary invariant preserved. Codified gate check (nn) v1.45 (non-canonical amber-token prose guard).
-**Clean-pass counter: 0/3 (counter stays — findings pass; restart #3 still seeking clean #1).** Pass 65 = restart #3 candidate clean #1.
-**Next action:** `phase-1d-adversarial` — **Pass 65** (candidate clean #1, restart #3 continues). Spec FROZEN after F64 fix burst. FU-007/FU-008/FU-010/FU-011/FU-012/FU-013/FU-014/FU-016/FU-017/FU-018/FU-019/FU-020/FU-021/FU-022/FU-023/FU-024/FU-025 open (non-blocking). FU-015 CLOSED (F51-02).
+**Phase:** 1 — Spec Crystallization IN PROGRESS. Steps 1–8 DONE + Phase-1d Passes 1–65 DONE.
+**Phase-1d Pass 65:** FINDINGS (0C/1I/1obs). F65-01(I,process-gap→CODIFIED): adapter-seam producer/consumer divergence — BC-15.01.001 (F40-07) hard-gates leaderboards.variantsSupported (PC5/EC-007/008 → E-EAP-012) but adapter-protocols.md §6.2 "Mandatory field rules" omitted it (appeared only as unannotated schema example), and BC-15.01.001 PC1 citation pointed at :822 (selfHostable line) not variantsSupported rule. Fixed: adapter-protocols.md v1.5→v1.6 (§6.2 mandatory-field rule for variantsSupported + `// MUST be non-empty` annotation); BC-15.01.001 v1.1→v1.2 (PC1 citation corrected to "§6.2 mandatory-field rule"; postconditions/ECs/test-vectors unchanged). Codified gate check (oo) v1.46 (§6.2 mandatory-field-rule completeness; curated allow-list {selfHostable, serverAuthoritative, offlineProject, variantsSupported}). F65-02(obs→FU-026): BC-15.04.001:76-78 PC5 'PASS' label returns E-EAP-002; deferred.
+**Clean-pass counter: 0/3 (counter stays — findings pass; restart #3 still seeking clean #1).** Pass 66 = restart #3 candidate clean #1.
+**Next action:** `phase-1d-adversarial` — **Pass 66** (candidate clean #1, restart #3 continues). Spec FROZEN after F65 fix burst. FU-007/008/010/011/012/013/014/016/017/018/019/020/021/022/023/024/025/026 open (non-blocking). FU-015 CLOSED (F51-02).
 **Phase 1 remaining:** Phase-1d adversarial convergence (0/3 clean passes, need 3) → consistency audit (T10) → drift check (T11) → Phase-1 human gate (T12).
-**Spec totals:** 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / P0=127/P1=42/P2=24 / CI gate v1.45 (~43 sub-assertions). Error codes UNCHANGED (267); Warning Codes registry carries 4 W-codes (NOT counted in 267). §3.1 D-SEC = 2 allowed values (GREEN, BLOCKED); check (s) verifies 33 dim-value pairs.
-**Version bumps Pass 64:** BC-11.01.002 v1.2, BC-11.01.003 v1.2, prd-cap-011 v1.4, processes.md v1.1 (all F64-01: amber prose residuals → canonical BLOCKED/DEGRADED-PENDING). BC count UNCHANGED (193). CI gate v1.44→v1.45 (check nn added). Spec totals UNCHANGED.
-**Open FUs:** FU-005/006/007/008/010/011/012/013/014/016/017/018/019/020/021/022/023/024/025 open (all non-blocking except FU-005 ONGOING). FU-009 CLOSED (Pass-24). FU-015 CLOSED (F51-02). See Open Follow-up Items table above.
+**Spec totals:** 193 BCs / 267 error codes (258 active) / 41 NFRs / 15 caps / 13 subsystems / 13 DI invariants / P0=127/P1=42/P2=24 / CI gate v1.46 (~44 sub-assertions). Error codes UNCHANGED (267); Warning Codes registry carries 4 W-codes (NOT counted in 267). §3.1 D-SEC = 2 allowed values (GREEN, BLOCKED); check (s) verifies 33 dim-value pairs.
+**Version bumps Pass 65:** adapter-protocols v1.6 (F65-01: §6.2 variantsSupported rule + annotation), BC-15.01.001 v1.2 (F65-01: PC1 citation fix). BC count UNCHANGED (193). CI gate v1.45→v1.46 (check oo added). Spec totals UNCHANGED.
+**Open FUs:** FU-005/006/007/008/010/011/012/013/014/016/017/018/019/020/021/022/023/024/025/026 open (all non-blocking except FU-005 ONGOING). FU-009 CLOSED (Pass-24). FU-015 CLOSED (F51-02). See Open Follow-up Items table above.
 **Decisions:** D-014/015/019 flagged for human gate review. D-001..013 see decisions-log-archive.md. D-018/019 in effect.
-**main branch:** CI gate v1.45 (check nn added — amber prose guard). Step history: see phase-1-log.md.
+**main branch:** CI gate v1.46 (check oo added — §6.2 mandatory-field-rule completeness guard). Step history: see phase-1-log.md.
 **GATE EXECUTION NOTE:** Run `bash scripts/check-spec-counts.sh` as a SINGLE isolated process — concurrent runs corrupt shared state and produced a spurious check-(k) false-positive during Pass 57. Gate must exit 0 before crediting any pass.
