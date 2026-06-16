@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.005
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -19,7 +19,13 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0-prd-rev-1d
-modified: []
+modified:
+  - date: 2026-06-16
+    version: "1.1"
+    author: product-owner
+    finding: F56-01-propagation
+    rid: R-07
+    summary: "R-07 propagation residual (F56-01): SP4 caveat expressed as test-vector row (mirrors BC-7.11.002 v1.2 pattern) rather than inline postcondition text — D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass; dimension is NOT GREEN-by-inapplicability. Operative OFFLINE EXEMPTION postcondition kept minimal to avoid check (n) false positive."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -59,7 +65,7 @@ server contradiction.
 2. **FAIL:** Client retains its local prediction after receiving a server state
    correction that contradicts it (reconciliation not implemented or suppressed).
    Error: `E-CONV-006` `CWE-602: client-state not reconciled from server authority`.
-3. **OFFLINE EXEMPTION:** No online features. INAPPLICABLE.
+3. **OFFLINE EXEMPTION:** No online features. The authoritative reconciliation sub-invariant is INAPPLICABLE.
 
 ## Invariants
 
@@ -82,6 +88,7 @@ server contradiction.
 |-------|----------------|----------|
 | Server corrects client position after lag spike | Client shows server-authoritative position | happy-path |
 | Client health local = 80, server correction = 60, client retains 80 | FAIL: E-CONV-006 reconciliation not applied | error |
+| Offline single-player game | authoritative reconciliation sub-invariant INAPPLICABLE (no online features); D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass — dimension is NOT GREEN-by-inapplicability | inapplicable |
 
 ## Verification Properties
 

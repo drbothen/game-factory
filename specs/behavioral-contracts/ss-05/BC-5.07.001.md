@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-16T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -82,7 +82,7 @@ that doesn't meet its requirements.
 
 | ID | Description | Expected Behavior |
 |----|-------------|-------------------|
-| EC-001 | Discipline DAG has a cycle (design depends on narrative depends on design) | DAG validation detects cycle; E-PROD-003 raised at game-production-plan validation time; plan rejected before any wave begins |
+| EC-001 | Discipline DAG has a cycle (design depends on narrative depends on design) | DAG validation detects cycle; E-PROD-004 raised at game-production-plan validation time; plan rejected before any wave begins (E-PROD-004 = DAG cycle; E-PROD-003 = predecessor wave not completed / wave-gate block — distinct codes per R-17) |
 | EC-002 | Producer discipline produces its artifacts but the contract was declared with wrong format requirements | Contract revision triggered; consumer discipline wave blocked; E-PROD-002 raised at acceptance check time (BC-5.07.002) |
 | EC-003 | Consumer agent acknowledges contract without reading it (auto-ack) | Acknowledgment is recorded; factory does not verify whether the agent "read" it; auto-ack is valid; contract obligations are enforced at artifact handoff (BC-5.07.002) |
 | EC-004 | New discipline added to game mid-production (e.g., esports lane activated) | New dependency contracts required for all new discipline edges; existing waves not affected; new waves blocked until contracts declared |
@@ -96,7 +96,7 @@ that doesn't meet its requirements.
 | Art wave starting; design→art contract exists, schema-valid, both acknowledged | dependency-contract-readiness-report: pass; art wave start permitted | happy-path |
 | Art wave starting; design→art contract missing | E-PROD-001: missing cross-discipline-dependency-contract from design to art | error |
 | Art wave starting; design→art contract exists but consumer (art) ack missing | E-PROD-001: consumer ack missing for design→art contract | error |
-| DAG has cycle (design→art→design) | E-PROD-003: cycle detected in discipline DAG; plan rejected | error |
+| DAG has cycle (design→art→design) | E-PROD-004: cycle detected in discipline DAG; plan rejected | error |
 | Single-discipline puzzle game; no DAG edges | dependency-contract-readiness-report: no dependencies; wave start permitted | edge-case |
 
 ## Verification Properties
@@ -104,7 +104,7 @@ that doesn't meet its requirements.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-5.07.001 | For all consumer discipline waves, absence of any required dependency contract always raises E-PROD-001 | proptest: generate discipline DAGs with random edge sets; assert contract checks enforce all edges |
-| VP-5.07.002 | DAG cycle detection correctly identifies all cyclic dependencies | proptest: generate random directed graphs including cyclic examples; assert cycle detection |
+| VP-5.07.002 | DAG cycle detection correctly identifies all cyclic dependencies and raises E-PROD-004 | proptest: generate random directed graphs including cyclic examples; assert E-PROD-004 raised (not E-PROD-003 — wave-gate block is separate) |
 
 ## Traceability
 
@@ -131,5 +131,13 @@ S-TBD — Cross-Discipline Dependency Contract Declaration Gate
 
 ## VP Anchors
 
-- VP-5.07.001 — contract presence enforcement
-- VP-5.07.002 — DAG cycle detection
+- VP-5.07.001 — contract presence enforcement (E-PROD-001)
+- VP-5.07.002 — DAG cycle detection (E-PROD-004)
+
+## Changelog
+
+### v1.2 (2026-06-16)
+
+| Change | Detail |
+|--------|--------|
+| R-17: E-PROD-003 overload split — DAG cycle case | EC-001 and test vector updated from E-PROD-003 to E-PROD-004 (discipline-DAG cycle detected at plan-validation). E-PROD-003 is reserved for predecessor-wave-not-completed / wave-gate block (BC-5.07.003). VP-5.07.002 updated to cite E-PROD-004. |

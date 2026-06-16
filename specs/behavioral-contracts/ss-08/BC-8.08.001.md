@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -20,7 +20,11 @@ capability: CAP-008
 priority: P1
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.3"
+    date: 2026-06-16
+    by: product-owner
+    reason: "R-08 (Phase-1d audit): Precondition 4 non-canonical dimension-state tokens fixed — `pending` → `DEGRADED-PENDING`, `not-started` → `BLOCKED` per methodology §3.1 canonical enum {GREEN, DEGRADED, DEGRADED-PENDING, BLOCKED}."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -47,7 +51,7 @@ session — the factory owns its structure and completeness; the human owns exec
 3. No prior `playtest-protocol` artifact for this milestone exists with
    `status: approved`; a new one is being generated or regenerating a `draft`.
 4. The 11-dimension convergence tracker reports the `playtest-satisfaction` dimension
-   as `pending` or `not-started` (i.e., has not yet been signed off).
+   as `DEGRADED-PENDING` or `BLOCKED` (i.e., has not yet been signed off).
 
 ## Postconditions
 

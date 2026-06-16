@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -17,7 +17,10 @@ capability: CAP-001
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-16
+    reason: "R-19 (Phase-1d audit): version bump to align with BC-1.02.001 v1.2 which now declares 'modes: array' as a mandatory capture capability field, closing the gap this BC's PC1 depended on."
 deprecated: null
 deprecated_by: null
 replacement: null

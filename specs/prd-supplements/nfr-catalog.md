@@ -2,7 +2,7 @@
 document_type: prd-supplement
 level: L3
 section: nfr-catalog
-version: "1.4"
+version: "1.5"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -56,7 +56,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | NFR-023 | Conformance drift detection latency | CAP-002 | Scheduled anti-drift re-run on engine minor release | < 15 min end-to-end (trigger → pass/fail verdict) | Timed CI scheduled run | prd-cap-002-003.md §FU-002 (CAP-002) |
 | NFR-024 | Replay recording overhead | CAP-003 | Input-stream recording overhead vs. unrecorded run at T1 determinism | < 5% wall-clock overhead | CI benchmark: 10,000-frame deterministic sim; compare recorded vs. unrecorded run | prd-cap-002-003.md §FU-002 (CAP-003) |
 | NFR-025 | Replay execution wall-clock time | CAP-003 | Replay of a 10,000-frame session at T1 (exact snapshot-hash mode) | p95 < 2× original recorded wall-clock time | CI replay benchmark; regression flag if ratio exceeds 2× | prd-cap-002-003.md §FU-002 (CAP-003) |
-| NFR-026 | Simulation-BC verification throughput | CAP-006 | Machine-verifiable simulation contract battery (economy, damage, FSM, AI — all 11 checks) | p95 < 60 s for a reference game's full sim-BC suite | Timed CI sim-BC gate | prd-cap-006-007.md §FU-002 (CAP-006) |
+| NFR-026 | Simulation-BC verification throughput | CAP-006 | Machine-verifiable simulation contract battery (economy, damage, FSM, AI — all 10 checks) | p95 < 60 s for a reference game's full sim-BC suite | Timed CI sim-BC gate | prd-cap-006-007.md §FU-002 (CAP-006) |
 | NFR-027 | Convergence dimension evaluation latency | CAP-007 | Full 11-dimension convergence evaluation pass (one loop tick) | p95 < 30 s for a fully-populated project state | Timed CI convergence-tick benchmark | prd-cap-006-007.md §FU-002 (CAP-007) |
 | NFR-028 | Cert pre-flight checklist generation time | CAP-009 | Machine-checkable cert pre-flight run for one target platform (Steam, PlayStation, Xbox, iOS, Android) | p95 < 5 min per platform on CI | Timed CI cert-preflight step per platform | prd-cap-009-010.md §FU-002 (CAP-009) |
 | NFR-029 | Compliance manifest generation time | CAP-010 | AI disclosure manifest + IARC questionnaire auto-fill from provenance sidecar data | p95 < 60 s for a 1,000-asset project | Timed CI compliance-pipeline step | prd-cap-009-010.md §FU-002 (CAP-010) |
@@ -94,6 +94,12 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 ## Changelog
+
+### v1.5 (2026-06-16)
+
+| Change | Detail |
+|--------|--------|
+| R-27: NFR-026 sim-BC battery count corrected | "all 11 checks" → "all 10 checks" in NFR-026 Requirement column. BC-6.04.001 feeds D-IMPL (implementation anchor hook), not D-SIM (simulation contract battery). The sim-BC battery is 10 contracts (BC-6.01.001–BC-6.03.001), not 11. Corresponding fix applied to prd.md §4 NFR summary table in the same pass. |
 
 ### v1.4 (2026-06-09)
 

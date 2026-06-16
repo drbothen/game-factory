@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -25,6 +25,10 @@ modified:
     date: 2026-06-09
     author: product-owner
     reason: "F46-01: remove non-schema `competitive_multiplayer_enabled: true` OR-branch from Precondition 2. The genre-profile schema defines no separate `competitive_multiplayer_enabled` field; `genre-profile.esports_enabled: true` is the sole schema-valid competitive/esports lane signal (per BC-13.01.001 and BC-13.02.006 F44-01 resolution). The OR-branch was redundant and referenced a non-existent schema field. Gate now reads solely on `genre-profile.esports_enabled: true`."
+  - version: "1.2"
+    date: 2026-06-16
+    author: product-owner
+    reason: "R-32: Remove CAP-013 from the Processes traceability row. CAP-013 is a Capability, not a Process; it was already correctly cited in the Capability Anchor Justification row. The Processes row now retains only PROC-NNN entries."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -139,7 +143,7 @@ discipline as competitive-grade deterministic lockstep netcode.
 | L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-010 (Kernel Anti-Cheat Is Never Autonomously Authored) |
 | Architecture Module | SS-02 (Replay Exporter, Genre-Lane Activator — filled by architect) |
 | Stories | (filled by story-writer) |
-| Processes | CAP-013 (genre-gated lane activation), PROC-004 (Replay Regression Workflow as foundation) |
+| Processes | PROC-004 (Replay Regression Workflow as foundation) |
 | ADRs | ADR-0003 |
 | Differentiators | D-002 (Deterministic Replay as First-Class Quality Gate — "single replay primitive" claim) |
 

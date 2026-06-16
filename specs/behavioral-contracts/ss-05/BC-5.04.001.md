@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,12 @@ capability: CAP-005
 priority: P0
 lifecycle_status: active
 introduced: v1.0.0
-modified: []
+modified:
+  - date: 2026-06-16
+    version: "1.3"
+    author: product-owner
+    finding: R-31
+    summary: "R-31 propagation residual — added OBS-20-B authority note mirroring BC-5.04.002 v1.3: the authoritative Canon-KB store (entity registry, edges, timeline) is owned by CAP-012/SS-10 (BC-12.12.002/003/004); this BC (CAP-005/SS-04) is a consumer/validation view, not the owner."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -29,6 +34,8 @@ removal_reason: null
 ---
 
 # BC-5.04.001: Narrative Graph Is Reachable, Dead-End-Free, and Canon-Grounded
+
+> **Canon-KB authority (OBS-20-B reciprocal):** The authoritative Canon-KB store — entity registry, edge graph, and timeline — is owned by CAP-012 / SS-10 (BC-12.12.002 entities, BC-12.12.003 edges, BC-12.12.004 timeline). This BC (CAP-005 / SS-04) is a narrative-graph consumer / validation view: it queries the Canon-KB for canon-grounding checks but does not own, create, or manage entity/timeline mutations. (Mirrors BC-5.04.002 v1.3 OBS-20-B note.)
 
 ## Description
 

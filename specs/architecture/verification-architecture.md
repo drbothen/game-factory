@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-architecture
-version: "1.2"
+version: "1.3"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,9 @@ modified:
   - version: "1.1"
     date: 2026-06-10
     reason: "OBS-54-A fix — VP-009 title in P0 proofs table corrected from 'Damage I/O matrix row-sum correctness' to 'Damage I/O matrix range containment and split-damage sum — damage output within declared I/O matrix bounds' to match VP-INDEX:58 corrected title (F40-06 retitling); VP-008 description also corrected to match VP-INDEX current title."
+  - version: "1.3"
+    date: 2026-06-16
+    reason: "R-03 fix — DI-013 (never-emit-secrets, registered Pass-42 F42-03) added to §7 Invariants Classified as Test-Sufficient table. DI-013 was absent despite being registered in domain-spec/invariants.md v1.2 and enforced by BC-1.15.003 / cicd-setup.md §Output-Bundle Secrets Gate. Enforcing contract and CI gate method now match verification-coverage-matrix.md."
   - version: "1.2"
     date: 2026-06-13
     reason: "F60-01 fix — VP-007 P1 Property column updated from stale single-invariant 'TrueSkill μ−3σ partial-order monotonicity' to dual-invariant form 'TrueSkill INV-TS-02 conservative-rating ordering (μ−3σ monotonicity) + INV-TS-03 permutation equivariance' matching VP-INDEX:56 (F40-04 scope). F60-02 fix — VP-004 P0 Property column updated from over-strong win-only reachability to terminal-set reachability (win OR game-over) matching BC-6.02.004 EC-001 and BC-6.02.004/VP-TBD-015."
@@ -188,3 +191,4 @@ test-sufficient rather than formally proven, with justification:
 | DI-010 (no kernel AC authored) | File system / build output scan; has I/O | Static lint VP-TBD-060/061 |
 | DI-011 (NFT off by default) | Schema field presence check; VP-TBD-062/063 | Schema validation |
 | DI-012 (every contract has validation method) | Schema structural check; not a pure function over in-memory data alone | Schema validation CI gate |
+| DI-013 (never-emit-secrets) | Output-bundle scan over generated file artifacts; I/O-dependent; enforced by BC-1.15.003 | CI gate — output-bundle secrets scan (gitleaks/trufflehog; cicd-setup.md §Output-Bundle Secrets Gate) |

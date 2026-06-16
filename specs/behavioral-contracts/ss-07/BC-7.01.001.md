@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -24,6 +24,11 @@ modified:
     author: product-owner
     finding: F63-01
     summary: "Corrected sim-BC set cardinality from 11 to 10. BC-6.04.001 (TDD Red Gate) is an implementation-dimension input (BC-7.03.001), not a sim-BC. Test vector row 1 changed from 'All 11 sim-BCs PASS' to 'All 10 sim-BCs PASS'; row 2 changed from '10 sim-BCs PASS, BC-6.01.001 FAIL' to '9 sim-BCs PASS, BC-6.01.001 FAIL'. Precondition 1 (BC-6.01.xxx + BC-6.02.xxx + BC-6.03.001 = 10) and test vectors are now consistent. No change to Red Gate dimension assignment."
+  - version: "1.2"
+    date: 2026-06-16
+    author: product-owner
+    finding: R-06
+    summary: "R-06 propagation residual — corrected Related BCs range from 'BC-6.01.001 through BC-6.04.001' to 'BC-6.01.001 through BC-6.03.001', consistent with F63-01 exclusion of BC-6.04.001 (Red Gate) from the sim-BC set."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -118,7 +123,7 @@ machine-verifiable quality dimension of the 11-dimension convergence model.
 
 ## Related BCs
 
-- BC-6.01.001 through BC-6.04.001 — depended on by (these BCs must PASS for this dimension to be GREEN)
+- BC-6.01.001 through BC-6.03.001 — depended on by (these BCs must PASS for this dimension to be GREEN)
 - BC-7.12.001 — depended on by (convergence loop engine reads this dimension's result)
 
 ## Architecture Anchors

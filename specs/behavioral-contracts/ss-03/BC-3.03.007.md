@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,11 @@ capability: CAP-003
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    author: product-owner
+    reason: "R-21: Add DI-007 to L2 Domain Invariants traceability row. Invariant 3 (line 83) explicitly invokes DI-007 (no automated metric replaces the human playtest gate) but the traceability row only listed DI-004 and DI-006. DI-007 added to close the orphan-invariant gap."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -116,7 +120,7 @@ and visible in the convergence report; it is never silent.
 |-------|-------|
 | L2 Capability | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 |
 | Capability Anchor Justification | CAP-003 ("Determinism-Tier-Governed Replay Regression") per capabilities.md §CAP-003 — this BC specifies the "replay: none → degrade to human-playtest evidence" fallback described in ADR-0003 ("An adapter lacking these declares `replay: none` and the regression dimension falls back to human-playtest evidence") and in PROC-004 Stage 4 (Degradation). |
-| L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-006 (Human-Gated Tasks Are Surfaced Not Silently Dropped) |
+| L2 Domain Invariants | DI-004 (Determinism Tier Is Declared, Never Assumed), DI-006 (Human-Gated Tasks Are Surfaced Not Silently Dropped), DI-007 (No Automated Metric Replaces Human-Gated Playtest Evidence) |
 | Architecture Module | SS-02 (Replay Engine, Convergence Tracker — filled by architect) |
 | Stories | (filled by story-writer) |
 | Processes | PROC-004 Stage 4 (Degradation), PROC-006 (Human-Gated Task Surfacing) |

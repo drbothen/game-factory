@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: subsystem-decomposition
-version: "1.8"
+version: "1.9"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -17,6 +17,13 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Subsystem Decomposition
+
+> **v1.9 changes (R-05 — BC→Subsystem table SS-05 sim-BC count corrected):**
+> - BC→Subsystem table row "BC-6.01.001 – BC-6.04.001": count corrected 11 → 10.
+>   Per F63-01, BC-6.04.001 (Red Gate) is classified as a D-IMPL input, not a sim-BC.
+>   The authoritative sim-BC count for SS-05 / CAP-006 is 10. Note added inline.
+>   Grand total (193) is unaffected: BC-6.04.001 remains in the SS-05 range and is
+>   still counted once in the TOTAL row via the BC-6.01.001–BC-6.04.001 range.
 
 > **v1.8 changes (Pass-42 D-019 security burst — PO BC authoring step):**
 > - BC count updated: SS-01=41→42 (+1 BC-1.15.003 never-emit-secrets, P0, CAP-001).
@@ -406,7 +413,7 @@ for single-player or offline projects. The conformance suite must include a
 | BC-3.03.001 – BC-3.03.009 | 9 | **SS-02** | CAP-003 = deterministic replay harness |
 | BC-4.01.001 – BC-4.06.001 | 15 | **SS-03** | CAP-004 = asset generation pipeline |
 | BC-5.01.001 – BC-5.07.003 | 16 | **SS-04** | CAP-005 = multi-discipline production |
-| BC-6.01.001 – BC-6.04.001 | 11 | **SS-05** | CAP-006 = simulation quality verification |
+| BC-6.01.001 – BC-6.04.001 | 10 | **SS-05** | CAP-006 = simulation quality verification (10 sim-BCs; BC-6.04.001 is an SS-05 contract classified as D-IMPL input, not a sim-BC per F63-01) |
 | BC-7.01.001 – BC-7.12.001 | 12 | **SS-06** | CAP-007 = convergence tracking engine (original 12) |
 | BC-7.11.002 – BC-7.11.008 | 7 | **SS-06** | CAP-007; v1.2 add: server-authority invariant suite CWE-602 (dir: ss-07/) |
 | BC-8.08.001 – BC-8.08.005 | 5 | **SS-07** | CAP-008 = playtest protocol |

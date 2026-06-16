@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,10 @@ capability: CAP-001
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-16
+    reason: "R-14 (Phase-1d audit): corrected T2 description in Description §Research basis and Postconditions PC1 — T2 uses snapshot-structured-diff on a pinned runner; bitwise hash equality is NOT guaranteed cross-platform."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -40,7 +43,7 @@ always declared by the adapter.
 
 Research basis (Decision 0003, `planning/decisions/0003-determinism-tier-capability.md`):
 - Bevy + Rapier: bitwise-cross-platform (deterministic hash across OS/CPU)
-- Unity + PhysX with Enhanced Determinism: same-machine (hash only on pinned runner)
+- Unity + PhysX with Enhanced Determinism: same-machine (snapshot-structured-diff on pinned runner; hash equality not guaranteed cross-platform)
 - Godot (any physics): tolerance-only (FP non-determinism, no guarantee)
 
 ## Preconditions
@@ -52,8 +55,8 @@ Research basis (Decision 0003, `planning/decisions/0003-determinism-tier-capabil
 1. The manifest includes `"determinismTier"` at the top level with one of:
    - `"bitwise-cross-platform"` (T1): adapter guarantees identical simulation
      snapshot hash across different OS/CPU combinations
-   - `"same-machine"` (T2): adapter guarantees hash reproducibility only on the
-     same pinned runner image
+   - `"same-machine"` (T2): adapter uses snapshot-structured-diff (field-by-field)
+     on a pinned runner; cross-platform hash equality is NOT guaranteed
    - `"tolerance-only"` (T3): no hash-level guarantee; replay comparison uses
      a tolerance-window metric diff
 2. If the adapter is uncertain about its tier (e.g., unknown engine version),

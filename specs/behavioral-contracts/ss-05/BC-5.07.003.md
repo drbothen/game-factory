@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-16T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -138,6 +138,14 @@ S-TBD — Wave Schedule DAG Ordering Enforcement
 
 ## VP Anchors
 
-- VP-5.07.005 — predecessor completion enforcement
+- VP-5.07.005 — predecessor completion enforcement (E-PROD-003)
 - VP-5.07.006 — blocked-wave signal emission
 - VP-5.07.007 — wave status append-only
+
+## Changelog
+
+### v1.2 (2026-06-16)
+
+| Change | Detail |
+|--------|--------|
+| R-17: E-PROD-003 ownership confirmed | This BC owns E-PROD-003 (predecessor wave not completed / wave-gate block). The DAG-cycle case has been split to E-PROD-004 in BC-5.07.001 EC-001. E-PROD-003 usage in postconditions 1a, 2, and all edge cases/test vectors remains correct and unchanged. |

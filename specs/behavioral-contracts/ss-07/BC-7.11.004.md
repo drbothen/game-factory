@@ -19,7 +19,12 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0-prd-rev-1d
-modified: []
+modified:
+  - date: 2026-06-13
+    version: "1.1"
+    author: product-owner
+    finding: F57-01
+    summary: "F57-01 (Pass-57): corrected Related BCs composition reference from BC-7.11.006 → BC-7.11.007 (economy-atomicity composition fix). No content change to postconditions or invariants."
 deprecated: null
 deprecated_by: null
 replacement: null

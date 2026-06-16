@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -20,7 +20,11 @@ capability: CAP-002
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    author: product-owner
+    reason: "R-20: Precondition 4 reworded to clarify that both build and test capabilities must be declared full — partial or none causes the mini-game step to be skipped per Invariant 3, not executed at partial fidelity. Removes the implication that partial fidelity suffices to run the mini-game."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -49,8 +53,10 @@ blocks acceptance even if all capability tests passed.
 3. The reference mini-game spec is available and has been translated to the adapter's
    target engine (this translation is a one-time step per engine, produced during adapter
    authoring).
-4. The adapter's `build` and `test` capabilities are declared at `full` or `partial`
-   fidelity (the mini-game requires both to run).
+4. Both `build` and `test` capabilities are declared in the adapter's manifest; the
+   mini-game executes only when both are declared `full` — if either is `partial` or
+   `none`, the mini-game step is skipped per Invariant 3
+   (`reference_mini_game: skipped_insufficient_build_test`).
 
 ## Postconditions
 

@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.003
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -19,7 +19,13 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0-prd-rev-1d
-modified: []
+modified:
+  - date: 2026-06-16
+    version: "1.1"
+    author: product-owner
+    finding: F56-01-propagation
+    rid: R-07
+    summary: "R-07 propagation residual (F56-01): SP4 caveat expressed as test-vector row (mirrors BC-7.11.002 v1.2 pattern) rather than inline postcondition text — D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass; dimension is NOT GREEN-by-inapplicability. Operative OFFLINE EXEMPTION postcondition kept minimal to avoid check (n) false positive."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -62,7 +68,7 @@ gate BEFORE server re-evaluation, not a replacement for it.
 4. **FAIL — sequence:** Input is not valid in current state (state machine does not
    permit this input from current state). Input rejected; error logged.
    Error: `E-CONV-006` `CWE-602: invalid input sequence, input '<type>' from state '<state>'`.
-5. **OFFLINE EXEMPTION:** No online features declared. Invariant INAPPLICABLE.
+5. **OFFLINE EXEMPTION:** No online features declared. The input range/rate/sequence sub-invariant is INAPPLICABLE.
 
 ## Invariants
 
@@ -92,6 +98,7 @@ gate BEFORE server re-evaluation, not a replacement for it.
 | Movement `speed = max_speed * 5` (range violation) | Rejected or clamped; E-CONV-006 range | error |
 | Fire-weapon at 500/sec (rate violation) | 490 inputs dropped; E-CONV-006 rate | error |
 | Reload while weapon full (sequence violation) | Rejected silently; E-CONV-006 sequence | error |
+| Offline single-player game | input range/rate/sequence sub-invariant INAPPLICABLE (no online features); D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass — dimension is NOT GREEN-by-inapplicability | inapplicable |
 
 ## Verification Properties
 

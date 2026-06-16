@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -19,7 +19,11 @@ capability: CAP-002
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    author: product-owner
+    reason: "R-33: Fix semver variable collision in Preconditions 1–2. PC1 now uses distinct major.minor.patch variables (M.m.p). PC2 uses E.M.m'.p' where m' > m or (p' > p with m' = m), correctly expressing a minor/patch bump without conflating the major-version variable M with a minor/patch comparison."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -41,10 +45,11 @@ new engine version; the old acceptance record remains valid for the old engine v
 
 ## Preconditions
 
-1. An adapter has a current `accepted` record for engine version `E.M` (major M, some
-   minor/patch N).
-2. A new engine version `E.M'` (where M' > M in semver minor or patch) is detected by
-   the factory's adapter-version monitor.
+1. An adapter has a current `accepted` record for engine version `E.M.m.p`
+   (major M, minor m, patch p).
+2. A new engine version `E.M.m'.p'` (where m' > m, or p' > p with m' = m) is detected
+   by the factory's adapter-version monitor — i.e., a minor or patch bump, not a major
+   bump.
 3. The conformance suite version is compatible with the new engine version per the
    compatibility matrix (BC-2.02.004).
 

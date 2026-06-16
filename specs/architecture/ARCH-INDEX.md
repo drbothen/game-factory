@@ -1,7 +1,7 @@
 ---
 document_type: architecture-index
 level: L4
-version: "2.3"
+version: "2.4"
 status: draft
 producer: architect
 timestamp: 2026-06-09T00:00:00Z
@@ -31,6 +31,11 @@ traces_to: .factory/specs/product-brief.md
 
 # Architecture Index — game-factory
 
+> **v2.4 — Phase-1d propagation residuals R-01, R-02, R-36.**
+> - **R-01:** Document Map VP-004 row description updated from pre-F60-02 "Goal state reachable from any valid game state" to "No-softlock reachability — every reachable non-terminal state has path to at least one declared terminal (win OR game-over)" matching VP-INDEX and verification-architecture.md (F60-02).
+> - **R-02:** Document Map VP-007 row description updated from pre-F40-04 "TrueSkill μ−3σ partial-order monotonicity" to "TrueSkill INV-TS-02 conservative-rating ordering (μ−3σ monotonicity) + INV-TS-03 permutation equivariance" matching VP-INDEX (F40-04 scope).
+> - **R-36:** v1.4/Pass-3 changelog note "VP counts in ARCH-INDEX line 93" replaced with "VP counts in ARCH-INDEX §Verification Properties" (line number had rotated; section anchor is stable).
+>
 > **v2.3 — Pass-44 OBS-44-A cosmetic: SS-13 Subsystem Registry priority annotation aligned with per-BC P0/P1 split.**
 > - **OBS-44-A:** SS-13 Priority column annotated with per-BC split "9 P0 / 3 P1" to match the
 >   parallel treatment of SS-09 (added in a prior pass). BC count table row already had "9 P0 + 3 P1" detail.
@@ -112,7 +117,7 @@ traces_to: .factory/specs/product-brief.md
 > - **I1 (Pass-3):** R-017 (kernel anti-cheat) risk mitigation row corrected from SS-11 → SS-01.
 >   R-017/DI-010 is enforced by BC-1.15.002 (Engine-Adapter Protocol subsystem). SS-11 owns
 >   DI-011 (NFT/web3), not DI-010. Mitigation note updated to cite VP-TBD-060/061.
-> - **C1 (Pass-3):** VP counts in ARCH-INDEX line 93 were already correct (6 P0, 4 P1);
+> - **C1 (Pass-3):** VP counts in ARCH-INDEX §Verification Properties were already correct (6 P0, 4 P1);
 >   VP-INDEX.md summary line corrected from "7 P0, 3 P1" → "6 P0, 4 P1" (VP-INDEX v1.2).
 > - **I2 (Pass-3):** Authored `verification-architecture.md` and `verification-coverage-matrix.md`
 >   under `architecture/`. Resolves dangling `traces_to` reference in VP-INDEX.md.
@@ -173,10 +178,10 @@ traces_to: .factory/specs/product-brief.md
 | `VP-001-economy-conservation.md` | VP-001 | Economy resource conservation (no creation/destruction) |
 | `VP-002-fsm-state-legality.md` | VP-002 | FSM: no invalid state or illegal transition reachable |
 | `VP-003-balance-band-containment.md` | VP-003 | Balance metric within declared band after N steps |
-| `VP-004-no-softlock-reachability.md` | VP-004 | Goal state reachable from any valid game state |
+| `VP-004-no-softlock-reachability.md` | VP-004 | No-softlock reachability — every reachable non-terminal state has path to at least one declared terminal (win OR game-over) |
 | `VP-005-elo-zero-sum.md` | VP-005 | Elo: winner gain equals loser loss (zero-sum) |
 | `VP-006-glicko2-rd-decay.md` | VP-006 | Glicko-2: RD monotone decay and bounds |
-| `VP-007-trueskill-monotonicity.md` | VP-007 | TrueSkill μ−3σ partial-order monotonicity |
+| `VP-007-trueskill-monotonicity.md` | VP-007 | TrueSkill INV-TS-02 conservative-rating ordering (μ−3σ monotonicity) + INV-TS-03 permutation equivariance |
 | `VP-008-replay-determinism-equality.md` | VP-008 | T1 bitwise replay equality (pure-sim step function) |
 | `VP-009-damage-io-matrix.md` | VP-009 | Damage output within declared I/O matrix bounds |
 | `VP-010-tournament-bracket-progression.md` | VP-010 | Bracket combinatorics: progression correctness per format |

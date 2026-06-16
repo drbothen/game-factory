@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L3
 section: adapter-protocols
-version: "1.6"
+version: "1.7"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -39,6 +39,15 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 ---
 
 # Adapter Protocol Family
+
+> **v1.7 changes (R-04 — §6.2 testModeSupport mandatory-field rule):**
+> - §6.2 Mandatory field rules: added rule for `testModeSupport` (bool) — must be declared.
+>   `true` when the BaaS SDK provides a sandbox/test environment; `false` otherwise.
+>   Absent or null is malformed (returns `MalformedManifest` / E-EAP-012).
+>   BC-15.01.001 PC1/PC2. Field was present in the §6.2 schema comment (~line 835) but
+>   absent from the mandatory-field rule list — producer/consumer spec divergence (R-04).
+>   Addition is purely additive; the four gated fields {selfHostable, serverAuthoritative,
+>   offlineProject, variantsSupported} are unchanged.
 
 > **v1.6 changes (Pass-65 F65-01 — §6.2 variantsSupported mandatory-field rule and schema annotation):**
 > - §6.2 Mandatory field rules: added rule for `capabilities.leaderboards.variantsSupported` —
@@ -866,6 +875,7 @@ Fields extending the base manifest schema (§1.3):
 
 **Mandatory field rules:**
 - `selfHostable` must be declared. Nakama = `true`; EOS/PlayFab = `false`.
+- `testModeSupport` must be declared (bool). `true` when the BaaS SDK provides a sandbox/test environment; `false` otherwise. Absent or null is malformed (returns `MalformedManifest` / E-EAP-012). BC-15.01.001 PC1/PC2. (R-04)
 - `serverAuthoritative: true` is required for any `leaderboards` or `entitlements`
   capability with non-`none` fidelity. A manifest declaring `serverAuthoritative: false`
   on these capabilities is malformed (returns `MalformedManifest` / E-EAP-012).

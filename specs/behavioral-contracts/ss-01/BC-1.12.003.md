@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.2"
+version: "1.3"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -21,6 +21,9 @@ modified:
   - version: "1.2"
     date: 2026-06-09
     reason: "F40-01 propagation: updated Preconditions PC2 and EC-002 to reflect T2 now uses snapshot-structured-diff (not snapshot-hash-diff). snapshot-hash-diff sent to a same-machine adapter is now a DeterminismTierViolation. Consistent with BC-1.12.002 v1.2 and methodology-layer.md v1.12."
+  - version: "1.3"
+    date: 2026-06-16
+    reason: "R-28 (Phase-1d audit): added VP-TBD-047 covering T2 (same-machine) adapter DeterminismTierViolation on snapshot-hash-diff request; VP table previously covered only the T3 (tolerance-only) path (VP-TBD-046)."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -87,6 +90,7 @@ but the adapter enforces it as a last line of defense.
 | VP-NNN | Property | Proof Method |
 |--------|----------|-------------|
 | VP-TBD-046 | tolerance-only adapter always returns DeterminismTierViolation on snapshot-hash-diff request | conformance test |
+| VP-TBD-047 | same-machine (T2) adapter always returns DeterminismTierViolation on snapshot-hash-diff request | conformance test |
 
 ## Traceability
 

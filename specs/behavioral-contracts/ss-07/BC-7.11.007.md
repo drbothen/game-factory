@@ -2,7 +2,7 @@
 document_type: behavioral-contract
 level: L3
 id: BC-7.11.007
-version: "1.1"
+version: "1.2"
 status: active
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -23,6 +23,12 @@ modified:
   - version: "1.1"
     date: 2026-06-08
     reason: "O8-02: clarified DI-012 is the meta-invariant anchor for economy-atomicity/CWE-602; no dedicated DI-NNN exists"
+  - date: 2026-06-16
+    version: "1.2"
+    author: product-owner
+    finding: F56-01-propagation
+    rid: R-07
+    summary: "R-07 propagation residual (F56-01): SP4 caveat expressed as test-vector row (mirrors BC-7.11.002 v1.2 pattern) rather than inline postcondition text — D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass; dimension is NOT GREEN-by-inapplicability. Operative OFFLINE EXEMPTION postcondition kept minimal to avoid check (n) false positive."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -67,8 +73,7 @@ the SECURITY requirement; conservation is the GAME-DESIGN requirement. Both must
 4. **FAIL (conservation violated):** Economy conservation invariant violated by a
    server-side mutation outside declared faucets/sinks. This is the server-side
    equivalent of BC-6.01.001. Error: `E-SIM-001` (conservation invariant).
-5. **OFFLINE EXEMPTION:** No online economy mutations. INAPPLICABLE for this BC
-   (BC-6.01.001 covers offline economy conservation separately).
+5. **OFFLINE EXEMPTION:** No online economy mutations. The economy atomicity sub-invariant is INAPPLICABLE for this BC (BC-6.01.001 covers offline economy conservation separately).
 
 ## Invariants
 
@@ -95,6 +100,7 @@ the SECURITY requirement; conservation is the GAME-DESIGN requirement. Both must
 | Purchase: currency -= 100, item += 1; both committed | PASS: economy state consistent | happy-path |
 | Purchase: currency -= 100, item grant fails; transaction rolls back | PASS: currency restored; no item granted; E-CONV-006 logged for diagnostics | rollback-pass |
 | Currency -= 100, item += 1 committed, but separately item += 1 committed again (dupe exploit) | FAIL: E-CONV-006 partial commit; conservation violated | error |
+| Offline single-player game (no server-side economy mutations) | economy atomicity sub-invariant INAPPLICABLE (no online economy); D-SEC GREEN still requires secrets scan (SP4 / BC-1.15.003 / DI-013) to pass — dimension is NOT GREEN-by-inapplicability | inapplicable |
 
 ## Verification Properties
 

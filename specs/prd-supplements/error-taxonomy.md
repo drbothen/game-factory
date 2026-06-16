@@ -2,10 +2,10 @@
 document_type: prd-supplement
 level: L3
 section: error-taxonomy
-version: "2.5"
+version: "2.6"
 status: draft
 producer: product-owner
-timestamp: 2026-06-09T00:00:00Z
+timestamp: 2026-06-16T00:00:00Z
 phase: 1d
 traces_to: prd.md
 inputs:
@@ -75,7 +75,7 @@ input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 | E-EAP-002 | -32001 | CapabilityUnsupported | Calling a capability with `fidelity: none` | degraded |
 | E-EAP-003 | -32002 | ProfileUnavailable | Requested execution profile not available (no lavapipe/xvfb) | degraded |
 | E-EAP-004 | -32003 | EngineToolMissing | Engine binary/tool/license not present (Unity .ulf, Godot export templates) | broken |
-| E-EAP-005 | -32004 | DeterminismTierViolation | Snapshot-hash-diff requested from tolerance-only adapter | broken |
+| E-EAP-005 | -32004 | DeterminismTierViolation | Snapshot-hash-diff requested from a tolerance-only (T3) or same-machine (T2) adapter | broken |
 | E-EAP-006 | -32005 | OperationFailed | Engine operation ran but failed (build error, test runner crash) | broken |
 | E-EAP-007 | -32006 | Cancelled | Request cancelled via `$/cancelRequest` | cosmetic |
 | E-EAP-008 | -32600 | InvalidRequest | Malformed JSON-RPC envelope | broken |
@@ -118,7 +118,8 @@ Message format uses `<placeholder>` syntax for dynamic values.
 | E-AUD-001 | Bank build | broken | 1 | `audio bank build failed: <platform>/<bank_id>: <error>` |
 | E-AUD-002 | Loudness conformance | broken | 1 | `audio bank '<bank_id>' loudness = <lufs> LUFS, target = <target> ±2 LUFS` |
 | E-AUD-003 | True-peak | broken | 1 | `audio bank '<bank_id>' true-peak = <dBTP> dBTP, ceiling = -1 dBTP` |
-| E-AUD-004 | AI audio provenance | broken | 1 | `audio asset '<id>' not covered by ai-audio-provenance-ledger — violates DI-003` |
+| E-AUD-004 | AI audio provenance — blocked tool | broken | 1 | `audio asset '<id>' uses blocked tool '<tool>' in provenance sidecar — DI-009 violation; ledger blocked_tool_detected=true` |
+| E-AUD-005 | AI audio provenance — coverage gap | broken | 1 | `audio asset '<id>' missing from ai-audio-provenance-ledger — AI-generated asset not covered; coverage gap violates DI-003 (BC-5.03.002)` |
 
 ---
 
@@ -172,7 +173,8 @@ resolves to a registered code).
 |-----------|----------|----------|-----------|----------------|
 | E-PROD-001 | Missing dependency contract | broken | 1 | `wave '<wave_id>' starts discipline '<consumer>' but cross-discipline-dependency-contract from '<producer>' not found` |
 | E-PROD-002 | Dependency acceptance fail | broken | 1 | `cross-discipline-dependency-contract '<contract_id>' acceptance criterion '<crit_id>' failed: <assertion>` |
-| E-PROD-003 | Wave ordering violation | broken | 1 | `wave '<wave_id>' started but dependency '<dep_wave_id>' not yet green in discipline DAG` |
+| E-PROD-003 | Wave ordering violation / predecessor not complete | broken | 1 | `wave '<wave_id>' started but dependency '<dep_wave_id>' not yet green in discipline DAG` |
+| E-PROD-004 | Discipline-DAG cycle at plan-validation | broken | 1 | `game-production-plan rejected: discipline-DAG cycle detected — cycle: <discipline_path>; resolve cycle before any wave begins (BC-5.07.001 EC-001)` |
 
 ---
 
@@ -811,6 +813,17 @@ Message format uses `<placeholder>` syntax.
 
 ## Coverage Notes
 
+### PRD Revision 2.6 Changes (Phase-1d residual burst R-12/R-16/R-17/R-26 — error-code splits + CAP-001 supplement fixes)
+
+| Change | Detail |
+|--------|--------|
+| E-AUD-004 message updated (R-16) | **IMPORTANT:** E-AUD-004 message format updated to explicitly name the blocked-tool case: `audio asset '<id>' uses blocked tool '<tool>' in provenance sidecar — DI-009 violation`. Previously the message was ambiguous and used for both blocked-tool and coverage-gap cases. |
+| E-AUD-005 registered (R-16) | **NEW CODE:** `E-AUD-005` (AI-generated audio asset missing from provenance ledger — coverage gap) registered in E-AUD family. Enforced by BC-5.03.002 postconditions 3 and 5. Severity: broken, exit code: 1. E-AUD: 4 → **5 codes**. |
+| E-PROD-003 message updated (R-17) | **IMPORTANT:** E-PROD-003 message category updated to "Wave ordering violation / predecessor not complete" to clarify this code covers only the wave-gate block path (BC-5.07.003). |
+| E-PROD-004 registered (R-17) | **NEW CODE:** `E-PROD-004` (discipline-DAG cycle detected at plan-validation) registered in E-PROD family. Enforced by BC-5.07.001 EC-001. Severity: broken, exit code: 1. E-PROD: 3 → **4 codes**. |
+| E-EAP-005 trigger updated (R-26) | **IMPORTANT:** E-EAP-005 (DeterminismTierViolation) trigger condition extended from "tolerance-only (T3) adapter" to "tolerance-only (T3) or same-machine (T2) adapter" — per F40-01 (BC-1.12.003 EC-002), the T2 same-machine path is also a DeterminismTierViolation. No new code. |
+| Total codes 267 → 269 | E-AUD: 4→5 (+1), E-PROD: 3→4 (+1). Net: **+2 new codes**. Active codes: 258 → **260**. Total registered (incl. retired E-GEN): 267 → **269**. No new families (34 total unchanged). |
+
 ### PRD Revision 2.4 Changes (Pass-44 F44-01 — trigger vocabulary reconciliation: E-TMOD, E-ANTICH scope fix)
 
 | Change | Detail |
@@ -922,7 +935,7 @@ Message format uses `<placeholder>` syntax.
 | Total 139 → 196 (CI-computed) | **Net:** +57 new codes (E-AAG×7 + E-SVC×6 + E-PRV×5 + E-QG×11 + E-SHIP×3 + E-ING×4 + E-GLG×5 + E-MOD×11 + E-MKT×4 + E-XR×1) = 139 + 57 = **196 total registered codes** (CI computes all distinct E-xxx-NNN tokens including retired E-GEN). E-GEN (9 codes) retired but its codes remain in the taxonomy as a retired table, so CI still counts them. Active families: 22 − 1 (E-GEN retired) + 8 new = **29 active families**. Active codes only (excl. E-GEN): **187**. |
 | Total 196 → 198 (PRD rev 1.7) | **+E-COMP-011** (out-of-vocabulary `disclosure_class` at manifest aggregation; I-1 fix) and **+E-COMP-012** (`nft_blockchain`/`nft_mechanics` inconsistency seam guard; I-2 fix). E-COMP family: 2 → 4. Total all registered (incl. retired E-GEN): **198**. Active codes only (excl. E-GEN): **189**. |
 
-**Total defined error codes: 267** across 34 families (33 active + 1 retired E-GEN). Per-family breakdown (active codes: 258; retired codes: 9 E-GEN):
+**Total defined error codes: 269** across 34 families (33 active + 1 retired E-GEN). Per-family breakdown (active codes: 260; retired codes: 9 E-GEN):
 
 | Family | Code Count | Notes |
 |--------|-----------|-------|
@@ -937,11 +950,11 @@ Message format uses `<placeholder>` syntax.
 | E-ING | 4 | v1.6 addition: ingest pre-flight (BC-4.06.001) |
 | E-DES | 5 | |
 | E-ART | 3 | |
-| E-AUD | 4 | |
+| E-AUD | 5 | v2.6: +E-AUD-005 (AI-generated audio asset missing from provenance ledger — coverage gap; R-16 split from E-AUD-004) |
 | E-NAR | 6 | v2.0: +E-NAR-005 (undeclared variable, BC-5.04.001), +E-NAR-006 (invalid naming-registry regex, BC-5.04.002) — F-20-02 fix |
 | E-ENG | 4 | v2.2: +E-ENG-003 (UnclassifiedModule), +E-ENG-004 (TestScopedToWrongModule) — F39-02 fix |
 | E-CIN | 6 | v2.2: +E-CIN-005 (TimestampOutOfRange), +E-CIN-006 (BlendshapeTrackSetIncomplete) — F39-02 fix |
-| E-PROD | 3 | |
+| E-PROD | 4 | v2.6: +E-PROD-004 (discipline-DAG cycle detected at plan-validation; R-17 split from E-PROD-003) |
 | E-CERT | 3 | |
 | E-DIST | 19 | |
 | E-COMP | 4 | v1.7: +E-COMP-011 (out-of-vocab disclosure_class at manifest aggregation), +E-COMP-012 (nft_blockchain/nft_mechanics inconsistency seam guard); v2.1: E-COMP-012 scope extended to 3-signal (adds NFT_MECHANIC content-descriptor tag, F37-01) — count unchanged |
@@ -960,8 +973,8 @@ Message format uses `<placeholder>` syntax.
 | E-TMOD | 3 | v2.3 addition (Pass-42): moderation pipeline contract (CAP-013, BC-13.03.005) |
 | E-ANTICH | 3 | v2.3 addition (Pass-42): anti-cheat provider policy (CAP-013, BC-13.02.006) |
 | E-SEC | 1 | v2.3 addition (Pass-42): output-bundle secrets gate (CAP-001, BC-1.15.003) |
-| **TOTAL (all registered incl. retired E-GEN)** | **267** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 267 |
-| *(active only, excl. E-GEN retired)* | *258* | Active codes only (33 active families) |
+| **TOTAL (all registered incl. retired E-GEN)** | **269** | Sum of all rows including retired E-GEN; CI-computed unique E-XXX-NNN count = 269 |
+| *(active only, excl. E-GEN retired)* | *260* | Active codes only (33 active families) |
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,12 @@ capability: CAP-006
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - date: 2026-06-16
+    version: "1.1"
+    author: product-owner
+    finding: R-15
+    summary: "R-15 propagation residual — updated Precondition 1 to include BC-6.03.001 itself in the BC-INDEX listing (sim-BC set = BC-6.01.xxx, BC-6.02.xxx, and BC-6.03.001 = 10 total), consistent with BC-7.01.001 v1.1 (F63-01) and the F63-01 count gate."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -45,7 +50,7 @@ accepted.
 
 ## Preconditions
 
-1. A BC-INDEX exists listing all active sim-BCs (BC-6.01.xxx and BC-6.02.xxx).
+1. A BC-INDEX exists listing all active sim-BCs (BC-6.01.xxx, BC-6.02.xxx, and BC-6.03.001 itself).
 2. A replay-regression contract registry exists listing all active
    `replay-regression-contract` artifacts with their linked sim-BC IDs.
 3. The replay harness (CAP-003) is operational for the declared determinism tier.

@@ -2,7 +2,7 @@
 document_type: domain-spec-section
 level: L2
 section: entities
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
@@ -14,6 +14,11 @@ inputs:
   - .factory/planning/design/architecture.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: L2-INDEX.md
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    author: product-owner
+    reason: "R-22+R-23: AssetAdapter identity field renamed backend_id → adapter_id to match all three ss-04 BCs (BC-4.01.001/002/003). backend_class description corrected from '(Tier-1/2/3)' (which describes indemnification_tier) to the authoritative six-value taxonomy '(cloud-api | headless-cli | mcp-headless | mcp-gui | saas-ui | desktop-gui)' per BC-4.01.001."
 ---
 
 # Domain Entities and Relationships
@@ -48,7 +53,7 @@ execution profiles.
 
 ### AssetAdapter
 Adapter for one asset-generation backend (3D mesh, texture, audio, voice).
-- Key properties: `backend_id`, `asset_classes[]`, `backend_class` (Tier-1/2/3),
+- Key properties: `adapter_id`, `asset_classes[]`, `backend_class` (cloud-api | headless-cli | mcp-headless | mcp-gui | saas-ui | desktop-gui),
   `indemnification_tier`, `fidelity{}` per asset class
 - Conforms to: ConformanceSuite
 

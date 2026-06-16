@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,10 @@ capability: CAP-001
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-16
+    reason: "R-18 (Phase-1d audit): corrected Bevy/cargo-nextest format from 'JUnit XML' to 'libtest-json' in Description and Canonical Test Vectors, consistent with adapter-protocols.md §2.4."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -32,7 +35,7 @@ removal_reason: null
 ## Description
 
 When the `test` capability is invoked, the adapter runs the engine-native test
-framework (JUnit XML via cargo-nextest for Bevy, NUnit3 XML via Unity Test Framework
+framework (libtest-json via cargo-nextest for Bevy, NUnit3 XML via Unity Test Framework
 for Unity, JUnit XML via GUT for Godot) and normalizes the result to the canonical
 `TestResult` schema. The factory core never parses engine-native test output formats.
 This normalization is the contract surface that makes cross-engine test gating
@@ -87,7 +90,7 @@ possible.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| Bevy adapter runs sim.economy tests, 41 pass, 2 skip, 0 fail | `{ suite: "sim.economy", tests: [...41 pass + 2 skip objects...], totals: {pass:41, fail:0, skip:2}, sourceFormat: "junit-xml", capabilityFidelity: "full", engine: "bevy" }` | happy-path |
+| Bevy adapter runs sim.economy tests, 41 pass, 2 skip, 0 fail | `{ suite: "sim.economy", tests: [...41 pass + 2 skip objects...], totals: {pass:41, fail:0, skip:2}, sourceFormat: "libtest-json", capabilityFidelity: "full", engine: "bevy" }` | happy-path |
 | Unity adapter, 5 tests, 1 fails with assertion message | `{ tests: [...], totals: {pass:4, fail:1, skip:0}, sourceFormat: "nunit3-xml", ...}` with fail test having non-null message | error |
 | GUT for Godot, empty suite | `{ suite: "...", tests: [], totals: {pass:0,fail:0,skip:0}, sourceFormat: "junit-xml", capabilityFidelity: "full", engine: "godot" }` | edge-case |
 

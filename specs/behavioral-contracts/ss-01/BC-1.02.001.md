@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,10 @@ capability: CAP-001
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.2"
+    date: 2026-06-16
+    reason: "R-19 (Phase-1d audit): added 'modes: array' to PC1 capture capability field list so BC-1.08.003 PC1 (which gates on modes including 'frame-sequence') has a matching producer declaration."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -58,7 +61,9 @@ for what the core may request from this adapter.
    - `executionProfiles`: object with keys `headless-compute` and `render`, each with `available: bool`
    - `capabilities`: object with at least the eight capability keys: `build`, `test`,
      `runHeadless`, `replay`, `capture`, `lint`, `assetsValidate`, `introspect`;
-     each capability has a `fidelity` field of value `"full"`, `"partial"`, or `"none"`
+     each capability has a `fidelity` field of value `"full"`, `"partial"`, or `"none"`;
+     the `capture` capability additionally declares a `modes` array of supported capture
+     modes (e.g., `["screenshot", "frame-sequence"]`)
 2. The `render` execution profile's `requires` array lists all external dependencies
    needed to start the render profile (e.g., `"vulkan-software:lavapipe"`,
    `"xvfb"`, `"gl-software:llvmpipe"`).

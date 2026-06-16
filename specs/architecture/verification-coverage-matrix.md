@@ -2,7 +2,7 @@
 document_type: architecture-section
 level: L4
 section: verification-coverage-matrix
-version: "1.3"
+version: "1.4"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -15,6 +15,9 @@ inputs:
   - .factory/specs/architecture/verification-architecture.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 modified:
+  - version: "1.4"
+    date: 2026-06-16
+    reason: "R-03 fix — DI-013 (never-emit-secrets, registered Pass-42 F42-03) added to Deliberately Unguarded Invariants table. DI-013 was absent despite enumeration DI-001..DI-012 being present; enforcing contract BC-1.15.003 and CI gate (cicd-setup.md §Output-Bundle Secrets Gate) now documented."
   - version: "1.3"
     date: 2026-06-13
     reason: "F60-02 fix — VP-004 row updated to reflect terminal-set reachability (win OR game-over) in Guarded Invariant column and BC Coverage SS-05 Notes; prior 'goal state reachable from any valid state' over-stated the property vs BC-6.02.004 EC-001. Matches VP-INDEX:53 corrected description (F60-02)."
@@ -143,6 +146,7 @@ test-sufficient. All are covered by the non-formal verification tier.
 | DI-010 (no kernel AC authored) | Static lint VP-TBD-060/061 | None | File system scan over generated artifacts; I/O-dependent; enforced by BC-1.15.002/R-017 mitigation (SS-01) |
 | DI-011 (NFT off by default) | Schema validation VP-TBD-062/063 | None | Schema field presence check; I/O-dependent |
 | DI-012 (validation method declared) | Schema validation CI gate | None | Schema structural check; contracts can only be validated via document inspection, not pure function proof |
+| DI-013 (never-emit-secrets) | CI gate — output-bundle secrets scan (gitleaks/trufflehog; cicd-setup.md §Output-Bundle Secrets Gate); enforced by BC-1.15.003 (never-emit-secrets, SS-01) | None | Output-bundle scan over generated file artifacts; I/O-dependent; registered Pass-42 F42-03 |
 
 ---
 

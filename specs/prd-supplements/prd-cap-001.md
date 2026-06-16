@@ -1,10 +1,10 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-16T00:00:00Z
 phase: 1a
 traces_to: CAP-001
 inputs:
@@ -234,6 +234,8 @@ All BCs are in `.factory/specs/behavioral-contracts/ss-01/`.
 | BC ID | Title | Priority |
 |---|---|---|
 | BC-1.15.001 | Factory core source artifacts contain no engine SDK imports or engine name references | P0 |
+| BC-1.15.002 | Kernel anti-cheat code pattern detected in factory output artifact is unconditionally rejected | P0 |
+| BC-1.15.003 | Factory output bundle never contains secret material (secret-pattern scan + entropy scan gate) | P0 |
 
 ---
 
@@ -245,7 +247,7 @@ All BCs are in `.factory/specs/behavioral-contracts/ss-01/`.
 | E-EAP-002 | -32001 | CapabilityUnsupported | calling a capability with fidelity: none | degraded |
 | E-EAP-003 | -32002 | ProfileUnavailable | requested execution profile not available (no lavapipe/xvfb) | degraded |
 | E-EAP-004 | -32003 | EngineToolMissing | engine binary/tool/license not present (Unity .ulf, Godot export templates) | broken |
-| E-EAP-005 | -32004 | DeterminismTierViolation | snapshot-hash-diff requested from tolerance-only adapter | broken |
+| E-EAP-005 | -32004 | DeterminismTierViolation | snapshot-hash-diff requested from a tolerance-only (T3) or same-machine (T2) adapter | broken |
 | E-EAP-006 | -32005 | OperationFailed | engine operation ran but failed (build error, test runner crash) | broken |
 | E-EAP-007 | -32006 | Cancelled | request cancelled via $/cancelRequest | cosmetic |
 | E-EAP-008 | -32600 | InvalidRequest | malformed JSON-RPC envelope | broken |
@@ -262,6 +264,8 @@ All BCs are in `.factory/specs/behavioral-contracts/ss-01/`.
 | DI-002 (adapter must pass conformance) | BC-1.02.001, BC-1.02.002, BC-1.03.001 |
 | DI-004 (determinism tier declared, never assumed) | BC-1.12.001, BC-1.12.002, BC-1.12.003 |
 | DI-006 (human-gated tasks surfaced, not dropped) | BC-1.13.002 (degraded convergence surfaced) |
+| DI-010 (kernel-mode anti-cheat code unconditionally rejected in factory output) | BC-1.15.002 |
+| DI-013 (factory output bundle never contains secret material) | BC-1.15.003 |
 
 ---
 
@@ -290,6 +294,14 @@ This batch makes the following assumptions about other CAP batches:
 ---
 
 ## Changelog
+
+### v2.3 (2026-06-16)
+
+| Change | Detail |
+|--------|--------|
+| R-12: BC-1.15.002 and BC-1.15.003 added to §4 section-1.15 table | §4 section-1.15 detail table previously listed only BC-1.15.001. Added BC-1.15.002 (kernel anti-cheat unconditional rejection, P0) and BC-1.15.003 (output-bundle secrets gate, P0). These BCs were authored in earlier bursts and referenced in §2 scope table and §1 overview count but were absent from the §4 index table. |
+| R-12: DI-010 and DI-013 added to §6 invariants table | §6 invariants table now maps DI-010 (kernel-mode anti-cheat code unconditionally rejected) → BC-1.15.002 and DI-013 (factory output bundle never contains secret material) → BC-1.15.003. |
+| R-26: E-EAP-005 trigger condition extended in §5 | E-EAP-005 trigger updated from "snapshot-hash-diff requested from tolerance-only adapter" to "snapshot-hash-diff requested from a tolerance-only (T3) or same-machine (T2) adapter" per F40-01 (BC-1.12.003 EC-002). |
 
 ### v1.1 (2026-06-08)
 

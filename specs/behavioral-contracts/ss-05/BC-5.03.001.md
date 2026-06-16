@@ -1,10 +1,10 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: product-owner
-timestamp: 2026-06-07T00:00:00Z
+timestamp: 2026-06-16T00:00:00Z
 phase: 1a
 inputs:
   - .factory/specs/domain-spec/capabilities.md
@@ -108,7 +108,7 @@ loudness check are CI gates; failure is a broken severity defect.
 |--------|----------|-------------|
 | VP-5.03.001 | Bank build with valid manifest and available CLI always produces non-empty bank files | integration test against reference audio assets |
 | VP-5.03.002 | Loudness measurement is within ±0.1 LUFS of reference measurement (libebur128 vs ffmpeg) | calibration test with known reference audio |
-| VP-5.03.003 | Manifest with Suno/Udio-provenance asset reference always raises E-AUD-004 before build | proptest: inject blocked tool in provenance sidecar |
+| VP-5.03.003 | Manifest with Suno/Udio-provenance asset reference always raises E-AUD-004 (blocked tool) before build | proptest: inject blocked tool in provenance sidecar; E-AUD-004 = blocked-tool path; E-AUD-005 = missing-ledger-entry path (BC-5.03.002) |
 
 ## Traceability
 
@@ -137,4 +137,12 @@ S-TBD — Audio Bank Build and Loudness Conformance
 
 - VP-5.03.001 — bank build integration test
 - VP-5.03.002 — loudness measurement calibration
-- VP-5.03.003 — blocked-tool provenance rejection
+- VP-5.03.003 — blocked-tool provenance rejection (E-AUD-004)
+
+## Changelog
+
+### v1.2 (2026-06-16)
+
+| Change | Detail |
+|--------|--------|
+| R-16: E-AUD-004 semantics clarified | This BC's invariant 1 and VP-5.03.003 describe the blocked-tool case (E-AUD-004). The coverage-gap case (missing ledger entry) now uses E-AUD-005 in BC-5.03.002. VP-5.03.003 note updated to distinguish E-AUD-004 (blocked-tool) from E-AUD-005 (missing-ledger-entry). |
