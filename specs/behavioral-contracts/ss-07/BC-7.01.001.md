@@ -1,7 +1,7 @@
 ---
 document_type: behavioral-contract
 level: L3
-version: "1.0"
+version: "1.1"
 status: active
 producer: product-owner
 timestamp: 2026-06-07T00:00:00Z
@@ -18,7 +18,12 @@ capability: CAP-007
 priority: P0
 lifecycle_status: active
 introduced: v0.1.0
-modified: []
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    author: product-owner
+    finding: F63-01
+    summary: "Corrected sim-BC set cardinality from 11 to 10. BC-6.04.001 (TDD Red Gate) is an implementation-dimension input (BC-7.03.001), not a sim-BC. Test vector row 1 changed from 'All 11 sim-BCs PASS' to 'All 10 sim-BCs PASS'; row 2 changed from '10 sim-BCs PASS, BC-6.01.001 FAIL' to '9 sim-BCs PASS, BC-6.01.001 FAIL'. Precondition 1 (BC-6.01.xxx + BC-6.02.xxx + BC-6.03.001 = 10) and test vectors are now consistent. No change to Red Gate dimension assignment."
 deprecated: null
 deprecated_by: null
 replacement: null
@@ -90,8 +95,8 @@ machine-verifiable quality dimension of the 11-dimension convergence model.
 
 | Input | Expected Output | Category |
 |-------|----------------|----------|
-| All 11 sim-BCs PASS; adapter T1; replay linkage complete | sim/spec dimension = GREEN | happy-path |
-| 10 sim-BCs PASS, BC-6.01.001 FAIL (conservation violation) | sim/spec dimension = BLOCKED; convergence loop triggered | error |
+| All 10 sim-BCs PASS; adapter T1; replay linkage complete | sim/spec dimension = GREEN | happy-path |
+| 9 sim-BCs PASS, BC-6.01.001 FAIL (conservation violation) | sim/spec dimension = BLOCKED; convergence loop triggered | error |
 | All sim-BCs PASS; adapter T2; BC makes T1 claim | sim/spec dimension = DEGRADED; degradation recorded | edge-case (tier) |
 | Adapter declares replay:none | sim/spec = DEGRADED (no-replay); playtest evidence required for regression | edge-case (no-replay) |
 
