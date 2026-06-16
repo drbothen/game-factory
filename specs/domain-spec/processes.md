@@ -2,7 +2,7 @@
 document_type: domain-spec-section
 level: L2
 section: processes
-version: "1.0"
+version: "1.1"
 status: draft
 producer: business-analyst
 timestamp: 2026-06-07T00:00:00Z
@@ -14,6 +14,11 @@ inputs:
   - .factory/planning/design/engine-adapter-protocol.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 traces_to: L2-INDEX.md
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    by: product-owner
+    reason: "F64-01 AMBER→canonical residual sweep: replaced non-canonical 'amber/blocked' token in PROC-006 Stage 4 with canonical 'DEGRADED-PENDING or BLOCKED' per methodology-layer.md §3.1 enum."
 ---
 
 # Domain Processes
@@ -176,7 +181,7 @@ XR comfort-cert, paid-UGC vetting.
    by whom, with what artifacts, and what the success criterion is.
 3. **Surfacing** — Task is surfaced to the producer / cert-owner role via the milestone gate
    mechanism. Not silently skipped, not dropped from the convergence report.
-4. **Completion Gating** — The `human-gated` convergence sub-dimension remains amber/blocked
+4. **Completion Gating** — The `human-gated` convergence sub-dimension remains DEGRADED-PENDING or BLOCKED
    until the task is marked complete by the responsible human.
 
 **Invariant:** Suppressing a `human-gated` task without completion is hook-detectable as a

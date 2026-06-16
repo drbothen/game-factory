@@ -1,7 +1,7 @@
 ---
 document_type: prd-supplement
 level: L3
-version: "1.3"
+version: "1.4"
 status: draft
 producer: product-owner
 timestamp: 2026-06-08T00:00:00Z
@@ -18,6 +18,11 @@ inputs:
   - .factory/planning/research/aaa/monetization-business-model.md
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
 parallel_batch: CAP-011
+modified:
+  - version: "1.4"
+    date: 2026-06-16
+    by: product-owner
+    reason: "F64-01 AMBER→canonical residual sweep: replaced non-canonical 'amber' token in §11.2.3 default envelope description. D-ETHICS is binary {GREEN, BLOCKED}; shipping without a reviewed custom contract is a convergence BLOCKED state, not amber."
 ---
 
 # PRD Section — CAP-011: Monetization Ethics Enforcement (P1)
@@ -120,7 +125,7 @@ The default is designed to be the strictest safe starting point:
 | `max_prompts_per_session` | `1` |
 | `disclosure_real_money_equivalent` | `true` |
 
-The default envelope MUST be applied automatically when `monetization_model != "none"` and no custom `monetization-ethics-contract` exists. This is not optional — absence of a contract with the default applied is still better than absence of any contract. However, shipping without a reviewed custom contract is a convergence amber state for monetization-ethics dimension #10.
+The default envelope MUST be applied automatically when `monetization_model != "none"` and no custom `monetization-ethics-contract` exists. This is not optional — absence of a contract with the default applied is still better than absence of any contract. However, shipping without a reviewed custom contract is a convergence BLOCKED state for monetization-ethics dimension #10.
 
 ### 11.3 Forbidden Dark Patterns
 
