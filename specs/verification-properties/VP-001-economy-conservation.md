@@ -1,7 +1,7 @@
 ---
 document_type: verification-property
 level: L3
-version: "1.0"
+version: "1.1"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -17,6 +17,10 @@ inputs:
   - .factory/specs/behavioral-contracts/ss-06/BC-6.01.001.md
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md#§4
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.1"
+    date: 2026-06-16
+    reason: "F67-02 fix — corrected Kani harness assertion from state.total_resource(resource_id) (pre-op state, vacuously always equal to total_before) to state_after.total_resource(resource_id) (post-op result). Prior assertion made the P0 economy-conservation proof inert: since apply() is a pure (State,Op)→State function, asserting on the unmodified pre-op state was a tautology. Fix ensures the proof actually verifies conservation on the output state."
 ---
 
 # VP-001: Economy Conservation Invariant
@@ -54,7 +58,7 @@ fn verify_economy_conservation() {
     let op: EconomyOp = kani::any();
     kani::assume(op.is_conserved_transfer());
     let state_after = state.apply(op);
-    assert_eq!(state.total_resource(resource_id), total_before);
+    assert_eq!(state_after.total_resource(resource_id), total_before);
 }
 ```
 

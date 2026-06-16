@@ -1,7 +1,7 @@
 ---
 document_type: verification-property
 level: L3
-version: "1.1"
+version: "1.2"
 status: draft
 producer: architect
 timestamp: 2026-06-08T00:00:00Z
@@ -17,6 +17,13 @@ inputs:
   - .factory/specs/behavioral-contracts/ss-13/BC-13.02.001.md
   - .factory/planning/research/aaa/AAA-RECONCILIATION.md#§5
 input-hash: "[compute via bin/compute-input-hash at pipeline ingest]"
+modified:
+  - version: "1.1"
+    date: 2026-06-08
+    reason: "F40-05 fix — corrected property statement and harness baseline from RD_inactive to RD_old. Prior assertion RD' ≤ RD_inactive did not establish INV-GL2-02 (RD' < RD_old); an implementation leaving RD' ≥ RD_old but ≤ RD_inactive would have passed. Fix changes baseline to original pre-inactivity RD (rd_old), matching INV-GL2-02 strict inequality."
+  - version: "1.2"
+    date: 2026-06-16
+    reason: "F67-01 fix — corrected epsilon direction in the INV-GL2-02 harness assertion. Prior form 'rd_new < rd_old + 1e-9' encoded non-strict ≤ (epsilon applied in the relaxing direction), allowing a no-decay regression (rd_new == rd_old) to pass. Corrected to 'rd_new < rd_old - 1e-9' (epsilon in the tightening direction) to enforce strict decrease per Property Statement #2 and the F40-05 note. Error message updated to reflect strict-decrease semantics."
 ---
 
 # VP-006: Glicko-2 RD Monotone Decay
@@ -73,11 +80,12 @@ proptest! {
         // Game update applied to inflated RD
         let (_, rd_new, _) = glicko2_update(rating, rd_inactive, volatility, &game_results);
 
-        // INV-GL2-02: RD_new must be STRICTLY less than ORIGINAL RD_old (not RD_inactive)
-        // This is the correct invariant — testing against RD_inactive would allow a
-        // regression where RD_new >= rd_old but <= RD_inactive to pass undetected.
-        prop_assert!(rd_new < rd_old + 1e-9,
-            "INV-GL2-02 violated: rd_new={} >= rd_old={}", rd_new, rd_old);
+        // INV-GL2-02: RD_new must be STRICTLY less than ORIGINAL RD_old (not RD_inactive).
+        // The epsilon is applied in the TIGHTENING direction (rd_old - 1e-9) so that a
+        // no-decay regression (rd_new == rd_old) is correctly rejected. Using rd_old + 1e-9
+        // (relaxing direction) would encode non-strict ≤ and allow no-decay to pass.
+        prop_assert!(rd_new < rd_old - 1e-9,
+            "INV-GL2-02 violated: rd_new={} not strictly less than rd_old={}", rd_new, rd_old);
         // RD floor and ceiling
         prop_assert!(rd_new >= RD_MIN);
         prop_assert!(rd_new <= RD_MAX);
