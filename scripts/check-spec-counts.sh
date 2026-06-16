@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.44
+# check-spec-counts.sh — Spec count consistency checker (S2-02) v1.45
 #
 # PURPOSE
 # -------
@@ -249,6 +249,8 @@
 #
 #   POSITIVE-COVERAGE LOG: always printed. POSIX/BSD-grep/awk compatible
 #   (no grep -P). (F53-01 recurrence prevention).
+# extended in v1.45 to add check (nn) — non-canonical "amber" prose-token guard
+#   (F64-01 process-gap recurrence prevention): see below.
 # extended in v1.44 to add check (mm) — anti-cheat kernel-anomaly routing guard
 #   (F62-01 process-gap recurrence prevention): see below.
 # extended in v1.43 to add check (ll) — T2 comparison-method consistency guard
@@ -582,7 +584,7 @@
 #   were authored in the PO burst following Pass-42, so the check is green from the start.
 #   POSIX/BSD-grep compatible (no grep -P). (F42-01/F42-02 recurrence prevention).
 # Inventory: checks a, a.ii, a.iii, a.iv, b, c, d, e, f, g, h, i, j, k, k.ii,
-#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm + o.ii.
+#   l, m, m.ii, n, n.ii, n.iii, o, o.ii, p, q, r, s, t, u, w, x, y, z, aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm, nn + o.ii.
 #   check (w) generalized in v1.37: DI-007 context guard (F52-01 process-gap recurrence prevention).
 #   check (gg) added in v1.38: D-SEC evaluator-completeness guard (F53-01 recurrence prevention).
 #   check (hh) added in v1.39: economy-conservation BC-routing guard (F54-01 recurrence prevention).
@@ -591,7 +593,8 @@
 #   check (kk) added in v1.42: warning-identifier resolution guard (F58-03 process-gap recurrence prevention).
 #   check (ll) added in v1.43: T2 comparison-method consistency guard (F61-01 / F40-01-propagation recurrence prevention).
 #   check (mm) added in v1.44: anti-cheat kernel-anomaly routing guard (F62-01 process-gap recurrence prevention).
-#   Positive-coverage log always printed. (F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
+#   check (nn) added in v1.45: non-canonical "amber" prose-token guard (F64-01 process-gap recurrence prevention).
+#   Positive-coverage log always printed. (F64-01/F62-01/F61-01/F58-03/F56-01/F55-01/F54-01/F53-01/F52-01/F49-01/F44-01/F43-01/F42-01/F42-02 recurrence prevention).
 #
 # SUB-CHECK 1 — PER-CAP PRD BC TOTALS:
 #   Scans all .factory/specs/prd-supplements/prd-cap-*.md for lines matching:
@@ -6813,6 +6816,78 @@ fi
 echo ""
 
 # ============================================================================
+# (nn) NON-CANONICAL "AMBER" PROSE-TOKEN GUARD  [NEW v1.45, F64-01]
+# ============================================================================
+# CANONICAL RULE (methodology-layer.md §3.1; ADR-0006):
+#   The convergence-dimension status enum is GREEN / DEGRADED-PENDING / BLOCKED.
+#   "AMBER" / "amber" was an eliminated non-canonical token (resolved Pass-10).
+#   Check (n) gates non-canonical status tokens on STRUCTURED dimension-context
+#   lines; this check (nn) closes the complementary free-prose class: any
+#   occurrence of the word "amber" (case-insensitive) in BC, prd-supplement, or
+#   domain-spec prose that is NOT part of a changelog entry is a violation.
+#
+# SCOPE: all .md files under:
+#   .factory/specs/behavioral-contracts/
+#   .factory/specs/prd-supplements/
+#   .factory/specs/domain-spec/
+#
+# EXEMPT: .factory/specs/architecture/methodology-layer.md (and any other file
+#   under .factory/specs/architecture/) — that file is the canonical migration
+#   documentation and legitimately discusses the eliminated AMBER token.
+#
+# SKIP LINES: lines starting with ">" (blockquote changelog narration), and
+#   lines containing "modified:" or "reason:" (changelog metadata).
+#   Rationale: changelog entries recording the AMBER→canonical migration are
+#   legitimate history and must not false-fire.
+#
+# On violation: print offending file:line + the line, append to FAILURES list,
+#   exit non-zero (same aggregation as (k)/(mm)).
+# Green summary: "Non-canonical amber-token prose guard (nn): N files scanned,
+#   0 'amber' residuals (methodology-layer.md migration-doc exempt)."
+# POSIX/BSD-grep compatible (no grep -P). (F64-01 recurrence prevention).
+# ============================================================================
+
+echo "--- (nn) Non-canonical amber-token prose guard ---"
+
+nn_violations=0
+nn_files_scanned=0
+nn_offenders=()
+
+while IFS= read -r nn_file; do
+  nn_files_scanned=$(( nn_files_scanned + 1 ))
+  nn_lineno=0
+  while IFS= read -r nn_line; do
+    nn_lineno=$(( nn_lineno + 1 ))
+    # Skip blockquote and changelog/reason/modified lines
+    case "$nn_line" in
+      ">"*) continue ;;
+      *"reason:"*) continue ;;
+      *"modified:"*) continue ;;
+    esac
+    # Violation: line contains "amber" (case-insensitive)
+    if printf '%s' "$nn_line" | grep -qiF 'amber' 2>/dev/null; then
+      nn_offenders+=("$nn_file:$nn_lineno: $nn_line")
+      nn_violations=$(( nn_violations + 1 ))
+    fi
+  done < "$nn_file"
+done < <(find "$REPO_ROOT/.factory/specs/behavioral-contracts" \
+              "$REPO_ROOT/.factory/specs/prd-supplements" \
+              "$REPO_ROOT/.factory/specs/domain-spec" \
+         -name "*.md" -type f 2>/dev/null)
+
+if [[ ${#nn_offenders[@]} -gt 0 ]]; then
+  echo "    FAIL: non-canonical 'amber' token found in prose (must use GREEN/DEGRADED-PENDING/BLOCKED):"
+  for offender in "${nn_offenders[@]}"; do
+    echo "      $offender"
+  done
+  errors+=("MISMATCH [non-canonical amber-token prose (nn)]: ${#nn_offenders[@]} line(s) contain non-canonical 'amber' token in BC/prd-supplement/domain-spec prose — replace with canonical enum value per methodology-layer.md §3.1 (F64-01)")
+  fail=1
+else
+  echo "    Non-canonical amber-token prose guard (nn): $nn_files_scanned files scanned, 0 'amber' residuals (methodology-layer.md migration-doc exempt)"
+fi
+echo ""
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo "=== SUMMARY ==="
@@ -6865,6 +6940,7 @@ if [[ $fail -eq 0 ]]; then
   echo "  Warning-identifier resolution (kk): $kk_files_scanned BC files scanned, ${kk_distinct:-0} distinct W-codes, 0 unregistered"
   echo "  T2 comparison-method consistency (ll): same-machine→structured-diff confirmed; ReplayResult enum has all 3 methods; 0 violations"
   echo "  Anti-cheat kernel-anomaly routing (mm): $mm_files_scanned files scanned, 0 kernel-anomaly→E-ANTICH-001 mis-routes"
+  echo "  Non-canonical amber-token prose (nn):   $nn_files_scanned files scanned, 0 'amber' residuals (methodology-layer.md migration-doc exempt)"
 else
   echo "FAILURES DETECTED:"
   for e in "${errors[@]}"; do
